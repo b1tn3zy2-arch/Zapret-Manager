@@ -85,7 +85,7 @@ if (problems.length > 0) {
     console.error(`  - ${problem}`);
   }
   console.error(
-    "\nКак исправить: замените APP_REPOSITORY_URL в src/lib/constants.ts и ссылки USER/zapret-manager в README.md и CHANGELOG.md на адрес своего репозитория."
+    `\nКак исправить одной командой: pnpm release:repo <owner/name>\nНапример: pnpm release:repo my-account/zapret-manager`
   );
   process.exitCode = 1;
 } else {

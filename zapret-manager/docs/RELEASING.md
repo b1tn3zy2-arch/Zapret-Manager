@@ -42,6 +42,23 @@ cd src-tauri && cargo test && cargo clippy --all-targets -- -D warnings && cargo
 
 `node scripts/security-audit.mjs` проверяет CSP, capabilities и отсутствие опасных конструкций.
 
+Короткие варианты той же последовательности:
+
+```bash
+pnpm release:check        # типы, линтер, формат, knip, i18n, метаданные, unit, cargo
+pnpm release:check:full   # плюс E2E, сборка фронтенда и NSIS/MSI
+```
+
+`pnpm release:check` останавливается на `pnpm lint:release`, пока в метаданных
+не указан адрес своего репозитория. Подставить его одной командой:
+
+```bash
+pnpm release:repo <owner/name>
+```
+
+Состав дистрибутива и лицензии сторонних компонентов (zapret, Cygwin, WinDivert) —
+`../THIRD_PARTY_NOTICES.md`.
+
 ## 3. Локальная сборка релиза
 
 ```bash
