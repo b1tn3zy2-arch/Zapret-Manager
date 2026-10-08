@@ -1718,6 +1718,24 @@ icons/, а проверка выполняется скриптом scripts/veri
 elease.yml переведена с gh на softprops/action-gh-release,
 чтобы CI не зависел от предустановленного gh.
 
+### Исправления CI и релизного пайплайна
+
+- ci.yml и
+  elease.yml запускали pnpm install, cargo test и src-tauri/Cargo.toml
+  в корне репозитория, где нет ни package.json, ни src-tauri — первый запуск упал бы.
+  Теперь у каждого job свой working-directory: zapret-manager и cache-dependency-path.
+- В ci.yml добавлен job Bundle build: сборка NSIS + MSI, сборка артефактов, проверка
+  portable и контрольных сумм, выгрузка release-candidate. Ошибки упаковки (например,
+  падение WiX из-за символов вне cp1251) теперь ловятся в CI до релиза.
+- Извлечение секции CHANGELOG из wk заменено на scripts/extract-changelog.mjs:
+  работает одинаково на всех ОС, покрыта локальными проверками (версия существует,
+  версия отсутствует, некорректная версия, отсечение ссылок).
+-
+
+elease.yml сверяет тег с версией в package.json и останавливается при расхождении.
+
+- Чек-лист публикации вынесен в zapret-manager/docs/RELEASE_CHECKLIST.md.
+
 ### Состояние репозитория
 
 - Локальный git-репозиторий создан (`main`), первый коммит `release: v0.1.0` (1011 файлов),

@@ -19,7 +19,6 @@ jobs:
     outputs:
       version: ${{ steps.version.outputs.version }}
       release_id: ${{ steps.create.outputs.result }}
-      upload_url: ${{ steps.create.outputs.upload_url }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -29,18 +28,28 @@ jobs:
         id: version
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "version=${{ github.event.inputs.version }}" >> "$GITHUB_OUTPUT"
+            echo "version=${{ github.event_inputs.version }}" >> "$GITHUB_OUTPUT"
           else
             echo "version=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Check version matches sources
+        working-directory: zapret-manager
+        run: |
+          version="${{ steps.version.outputs.version }}"
+          version="${version#v}"
+          expected=$(node -p "require('./package.json').version")
+          if [ "$version" != "$expected" ]; then
+            echo "Тег $version не совпадает с версией в package.json ($expected)"
+            exit 1
+          fi
+
       - name: Extract changelog section
         run: |
-          VERSION="${{ steps.version.outputs.version }}"
-          VERSION_NO_V="${VERSION#v}"
           mkdir -p release-notes
-          awk "/^## \[$VERSION_NO_V\]/{flag=1; next} /^## \[/{flag=0} flag" CHANGELOG.md > release-notes/body.md
-          test -s release-notes/body.md || { echo "Секция $VERSION_NO_V не найдена в CHANGELOG.md"; exit 1; }
+          node zapret-manager/scripts/extract-changelog.mjs \
+            "${{ steps.version.outputs.version }}" \
+            release-notes/body.md
 
       - name: Create draft release
         id: create
@@ -58,6 +67,9 @@ jobs:
     name: Build artifacts
     needs: create-release
     runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: zapret-manager
     steps:
       - uses: actions/checkout@v4
 
@@ -69,6 +81,7 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
+          cache-dependency-path: zapret-manager/pnpm-lock.yaml
 
       - uses: dtolnay/rust-toolchain@stable
         with:
@@ -79,33 +92,40 @@ jobs:
           workspaces: src-tauri -> target
 
       - run: pnpm install --frozen-lockfile
-        working-directory: zapret-manager
 
       - name: Unit tests
         run: pnpm test
-        working-directory: zapret-manager
 
       - name: Types
         run: pnpm typecheck
-        working-directory: zapret-manager
 
       - name: Rust tests
-        run: cargo test --manifest-path zapret-manager/src-tauri/Cargo.toml
+        run: cargo test --manifest-path src-tauri/Cargo.toml
 
       - name: Clippy
-        run: cargo clippy --manifest-path zapret-manager/src-tauri/Cargo.toml --all-targets -- -D warnings
+        run: cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings
 
-      - name: Build Tauri app
-        working-directory: zapret-manager
+      - name: Build installers
         run: pnpm tauri build
 
-      - name: Collect artifacts and checksums
-        working-directory: zapret-manager
+      - name: Collect artifacts
         run: node scripts/release-artifacts.mjs
+
+      - name: Verify portable bundle
+        run: node scripts/verify-portable.mjs
+
+      - name: Verify checksums
+        shell: pwsh
+        run: |
+          Get-Content release/SHA256SUMS.txt | ForEach-Object {
+            $parts = $_ -split '\s+', 2
+            $actual = (Get-FileHash -Algorithm SHA256 -Path (Join-Path "release" $parts[1])).Hash.ToLower()
+            if ($actual -ne $parts[0]) { throw "Checksum mismatch: $($parts[1])" }
+          }
+          Write-Host "checksums verified"
 
       - name: Rename artifacts to release names
         shell: pwsh
-        working-directory: zapret-manager
         env:
           RELEASE_TAG: ${{ needs.create-release.outputs.version }}
         run: |
@@ -132,14 +152,3 @@ jobs:
             zapret-manager/release/*.msi
             zapret-manager/release/*.zip
             zapret-manager/release/SHA256SUMS.txt
-
-      - name: Verify checksums
-        shell: pwsh
-        working-directory: zapret-manager
-        run: |
-          Get-Content release/SHA256SUMS.txt | ForEach-Object {
-            $parts = $_ -split '\s+', 2
-            $actual = (Get-FileHash -Algorithm SHA256 -Path (Join-Path "release" $parts[1])).Hash.ToLower()
-            if ($actual -ne $parts[0]) { throw "Checksum mismatch: $($parts[1])" }
-          }
-          Write-Host "checksums verified"

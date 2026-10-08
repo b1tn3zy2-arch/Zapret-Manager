@@ -1,13 +1,34 @@
-import { mkdtempSync, rmSync } from "node:fs";
+import {
+  existsSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { execFileSync } from "node:child_process";
-import { existsSync, readdirSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 
-const zipPath = process.argv[2];
+const scriptDir = dirname(fileURLToPath(import.meta.url));
+const root = join(scriptDir, "..");
 
-if (zipPath === undefined || !existsSync(zipPath)) {
-  console.error("usage: node scripts/verify-portable.mjs <portable.zip>");
+function resolveArchive() {
+  if (process.argv[2] !== undefined) {
+    return process.argv[2];
+  }
+
+  const { version } = JSON.parse(
+    readFileSync(join(root, "package.json"), "utf8")
+  );
+
+  return join(root, "release", `ZapretManager_${version}_x64_portable.zip`);
+}
+
+const zipPath = resolveArchive();
+
+if (!existsSync(zipPath)) {
+  console.error(`portable-архив не найден: ${zipPath}`);
   process.exit(1);
 }
 
