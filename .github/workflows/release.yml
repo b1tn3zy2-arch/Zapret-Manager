@@ -103,22 +103,35 @@ jobs:
         working-directory: zapret-manager
         run: node scripts/release-artifacts.mjs
 
-      - name: Upload assets
+      - name: Rename artifacts to release names
         shell: pwsh
+        working-directory: zapret-manager
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_TAG: ${{ needs.create-release.outputs.version }}
         run: |
-          $tag = $env:RELEASE_TAG
-          $version = $tag.TrimStart('v')
-          Get-ChildItem -Path "release" -File | Where-Object { $_.Name -ne "SHA256SUMS.txt" } | ForEach-Object {
-            $name = $_.Name -replace 'Zapret Manager_', 'ZapretManager_'
-            $name = $name -replace '_x64-setup\.exe$', "_x${version}_setup.exe"
-            $name = $name -replace '_en-US_x64\.msi$', "_x${version}_en-US.msi"
-            $name = $name -replace 'ZapretManager_(\d+\.\d+\.\d+)_x64_portable\.zip', "ZapretManager_`$${version}_x64_portable.zip"
-            gh release upload $tag $_.FullName --clobber --repo $env:GITHUB_REPOSITORY --name $name
+          $version = $env:RELEASE_TAG.TrimStart('v')
+          $map = @{
+            "Zapret Manager_${version}_x64-setup.exe" = "ZapretManager_${version}_x64-setup.exe"
+            "Zapret Manager_${version}_x64_ru-RU.msi" = "ZapretManager_${version}_x64_ru-RU.msi"
           }
-          gh release upload $tag "release/SHA256SUMS.txt" --clobber --repo $env:GITHUB_REPOSITORY
+          foreach ($entry in $map.GetEnumerator()) {
+            if (Test-Path "release/$($entry.Key)") {
+              Rename-Item "release/$($entry.Key)" "release/$($entry.Value)"
+            }
+          }
+          Get-ChildItem release -File | Select-Object -ExpandProperty Name
+
+      - name: Upload assets
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ needs.create-release.outputs.version }}
+          files: |
+            zapret-manager/release/*.exe
+            zapret-manager/release/*.msi
+            zapret-manager/release/*.zip
+            zapret-manager/release/SHA256SUMS.txt
 
       - name: Verify checksums
         shell: pwsh

@@ -2,10 +2,12 @@ import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import {
   copyFileSync,
+  cpSync,
   existsSync,
   mkdirSync,
   readFileSync,
   readdirSync,
+  rmSync,
   writeFileSync,
 } from "node:fs";
 import { basename, dirname, join } from "node:path";
@@ -41,20 +43,37 @@ function collect(directory, extension) {
 }
 
 function createPortable(version) {
-  const exe = join(
-    root,
-    "src-tauri",
-    "target",
-    "release",
-    "zapret-manager.exe"
-  );
+  const releaseDir = join(root, "src-tauri", "target", "release");
+  const exe = join(releaseDir, "zapret-manager.exe");
+  const resources = join(releaseDir, "resources");
 
   if (!existsSync(exe)) {
     console.log("portable: бинарь не найден, пропуск");
     return null;
   }
 
+  if (!existsSync(resources)) {
+    console.error(
+      "portable: каталог resources отсутствует, сборка некорректна"
+    );
+    process.exitCode = 1;
+    return null;
+  }
+
+  const stage = join(stageDir, "portable");
   const zip = join(stageDir, `ZapretManager_${version}_x64_portable.zip`);
+
+  rmSync(stage, { recursive: true, force: true });
+  mkdirSync(stage, { recursive: true });
+  copyFileSync(exe, join(stage, "zapret-manager.exe"));
+
+  for (const entry of ["resources", "icons"]) {
+    const source = join(releaseDir, entry);
+
+    if (existsSync(source)) {
+      cpSync(source, join(stage, entry), { recursive: true });
+    }
+  }
 
   if (process.platform === "win32") {
     execFileSync(
@@ -63,15 +82,17 @@ function createPortable(version) {
         "-NoProfile",
         "-NonInteractive",
         "-Command",
-        `Compress-Archive -Path '${exe}' -DestinationPath '${zip}' -Force`,
+        `Compress-Archive -Path '${stage}\\*' -DestinationPath '${zip}' -Force`,
       ],
       { stdio: "ignore" }
     );
   } else {
-    copyFileSync(exe, zip.replace(/\.zip$/, ""));
+    execFileSync("zip", ["-qr", zip, "."], { cwd: stage, stdio: "ignore" });
   }
 
-  console.log(`portable: ${zip}`);
+  rmSync(stage, { recursive: true, force: true });
+
+  console.log(`portable: ${zip} (exe + resources + icons)`);
 
   return zip;
 }
