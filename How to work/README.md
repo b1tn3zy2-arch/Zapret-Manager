@@ -1752,6 +1752,18 @@ upstream-репозиторий zapret (сотни тысяч загрузок).
   elease.yml;
 - требование заменить плейсхолдер вынесено первым шагом в docs/RELEASE_CHECKLIST.md.
 
+### Готовность дистрибутива к распространению
+
+- THIRD_PARTY_NOTICES.md — состав дистрибутива и лицензии сторонних компонентов:
+  zapret (MIT, текст лицензии уже лежит в ресурсах), Cygwin runtime 3.4.10, WinDivert 2.2
+  (LGPL v3). Версии DLL и SYS взяты из файлов сборки, а не из документации.
+- scripts/set-repository-url.mjs (pnpm release:repo <owner/name>) — подстановка адреса
+  своего репозитория в APP_REPOSITORY_URL, README, CHANGELOG и ISSUE_TEMPLATE одной командой,
+  с проверкой ввода и запуском pnpm lint:release в конце.
+- pnpm release:check — единая последовательность локальных проверок перед релизом:
+  tsc, ESLint, Prettier, knip, i18n, метаданные, unit-тесты, cargo test, cargo check.
+- pnpm release:check:full — дополнительно E2E, сборка фронтенда и NSIS/MSI.
+
 ### Проверка автообновления на реальных данных
 
 Ответ GitHub API для upstream-релиза 1.10.3 сохранён как фикстура
