@@ -208,3 +208,46 @@ fn test_init_progress_serializes_camel_case() {
     assert!(value.contains("\"currentFile\""));
     assert!(!value.contains("current_file"));
 }
+#[test]
+fn test_resource_roots_prefers_resource_dir() {
+    let roots = build_resource_roots(
+        Some(PathBuf::from(r"C:\\app\\resources")),
+        Some(PathBuf::from(r"C:\\app\\zapret-manager.exe")),
+        false,
+    );
+
+    assert_eq!(roots[0], PathBuf::from(r"C:\\app\\resources\\resources"));
+    assert_eq!(roots[1], PathBuf::from(r"C:\\app\\resources"));
+    assert_eq!(roots[2], PathBuf::from(r"C:\\app\\resources"));
+}
+
+#[test]
+fn test_resource_roots_release_has_no_manifest_dir() {
+    let roots = build_resource_roots(
+        Some(PathBuf::from(r"C:\\app\\resources")),
+        Some(PathBuf::from(r"C:\\app\\zapret-manager.exe")),
+        false,
+    );
+
+    let manifest = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(RESOURCES_DIR);
+
+    assert!(
+        !roots.contains(&manifest),
+        "release build must not look into the build machine directory"
+    );
+}
+
+#[test]
+fn test_resource_roots_debug_includes_manifest_dir() {
+    let manifest = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(RESOURCES_DIR);
+    let roots = build_resource_roots(None, None, true);
+
+    assert!(roots.contains(&manifest));
+}
+
+#[test]
+fn test_resource_roots_survive_missing_paths() {
+    let roots = build_resource_roots(None, None, false);
+
+    assert!(roots.is_empty());
+}

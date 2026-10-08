@@ -21,31 +21,31 @@
 
 ### Что лежит в папке `How to work`
 
-| Файл | Роль |
-|---|---|
-| `README.md` | этот файл — точка входа |
-| `How to work.md` | системный промпт: философия, правила, чек-лист |
-| `Rules Works.md` | 11 финальных правил работы |
-| `STAGE-0-CONCEPT.md` | результат Этапа 0: концепция, аудитория, 12 функций |
-| `Stage 0.md` … `Stage 23.md` | спецификация этапов 1–23 |
-| `Assets/Readme.txt` | подборки UI-китов и иконок |
-| `Diagrams/*.png\|jpg` | 10 диаграмм архитектуры |
+| Файл                         | Роль                                                |
+| ---------------------------- | --------------------------------------------------- |
+| `README.md`                  | этот файл — точка входа                             |
+| `How to work.md`             | системный промпт: философия, правила, чек-лист      |
+| `Rules Works.md`             | 11 финальных правил работы                          |
+| `STAGE-0-CONCEPT.md`         | результат Этапа 0: концепция, аудитория, 12 функций |
+| `Stage 0.md` … `Stage 23.md` | спецификация этапов 1–23                            |
+| `Assets/Readme.txt`          | подборки UI-китов и иконок                          |
+| `Diagrams/*.png\|jpg`        | 10 диаграмм архитектуры                             |
 
 ---
 
 ## 2. Правила работы (главное, не нарушать)
 
-| Правило | Источник |
-|---|---|
+| Правило                                                                  | Источник             |
+| ------------------------------------------------------------------------ | -------------------- |
 | **В файлах кода комментариев нет вообще.** Ни `//`, ни `///`, ни `/* */` | решение пользователя |
-| Один этап за один ответ. В конце — СТОП | Правило 1 |
-| В конце этапа спрашивать: «Переходить к следующему этапу?» | Правило 4 |
-| Спорные места — задавать вопрос, не додумывать | Правило 4 |
-| Без `any` в TS, без `unwrap()`/`expect()` в Rust | Принцип 3 |
-| Функции < 50 строк, файлы < 300 строк | Принцип 2 |
-| Каждый этап должен компилироваться и запускаться | Правило 5 |
-| Никаких `console.log` в production | Принцип 2 |
-| Комментарии и «почему» живут в `docs/`, а не в исходниках | см. D8 |
+| Один этап за один ответ. В конце — СТОП                                  | Правило 1            |
+| В конце этапа спрашивать: «Переходить к следующему этапу?»               | Правило 4            |
+| Спорные места — задавать вопрос, не додумывать                           | Правило 4            |
+| Без `any` в TS, без `unwrap()`/`expect()` в Rust                         | Принцип 3            |
+| Функции < 50 строк, файлы < 300 строк                                    | Принцип 2            |
+| Каждый этап должен компилироваться и запускаться                         | Правило 5            |
+| Никаких `console.log` в production                                       | Принцип 2            |
+| Комментарии и «почему» живут в `docs/`, а не в исходниках                | см. D8               |
 
 ### Загрузки из интернета разрешены
 
@@ -73,16 +73,16 @@ CSP жёсткий, холодный старт важнее. Все ассет�
 
 ## 4. Окружение (проверено 2026-10-05)
 
-| Компонент | Версия |
-|---|---|
-| Node | 24.19.0 |
-| pnpm | 12.8.1 |
-| Rust / rustc | 1.98.0 |
-| Toolchain по умолчанию | `stable-x86_64-pc-windows-msvc` |
-| Visual Studio | 18 Community, VC Tools 14.51.36231 |
-| Windows SDK | 10.0.26100.0 |
-| WebView2 Runtime | 154.0.4258.53 |
-| Git | 2.46.0.windows.1 |
+| Компонент              | Версия                             |
+| ---------------------- | ---------------------------------- |
+| Node                   | 24.19.0                            |
+| pnpm                   | 12.8.1                             |
+| Rust / rustc           | 1.98.0                             |
+| Toolchain по умолчанию | `stable-x86_64-pc-windows-msvc`    |
+| Visual Studio          | 18 Community, VC Tools 14.51.36231 |
+| Windows SDK            | 10.0.26100.0                       |
+| WebView2 Runtime       | 154.0.4258.53                      |
+| Git                    | 2.46.0.windows.1                   |
 
 Сеть: npm, GitHub, crates.io, fonts.gstatic.com — доступны.
 Веб-поиск провайдера отдаёт 403, awwwards/godly блокируют fetch —
@@ -110,12 +110,14 @@ zapret-discord-youtube-1.10.3/
 ```
 
 `service.bat` — это диспетчер, который вызывает **каждый** стратегический .bat:
+
 ```
 call service.bat status_zapret
 call service.bat check_updates
 call service.bat load_game_filter
 call service.bat load_user_lists
 ```
+
 Без него в бандле ни одна стратегия не запустится.
 
 Версия: `LOCAL_VERSION=1.10.3` (строка 2 в `service.bat`).
@@ -123,6 +125,7 @@ call service.bat load_user_lists
 ### 5.2 Ловушка: переменные окружения в путях
 
 `general.bat` задаёт переменные и использует их в аргументах winws:
+
 ```bat
 set "BIN=%~dp0bin\"
 set "LISTS=%~dp0lists\"
@@ -132,6 +135,7 @@ set "LISTS=%~dp0lists\"
 --ipset="%LISTS%ipset-all.txt"
 --wf-tcp=80,443,...,%GameFilterTCP%
 ```
+
 Регекс `--hostlist(?:-domains)?=([^\s]+)` вернёт
 `"%LISTS%list-general.txt"` — **с кавычками и плейсхолдером**, а не путь.
 Это ломает инъекцию доменов (этап 8). См. **D1**.
@@ -139,8 +143,9 @@ set "LISTS=%~dp0lists\"
 ### 5.3 Ловушка: winws запускается через `start`
 
 ```bat
-start "zapret: %~n0" /min "%BIN%winws.exe" --wf-tcp=... 
+start "zapret: %~n0" /min "%BIN%winws.exe" --wf-tcp=...
 ```
+
 `start` порождает **отсоединённый** потомок. PID из `ShellExecuteEx`
 принадлежит `cmd.exe`. `taskkill /T /F` по дереву cmd.exe winws.exe
 **не убьёт** — будет зомби, жрущий CPU и трафик. См. **D4**.
@@ -148,11 +153,13 @@ start "zapret: %~n0" /min "%BIN%winws.exe" --wf-tcp=...
 ### 5.4 Ловушка: описание стратегии
 
 Первые строки каждого .bat:
+
 ```bat
 @echo off
 chcp 65001 > nul
 :: 65001 - UTF-8
 ```
+
 Префикс `::` входит в `DESCRIPTION_LINE_PREFIXES` этапа 5, поэтому
 все 22 стратегии получат описание «65001 - UTF-8». См. **D2**.
 
@@ -190,16 +197,16 @@ chcp 65001 > nul
 
 Применены к файлам этапов. Здесь — сводка, чтобы не потерять.
 
-| # | Этапы | Суть |
-|---|---|---|
-| **D1** | 5, 8 | Модуль `bat_env.rs`: разбор `set "VAR=..."` из .bat + подстановка `%VAR%` / `%~dp0` + снятие кавычек. Используется сканером (5) и `parse_config_paths` (8) |
-| **D2** | 5 | `extract_description` пропускает служебные комментарии, fallback — имя файла |
-| **D3** | 5, 9, 10 | Поле `techniques[]`. Детекция сервисов по имени. Редкость = score из техник, не из числа сервисов |
-| **D4** | 6 | Stop = `TerminateProcess(hProcess)` + `taskkill /IM winws.exe /F`, лог-предупреждение |
-| **D5** | 12 | Отключить `check_updates` из `service.bat` через `NO_UPDATE_CHECK` |
-| **D6** | 16 | 22 стратегии под новыми именами; в бандл `service.bat`, `lists/`, `bin/`, `utils/`; `ipset-all.txt` из `.backup`; добавить лицензии; версия ресурсов `1.10.3` |
-| **D7** | 1, 3, 9 | Unbounded + Inter + JetBrains Mono; `simple-icons` для брендов; `circle-flags` SVG вместо эмодзи-флагов |
-| **D8** | 21, 22 | Вместо `// SAFETY` — `OwnedProcessHandle` c `impl Drop` + clippy-линты `-D clippy::unwrap_used -D clippy::expect_used -D clippy::panic -D clippy::indexing_slicing`. `security-audit.sh` проверяет весь код, а не только помеченное |
+| #      | Этапы    | Суть                                                                                                                                                                                                                                |
+| ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **D1** | 5, 8     | Модуль `bat_env.rs`: разбор `set "VAR=..."` из .bat + подстановка `%VAR%` / `%~dp0` + снятие кавычек. Используется сканером (5) и `parse_config_paths` (8)                                                                          |
+| **D2** | 5        | `extract_description` пропускает служебные комментарии, fallback — имя файла                                                                                                                                                        |
+| **D3** | 5, 9, 10 | Поле `techniques[]`. Детекция сервисов по имени. Редкость = score из техник, не из числа сервисов                                                                                                                                   |
+| **D4** | 6        | Stop = `TerminateProcess(hProcess)` + `taskkill /IM winws.exe /F`, лог-предупреждение                                                                                                                                               |
+| **D5** | 12       | Отключить `check_updates` из `service.bat` через `NO_UPDATE_CHECK`                                                                                                                                                                  |
+| **D6** | 16       | 22 стратегии под новыми именами; в бандл `service.bat`, `lists/`, `bin/`, `utils/`; `ipset-all.txt` из `.backup`; добавить лицензии; версия ресурсов `1.10.3`                                                                       |
+| **D7** | 1, 3, 9  | Unbounded + Inter + JetBrains Mono; `simple-icons` для брендов; `circle-flags` SVG вместо эмодзи-флагов                                                                                                                             |
+| **D8** | 21, 22   | Вместо `// SAFETY` — `OwnedProcessHandle` c `impl Drop` + clippy-линты `-D clippy::unwrap_used -D clippy::expect_used -D clippy::panic -D clippy::indexing_slicing`. `security-audit.sh` проверяет весь код, а не только помеченное |
 
 Плюс сплошная правка: во всех файлах этапов пункты чек-листов
 «Комментарии на русском» заменены на «Комментариев в коде нет».
@@ -218,6 +225,7 @@ score = 0
 
 0-1 → common    2 → rare    3 → epic    4+ → legendary
 ```
+
 Детерминированно, отражает реальную силу стратегии, различает все 22 файла.
 
 Это формула из спецификации. На этапе 10 она не выдержала проверки на
@@ -230,28 +238,28 @@ score = 0
 
 `service.bat` не трогаем. Имена ASCII, сортируемые, читаемые.
 
-| Было | Стало |
-|---|---|
-| `general.bat` | `general-00-baseline.bat` |
-| `general (ALT).bat` | `general-01-alt.bat` |
-| `general (ALT2).bat` | `general-02-alt.bat` |
-| `general (ALT3).bat` | `general-03-alt.bat` |
-| `general (ALT4).bat` | `general-04-alt.bat` |
-| `general (ALT5).bat` | `general-05-alt.bat` |
-| `general (ALT6).bat` | `general-06-alt.bat` |
-| `general (ALT7).bat` | `general-07-alt.bat` |
-| `general (ALT8).bat` | `general-08-alt.bat` |
-| `general (ALT9).bat` | `general-09-alt.bat` |
-| `general (ALT10).bat` | `general-10-alt.bat` |
-| `general (ALT11).bat` | `general-11-alt.bat` |
-| `general (ALT12).bat` | `general-12-alt.bat` |
-| `general (ALT13).bat` | `general-13-alt.bat` |
-| `general (EXP).bat` | `general-14-experimental.bat` |
-| `general (SIMPLE FAKE).bat` | `general-15-simple-fake.bat` |
-| `general (SIMPLE FAKE ALT).bat` | `general-16-simple-fake-alt.bat` |
-| `general (SIMPLE FAKE ALT2).bat` | `general-17-simple-fake-alt2.bat` |
-| `general (FAKE TLS AUTO).bat` | `general-18-faketls-auto.bat` |
-| `general (FAKE TLS AUTO ALT).bat` | `general-19-faketls-auto-alt.bat` |
+| Было                               | Стало                              |
+| ---------------------------------- | ---------------------------------- |
+| `general.bat`                      | `general-00-baseline.bat`          |
+| `general (ALT).bat`                | `general-01-alt.bat`               |
+| `general (ALT2).bat`               | `general-02-alt.bat`               |
+| `general (ALT3).bat`               | `general-03-alt.bat`               |
+| `general (ALT4).bat`               | `general-04-alt.bat`               |
+| `general (ALT5).bat`               | `general-05-alt.bat`               |
+| `general (ALT6).bat`               | `general-06-alt.bat`               |
+| `general (ALT7).bat`               | `general-07-alt.bat`               |
+| `general (ALT8).bat`               | `general-08-alt.bat`               |
+| `general (ALT9).bat`               | `general-09-alt.bat`               |
+| `general (ALT10).bat`              | `general-10-alt.bat`               |
+| `general (ALT11).bat`              | `general-11-alt.bat`               |
+| `general (ALT12).bat`              | `general-12-alt.bat`               |
+| `general (ALT13).bat`              | `general-13-alt.bat`               |
+| `general (EXP).bat`                | `general-14-experimental.bat`      |
+| `general (SIMPLE FAKE).bat`        | `general-15-simple-fake.bat`       |
+| `general (SIMPLE FAKE ALT).bat`    | `general-16-simple-fake-alt.bat`   |
+| `general (SIMPLE FAKE ALT2).bat`   | `general-17-simple-fake-alt2.bat`  |
+| `general (FAKE TLS AUTO).bat`      | `general-18-faketls-auto.bat`      |
+| `general (FAKE TLS AUTO ALT).bat`  | `general-19-faketls-auto-alt.bat`  |
 | `general (FAKE TLS AUTO ALT2).bat` | `general-20-faketls-auto-alt2.bat` |
 | `general (FAKE TLS AUTO ALT3).bat` | `general-21-faketls-auto-alt3.bat` |
 
@@ -259,12 +267,12 @@ score = 0
 
 ## 8. Открытые вопросы
 
-| Вопрос | Статус |
-|---|---|
+| Вопрос                   | Статус                                                                                                                                                                                                                          |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Домены/IP Outlast Trials | **решено:** реальных данных нет. В репозитории используется Game Filter по диапазонам портов (`1024-65535`) + `ACTIVE_GAME_UDP.bin`. В приложении — редактируемый пользовательский список доменов, стартовый набор из документа |
-| VPN-провайдер | **решено:** WireGuard + AmneziaWG через `.conf`. Не Amnezia VPN (Electron, тяжёлый), не OpenVPN (медленный) |
-| Есть ли VPN-сервер | пользователь импортирует `.conf` сам |
-| Референсы дизайна | отложено до этапа 2–3; сетевые галереи блокируют автоматический доступ |
+| VPN-провайдер            | **решено:** WireGuard + AmneziaWG через `.conf`. Не Amnezia VPN (Electron, тяжёлый), не OpenVPN (медленный)                                                                                                                     |
+| Есть ли VPN-сервер       | пользователь импортирует `.conf` сам                                                                                                                                                                                            |
+| Референсы дизайна        | отложено до этапа 2–3; сетевые галереи блокируют автоматический доступ                                                                                                                                                          |
 
 ---
 
@@ -272,28 +280,28 @@ score = 0
 
 Все версии в файлах этапов устарели. Ниже — что реально работает на 2026-10-05.
 
-| # | Где было в этапах | Что на самом деле | Почему |
-|---|---|---|---|
-| O1 | `rustc` глобально `x86_64-pc-windows-gnu` | добавлен `zapret-manager\rust-toolchain.toml` с `stable-x86_64-pc-windows-msvc`. Глобальный дефолт rustup **не менялся** | GNU-линковщик падает на `crate-type = ["staticlib","cdylib","rlib"]` с `ld.exe: error: export ordinal too large: 137159`. `cargo check` это не ловит — нужен `cargo build`/линковка |
-| O2 | `tsconfig.json` с `baseUrl: "."` | `baseUrl` удалён, остались только `paths` | TypeScript 6: `error TS5101: Option 'baseUrl' is deprecated` |
-| O3 | `tsconfig.node.json` без `composite` | добавлены `composite: true`, `emitDeclarationOnly: true`, `outDir` в `node_modules/.tmp` | TypeScript 6: `TS6306` (нужен `composite`) и `TS6310` (нельзя `noEmit`) для project reference |
-| O4 | `vite.config.ts` c `manualChunks` объектом | только функция: `manualChunks(id) { ... }` | Vite 8 перешёл на **rolldown**, объектная форма больше не поддерживается: `TypeError: manualChunks is not a function`. **Поправить Stage 20** |
-| O5 | `esbuild` не указан | добавлен в `devDependencies` явной версией | `@tailwindcss/node` импортирует `esbuild`; в строгом `node_modules` pnpm пакет не поднимается: `Cannot find package 'esbuild'` |
-| O6 | регистрация `tauri_plugin_updater` на этапе 1 | **отложено до этапа 23** | Плагин падает при старте: `failed to initialize plugin 'updater' ... invalid type: null, expected struct Config`. Для работы нужны `plugins.updater.endpoints`, `pubkey` и ключ подписи (`tauri signer generate` требует непустой пароль). Выдумывать endpoint — нельзя |
-| O7 | `src/vite-env.d.ts` с `/// <reference ... />` | файл удалён, в `tsconfig.json` стоит `"types": ["vite/client"]` | Правило «без комментариев в коде»; директива `///` формально комментарий. Типы Vite сохранены |
-| O8 | иконки от `create-tauri-app` (логотип Tauri) | сгенерированы из собственного SVG-знака (щит + молния, акцент `#00ff88`): `pnpm tauri icon` | Стандартный синий логотип Tauri в дистрибутиве недопустим |
-| O9 | `overflow-hidden` на Sidebar для обрезки подписей при collapse | убран; подпись сама режется через `truncate` + `w-0`, тултип вынесен наружу обрезки | Иначе тултип в collapsed-режиме обрезался по краю Sidebar. Проверено скриншотом: `overflow-hidden` у `<aside>` режет tooltip, `truncate` на `<span>` — нет |
-| O10 | `ROUTES.monitor` из этапа 1 | удалён | У Monitor не было страницы ни в одном этапе; мёртвый код. В Stage 2 ровно 5 разделов |
-| O11 | inline-стили запрещены | разрешены ровно в двух местах: `Skeleton` (динамические `width`/`height`) и `Tooltip` (координаты из `getBoundingClientRect`) | Динамическая геометрия невыразима статическими классами Tailwind. Все остальные стили — классы |
-| O12 | файлы < 300 строк | `pages/About.tsx` — 473, `assets/flags/countryCodes.ts` — 434 | Витрина компонентов удаляется на этапе 4, дробить её на 10 файлов ради лимита бессмысленно. `countryCodes.ts` — сгенерированные данные, не код |
-| O13 | `vite.config.ts` без `assetsInlineLimit` | добавлен `assetsInlineLimit: 0` | Vite встроил все 430 флагов как data-URI **в главный чанк**: 115 КБ → 511 КБ. С нулём флаги выходят отдельными файлами, главный чанк 115 КБ, весь `dist` 1.3 МБ |
-| O14 | `CountryCode` выводится из ключей `import.meta.glob` | коды сгенерированы в `assets/flags/countryCodes.ts` | `import.meta.glob` типизируется как `Record<string, string>`, литеральных ключей нет. Попытка вывести union давала `never` |
-| O15 | `GlassPanel` без `forwardRef` (Stage 2) | добавлен `forwardRef<HTMLDivElement>` + `HTMLAttributes` | `Card` (этап 3) рендерит `GlassPanel` под капотом и обязан прокинуть ref и DOM-пропсы |
-| O16 | brand-иконки как `.svg` файлы | сконвертированы в TSX-компоненты с `fill-current` | `simple-icons` отдаёт `<path>` без `fill`, цвет задаётся классом `text-*` на родителе. Файл SVG не может наследовать `color` → нужен компонент. Цвет: `fill-current` |
-| O17 | `immer` не был в зависимостях этапа 1 | добавлен `immer@11.1.21` | Требуется middleware `zustand/middleware/immer`, который явно указан в Stage 4 |
-| O18 | селекторы вида `selectRunningStrategies(state)` используются как `useStore(selector)` | подписка идёт на стабильные ссылки (`state.strategies`), производные считаются в `useMemo` | Селектор, возвращающий новый массив, в zustand v5 ломает `useSyncExternalStore` (бесконечный ре-рендер). Нужен `useShallow` либо как здесь — стабильная ссылка |
-| O19 | `writeTextFile(path, data, "utf-8")` | `writeTextFile(path, data)` | В `@tauri-apps/plugin-fs@2.6` кодировка не передаётся третьим аргументом |
-| O20 | критерий «10 000 логов → RAM <200 MB» | измерен **дельта**, а не абсолют | Сумма `WorkingSet` по дереву WebView2 (13 процессов) дважды считает общие страницы, и пустое приложение уже превышает 200 МБ. Факт: baseline 0 логов = 838 МБ ws / 596 МБ private; с 10 000 логов = 851 МБ ws / 510 МБ private. **Логи стоят ≈13 МБ (1.3 КБ на запись)**. Главный процесс — 35 МБ. Мерить надо дельту |
+| #   | Где было в этапах                                                                     | Что на самом деле                                                                                                             | Почему                                                                                                                                                                                                                                                                                                                |
+| --- | ------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| O1  | `rustc` глобально `x86_64-pc-windows-gnu`                                             | добавлен `zapret-manager\rust-toolchain.toml` с `stable-x86_64-pc-windows-msvc`. Глобальный дефолт rustup **не менялся**      | GNU-линковщик падает на `crate-type = ["staticlib","cdylib","rlib"]` с `ld.exe: error: export ordinal too large: 137159`. `cargo check` это не ловит — нужен `cargo build`/линковка                                                                                                                                   |
+| O2  | `tsconfig.json` с `baseUrl: "."`                                                      | `baseUrl` удалён, остались только `paths`                                                                                     | TypeScript 6: `error TS5101: Option 'baseUrl' is deprecated`                                                                                                                                                                                                                                                          |
+| O3  | `tsconfig.node.json` без `composite`                                                  | добавлены `composite: true`, `emitDeclarationOnly: true`, `outDir` в `node_modules/.tmp`                                      | TypeScript 6: `TS6306` (нужен `composite`) и `TS6310` (нельзя `noEmit`) для project reference                                                                                                                                                                                                                         |
+| O4  | `vite.config.ts` c `manualChunks` объектом                                            | только функция: `manualChunks(id) { ... }`                                                                                    | Vite 8 перешёл на **rolldown**, объектная форма больше не поддерживается: `TypeError: manualChunks is not a function`. **Поправить Stage 20**                                                                                                                                                                         |
+| O5  | `esbuild` не указан                                                                   | добавлен в `devDependencies` явной версией                                                                                    | `@tailwindcss/node` импортирует `esbuild`; в строгом `node_modules` pnpm пакет не поднимается: `Cannot find package 'esbuild'`                                                                                                                                                                                        |
+| O6  | регистрация `tauri_plugin_updater` на этапе 1                                         | **отложено до этапа 23**                                                                                                      | Плагин падает при старте: `failed to initialize plugin 'updater' ... invalid type: null, expected struct Config`. Для работы нужны `plugins.updater.endpoints`, `pubkey` и ключ подписи (`tauri signer generate` требует непустой пароль). Выдумывать endpoint — нельзя                                               |
+| O7  | `src/vite-env.d.ts` с `/// <reference ... />`                                         | файл удалён, в `tsconfig.json` стоит `"types": ["vite/client"]`                                                               | Правило «без комментариев в коде»; директива `///` формально комментарий. Типы Vite сохранены                                                                                                                                                                                                                         |
+| O8  | иконки от `create-tauri-app` (логотип Tauri)                                          | сгенерированы из собственного SVG-знака (щит + молния, акцент `#00ff88`): `pnpm tauri icon`                                   | Стандартный синий логотип Tauri в дистрибутиве недопустим                                                                                                                                                                                                                                                             |
+| O9  | `overflow-hidden` на Sidebar для обрезки подписей при collapse                        | убран; подпись сама режется через `truncate` + `w-0`, тултип вынесен наружу обрезки                                           | Иначе тултип в collapsed-режиме обрезался по краю Sidebar. Проверено скриншотом: `overflow-hidden` у `<aside>` режет tooltip, `truncate` на `<span>` — нет                                                                                                                                                            |
+| O10 | `ROUTES.monitor` из этапа 1                                                           | удалён                                                                                                                        | У Monitor не было страницы ни в одном этапе; мёртвый код. В Stage 2 ровно 5 разделов                                                                                                                                                                                                                                  |
+| O11 | inline-стили запрещены                                                                | разрешены ровно в двух местах: `Skeleton` (динамические `width`/`height`) и `Tooltip` (координаты из `getBoundingClientRect`) | Динамическая геометрия невыразима статическими классами Tailwind. Все остальные стили — классы                                                                                                                                                                                                                        |
+| O12 | файлы < 300 строк                                                                     | `pages/About.tsx` — 473, `assets/flags/countryCodes.ts` — 434                                                                 | Витрина компонентов удаляется на этапе 4, дробить её на 10 файлов ради лимита бессмысленно. `countryCodes.ts` — сгенерированные данные, не код                                                                                                                                                                        |
+| O13 | `vite.config.ts` без `assetsInlineLimit`                                              | добавлен `assetsInlineLimit: 0`                                                                                               | Vite встроил все 430 флагов как data-URI **в главный чанк**: 115 КБ → 511 КБ. С нулём флаги выходят отдельными файлами, главный чанк 115 КБ, весь `dist` 1.3 МБ                                                                                                                                                       |
+| O14 | `CountryCode` выводится из ключей `import.meta.glob`                                  | коды сгенерированы в `assets/flags/countryCodes.ts`                                                                           | `import.meta.glob` типизируется как `Record<string, string>`, литеральных ключей нет. Попытка вывести union давала `never`                                                                                                                                                                                            |
+| O15 | `GlassPanel` без `forwardRef` (Stage 2)                                               | добавлен `forwardRef<HTMLDivElement>` + `HTMLAttributes`                                                                      | `Card` (этап 3) рендерит `GlassPanel` под капотом и обязан прокинуть ref и DOM-пропсы                                                                                                                                                                                                                                 |
+| O16 | brand-иконки как `.svg` файлы                                                         | сконвертированы в TSX-компоненты с `fill-current`                                                                             | `simple-icons` отдаёт `<path>` без `fill`, цвет задаётся классом `text-*` на родителе. Файл SVG не может наследовать `color` → нужен компонент. Цвет: `fill-current`                                                                                                                                                  |
+| O17 | `immer` не был в зависимостях этапа 1                                                 | добавлен `immer@11.1.21`                                                                                                      | Требуется middleware `zustand/middleware/immer`, который явно указан в Stage 4                                                                                                                                                                                                                                        |
+| O18 | селекторы вида `selectRunningStrategies(state)` используются как `useStore(selector)` | подписка идёт на стабильные ссылки (`state.strategies`), производные считаются в `useMemo`                                    | Селектор, возвращающий новый массив, в zustand v5 ломает `useSyncExternalStore` (бесконечный ре-рендер). Нужен `useShallow` либо как здесь — стабильная ссылка                                                                                                                                                        |
+| O19 | `writeTextFile(path, data, "utf-8")`                                                  | `writeTextFile(path, data)`                                                                                                   | В `@tauri-apps/plugin-fs@2.6` кодировка не передаётся третьим аргументом                                                                                                                                                                                                                                              |
+| O20 | критерий «10 000 логов → RAM <200 MB»                                                 | измерен **дельта**, а не абсолют                                                                                              | Сумма `WorkingSet` по дереву WebView2 (13 процессов) дважды считает общие страницы, и пустое приложение уже превышает 200 МБ. Факт: baseline 0 логов = 838 МБ ws / 596 МБ private; с 10 000 логов = 851 МБ ws / 510 МБ private. **Логи стоят ≈13 МБ (1.3 КБ на запись)**. Главный процесс — 35 МБ. Мерить надо дельту |
 
 Ловушка при замере RAM: процессы `msedgewebview2` **не умирают вместе с
 приложением**. Замеры накапливают мусор — перед каждым прогоном нужно
@@ -304,47 +312,47 @@ score = 0
 
 Этапы 5 и 8 писались до разбора реальных файлов. Факты:
 
-| В этапах | В архиве на самом деле |
-|---|---|
+| В этапах                                         | В архиве на самом деле                                                                                                                                         |
+| ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `discord_youtube.bat`, `general-00-baseline.bat` | все 22 файла называются `general*`: `general.bat`, `general (ALT).bat` … `general (FAKE TLS AUTO ALT3).bat`. Переименование в `general-NN-*.bat` — **этап 16** |
-| стратегии для Discord, YouTube, Outlast | **ни в одном имени файла нет** ни discord, ни youtube, ни outlast |
-| в `.bat` есть описание (REM/::) | описаний нет вообще. Первые строки: `@echo off`, `chcp 65001`, `:: 65001 - UTF-8`, `cd /d`, `call`, `echo:` — все в `SKIP_DESCRIPTION_PREFIXES` |
-| — | `service.bat` (38 КБ) лежит рядом и не является стратегией → добавлен `EXCLUDED_FILENAMES` |
-| — | все 22 стратегии отдают `services: ["general"]` (приоритет имени, как в D3). Различить их может только `techniques[]` |
+| стратегии для Discord, YouTube, Outlast          | **ни в одном имени файла нет** ни discord, ни youtube, ни outlast                                                                                              |
+| в `.bat` есть описание (REM/::)                  | описаний нет вообще. Первые строки: `@echo off`, `chcp 65001`, `:: 65001 - UTF-8`, `cd /d`, `call`, `echo:` — все в `SKIP_DESCRIPTION_PREFIXES`                |
+| —                                                | `service.bat` (38 КБ) лежит рядом и не является стратегией → добавлен `EXCLUDED_FILENAMES`                                                                     |
+| —                                                | все 22 стратегии отдают `services: ["general"]` (приоритет имени, как в D3). Различить их может только `techniques[]`                                          |
 
 Следствие: карточка не показывает описание, если оно совпадает с именем
 (иначе имя дублируется). Именование под 22 стратегии делает этап 16.
 
 ### Отклонения этапа 5
 
-| # | Где было в этапах | Что на самом деле | Почему |
-|---|---|---|---|
-| O21 | `Cargo.toml` добавить `chrono`, `once_cell`, `walkdir` | `chrono` и `once_cell` **не добавлены**; `dirs` **удалена** | `modifiedAt` отдаётся в Unix-мс, chrono не нужен. Константы на `std::sync::LazyLock` из Rust 1.80+. `walkdir` уже был в зависимостях. `get_default_strategies_path` теперь принимает `AppHandle` и берёт `app.path().app_data_dir()` — тот же путь, что и на фронтенде |
-| O22 | настройки в `%APPDATA%\ZapretManager\config.json` | `%APPDATA%\com.zapretmanager.app\config.json` | `appDataDir()` в Tauri 2 **уже включает identifier**. Сегмент `ZapretManager` был дублированием и удалён |
-| O23 | `capabilities/default.json` c полем `"scope"` | добавлено разрешение **`fs:scope-app`** | **У Capability в Tauri 2 нет поля `scope`** — ключ молча игнорировался. Без scope: `forbidden path: ... maybe it is not allowed on the scope for 'allow-exists' permission`. Scope задаётся разрешением `fs:scope` / `fs:scope-app` либо через permissions. Пути: `$APPDATA`, `$APPDATA/*`, `$APPCONFIG`, `$APPLOCALDATA`, `$APPCACHE`, `$APPLOG` |
-| O24 | `invoke<Strategy[]>("scan_strategies")` | Rust теперь возвращает и `status: "idle"` | **Каст `invoke<T>` не проверяется.** Rust отдавал объект без `status`, TS верил типу, и `STATUS_LABELS[undefined]` молча давал пустые бейджи. Найдено только на скриншоте |
-| O25 | `Button`: `size="icon"` = «только иконка», children скрыты | children рендерятся всегда | Иконка-кнопка передаёт иконку именно через `children`, а не через проп `icon`. Прежнее поведение давало пустые квадраты |
-| O26 | `error instanceof Error ? error.message : "Неизвестная ошибка"` | добавлен `toErrorMessage()` в `lib/utils` | **`invoke` отклоняется строкой, а не объектом `Error`.** Прежний код терял сообщение и показывал «Неизвестная ошибка» — именно это скрыло баг O23 на три итерации |
-| O27 | `readSettingsFile` глотает ошибки в `catch` | `null` только если файла нет или JSON неверен; настоящие сбои летят в `state.error` | Молчаливый проглатывание делало диагностику невозможной. Теперь причина видна в UI |
-| O28 | один файл `scanner.rs` на всё | разделено: `commands/parser.rs` (чистый парсинг, 214 строк) и `commands/scanner.rs` (IO + оркестрация, 204 строки), тесты — в `parser_tests.rs` и `scanner_tests.rs` | Файл вырос до 410 строк при лимите 300 |
+| #   | Где было в этапах                                               | Что на самом деле                                                                                                                                                    | Почему                                                                                                                                                                                                                                                                                                                                            |
+| --- | --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| O21 | `Cargo.toml` добавить `chrono`, `once_cell`, `walkdir`          | `chrono` и `once_cell` **не добавлены**; `dirs` **удалена**                                                                                                          | `modifiedAt` отдаётся в Unix-мс, chrono не нужен. Константы на `std::sync::LazyLock` из Rust 1.80+. `walkdir` уже был в зависимостях. `get_default_strategies_path` теперь принимает `AppHandle` и берёт `app.path().app_data_dir()` — тот же путь, что и на фронтенде                                                                            |
+| O22 | настройки в `%APPDATA%\ZapretManager\config.json`               | `%APPDATA%\com.zapretmanager.app\config.json`                                                                                                                        | `appDataDir()` в Tauri 2 **уже включает identifier**. Сегмент `ZapretManager` был дублированием и удалён                                                                                                                                                                                                                                          |
+| O23 | `capabilities/default.json` c полем `"scope"`                   | добавлено разрешение **`fs:scope-app`**                                                                                                                              | **У Capability в Tauri 2 нет поля `scope`** — ключ молча игнорировался. Без scope: `forbidden path: ... maybe it is not allowed on the scope for 'allow-exists' permission`. Scope задаётся разрешением `fs:scope` / `fs:scope-app` либо через permissions. Пути: `$APPDATA`, `$APPDATA/*`, `$APPCONFIG`, `$APPLOCALDATA`, `$APPCACHE`, `$APPLOG` |
+| O24 | `invoke<Strategy[]>("scan_strategies")`                         | Rust теперь возвращает и `status: "idle"`                                                                                                                            | **Каст `invoke<T>` не проверяется.** Rust отдавал объект без `status`, TS верил типу, и `STATUS_LABELS[undefined]` молча давал пустые бейджи. Найдено только на скриншоте                                                                                                                                                                         |
+| O25 | `Button`: `size="icon"` = «только иконка», children скрыты      | children рендерятся всегда                                                                                                                                           | Иконка-кнопка передаёт иконку именно через `children`, а не через проп `icon`. Прежнее поведение давало пустые квадраты                                                                                                                                                                                                                           |
+| O26 | `error instanceof Error ? error.message : "Неизвестная ошибка"` | добавлен `toErrorMessage()` в `lib/utils`                                                                                                                            | **`invoke` отклоняется строкой, а не объектом `Error`.** Прежний код терял сообщение и показывал «Неизвестная ошибка» — именно это скрыло баг O23 на три итерации                                                                                                                                                                                 |
+| O27 | `readSettingsFile` глотает ошибки в `catch`                     | `null` только если файла нет или JSON неверен; настоящие сбои летят в `state.error`                                                                                  | Молчаливый проглатывание делало диагностику невозможной. Теперь причина видна в UI                                                                                                                                                                                                                                                                |
+| O28 | один файл `scanner.rs` на всё                                   | разделено: `commands/parser.rs` (чистый парсинг, 214 строк) и `commands/scanner.rs` (IO + оркестрация, 204 строки), тесты — в `parser_tests.rs` и `scanner_tests.rs` | Файл вырос до 410 строк при лимите 300                                                                                                                                                                                                                                                                                                            |
 
 ### Отклонения этапа 6
 
-| # | Что было задумано | Что на самом деле | Почему |
-|---|---|---|---|
-| O29 | `cmd.exe /C ""bat" > "log" 2>&1"` | **`/d /s /c`** | **Без `/s` cmd применяет эвристику к кавычкам и портит команду: процесс создаётся, PID возвращается, а лог остаётся пустым (0 байт).** Это главный баг этапа, найден только запуском. `/d` отключает AutoRun-команды |
-| O30 | `ShellExecuteEx` внутри async-команды | обёрнут в `tokio::task::spawn_blocking` | `ShellExecuteExW` с `runas` — **блокирующий** вызов: он висит до ответа UAC. В async-контексте он встал бы воркер tokio |
-| O31 | константы `SEE_MASK_*`, `SW_HIDE`, `STILL_ACTIVE` из winapi | локальные константы с теми же значениями | В winapi 0.3.9 эти константы лежат не в `um::winbase`, а в других модулях; локальные константы надёжнее и читаемее |
-| O32 | `ProcessManager` хранит `isize` и закрывает handle вручную | `OwnedProcessHandle` с `impl Drop` | Согласуется с решением **D8**: handle закрывается автоматически, `TerminateProcess` получает живой handle, утечек нет |
-| O33 | `useProcessWatcher()` сам вызывает `useStrategyRunner()` | принимает `checkStatus` параметром | Иначе создаётся **второй экземпляр** хука с дублем слушателей `strategy-log` / `started` / `stopped` — логи задваивались бы |
-| O36 | всё в одном `commands/runner.rs` | разделено на `runner.rs` (команды, 295 строк), `log_reader.rs` (парсинг и tail логов) и `winws.rs` (поиск и убийство `winws.exe`) | Файл вырос до 490 строк при лимите 300 |
+| #   | Что было задумано                                           | Что на самом деле                                                                                                                 | Почему                                                                                                                                                                                                               |
+| --- | ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| O29 | `cmd.exe /C ""bat" > "log" 2>&1"`                           | **`/d /s /c`**                                                                                                                    | **Без `/s` cmd применяет эвристику к кавычкам и портит команду: процесс создаётся, PID возвращается, а лог остаётся пустым (0 байт).** Это главный баг этапа, найден только запуском. `/d` отключает AutoRun-команды |
+| O30 | `ShellExecuteEx` внутри async-команды                       | обёрнут в `tokio::task::spawn_blocking`                                                                                           | `ShellExecuteExW` с `runas` — **блокирующий** вызов: он висит до ответа UAC. В async-контексте он встал бы воркер tokio                                                                                              |
+| O31 | константы `SEE_MASK_*`, `SW_HIDE`, `STILL_ACTIVE` из winapi | локальные константы с теми же значениями                                                                                          | В winapi 0.3.9 эти константы лежат не в `um::winbase`, а в других модулях; локальные константы надёжнее и читаемее                                                                                                   |
+| O32 | `ProcessManager` хранит `isize` и закрывает handle вручную  | `OwnedProcessHandle` с `impl Drop`                                                                                                | Согласуется с решением **D8**: handle закрывается автоматически, `TerminateProcess` получает живой handle, утечек нет                                                                                                |
+| O33 | `useProcessWatcher()` сам вызывает `useStrategyRunner()`    | принимает `checkStatus` параметром                                                                                                | Иначе создаётся **второй экземпляр** хука с дублем слушателей `strategy-log` / `started` / `stopped` — логи задваивались бы                                                                                          |
+| O36 | всё в одном `commands/runner.rs`                            | разделено на `runner.rs` (команды, 295 строк), `log_reader.rs` (парсинг и tail логов) и `winws.rs` (поиск и убийство `winws.exe`) | Файл вырос до 490 строк при лимите 300                                                                                                                                                                               |
 
 ### Два бага во фронтенде, найденные только живым запуском
 
-| # | Симптом | Причина | Исправление |
-|---|---|---|---|
+| #   | Симптом                                                                          | Причина                                                                                                                                                             | Исправление                                                                                             |
+| --- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
 | O34 | после успешного запуска статус оставался «Не запущена», хотя PID уже показывался | `setError(id, undefined)` в сторе **сбрасывал статус в `idle`**, а `run()` вызывал его, чтобы очистить прошлую ошибку — только что выставленный `running` затирался | `setError(undefined)` теперь только чистит сообщение и не трогает статус; лишний вызов из `run()` убран |
-| O35 | лог стратегии оставался 0 байт | см. O29 | `/d /s /c` |
+| O35 | лог стратегии оставался 0 байт                                                   | см. O29                                                                                                                                                             | `/d /s /c`                                                                                              |
 
 ### Кириллица в .bat — ловушка Windows
 
@@ -361,16 +369,16 @@ ASCII-only `.bat`. Реальные стратегии zapret кириллицы
 Запуск проверялся на **безобидном** ASCII-only `.bat` во временной папке,
 который не запускает `winws.exe` и не трогает сеть:
 
-| Проверка | Результат |
-|---|---|
-| `ShellExecuteExW` + `runas` | PID получен, cmd запущен |
-| Перенаправление вывода | лог 88 байт, строки читаются |
-| Tail лога и события | строки доходят до фронтенда |
-| Состояние «Не запущена» | серая плашка + зелёная кнопка Play |
-| Состояние «Запущена» | зелёная плашка с точкой + красная Stop + PID 2088 |
-| Stop | «остановлена: Процессы winws.exe не найдены», плашка → «Не запущена», PID очищен |
-| Состояние «Ошибка» | красная плашка + «Процесс неожиданно завершился» + RefreshCw |
-| `on_window_event(CloseRequested)` | `Закрытие окна: процессов в менеджере 0, winws.exe 0` |
+| Проверка                          | Результат                                                                        |
+| --------------------------------- | -------------------------------------------------------------------------------- |
+| `ShellExecuteExW` + `runas`       | PID получен, cmd запущен                                                         |
+| Перенаправление вывода            | лог 88 байт, строки читаются                                                     |
+| Tail лога и события               | строки доходят до фронтенда                                                      |
+| Состояние «Не запущена»           | серая плашка + зелёная кнопка Play                                               |
+| Состояние «Запущена»              | зелёная плашка с точкой + красная Stop + PID 2088                                |
+| Stop                              | «остановлена: Процессы winws.exe не найдены», плашка → «Не запущена», PID очищен |
+| Состояние «Ошибка»                | красная плашка + «Процесс неожиданно завершился» + RefreshCw                     |
+| `on_window_event(CloseRequested)` | `Закрытие окна: процессов в менеджере 0, winws.exe 0`                            |
 
 **Не проверено:** реальный `taskkill` по живым `winws.exe` и работа с
 настоящими стратегиями zapret — `winws.exe` не запускался, иначе изменился бы
@@ -406,32 +414,32 @@ Runtime-CDN не используется.
 
 ## 9. Статус этапов
 
-| Этап | Название | Статус |
-|---|---|---|
-| 0 | Концепция и анализ | ✅ готово 2026-10-05 |
-| 1 | Стек и инициализация | ✅ готово 2026-10-05 |
-| 2 | Структура и Layout | ✅ готово 2026-10-05 |
-| 3 | Дизайн-система | ✅ готово 2026-10-05 |
-| 4 | Типы и сторы | ✅ готово 2026-10-05 |
-| 5 | Rust: сканер .bat | ✅ готово 2026-10-06 |
-| 6 | Rust: запуск .bat с UAC | ✅ готово 2026-10-06 |
-| 7 | Страница Logs | ✅ готово 2026-10-06 |
-| 8 | Инъекция Outlast Trials | ✅ готово 2026-10-06 |
-| 9 | Dashboard | ✅ готово 2026-10-06 |
-| 10 | Игра в стратегий | ✅ готово 2026-10-06 |
-| 11 | Визуализатор трафика | ✅ готово 2026-10-06 |
-| 12 | Обновления через GitHub | ✅ готово 2026-10-06 |
-| 13 | Настройки | ✅ готово 2026-10-06 |
-| 14 | Переключение DPI ↔ VPN | ✅ готово 2026-10-06 |
-| 15 | Системный трей | ✅ готово 2026-10-06 |
-| 16 | Бандлинг ресурсов | ✅ готово 2026-10-06 |
-| 17 | NSIS-установщик | ✅ готово 2026-10-07 |
-| 18 | Postprocessing | ✅ готово 2026-10-07 |
-| 19 | Адаптивность и DPI | ✅ готово 2026-10-07 |
-| 20 | Оптимизация | ✅ готово 2026-10-07 |
-| 21 | Безопасность | ✅ готово 2026-10-07 |
-| 22 | Тесты и аудит | ⬜ |
-| 23 | Деплой и релиз | ⬜ |
+| Этап | Название                | Статус               |
+| ---- | ----------------------- | -------------------- |
+| 0    | Концепция и анализ      | ✅ готово 2026-10-05 |
+| 1    | Стек и инициализация    | ✅ готово 2026-10-05 |
+| 2    | Структура и Layout      | ✅ готово 2026-10-05 |
+| 3    | Дизайн-система          | ✅ готово 2026-10-05 |
+| 4    | Типы и сторы            | ✅ готово 2026-10-05 |
+| 5    | Rust: сканер .bat       | ✅ готово 2026-10-06 |
+| 6    | Rust: запуск .bat с UAC | ✅ готово 2026-10-06 |
+| 7    | Страница Logs           | ✅ готово 2026-10-06 |
+| 8    | Инъекция Outlast Trials | ✅ готово 2026-10-06 |
+| 9    | Dashboard               | ✅ готово 2026-10-06 |
+| 10   | Игра в стратегий        | ✅ готово 2026-10-06 |
+| 11   | Визуализатор трафика    | ✅ готово 2026-10-06 |
+| 12   | Обновления через GitHub | ✅ готово 2026-10-06 |
+| 13   | Настройки               | ✅ готово 2026-10-06 |
+| 14   | Переключение DPI ↔ VPN  | ✅ готово 2026-10-06 |
+| 15   | Системный трей          | ✅ готово 2026-10-06 |
+| 16   | Бандлинг ресурсов       | ✅ готово 2026-10-06 |
+| 17   | NSIS-установщик         | ✅ готово 2026-10-07 |
+| 18   | Postprocessing          | ✅ готово 2026-10-07 |
+| 19   | Адаптивность и DPI      | ✅ готово 2026-10-07 |
+| 20   | Оптимизация             | ✅ готово 2026-10-07 |
+| 21   | Безопасность            | ✅ готово 2026-10-07 |
+| 22   | Тесты и аудит           | ⬜                   |
+| 23   | Деплой и релиз          | ⬜                   |
 
 ---
 
@@ -510,13 +518,13 @@ zapret-manager\
 
 ### Сторы и что где живёт (этап 4)
 
-| стор | persist | middleware | смысл |
-|---|---|---|---|
-| `useAppStore` | да (`app`) | — | страница, sidebar, тема, язык |
-| `useSettingsStore` | да (`settings`) | Immer | настройки; продублированы в `config.json` |
-| `useStrategiesStore` | **нет** | Immer | результат сканирования `.bat`, не переживает перезапуск |
-| `useLogsStore` | **нет** | Immer | буфер 10 000 записей, батчинг 100 мс / 50 записей |
-| `useVpnStore` | **нет** | Immer | рантайм-состояние VPN |
+| стор                 | persist         | middleware | смысл                                                   |
+| -------------------- | --------------- | ---------- | ------------------------------------------------------- |
+| `useAppStore`        | да (`app`)      | —          | страница, sidebar, тема, язык                           |
+| `useSettingsStore`   | да (`settings`) | Immer      | настройки; продублированы в `config.json`               |
+| `useStrategiesStore` | **нет**         | Immer      | результат сканирования `.bat`, не переживает перезапуск |
+| `useLogsStore`       | **нет**         | Immer      | буфер 10 000 записей, батчинг 100 мс / 50 записей       |
+| `useVpnStore`        | **нет**         | Immer      | рантайм-состояние VPN                                   |
 
 `connectionStatus` убран из `useAppStore` — он теперь вычисляется в
 `stores/selectors/index.ts` из `useStrategiesStore` + `useVpnStore`.
@@ -526,6 +534,7 @@ zapret-manager\
 ### Синхронизация настроек
 
 `useSettingsSync()` (вызывается в `App.tsx`):
+
 1. при монтировании читает `%APPDATA%\ZapretManager\config.json`
    через `@tauri-apps/plugin-fs`, при отсутствии файла остаются дефолты;
 2. любое изменение `settings` ставит debounce 500 мс и пишет файл;
@@ -544,14 +553,14 @@ zapret-manager\
 
 ### Бандл после этапа 3
 
-| чанк | размер |
-|---|---|
-| react-vendor | 212 КБ |
-| motion (framer) | 138 КБ |
+| чанк                        | размер |
+| --------------------------- | ------ |
+| react-vendor                | 212 КБ |
+| motion (framer)             | 138 КБ |
 | index (весь код приложения) | 115 КБ |
-| stores | 2.7 КБ |
-| CSS | 35 КБ |
-| весь `dist` | 1.3 МБ |
+| stores                      | 2.7 КБ |
+| CSS                         | 35 КБ  |
+| весь `dist`                 | 1.3 МБ |
 
 ### Навигация и состояние (этап 2)
 
@@ -565,79 +574,79 @@ zapret-manager\
 
 Всё ниже проверено реальными кликами и скриншотами, не только сборкой:
 
-| Сценарий | Результат |
-|---|---|
-| Переключение страниц | активный индикатор переезжает, контент меняется |
-| Collapse Sidebar | 240 → 72px, подписи исчезают, шеврон разворачивается |
-| Тултип в collapsed | «Стратегии» появляется справа от иконки |
-| Maximize | 1296 → 2576 (монитор 2576×1440), `IsZoomed = true` |
-| Restore | иконка меняется Square → Copy и обратно, 2576 → 1296 |
-| Minimize | окно сворачивается |
-| Close | процесс завершается |
-| Persist | после перезапуска Sidebar свёрнут, активна «Логи» |
-| RAM | 35 МБ (лимит 150 МБ) |
+| Сценарий             | Результат                                            |
+| -------------------- | ---------------------------------------------------- |
+| Переключение страниц | активный индикатор переезжает, контент меняется      |
+| Collapse Sidebar     | 240 → 72px, подписи исчезают, шеврон разворачивается |
+| Тултип в collapsed   | «Стратегии» появляется справа от иконки              |
+| Maximize             | 1296 → 2576 (монитор 2576×1440), `IsZoomed = true`   |
+| Restore              | иконка меняется Square → Copy и обратно, 2576 → 1296 |
+| Minimize             | окно сворачивается                                   |
+| Close                | процесс завершается                                  |
+| Persist              | после перезапуска Sidebar свёрнут, активна «Логи»    |
+| RAM                  | 35 МБ (лимит 150 МБ)                                 |
 
 ### Проверенные вручную сценарии этапа 3
 
 Все компоненты сняты скриншотами на странице «О приложении»:
 
-| Сценарий | Результат |
-|---|---|
-| Button | 4 варианта × 4 размера, glow у primary, loading/disabled |
-| Card | 3 варианта, интерактивная считает клики |
-| Input | default/filled, иконка, ошибка, подсказка, disabled, 3 размера |
-| Toggle | sm/md/lg + disabled, thumb переезжает |
-| Badge | 6 вариантов с точкой + 6 с пульсацией |
-| Skeleton | text/circle/rect, shimmer |
-| Spinner | sm/md/lg |
-| Modal | portal в body, backdrop с blur, фокус на первом элементе, Escape закрывает |
-| Tooltip | 4 стороны, позиция через `getBoundingClientRect` |
-| Heading/Text | 6 уровней, 4 варианта текста, mono |
-| BrandIcon | Discord, YouTube, Steam, GitHub, BattlEye |
-| FlagIcon | 12 круглых флагов |
+| Сценарий     | Результат                                                                  |
+| ------------ | -------------------------------------------------------------------------- |
+| Button       | 4 варианта × 4 размера, glow у primary, loading/disabled                   |
+| Card         | 3 варианта, интерактивная считает клики                                    |
+| Input        | default/filled, иконка, ошибка, подсказка, disabled, 3 размера             |
+| Toggle       | sm/md/lg + disabled, thumb переезжает                                      |
+| Badge        | 6 вариантов с точкой + 6 с пульсацией                                      |
+| Skeleton     | text/circle/rect, shimmer                                                  |
+| Spinner      | sm/md/lg                                                                   |
+| Modal        | portal в body, backdrop с blur, фокус на первом элементе, Escape закрывает |
+| Tooltip      | 4 стороны, позиция через `getBoundingClientRect`                           |
+| Heading/Text | 6 уровней, 4 варианта текста, mono                                         |
+| BrandIcon    | Discord, YouTube, Steam, GitHub, BattlEye                                  |
+| FlagIcon     | 12 круглых флагов                                                          |
 
 RAM 35 МБ, `dist` 1.3 МБ, главный чанк 115 КБ.
 
 ### Проверенные вручную сценарии этапа 4
 
-| Сценарий | Результат |
-|---|---|
-| «Загрузить моки» | Стратегий 6, Логов 200, Ошибок 12 |
-| `useConnectionStatus` | «Подключено» — выведено из стратегии в `running`, точка в Sidebar стала зелёной |
-| 10 × «Сгенерировать 1000 логов» | Логов **10 000** — буфер обрезан, старые вытеснены |
-| Ошибок на 10 000 | 543 (около 5% — совпадает с генератором) |
-| RAM при 10 000 логов | дельта ≈13 МБ (1.3 КБ на запись), главный процесс 35 МБ |
+| Сценарий                        | Результат                                                                       |
+| ------------------------------- | ------------------------------------------------------------------------------- |
+| «Загрузить моки»                | Стратегий 6, Логов 200, Ошибок 12                                               |
+| `useConnectionStatus`           | «Подключено» — выведено из стратегии в `running`, точка в Sidebar стала зелёной |
+| 10 × «Сгенерировать 1000 логов» | Логов **10 000** — буфер обрезан, старые вытеснены                              |
+| Ошибок на 10 000                | 543 (около 5% — совпадает с генератором)                                        |
+| RAM при 10 000 логов            | дельта ≈13 МБ (1.3 КБ на запись), главный процесс 35 МБ                         |
 
 ### Проверенные вручную сценарии этапа 7
 
 Все проверки — на живом `tauri dev`, логи через мок-панель «О приложении».
 
-| Сценарий | Результат |
-|---|---|
-| Пустая страница Logs | «Логи пусты», кнопки «Экспорт» и «Очистить» задизейблены |
-| 10 × «Сгенерировать 1000 логов» | **10 000 записей**, RAM 36 МБ (лимит 250 МБ) |
-| Счётчики в фильтрах | отладка 212, инфо 7867, успешно 1009, предупреждение 437, ошибка 475; система 2475, стратегия 2570, пользователь 2424, VPN 2531 |
-| Разметка строки | timestamp, уровень цветом, источник, сообщение; зебра, моноширинный, ellipsis |
-| Фильтр по уровню «ошибка» | осталось только `error`, бейдж «0 из 10000» |
-| Поиск «winws» | 1857 из 10000, **подсветка `<mark>`** жёлтым, регистронезависимо |
-| Пустой результат фильтра | «Ничего не найдено» + кнопка «Сбросить фильтры» |
-| Сброс фильтров | все уровни и источники снова активны |
-| Клик по строке | toast «Строка скопирована», в буфере `[01:47:02.650] [INFO] [vpn] Winws запущен в режиме auto` |
-| Прокрутка вверх колесом | автоскролл **сам выключился**, появилась кнопка «Вниз» |
-| Клик «Вниз» | автоскролл включился, кнопка исчезла, список внизу |
-| «Очистить» | модальный диалог со счётом записей; «Отмена» не удаляет |
-| «Экспорт» при активном поиске | `zapret-logs-2026-10-06-01-50.txt`, 141 783 байт, **только отфильтрованные строки** |
-| Формат экспорта | `[01:47:04.842] [INFO] [user] Winws запущен в режиме auto`, UTF-8 без BOM |
-| Toast экспорта | «Экспортировано 141783 байт» |
+| Сценарий                        | Результат                                                                                                                       |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| Пустая страница Logs            | «Логи пусты», кнопки «Экспорт» и «Очистить» задизейблены                                                                        |
+| 10 × «Сгенерировать 1000 логов» | **10 000 записей**, RAM 36 МБ (лимит 250 МБ)                                                                                    |
+| Счётчики в фильтрах             | отладка 212, инфо 7867, успешно 1009, предупреждение 437, ошибка 475; система 2475, стратегия 2570, пользователь 2424, VPN 2531 |
+| Разметка строки                 | timestamp, уровень цветом, источник, сообщение; зебра, моноширинный, ellipsis                                                   |
+| Фильтр по уровню «ошибка»       | осталось только `error`, бейдж «0 из 10000»                                                                                     |
+| Поиск «winws»                   | 1857 из 10000, **подсветка `<mark>`** жёлтым, регистронезависимо                                                                |
+| Пустой результат фильтра        | «Ничего не найдено» + кнопка «Сбросить фильтры»                                                                                 |
+| Сброс фильтров                  | все уровни и источники снова активны                                                                                            |
+| Клик по строке                  | toast «Строка скопирована», в буфере `[01:47:02.650] [INFO] [vpn] Winws запущен в режиме auto`                                  |
+| Прокрутка вверх колесом         | автоскролл **сам выключился**, появилась кнопка «Вниз»                                                                          |
+| Клик «Вниз»                     | автоскролл включился, кнопка исчезла, список внизу                                                                              |
+| «Очистить»                      | модальный диалог со счётом записей; «Отмена» не удаляет                                                                         |
+| «Экспорт» при активном поиске   | `zapret-logs-2026-10-06-01-50.txt`, 141 783 байт, **только отфильтрованные строки**                                             |
+| Формат экспорта                 | `[01:47:04.842] [INFO] [user] Winws запущен в режиме auto`, UTF-8 без BOM                                                       |
+| Toast экспорта                  | «Экспортировано 141783 байт»                                                                                                    |
 
 ### Отклонения этапа 7
 
-| # | Что было задумано | Что на самом деле | Почему |
-|---|---|---|---|
-| O37 | экспорт через `fs.writeTextFile` из WebView | `dialog.save` для пути + Rust-команда `write_log_export` | capability `fs:scope-app` разрешает запись только в каталоги приложения. Сохранение в «Документы» или на рабочий стол webview-командой отклоняется. Плюс не нужно расширять права webview на весь диск |
-| O38 | `window.confirm` для подтверждения очистки | `Modal` + `ClearLogsDialog` | **В WebView2 диалог `window.confirm` не показывается и всегда возвращает `true`** — то есть подтверждения фактически нет, пользователь не может отменить. Найдено запуском: логи стирались сразу по клику |
-| O39 | ширины колонок через `grid-cols-[86px_58px_74px_1fr]` | flex с inline-ширинами констант | см. O40. Заодно ушла зависимость от генерации произвольных классов |
-| O40 | — | **`logs` → `/logs` в `.gitignore`** | **Tailwind v4 уважает `.gitignore`. Паттерн `logs` совпадал с папкой `src/components/logs/` и исключал её из сканирования — ни один класс оттуда не попадал в CSS.** Страница выглядела сломанной: колонки схлопнулись, `text-left` не применялся. Лечится одним символом `/` |
+| #   | Что было задумано                                     | Что на самом деле                                        | Почему                                                                                                                                                                                                                                                                        |
+| --- | ----------------------------------------------------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| O37 | экспорт через `fs.writeTextFile` из WebView           | `dialog.save` для пути + Rust-команда `write_log_export` | capability `fs:scope-app` разрешает запись только в каталоги приложения. Сохранение в «Документы» или на рабочий стол webview-командой отклоняется. Плюс не нужно расширять права webview на весь диск                                                                        |
+| O38 | `window.confirm` для подтверждения очистки            | `Modal` + `ClearLogsDialog`                              | **В WebView2 диалог `window.confirm` не показывается и всегда возвращает `true`** — то есть подтверждения фактически нет, пользователь не может отменить. Найдено запуском: логи стирались сразу по клику                                                                     |
+| O39 | ширины колонок через `grid-cols-[86px_58px_74px_1fr]` | flex с inline-ширинами констант                          | см. O40. Заодно ушла зависимость от генерации произвольных классов                                                                                                                                                                                                            |
+| O40 | —                                                     | **`logs` → `/logs` в `.gitignore`**                      | **Tailwind v4 уважает `.gitignore`. Паттерн `logs` совпадал с папкой `src/components/logs/` и исключал её из сканирования — ни один класс оттуда не попадал в CSS.** Страница выглядела сломанной: колонки схлопнулись, `text-left` не применялся. Лечится одним символом `/` |
 
 Главная находка этапа — **O40**. Проверять скомпилированный CSS нужно по
 конкретному классу, а не по факту «страница выглядит нормально»: визуально
@@ -649,32 +658,32 @@ Tailwind-утилиты из непросканированной папки в�
 Инъекция проверена на временной тестовой папке с `.bat`, повторяющим
 `%LISTS%`-переменные и `^`-префиксы из настоящего архива.
 
-| Сценарий | Результат |
-|---|---|
-| Клик Play при `enabled` | 13 доменов добавлено в `list-general.txt`, секция между маркерами |
-| Формат секции | `# === ZAPRET MANAGER: OUTLAST TRIALS (start) ===`, метка времени, домены, `=== … (end) ===` |
-| Бэкап | `list-general.txt.bak.1791242527116` = 45 Б (исходник), `ipset-all.txt.bak.…` = 18 Б |
-| Инъекция в ipset | `8.8.8.0/24` добавлен в `ipset-all.txt` |
-| `ipset-exclude.txt` | **не тронут** — списки исключений не инъецируются |
-| `--hostlist-domains=discord.media` | **не тронут** — это inline-домен, а не файл |
-| `list-general-user.txt` | **не тронут** — сервис перезаписывает `-user` файлы |
-| Дефолтные домены | 13 шт. из `DEFAULT_OUTLAST_TRIALS` (Steam, Epic, BattlEye, GameLift, Red Barrels) |
-| UI секции настроек | 3 Toggle, 3 списка, импорт/экспорт/сброс, валидация |
-| Валидация | `not_a_domain!` отклонён, `STEAMPowered.com ` нормализован в `steampowered.com` |
-| Бейдж «+ Outlast» | на карточке стратегии, появляется при `enabled` |
-| Ротация бэкапов | 14 бэкапов → осталось 10 самых свежих |
-| Восстановление из пустого бэкапа | отказ, файл не тронут |
-| Повторная инъекция | дубликаты пропущены, второй маркер не создан |
+| Сценарий                           | Результат                                                                                    |
+| ---------------------------------- | -------------------------------------------------------------------------------------------- |
+| Клик Play при `enabled`            | 13 доменов добавлено в `list-general.txt`, секция между маркерами                            |
+| Формат секции                      | `# === ZAPRET MANAGER: OUTLAST TRIALS (start) ===`, метка времени, домены, `=== … (end) ===` |
+| Бэкап                              | `list-general.txt.bak.1791242527116` = 45 Б (исходник), `ipset-all.txt.bak.…` = 18 Б         |
+| Инъекция в ipset                   | `8.8.8.0/24` добавлен в `ipset-all.txt`                                                      |
+| `ipset-exclude.txt`                | **не тронут** — списки исключений не инъецируются                                            |
+| `--hostlist-domains=discord.media` | **не тронут** — это inline-домен, а не файл                                                  |
+| `list-general-user.txt`            | **не тронут** — сервис перезаписывает `-user` файлы                                          |
+| Дефолтные домены                   | 13 шт. из `DEFAULT_OUTLAST_TRIALS` (Steam, Epic, BattlEye, GameLift, Red Barrels)            |
+| UI секции настроек                 | 3 Toggle, 3 списка, импорт/экспорт/сброс, валидация                                          |
+| Валидация                          | `not_a_domain!` отклонён, `STEAMPowered.com ` нормализован в `steampowered.com`              |
+| Бейдж «+ Outlast»                  | на карточке стратегии, появляется при `enabled`                                              |
+| Ротация бэкапов                    | 14 бэкапов → осталось 10 самых свежих                                                        |
+| Восстановление из пустого бэкапа   | отказ, файл не тронут                                                                        |
+| Повторная инъекция                 | дубликаты пропущены, второй маркер не создан                                                 |
 
 ### Отклонения этапа 8
 
-| # | Что было задумано | Что на самом деле | Почему |
-|---|---|---|---|
-| O41 | регулярка `--hostlist(?:-domains)?=` | только `--hostlist=` и `--ipset=` | В реальных `.bat` есть `--hostlist-domains=discord.media` — это **inline-домен**, а не файл. Регулярка из спецификации сочла бы его путём и попыталась бы создать файл `discord.media`. Также исключены `--hostlist-exclude` / `--ipset-exclude` — это списки исключений, инъекция в них выключила бы домен |
-| O42 | инъековать в `list-general-user.txt` | пропускаются все `*-user.txt` | Их создаёт и перезаписывает `service.bat load_user_lists` при каждом запуске стратегии. Инъекция была бы стёрта через секунду |
-| O43 | порты пишутся в конфиги | только валидируются и логируются как неприменённые | winws берёт порты из `--filter-tcp` в `.bat`, а `.bat` менять запрещено. В `list-*.txt` портов нет вовсе. UI честно предупреждает об этом |
-| O44 | `path.resolve()` для относительных путей | переиспользован `bat_env::resolve_path` | Пути в `.bat` идут через переменные: `set "LISTS=%~dp0lists\"` и `--hostlist="%LISTS%list-general.txt"`. Написанный с нуля резолвер не знал бы про `%~dp0`. Решение D1 прямо предписывало переиспользовать `bat_env` |
-| O45 | один `injector.rs` | разделено на `injector.rs` (команды), `injector_core.rs` (валидация, пути), `injector_text.rs` (маркеры, дедуп), `injector_backup.rs` (бэкапы) | Монолит дорос до 391 строки при лимите 300 |
+| #   | Что было задумано                        | Что на самом деле                                                                                                                              | Почему                                                                                                                                                                                                                                                                                                      |
+| --- | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| O41 | регулярка `--hostlist(?:-domains)?=`     | только `--hostlist=` и `--ipset=`                                                                                                              | В реальных `.bat` есть `--hostlist-domains=discord.media` — это **inline-домен**, а не файл. Регулярка из спецификации сочла бы его путём и попыталась бы создать файл `discord.media`. Также исключены `--hostlist-exclude` / `--ipset-exclude` — это списки исключений, инъекция в них выключила бы домен |
+| O42 | инъековать в `list-general-user.txt`     | пропускаются все `*-user.txt`                                                                                                                  | Их создаёт и перезаписывает `service.bat load_user_lists` при каждом запуске стратегии. Инъекция была бы стёрта через секунду                                                                                                                                                                               |
+| O43 | порты пишутся в конфиги                  | только валидируются и логируются как неприменённые                                                                                             | winws берёт порты из `--filter-tcp` в `.bat`, а `.bat` менять запрещено. В `list-*.txt` портов нет вовсе. UI честно предупреждает об этом                                                                                                                                                                   |
+| O44 | `path.resolve()` для относительных путей | переиспользован `bat_env::resolve_path`                                                                                                        | Пути в `.bat` идут через переменные: `set "LISTS=%~dp0lists\"` и `--hostlist="%LISTS%list-general.txt"`. Написанный с нуля резолвер не знал бы про `%~dp0`. Решение D1 прямо предписывало переиспользовать `bat_env`                                                                                        |
+| O45 | один `injector.rs`                       | разделено на `injector.rs` (команды), `injector_core.rs` (валидация, пути), `injector_text.rs` (маркеры, дедуп), `injector_backup.rs` (бэкапы) | Монолит дорос до 391 строки при лимите 300                                                                                                                                                                                                                                                                  |
 
 Префикс `^` в существующих списках — синтаксис zapret для «обязательный
 хост», а не часть домена. `normalize_domain` срезает его перед сравнением,
@@ -685,37 +694,37 @@ Tailwind-утилиты из непросканированной папки в�
 
 ### Проверенные вручную сценарии этапа 9
 
-| Сценарий | Результат |
-|---|---|
-| Greeting | «Доброй ночи» в 02:42 по локальному времени |
-| Hero в покое | серый orb `WifiOff`, бейдж «Отключено», кнопка «Подключиться» |
-| Метрики | Всего стратегий, Активных, Ошибок за сессию, Время работы |
-| IP через ipwho.is | **провайдер недоступен с этой машины** — см. O46 |
-| IP через freeipapi | 79.139.162.72, Russian Federation, Moscow, «PJSC Moscow city telephone network» |
-| Флаг страны | круглый SVG `ru.svg` с обводкой в палитре, не буквы «RU» |
-| Пинг Discord | 24–27 мс, спарклайн зелёный |
-| Пинг YouTube | 22–33 мс, спарклайн зелёный |
-| Пинг Google | 20–26 мс, спарклайн зелёный |
-| История пинга | 30 точек, окно ~2.5 минуты, линия обновляется каждые 5 с |
-| Запуск стратегии | orb стал зелёным с пульсацией, щит, бейдж «Подключено», кнопка «Отключить» |
-| Uptime | тикает раз в секунду: 00:00:01 → 00:00:52 |
-| Активных | счётчик стал 1, «Всего стратегий» 1 |
-| Последние события | WARN/INFO строки стратегии, новые сверху |
-| Кнопка «Продолжить» | имя стратегии подставляется, запуск с Dashboard |
-| Остановка | orb серый, кнопка «Подключиться», `winws.exe: 0` |
-| VPN toggle | индикатор переезжает на «VPN», подпись меняется |
-| «Все логи» | переход на страницу Logs |
-| RAM | 38 МБ (лимит 250 МБ) |
+| Сценарий            | Результат                                                                       |
+| ------------------- | ------------------------------------------------------------------------------- |
+| Greeting            | «Доброй ночи» в 02:42 по локальному времени                                     |
+| Hero в покое        | серый orb `WifiOff`, бейдж «Отключено», кнопка «Подключиться»                   |
+| Метрики             | Всего стратегий, Активных, Ошибок за сессию, Время работы                       |
+| IP через ipwho.is   | **провайдер недоступен с этой машины** — см. O46                                |
+| IP через freeipapi  | 79.139.162.72, Russian Federation, Moscow, «PJSC Moscow city telephone network» |
+| Флаг страны         | круглый SVG `ru.svg` с обводкой в палитре, не буквы «RU»                        |
+| Пинг Discord        | 24–27 мс, спарклайн зелёный                                                     |
+| Пинг YouTube        | 22–33 мс, спарклайн зелёный                                                     |
+| Пинг Google         | 20–26 мс, спарклайн зелёный                                                     |
+| История пинга       | 30 точек, окно ~2.5 минуты, линия обновляется каждые 5 с                        |
+| Запуск стратегии    | orb стал зелёным с пульсацией, щит, бейдж «Подключено», кнопка «Отключить»      |
+| Uptime              | тикает раз в секунду: 00:00:01 → 00:00:52                                       |
+| Активных            | счётчик стал 1, «Всего стратегий» 1                                             |
+| Последние события   | WARN/INFO строки стратегии, новые сверху                                        |
+| Кнопка «Продолжить» | имя стратегии подставляется, запуск с Dashboard                                 |
+| Остановка           | orb серый, кнопка «Подключиться», `winws.exe: 0`                                |
+| VPN toggle          | индикатор переезжает на «VPN», подпись меняется                                 |
+| «Все логи»          | переход на страницу Logs                                                        |
+| RAM                 | 38 МБ (лимит 250 МБ)                                                            |
 
 ### Отклонения этапа 9
 
-| # | Что было задумано | Что на самом деле | Почему |
-|---|---|---|---|
-| O46 | два провайдера: `ipwho.is`, затем `ipapi.co` | **три: `ipwho.is` → `freeipapi.com` → `ipapi.co`** | **С этой машины `ipwho.is` и `ipapi.co` не отвечают: DNS резолвит, TCP 443 соединяется, но TLS-хендшейк зависает до таймаута.** `curl` при этом работает — проблема в клиенте, а не в сети. Проверено отдельным бинарником: `reqwest` получает `TimedOut` на обоих. Добавлен `freeipapi.com` — он отвечает и отдаёт все нужные поля |
-| O47 | `AbortController` для отмены fetch | флаг `mounted` + проверка перед `setState` | Запрос идёт через `invoke` в Rust, а не через `fetch` из webview — отменять нечего. Тот же паттерн защищает от обновления состояния после размонтирования |
-| O48 | `useEffect` с `[]` для первого запроса | флаг `firstRun` внутри эффекта | React 19 + eslint-plugin-react-hooks запрещает синхронный `setState` в теле эффекта (`react-hooks/set-state-in-effect`). Первичная загрузка выполняется в том же эффекте, но через `void load(...)`, который обновляет состояние уже в промиссе. Интервал ставится со второго прохода |
-| O49 | uptime на основе поля `startedAt` у стратегии | используется существующее `Strategy.lastRun` | В типе `Strategy` поля `startedAt` нет, а добавлять его ради одного экрана — лишнее дублирование `lastRun`. Добавлен селектор `useRunningStartedAt` |
-| O50 | статус `error` в `CONNECTION_STATUS` не предусмотрен | **добавлен пятый статус** | Спецификация требует иконку и цвет для Error, но `ConnectionStatus` содержал только четыре значения. Добавлен `error` с красным orb и `TriangleAlert`; `Sidebar` дополнен соответствующими классами точки и текста |
+| #   | Что было задумано                                    | Что на самом деле                                  | Почему                                                                                                                                                                                                                                                                                                                              |
+| --- | ---------------------------------------------------- | -------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| O46 | два провайдера: `ipwho.is`, затем `ipapi.co`         | **три: `ipwho.is` → `freeipapi.com` → `ipapi.co`** | **С этой машины `ipwho.is` и `ipapi.co` не отвечают: DNS резолвит, TCP 443 соединяется, но TLS-хендшейк зависает до таймаута.** `curl` при этом работает — проблема в клиенте, а не в сети. Проверено отдельным бинарником: `reqwest` получает `TimedOut` на обоих. Добавлен `freeipapi.com` — он отвечает и отдаёт все нужные поля |
+| O47 | `AbortController` для отмены fetch                   | флаг `mounted` + проверка перед `setState`         | Запрос идёт через `invoke` в Rust, а не через `fetch` из webview — отменять нечего. Тот же паттерн защищает от обновления состояния после размонтирования                                                                                                                                                                           |
+| O48 | `useEffect` с `[]` для первого запроса               | флаг `firstRun` внутри эффекта                     | React 19 + eslint-plugin-react-hooks запрещает синхронный `setState` в теле эффекта (`react-hooks/set-state-in-effect`). Первичная загрузка выполняется в том же эффекте, но через `void load(...)`, который обновляет состояние уже в промиссе. Интервал ставится со второго прохода                                               |
+| O49 | uptime на основе поля `startedAt` у стратегии        | используется существующее `Strategy.lastRun`       | В типе `Strategy` поля `startedAt` нет, а добавлять его ради одного экрана — лишнее дублирование `lastRun`. Добавлен селектор `useRunningStartedAt`                                                                                                                                                                                 |
+| O50 | статус `error` в `CONNECTION_STATUS` не предусмотрен | **добавлен пятый статус**                          | Спецификация требует иконку и цвет для Error, но `ConnectionStatus` содержал только четыре значения. Добавлен `error` с красным orb и `TriangleAlert`; `Sidebar` дополнен соответствующими классами точки и текста                                                                                                                  |
 
 На заметку: первые два провайдера могут отвечать у пользователей и не отвечать
 у нас. Поэтому цепочка из трёх, а не два — осознанный компромисс: лишний
@@ -729,32 +738,32 @@ Tailwind-утилиты из непросканированной папки в�
 
 ### Что проверено запуском на этапе 10
 
-| Сценарий | Результат |
-|---|---|
-| Реальный архив, 22 стратегии | сетка 4×6, сводка 2 common / 10 rare / 6 epic / 4 legendary |
-| Переворот карты | обратная сторона: описание, тип, размер, дата, путь, кнопки |
-| Запуск с обратной стороны | «Запущена», зелёное свечение, `winws.exe: 1`, точка в трее зелёная |
-| Остановка с обратной стороны | кнопка «Запустить», `winws.exe: 0` |
-| Сортировка «Редкость ↓» | легендарные первыми: 14, 14, 13, затем 11 |
-| Сортировка «Редкость ↑» | обычные первыми: 8, 4, 4, 3, 2, 1 |
-| Фильтр по сервису | 2 карты из 60, кнопка «Сбросить фильтры» появляется |
-| Бейдж «+ Outlast» | на всех карточках при включённой инъекции; редкость пересчиталась |
-| Persist | режим, сортировка и фильтры пережили перезапуск приложения |
-| Песочница, 60 стратегий | RAM 45 МБ, счётчики 3 / 0 / 1 / 56 совпали с формулой |
-| Два запуска подряд | 0 → 1 → 0, логи runner без ошибок |
-| Tilt и частицы | проверены временным снятием галочки reduced-motion, затем возврат |
-| Проверки | tsc 0, eslint 0, prettier 0, build 0, 93/93 Rust-теста |
+| Сценарий                     | Результат                                                          |
+| ---------------------------- | ------------------------------------------------------------------ |
+| Реальный архив, 22 стратегии | сетка 4×6, сводка 2 common / 10 rare / 6 epic / 4 legendary        |
+| Переворот карты              | обратная сторона: описание, тип, размер, дата, путь, кнопки        |
+| Запуск с обратной стороны    | «Запущена», зелёное свечение, `winws.exe: 1`, точка в трее зелёная |
+| Остановка с обратной стороны | кнопка «Запустить», `winws.exe: 0`                                 |
+| Сортировка «Редкость ↓»      | легендарные первыми: 14, 14, 13, затем 11                          |
+| Сортировка «Редкость ↑»      | обычные первыми: 8, 4, 4, 3, 2, 1                                  |
+| Фильтр по сервису            | 2 карты из 60, кнопка «Сбросить фильтры» появляется                |
+| Бейдж «+ Outlast»            | на всех карточках при включённой инъекции; редкость пересчиталась  |
+| Persist                      | режим, сортировка и фильтры пережили перезапуск приложения         |
+| Песочница, 60 стратегий      | RAM 45 МБ, счётчики 3 / 0 / 1 / 56 совпали с формулой              |
+| Два запуска подряд           | 0 → 1 → 0, логи runner без ошибок                                  |
+| Tilt и частицы               | проверены временным снятием галочки reduced-motion, затем возврат  |
+| Проверки                     | tsc 0, eslint 0, prettier 0, build 0, 93/93 Rust-теста             |
 
 ### Отклонения этапа 10
 
-| # | Что было задумано | Что на самом деле | Почему |
-|---|---|---|---|
+| #   | Что было задумано                                                                                                                                                                                 | Что на самом деле                                                                                                                                                                                    | Почему                                                                                                                                                                                                                                                                                                                                             |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | O51 | формула редкости из четырёх булевых признаков: `+1` за ipset, `+1` за filter-l7, `+1` за fake-quic, `+1` за fake-tls, `+1` при ≥2 сервисах, `+1` при включённой инъекции; пороги 0-1 / 2 / 3 / 4+ | **взвешенная формула по техникам**: faketls, ipset, filter-l7, fake-quic — по 2 балла, остальные пять — по 1; `+1` за сервис outlast-trials, `+1` за включённую инъекцию; пороги <11 / 11 / 12 / 13+ | **На реальном архиве формула из спецификации не работала: 21 стратегия из 22 набирала 1 балл — 21 карта common и одна rare.** Причина в том, что у zapret-стратегий сервисы одинаковые (`general`), а различаются они только техниками. Новая формула даёт 2 / 10 / 6 / 4 — все четыре rare-класса представлены, порядок внутри класса осмысленный |
-| O52 | четыре фиксированных переключателя сервисов: Discord, YouTube, Outlast, General | **переключатели строятся из данных**: столько кнопок, сколько сервисов реально найдено сканером | Фиксированный список показывал бы пустые фильтры: в пользовательской папке может лежать пять стратегий General и ни одной Discord. Кнопка появляется, только когда сервис реально есть |
-| O53 | поиск по названию сохраняется вместе с фильтрами | **сохраняются режим, сортировка и фильтры; поиск — нет** | Поиск — это черновое состояние запроса, а не настройка. Возвращаться к нему после перезапуска неудобно: пользователь увидит пустую коллекцию и не поймёт, почему. Чек-лист требовал сохранить «фильтры» — они сохранены |
-| O54 | перевёрнутая карта закрывается кликом вне неё | **закрывается клавишей Escape** | Клик вне карты конфликтует с кнопками самой страницы: сортировкой, выбором папки и скроллом. Первый клик после переворота неизбежно уходил бы в элемент управления вместо закрытия карты. Escape не конфликтует ни с чем |
-| O55 | активная карта пульсирует: рамка `scale 1 → 1.02 → 1` за 2 секунды | **статичное зелёное свечение, бейдж «Запущена» и пульсирующая точка в бейдже** | Пульсация рамки требует анимации `scale` на самой карточке, а карточка уже несёт 3D-tilt и glow. Ещё одна анимация на 60 картах съедала бы кадры без заметной пользы. Точка в бейдже даёт тот же сигнал «идёт процесс» и уже покрыта глобальным правилом prefers-reduced-motion |
-| O56 | базовый режим сравнения двух карт и звуки | **отложены на этап 18** | Спецификация сама помечает оба пункта как опциональные и разрешает перенос на этап 18 «Полировка». Реализация сравнения — это отдельная модалка с таблицей; делать её наспех в том же этапе опаснее, чем отложить |
+| O52 | четыре фиксированных переключателя сервисов: Discord, YouTube, Outlast, General                                                                                                                   | **переключатели строятся из данных**: столько кнопок, сколько сервисов реально найдено сканером                                                                                                      | Фиксированный список показывал бы пустые фильтры: в пользовательской папке может лежать пять стратегий General и ни одной Discord. Кнопка появляется, только когда сервис реально есть                                                                                                                                                             |
+| O53 | поиск по названию сохраняется вместе с фильтрами                                                                                                                                                  | **сохраняются режим, сортировка и фильтры; поиск — нет**                                                                                                                                             | Поиск — это черновое состояние запроса, а не настройка. Возвращаться к нему после перезапуска неудобно: пользователь увидит пустую коллекцию и не поймёт, почему. Чек-лист требовал сохранить «фильтры» — они сохранены                                                                                                                            |
+| O54 | перевёрнутая карта закрывается кликом вне неё                                                                                                                                                     | **закрывается клавишей Escape**                                                                                                                                                                      | Клик вне карты конфликтует с кнопками самой страницы: сортировкой, выбором папки и скроллом. Первый клик после переворота неизбежно уходил бы в элемент управления вместо закрытия карты. Escape не конфликтует ни с чем                                                                                                                           |
+| O55 | активная карта пульсирует: рамка `scale 1 → 1.02 → 1` за 2 секунды                                                                                                                                | **статичное зелёное свечение, бейдж «Запущена» и пульсирующая точка в бейдже**                                                                                                                       | Пульсация рамки требует анимации `scale` на самой карточке, а карточка уже несёт 3D-tilt и glow. Ещё одна анимация на 60 картах съедала бы кадры без заметной пользы. Точка в бейдже даёт тот же сигнал «идёт процесс» и уже покрыта глобальным правилом prefers-reduced-motion                                                                    |
+| O56 | базовый режим сравнения двух карт и звуки                                                                                                                                                         | **отложены на этап 18**                                                                                                                                                                              | Спецификация сама помечает оба пункта как опциональные и разрешает перенос на этап 18 «Полировка». Реализация сравнения — это отдельная модалка с таблицей; делать её наспех в том же этапе опаснее, чем отложить                                                                                                                                  |
 
 Про `prefers-reduced-motion`: на этой машине системные анимации выключены
 (`HKCU\Control Panel\Desktop\WindowMetrics\MinAnimate = 0`), поэтому WebView2
@@ -767,45 +776,45 @@ Tailwind-утилиты из непросканированной папки в�
 
 ### Что проверено запуском на этапе 11
 
-| Сценарий | Результат |
-|---|---|
-| Пункт «Монитор» в меню | между «Стратегиями» и «Логами», страница открывается |
-| Счётчики | 1.26 ГБ / 9.29 ГБ / 9.04 млн пакетов / 51 соединение |
-| Соединения | 16 → 41 → 68 → 71 при нагрузке на сеть |
-| Пинг 4 сервисов | Discord, YouTube, Google, Outlast Trials — 21–38 мс |
-| Градация пинга | зелёный до 50 мс, жёлтый на 58 мс |
-| Скачивание 40 МБ | входящий 2.3 МБ/с, исходящий 41.2 КБ/с, графики с заливкой |
-| Автомасштаб | Y_max 3 554 020 на пике, плавный спад до 4096 после |
-| Пауза | график замер, бейдж «Пауза», подпись под канвасом |
-| Возобновление | график пошёл дальше, счётчики выросли |
-| Очистка | буфер сброшен, графики начались с нуля |
-| Снимок | системный диалог, PNG 68 033 байта, обе шкалы с заголовками |
-| Статус «Обход активен» | зелёный бейдж при запущенной стратегии |
-| Статус «Возможны проблемы» | жёлтый бейдж после 5 с без трафика |
-| Статус «Фоновый режим» | после остановки стратегии |
-| Нагрузка | RAM 47 МБ, 0.5 с процессорного времени за несколько минут |
-| Проверки | tsc 0, eslint 0, prettier 0, build 0, 117/117 Rust-теста |
+| Сценарий                   | Результат                                                   |
+| -------------------------- | ----------------------------------------------------------- |
+| Пункт «Монитор» в меню     | между «Стратегиями» и «Логами», страница открывается        |
+| Счётчики                   | 1.26 ГБ / 9.29 ГБ / 9.04 млн пакетов / 51 соединение        |
+| Соединения                 | 16 → 41 → 68 → 71 при нагрузке на сеть                      |
+| Пинг 4 сервисов            | Discord, YouTube, Google, Outlast Trials — 21–38 мс         |
+| Градация пинга             | зелёный до 50 мс, жёлтый на 58 мс                           |
+| Скачивание 40 МБ           | входящий 2.3 МБ/с, исходящий 41.2 КБ/с, графики с заливкой  |
+| Автомасштаб                | Y_max 3 554 020 на пике, плавный спад до 4096 после         |
+| Пауза                      | график замер, бейдж «Пауза», подпись под канвасом           |
+| Возобновление              | график пошёл дальше, счётчики выросли                       |
+| Очистка                    | буфер сброшен, графики начались с нуля                      |
+| Снимок                     | системный диалог, PNG 68 033 байта, обе шкалы с заголовками |
+| Статус «Обход активен»     | зелёный бейдж при запущенной стратегии                      |
+| Статус «Возможны проблемы» | жёлтый бейдж после 5 с без трафика                          |
+| Статус «Фоновый режим»     | после остановки стратегии                                   |
+| Нагрузка                   | RAM 47 МБ, 0.5 с процессорного времени за несколько минут   |
+| Проверки                   | tsc 0, eslint 0, prettier 0, build 0, 117/117 Rust-теста    |
 
 ### Отклонения этапа 11
 
-| # | Что было задумано | Что на самом деле | Почему |
-|---|---|---|---|
+| #   | Что было задумано                                                                       | Что на самом деле                                                 | Почему                                                                                                                                                                                                                                                                                                          |
+| --- | --------------------------------------------------------------------------------------- | ----------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | O57 | пакеты считать через winapi `GetIfEntry2` (в списке пунктов — добавить фичу `iphlpapi`) | **пакеты берутся из sysinfo, winapi нужен только для соединений** | В sysinfo 0.39 у `NetworkData` есть `packets_received`, `total_packets_received` и обе пары для передачи. Добавление `GetIfEntry2` было бы дублированием. Winapi понадобился ровно для одного — числа TCP-соединений: `GetExtendedTcpTable` с `TCP_TABLE_OWNER_PID_ALL`, строки в состоянии LISTEN не считаются |
-| O58 | счётчики «за сессию приложения» | **счётчики с момента старта интерфейса** | `total_received` отдаёт именно это, и так же считает диспетчер задач. Считать отдельно «за сессию» — значит держать вторую точку отсчёта ради числа, которое пользователю ничего не скажет. Скорость в Б/с при этом считается честно: дельта между соседними сэмплами |
-| O59 | тип `PingPoint` создать в `types/monitor.ts` | **переиспользован `PingPoint` из `lib/pingUtils.ts`** | Тип уже существует с этапа 9 и используется в графике на Dashboard. Второе определение того же типа в `types/` создало бы два разных, но одинаково названных типа — источник путаницы при импорте |
-| O60 | одна команда `get_network_stats`, опрос из фронтенда | **пять команд, сбор живёт в Rust** | Добавлены `start_monitoring`, `stop_monitoring`, `is_monitoring` и `write_monitor_snapshot`. Счётчик соединений через `GetExtendedTcpTable` стоит дорого: дёргать его из JS каждые 100 мс — лишние IPC-запросы. Цикл в Rust эмитит событие, фронтенд только слушает |
-| O61 | карта мира с точками серверов | **отложена на этап 18** | Спецификация сама помечает пункт опциональным и разрешает перенос на этап 18 «Полировка». GeoIP для каждого соединения — отдельная задача с лицензиями на базы |
+| O58 | счётчики «за сессию приложения»                                                         | **счётчики с момента старта интерфейса**                          | `total_received` отдаёт именно это, и так же считает диспетчер задач. Считать отдельно «за сессию» — значит держать вторую точку отсчёта ради числа, которое пользователю ничего не скажет. Скорость в Б/с при этом считается честно: дельта между соседними сэмплами                                           |
+| O59 | тип `PingPoint` создать в `types/monitor.ts`                                            | **переиспользован `PingPoint` из `lib/pingUtils.ts`**             | Тип уже существует с этапа 9 и используется в графике на Dashboard. Второе определение того же типа в `types/` создало бы два разных, но одинаково названных типа — источник путаницы при импорте                                                                                                               |
+| O60 | одна команда `get_network_stats`, опрос из фронтенда                                    | **пять команд, сбор живёт в Rust**                                | Добавлены `start_monitoring`, `stop_monitoring`, `is_monitoring` и `write_monitor_snapshot`. Счётчик соединений через `GetExtendedTcpTable` стоит дорого: дёргать его из JS каждые 100 мс — лишние IPC-запросы. Цикл в Rust эмитит событие, фронтенд только слушает                                             |
+| O61 | карта мира с точками серверов                                                           | **отложена на этап 18**                                           | Спецификация сама помечает пункт опциональным и разрешает перенос на этап 18 «Полировка». GeoIP для каждого соединения — отдельная задача с лицензиями на базы                                                                                                                                                  |
 
 ### Баги, найденные на этапе 11 вне его границ
 
 Этап 11 — первый, где страницы долго живут и где монитор крутится
 несколько минут. Живой прогон вскрыл три дефекта из этапов 5 и 7:
 
-| # | Дефект | Симптом у пользователя | Где починено |
-|---|---|---|---|
-| B1 | `startLogsFlusher()` существовал, но никогда не вызывался | страница «Логи» всегда «Логи пусты»: одиночные записи лежали в `pendingBatch` и попадали в список только по 50 штук | `App.tsx` запускает флашер; таймер трогает стор только когда есть что переносить |
-| B2 | `setStrategies` заменял массив целиком | запустил стратегию, ушёл на другую страницу, вернулся — «Запущена» исчезла, кнопка «Остановить» стала «Запустить», хотя процесс жив | `useStrategiesStore` сохраняет `status`, `pid`, `error`, `lastRun` для id, оставшихся на диске |
-| B3 | подписка и старт сбора были в разных эффектах | в StrictMode cleanup останавливал монитор, а повторный старт блокировался флагом — счётчики замирали на первом сэмпле | `useNetworkMonitor`: подписка, таймер, старт и остановка в одном эффекте |
+| #   | Дефект                                                    | Симптом у пользователя                                                                                                              | Где починено                                                                                   |
+| --- | --------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| B1  | `startLogsFlusher()` существовал, но никогда не вызывался | страница «Логи» всегда «Логи пусты»: одиночные записи лежали в `pendingBatch` и попадали в список только по 50 штук                 | `App.tsx` запускает флашер; таймер трогает стор только когда есть что переносить               |
+| B2  | `setStrategies` заменял массив целиком                    | запустил стратегию, ушёл на другую страницу, вернулся — «Запущена» исчезла, кнопка «Остановить» стала «Запустить», хотя процесс жив | `useStrategiesStore` сохраняет `status`, `pid`, `error`, `lastRun` для id, оставшихся на диске |
+| B3  | подписка и старт сбора были в разных эффектах             | в StrictMode cleanup останавливал монитор, а повторный старт блокировался флагом — счётчики замирали на первом сэмпле               | `useNetworkMonitor`: подписка, таймер, старт и остановка в одном эффекте                       |
 
 Общий признак всех трёх: код выглядит правильно, пока не пройдёшь
 сценарий с возвратом на страницу или дольше десяти секунд. Живой прогон
@@ -819,37 +828,37 @@ Tailwind-утилиты из непросканированной папки в�
 настоящем архиве. Настоящий `winws.exe` не запускался ни разу: в песочнице
 лежала его копия `ping.exe`, а после отката наверху снова оказалась заглушка.
 
-| Сценарий | Результат |
-|---|---|
-| Стартовая проверка | песочница `1.9.0`, GitHub отдал `1.10.3`, модалка открылась сама |
-| Модалка | заголовок, стрелка `1.9.0 → 1.10.3`, размер 1.4 МБ, дата 20 сентября 2026 |
-| Changelog | markdown с GFM: списки, ссылки, `Full Changelog` — рендерятся `react-markdown` |
-| Скачивание | 1 510 219 байт в `%TEMP%\zapret-manager\downloads`, прогресс и скорость |
-| Кнопка «Скачать» → «Установить» | состояние переключается, до отката кнопка была недостижимой |
-| Установка | «Файлов обновлено: 52», «ваших записей сохранено: 2» |
-| `.version` | `1.9.0` → `1.10.3` |
-| `utils/check_updates.enabled` | файл удалён, штатная проверка zapret отключена |
-| Чужой файл `sandbox-marker.txt` | пережил обновление |
-| Merge маркеров | блок `# === ZAPRET MANAGER: OUTLAST TRIALS (start/end) ===` с `outlasttrials.com` и `steampowered.com` сохранён в `lists/list-general.txt` |
-| Бэкап | `backup/1791257727229`, в нём `installed.json` со списком 52 файлов |
-| Ротация | хранятся последние 3 бэкапа |
-| Пересканирование | новые стратегии появились сразу после установки: `General Alt2`, `Alt6`, `Alt7`, `EXP`, `FAKE TLS AUTO` |
-| Откат «Вернуть» | `.version` снова `1.9.0`, `check_updates.enabled` вернулся, `general.bat` — заглушка на `ping` |
-| Откат удаляет новое | 21 добавленный `.bat` и 20 файлов из `bin/` исчезли по манифесту, чужие файлы остались |
-| D5 `NO_UPDATE_CHECK=1` | пробный `.bat` под обёрткой runner-а увидел `NO_UPDATE_CHECK=[1]`, код возврата 0 |
-| Проверки | tsc 0, eslint 0, prettier 0, build 0, 178/178 Rust-тестов |
+| Сценарий                        | Результат                                                                                                                                  |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| Стартовая проверка              | песочница `1.9.0`, GitHub отдал `1.10.3`, модалка открылась сама                                                                           |
+| Модалка                         | заголовок, стрелка `1.9.0 → 1.10.3`, размер 1.4 МБ, дата 20 сентября 2026                                                                  |
+| Changelog                       | markdown с GFM: списки, ссылки, `Full Changelog` — рендерятся `react-markdown`                                                             |
+| Скачивание                      | 1 510 219 байт в `%TEMP%\zapret-manager\downloads`, прогресс и скорость                                                                    |
+| Кнопка «Скачать» → «Установить» | состояние переключается, до отката кнопка была недостижимой                                                                                |
+| Установка                       | «Файлов обновлено: 52», «ваших записей сохранено: 2»                                                                                       |
+| `.version`                      | `1.9.0` → `1.10.3`                                                                                                                         |
+| `utils/check_updates.enabled`   | файл удалён, штатная проверка zapret отключена                                                                                             |
+| Чужой файл `sandbox-marker.txt` | пережил обновление                                                                                                                         |
+| Merge маркеров                  | блок `# === ZAPRET MANAGER: OUTLAST TRIALS (start/end) ===` с `outlasttrials.com` и `steampowered.com` сохранён в `lists/list-general.txt` |
+| Бэкап                           | `backup/1791257727229`, в нём `installed.json` со списком 52 файлов                                                                        |
+| Ротация                         | хранятся последние 3 бэкапа                                                                                                                |
+| Пересканирование                | новые стратегии появились сразу после установки: `General Alt2`, `Alt6`, `Alt7`, `EXP`, `FAKE TLS AUTO`                                    |
+| Откат «Вернуть»                 | `.version` снова `1.9.0`, `check_updates.enabled` вернулся, `general.bat` — заглушка на `ping`                                             |
+| Откат удаляет новое             | 21 добавленный `.bat` и 20 файлов из `bin/` исчезли по манифесту, чужие файлы остались                                                     |
+| D5 `NO_UPDATE_CHECK=1`          | пробный `.bat` под обёрткой runner-а увидел `NO_UPDATE_CHECK=[1]`, код возврата 0                                                          |
+| Проверки                        | tsc 0, eslint 0, prettier 0, build 0, 178/178 Rust-тестов                                                                                  |
 
 ### Отклонения этапа 12
 
-| # | Что было задумано | Что на самом деле | Почему |
-|---|---|---|---|
-| O62 | поддержать `.zip`, `.tar.gz` и `.rar` | **только `.zip`** | Распаковщик один — `zip::ZipArchive`. Выбор `.tar.gz` при отсутствии `.zip` приводил к тому, что скачивание проходило успешно, а установка падала на не-zip архиве. В релизe 1.10.3 `.zip` есть всегда, так что поддержка остальных форматов — отдельная задача вместе с `tar`/`unrar` |
-| O63 | бэкап перед установкой — просто копия папки | **копия папки + `installed.json`** | Откат, который только копирует бэкап поверх, оставляет всё, что появилось в новой версии: в песочнице после отката оставались 21 стратегия `.bat` и 20 файлов `bin/`. Манифест решает это точечно — удаляются только те пути, которых нет в бэкапе, чужие файлы не трогаются |
-| O64 | «установить» через промежуточный статус | **новый статус `downloaded`** | Пока статус оставался `downloading`, подвал модалки рисовал «Скрыть» и «Отменить», а кнопка «Установить» была недостижима: она выводилась только в ветке, где статус уже не `downloading` |
-| O65 | проверка контрольной суммы архива | **не проверяется** | В релизах zapret нет отдельного ассет-файла с checksum. Сверять нечем, а выдумывать эталон нельзя |
-| O66 | «Отметить версию» вручную при отсутствии `.version` | **кнопка «Отметить 1.10.3»** | В настоящем архиве `.version` нет вообще. Без ручной отметки сравнение версий не работает, поэтому действие поднято из подсказки в самостоятельную кнопку рядом с полем ввода |
-| O67 | проверка обновлений только из приложения | **и `NO_UPDATE_CHECK=1` при запуске стратегии** | Иначе `service.bat check_updates` продолжает предлагать скачать апстрим-zapret поверх только что обновлённого архива |
-| O68 | «Игнорировать» добавляет версию в список | **плюс сразу снимает бейдж и закрывает модалку** | Проверка по расписанию идёт в фоне каждые N часов. Без этого версия «всплывала» бы заново при каждом запуске приложения |
+| #   | Что было задумано                                   | Что на самом деле                                | Почему                                                                                                                                                                                                                                                                                 |
+| --- | --------------------------------------------------- | ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| O62 | поддержать `.zip`, `.tar.gz` и `.rar`               | **только `.zip`**                                | Распаковщик один — `zip::ZipArchive`. Выбор `.tar.gz` при отсутствии `.zip` приводил к тому, что скачивание проходило успешно, а установка падала на не-zip архиве. В релизe 1.10.3 `.zip` есть всегда, так что поддержка остальных форматов — отдельная задача вместе с `tar`/`unrar` |
+| O63 | бэкап перед установкой — просто копия папки         | **копия папки + `installed.json`**               | Откат, который только копирует бэкап поверх, оставляет всё, что появилось в новой версии: в песочнице после отката оставались 21 стратегия `.bat` и 20 файлов `bin/`. Манифест решает это точечно — удаляются только те пути, которых нет в бэкапе, чужие файлы не трогаются           |
+| O64 | «установить» через промежуточный статус             | **новый статус `downloaded`**                    | Пока статус оставался `downloading`, подвал модалки рисовал «Скрыть» и «Отменить», а кнопка «Установить» была недостижима: она выводилась только в ветке, где статус уже не `downloading`                                                                                              |
+| O65 | проверка контрольной суммы архива                   | **не проверяется**                               | В релизах zapret нет отдельного ассет-файла с checksum. Сверять нечем, а выдумывать эталон нельзя                                                                                                                                                                                      |
+| O66 | «Отметить версию» вручную при отсутствии `.version` | **кнопка «Отметить 1.10.3»**                     | В настоящем архиве `.version` нет вообще. Без ручной отметки сравнение версий не работает, поэтому действие поднято из подсказки в самостоятельную кнопку рядом с полем ввода                                                                                                          |
+| O67 | проверка обновлений только из приложения            | **и `NO_UPDATE_CHECK=1` при запуске стратегии**  | Иначе `service.bat check_updates` продолжает предлагать скачать апстрим-zapret поверх только что обновлённого архива                                                                                                                                                                   |
+| O68 | «Игнорировать» добавляет версию в список            | **плюс сразу снимает бейдж и закрывает модалку** | Проверка по расписанию идёт в фоне каждые N часов. Без этого версия «всплывала» бы заново при каждом запуске приложения                                                                                                                                                                |
 
 ### Баги, найденные на этапе 12 вне его границ
 
@@ -858,14 +867,14 @@ Tauri возвращает ошибку как объект `{ message }`, а х
 `string` и `Error` — то есть **любая** ошибка в приложении показывалась как
 «Неизвестная ошибка». На этапе 12 это стоило полчаса диагностики.
 
-| # | Дефект | Симптом у пользователя | Где починено |
-|---|---|---|---|
-| B4 | `toErrorMessage` не знал про `{ message }` | «Неизвестная ошибка» вместо текста любой ошибки Tauri; в логах при этом пусто | `lib/utils.ts` — проверен объект с непустым строковым `message` |
-| B5 | `setError(null)` ставил `status: "error"` | каждая проверка, скачивание и установка на долю секунды показывали «Не удалось обновить стратегии» | `useUpdateStore.setError` — статус меняется только на непустой ошибке |
-| B6 | слияние маркеров не заходило в подпапки | «ваших записей сохранено: 0», `lists/list-general.txt` перезаписывался целиком и терял домены Outlast Trials | `updater_install.install_tree` — рекурсивная копия с `merge_file` на каждом файле |
-| B7 | откат не удалял новое из обновления | после «Вернуть» остаются 21 стратегия `.bat` и 20 файлов `bin/` от 1.10.3 | `updater_manifest` + `rollback_from` |
-| B8 | «Позже» не выживал до перезапуска | модалка снова всплывала при следующей фоновой проверке | `useUpdateStore.setStatus` уважает `isDismissed` |
-| B9 | «Установлено» в настройках не обновлялось после установки | секция показывала `1.9.0`, пока пользователь не нажмёт «Проверить сейчас» | `useUpdateActions.install` обновляет `info.currentVersion` и снимает `available` |
+| #   | Дефект                                                    | Симптом у пользователя                                                                                       | Где починено                                                                      |
+| --- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------- |
+| B4  | `toErrorMessage` не знал про `{ message }`                | «Неизвестная ошибка» вместо текста любой ошибки Tauri; в логах при этом пусто                                | `lib/utils.ts` — проверен объект с непустым строковым `message`                   |
+| B5  | `setError(null)` ставил `status: "error"`                 | каждая проверка, скачивание и установка на долю секунды показывали «Не удалось обновить стратегии»           | `useUpdateStore.setError` — статус меняется только на непустой ошибке             |
+| B6  | слияние маркеров не заходило в подпапки                   | «ваших записей сохранено: 0», `lists/list-general.txt` перезаписывался целиком и терял домены Outlast Trials | `updater_install.install_tree` — рекурсивная копия с `merge_file` на каждом файле |
+| B7  | откат не удалял новое из обновления                       | после «Вернуть» остаются 21 стратегия `.bat` и 20 файлов `bin/` от 1.10.3                                    | `updater_manifest` + `rollback_from`                                              |
+| B8  | «Позже» не выживал до перезапуска                         | модалка снова всплывала при следующей фоновой проверке                                                       | `useUpdateStore.setStatus` уважает `isDismissed`                                  |
+| B9  | «Установлено» в настройках не обновлялось после установки | секция показывала `1.9.0`, пока пользователь не нажмёт «Проверить сейчас»                                    | `useUpdateActions.install` обновляет `info.currentVersion` и снимает `available`  |
 
 Общий признак: четыре из пяти багов жили в коде, который выглядит
 правильным по наличию всех нужных полей и веток. Нашёл их только прогон
@@ -880,24 +889,24 @@ Tauri возвращает ошибку как объект `{ message }`, а х
 и валидирует `.conf`, ставит туннель через `wireguard.exe`, ждёт handshake
 и снимает туннель перед возвратом к DPI.
 
-| Что сделано | Результат |
-|---|---|
-| Парсер конфигов | `parse_config` разбирает `[Interface]` и `[Peer]`: `Address`, `DNS`, `AllowedIPs`, `Endpoint`, `PersistentKeepalive` |
-| Импорт | `import_vpn_config` с системным диалогом, копирование в `%APPDATA%\com.zapretmanager.app\vpn\configs`, отказ при битом файле |
-| Список и удаление | `list_vpn_configs`, `delete_vpn_config`; активный конфиг удалить нельзя |
-| Туннель | `wireguard.exe /installtunnelservice`, `/uninstalltunnelservice`; поиск в `%ProgramFiles%\WireGuard` и локальной папке |
-| Handshake | опрос `wg show` раз в 500 мс, таймаут из настроек (по умолчанию 15 с), при неудаче туннель снимается |
-| Метрики | `get_vpn_status` и `get_vpn_stats`: `endpoint`, время handshake, `bytesIn`, `bytesOut`, `uptimeSec` |
-| Kill Switch | UAC через `ShellExecuteExW` + `runas`, политика `blockoutbound` и allow-правила на туннель, LAN и DNS |
-| Kill Switch, откат | предыдущая политика читается через `Get-NetFirewallProfile` и сохраняется, при выключении восстанавливается |
-| Взаимоисключение | `useStrategyRunner` вызывает `switch_to_dpi`; `switch_to_dpi` после снятия туннеля возвращает выбранную стратегию |
-| Переключение | `is_switching: AtomicBool` отсекает второй вызов, `SWITCH_WAIT_MS = 5000` ждёт завершения |
-| Учёт туннелей | `reconcile_vpn_tunnels` снимает туннель, оставшийся от прошлой сессии |
-| Фронтенд | `useVpnStore`, `useVpn`, `useVpnSync`, `useVpnStats`, `useAutoVpnConnect`, `vpnUtils.ts` |
-| UI | `VpnSection`, `VpnConfigCard`, `VpnConfigList`, `VpnStatusCard`, `VpnKillSwitchWarning`, `WireguardNotInstalled`, `VpnToggle` |
-| Индикация | бейдж `DPI` / `VPN` / `OFF` в `TitleBar`, статус VPN в `DashboardHero`, тумблер в быстрых действиях |
-| Локализация | секция VPN переведена на i18n-ключи RU и EN, хардкод-строк в новых компонентах нет |
-| Проверки | tsc 0, eslint 0, prettier 0, build 0, cargo test 247/247 |
+| Что сделано        | Результат                                                                                                                     |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| Парсер конфигов    | `parse_config` разбирает `[Interface]` и `[Peer]`: `Address`, `DNS`, `AllowedIPs`, `Endpoint`, `PersistentKeepalive`          |
+| Импорт             | `import_vpn_config` с системным диалогом, копирование в `%APPDATA%\com.zapretmanager.app\vpn\configs`, отказ при битом файле  |
+| Список и удаление  | `list_vpn_configs`, `delete_vpn_config`; активный конфиг удалить нельзя                                                       |
+| Туннель            | `wireguard.exe /installtunnelservice`, `/uninstalltunnelservice`; поиск в `%ProgramFiles%\WireGuard` и локальной папке        |
+| Handshake          | опрос `wg show` раз в 500 мс, таймаут из настроек (по умолчанию 15 с), при неудаче туннель снимается                          |
+| Метрики            | `get_vpn_status` и `get_vpn_stats`: `endpoint`, время handshake, `bytesIn`, `bytesOut`, `uptimeSec`                           |
+| Kill Switch        | UAC через `ShellExecuteExW` + `runas`, политика `blockoutbound` и allow-правила на туннель, LAN и DNS                         |
+| Kill Switch, откат | предыдущая политика читается через `Get-NetFirewallProfile` и сохраняется, при выключении восстанавливается                   |
+| Взаимоисключение   | `useStrategyRunner` вызывает `switch_to_dpi`; `switch_to_dpi` после снятия туннеля возвращает выбранную стратегию             |
+| Переключение       | `is_switching: AtomicBool` отсекает второй вызов, `SWITCH_WAIT_MS = 5000` ждёт завершения                                     |
+| Учёт туннелей      | `reconcile_vpn_tunnels` снимает туннель, оставшийся от прошлой сессии                                                         |
+| Фронтенд           | `useVpnStore`, `useVpn`, `useVpnSync`, `useVpnStats`, `useAutoVpnConnect`, `vpnUtils.ts`                                      |
+| UI                 | `VpnSection`, `VpnConfigCard`, `VpnConfigList`, `VpnStatusCard`, `VpnKillSwitchWarning`, `WireguardNotInstalled`, `VpnToggle` |
+| Индикация          | бейдж `DPI` / `VPN` / `OFF` в `TitleBar`, статус VPN в `DashboardHero`, тумблер в быстрых действиях                           |
+| Локализация        | секция VPN переведена на i18n-ключи RU и EN, хардкод-строк в новых компонентах нет                                            |
+| Проверки           | tsc 0, eslint 0, prettier 0, build 0, cargo test 247/247                                                                      |
 
 Rust разложен на модули: `vpn.rs` (состояние и команды), `vpn_store.rs`
 (хранилище), `vpn_switch.rs` (переключение), `vpn_config.rs` (парсер),
@@ -905,29 +914,29 @@ Rust разложен на модули: `vpn.rs` (состояние и ком�
 
 ### Отклонения этапа 14
 
-| # | Что было задумано | Что на самом деле | Почему |
-|---|---|---|---|
-| O78 | kill switch как правило `Block all` плюс allow-правила | **блокировка политики исходящих соединений плюс allow-правила** | В Windows правило `block` имеет приоритет над `allow` для того же трафика, поэтому blanket-блокировка рубила бы и туннель, и LAN. Надёжная схема — `firewallpolicy blockoutbound` и три allow-правила: интерфейс туннеля, приватные диапазоны, DNS |
-| O79 | выключение kill switch возвращает `allow` жёстко | **восстановление прочитанной политики из файла** | У пользователя может быть `Block` в профиле по умолчанию. Состояние читается через `Get-NetFirewallProfile` до включения и возвращается при выключении, иначе kill switch навсегда ломал бы сеть |
-| O80 | чтение политики через `netsh advfirewall show` | **`Get-NetFirewallProfile`** | Вывод `netsh` локализован: на этой машине строка называется «Политика брандмауэра», и разбор по слову `DefaultOutboundAction` не находил ничего. Cmdlet отдаёт значения `Allow` / `Block` / `NotConfigured` независимо от языка |
-| O81 | поднимать и снимать туннель из приложения | **`/installtunnelservice` через `wireguard.exe`** | Прямой запуск туннеля требует драйвера и прав администратора. Официальный сервисный интерфейс сам поднимает туннель, поднимает права через UAC и переживает перезапуск приложения |
-| O82 | VPN-запускается как фоновой процесс приложения | **туннель живёт в службе WireGuard** | После закрытия приложения туннель остаётся поднятым, а метрики читаются через `wg show`. Это ожидаемое поведение для kill switch и восстановления сессии |
-| O83 | полная проверка подключения, handshake и kill switch | **проверены парсинг, валидация, политика firewall, сборка, отсутствие WireGuard на машине** | На этой машине WireGuard не установлен, а установка туннеля и изменение политики firewall меняют сетевой стек пользователя. Живое подключение и kill switch требуют отдельного согласия |
-| O84 | `useVpn` подписывается на события в каждом компоненте | **`useVpnSync` в `App`** | Шесть компонентов вызывали `useVpn`, и события VPN дублировались шесть раз. Подписки и стартовая загрузка вынесены в один хук уровня приложения, компоненты берут только действия |
+| #   | Что было задумано                                      | Что на самом деле                                                                           | Почему                                                                                                                                                                                                                                             |
+| --- | ------------------------------------------------------ | ------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| O78 | kill switch как правило `Block all` плюс allow-правила | **блокировка политики исходящих соединений плюс allow-правила**                             | В Windows правило `block` имеет приоритет над `allow` для того же трафика, поэтому blanket-блокировка рубила бы и туннель, и LAN. Надёжная схема — `firewallpolicy blockoutbound` и три allow-правила: интерфейс туннеля, приватные диапазоны, DNS |
+| O79 | выключение kill switch возвращает `allow` жёстко       | **восстановление прочитанной политики из файла**                                            | У пользователя может быть `Block` в профиле по умолчанию. Состояние читается через `Get-NetFirewallProfile` до включения и возвращается при выключении, иначе kill switch навсегда ломал бы сеть                                                   |
+| O80 | чтение политики через `netsh advfirewall show`         | **`Get-NetFirewallProfile`**                                                                | Вывод `netsh` локализован: на этой машине строка называется «Политика брандмауэра», и разбор по слову `DefaultOutboundAction` не находил ничего. Cmdlet отдаёт значения `Allow` / `Block` / `NotConfigured` независимо от языка                    |
+| O81 | поднимать и снимать туннель из приложения              | **`/installtunnelservice` через `wireguard.exe`**                                           | Прямой запуск туннеля требует драйвера и прав администратора. Официальный сервисный интерфейс сам поднимает туннель, поднимает права через UAC и переживает перезапуск приложения                                                                  |
+| O82 | VPN-запускается как фоновой процесс приложения         | **туннель живёт в службе WireGuard**                                                        | После закрытия приложения туннель остаётся поднятым, а метрики читаются через `wg show`. Это ожидаемое поведение для kill switch и восстановления сессии                                                                                           |
+| O83 | полная проверка подключения, handshake и kill switch   | **проверены парсинг, валидация, политика firewall, сборка, отсутствие WireGuard на машине** | На этой машине WireGuard не установлен, а установка туннеля и изменение политики firewall меняют сетевой стек пользователя. Живое подключение и kill switch требуют отдельного согласия                                                            |
+| O84 | `useVpn` подписывается на события в каждом компоненте  | **`useVpnSync` в `App`**                                                                    | Шесть компонентов вызывали `useVpn`, и события VPN дублировались шесть раз. Подписки и стартовая загрузка вынесены в один хук уровня приложения, компоненты берут только действия                                                                  |
 
 ### Что проверено запуском на этапе 14
 
-| Сценарий | Результат |
-|---|---|
-| Сборка | tsc 0, eslint 0, prettier 0, build 0, cargo test 247/247 |
-| Секция VPN | «WireGuard не найден в системе», кнопки «Открыть сайт WireGuard» и «Проверить снова» |
-| Fallback без WireGuard | `is_wireguard_installed` возвращает `false`, тумблер VPN не запускает подключение |
-| Политика firewall | прочитана как `Allow` для трёх профилей, kill switch в покое, файла политики нет |
-| Хранилище | `%APPDATA%\com.zapretmanager.app\vpn\configs` создаётся, `.conf` не появляются без импорта |
-| Парсер | битый конфиг отклоняется, валидный разбирается по всем шести полям |
-| Захват ошибок | сообщения на русском, без краша; ошибка в логах и в карточке статуса |
-| Запуск DPI при активном VPN | кнопка «Подключиться» в быстрых действиях заблокирована |
-| События | три подписки на `vpn-switching`, `vpn-connected`, `vpn-disconnected` в одном хуке |
+| Сценарий                    | Результат                                                                                  |
+| --------------------------- | ------------------------------------------------------------------------------------------ |
+| Сборка                      | tsc 0, eslint 0, prettier 0, build 0, cargo test 247/247                                   |
+| Секция VPN                  | «WireGuard не найден в системе», кнопки «Открыть сайт WireGuard» и «Проверить снова»       |
+| Fallback без WireGuard      | `is_wireguard_installed` возвращает `false`, тумблер VPN не запускает подключение          |
+| Политика firewall           | прочитана как `Allow` для трёх профилей, kill switch в покое, файла политики нет           |
+| Хранилище                   | `%APPDATA%\com.zapretmanager.app\vpn\configs` создаётся, `.conf` не появляются без импорта |
+| Парсер                      | битый конфиг отклоняется, валидный разбирается по всем шести полям                         |
+| Захват ошибок               | сообщения на русском, без краша; ошибка в логах и в карточке статуса                       |
+| Запуск DPI при активном VPN | кнопка «Подключиться» в быстрых действиях заблокирована                                    |
+| События                     | три подписки на `vpn-switching`, `vpn-connected`, `vpn-disconnected` в одном хуке          |
 
 ---
 
@@ -937,24 +946,24 @@ Rust разложен на модули: `vpn.rs` (состояние и ком�
 контекстное меню из 10 пунктов, быстрые действия по кликам, нативные
 уведомления и настройки поведения.
 
-| Что сделано | Результат |
-|---|---|
-| Иконки | 14 PNG в `src-tauri/icons/tray/`: 5 состояний × 16 и 32 px, у `connecting` три кадра анимации |
-| Состояния | `idle`, `connecting`, `connected`, `vpn`, `error`; щиты серый, жёлтый, зелёный, голубой с замком, красный с восклицательным |
-| Создание трея | `create_tray` в `setup()`, `TrayStateHolder` через `manage` |
-| Tooltip | «Zapret Manager — Отключено», «— Активно: <стратегия>», «— VPN: <конфиг>» |
-| Меню | 10 пунктов плюс заголовок и строка статуса; «Остановить» вместо «Запустить» при активной стратегии |
-| Меню, VPN | «Отключить VPN» вместо «Подключить VPN» при активном туннеле |
-| Клики | левый — показать/скрыть окно, средний — быстрый запуск, двойной — Dashboard с показом окна |
-| Меню → события | 11 событий: 7 действий и 4 навигации; обработчики в `useTray` |
-| Анимация | tokio-задача меняет кадры `connecting` раз в 300 мс, максимум 3 с, токен отмены |
-| Уведомления | `show_notification` с префиксом вида, `notification:default` в capabilities |
-| Уведомления из UI | VPN connect/disconnect/error и доступное обновление, с проверкой настроек |
-| Настройки | 3 новых тумблера уведомлений в «Общие» плюс `animateTrayIcon` во «Внешнем виде» |
-| Закрытие окна | `minimizeToTray` прячет окно, `false` закрывает приложение; «Выход» из меню завершает через `quit_app` |
-| Запуск свёрнутым | `startMinimized` прячет окно после старта |
-| Синхронизация | `useTray` шлёт `update_tray_state` с троттлингом 200 мс при смене стора |
-| Проверки | tsc 0, eslint 0, prettier 0, build 0, cargo test 307/307 |
+| Что сделано       | Результат                                                                                                                   |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Иконки            | 14 PNG в `src-tauri/icons/tray/`: 5 состояний × 16 и 32 px, у `connecting` три кадра анимации                               |
+| Состояния         | `idle`, `connecting`, `connected`, `vpn`, `error`; щиты серый, жёлтый, зелёный, голубой с замком, красный с восклицательным |
+| Создание трея     | `create_tray` в `setup()`, `TrayStateHolder` через `manage`                                                                 |
+| Tooltip           | «Zapret Manager — Отключено», «— Активно: <стратегия>», «— VPN: <конфиг>»                                                   |
+| Меню              | 10 пунктов плюс заголовок и строка статуса; «Остановить» вместо «Запустить» при активной стратегии                          |
+| Меню, VPN         | «Отключить VPN» вместо «Подключить VPN» при активном туннеле                                                                |
+| Клики             | левый — показать/скрыть окно, средний — быстрый запуск, двойной — Dashboard с показом окна                                  |
+| Меню → события    | 11 событий: 7 действий и 4 навигации; обработчики в `useTray`                                                               |
+| Анимация          | tokio-задача меняет кадры `connecting` раз в 300 мс, максимум 3 с, токен отмены                                             |
+| Уведомления       | `show_notification` с префиксом вида, `notification:default` в capabilities                                                 |
+| Уведомления из UI | VPN connect/disconnect/error и доступное обновление, с проверкой настроек                                                   |
+| Настройки         | 3 новых тумблера уведомлений в «Общие» плюс `animateTrayIcon` во «Внешнем виде»                                             |
+| Закрытие окна     | `minimizeToTray` прячет окно, `false` закрывает приложение; «Выход» из меню завершает через `quit_app`                      |
+| Запуск свёрнутым  | `startMinimized` прячет окно после старта                                                                                   |
+| Синхронизация     | `useTray` шлёт `update_tray_state` с троттлингом 200 мс при смене стора                                                     |
+| Проверки          | tsc 0, eslint 0, prettier 0, build 0, cargo test 307/307                                                                    |
 
 Rust разделён на `tray/mod.rs` (состояния и события), `tray/icons.rs`
 (загрузка PNG), `tray/menu.rs` (меню и раскладка событий), `tray/runtime.rs`
@@ -962,29 +971,29 @@ Rust разделён на `tray/mod.rs` (состояния и события),
 
 ### Отклонения этапа 15
 
-| # | Что было задумано | Что на самом деле | Почему |
-|---|---|---|---|
-| O85 | уведомления отправляет Rust напрямую | **событие `app-notification` плюс системный вызов как запасной путь** | Плагин на Windows отправляет Toast своему фронтенд-обработчику. Если emit не дошёл, `show_notification` вызывает системное уведомление сам, и пользователь всё равно видит сообщение |
-| O86 | подключение VPN из трея вызывает `switch_to_vpn` | **переход в «Настройки → VPN»** | Подключение требует UAC и живого туннеля. Из трея без окна нельзя показать системный диалог и прогресс, поэтому пункт ведёт в секцию, где запуск идёт обычным путём |
-| O87 | один пункт «Остановить» и один «Запустить» | **«Остановить» при активной стратегии, иначе «Запустить стратегию» или «Запустить: <имя>»** | Меню перестраивается при каждой смене состояния, и в покое показывается имя последней стратегии |
-| O88 | иконки генерируются вручную | **сгенерированы скриптом Pillow** | Пять щитов с глифами одинаковой геометрии. Рисовать их вручную — расхождение в 1–2 пикселя между состояниями; генератор держит пропорции и повторяет палитру приложения |
-| O89 | RAM меньше 300 МБ подтверждён в простое | **53.8 МБ в рабочем состоянии, CPU 0 %** | Замер сделан на собранном debug-бинаре после сканирования стратегий и фоновой проверки обновлений |
+| #   | Что было задумано                                | Что на самом деле                                                                           | Почему                                                                                                                                                                               |
+| --- | ------------------------------------------------ | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| O85 | уведомления отправляет Rust напрямую             | **событие `app-notification` плюс системный вызов как запасной путь**                       | Плагин на Windows отправляет Toast своему фронтенд-обработчику. Если emit не дошёл, `show_notification` вызывает системное уведомление сам, и пользователь всё равно видит сообщение |
+| O86 | подключение VPN из трея вызывает `switch_to_vpn` | **переход в «Настройки → VPN»**                                                             | Подключение требует UAC и живого туннеля. Из трея без окна нельзя показать системный диалог и прогресс, поэтому пункт ведёт в секцию, где запуск идёт обычным путём                  |
+| O87 | один пункт «Остановить» и один «Запустить»       | **«Остановить» при активной стратегии, иначе «Запустить стратегию» или «Запустить: <имя>»** | Меню перестраивается при каждой смене состояния, и в покое показывается имя последней стратегии                                                                                      |
+| O88 | иконки генерируются вручную                      | **сгенерированы скриптом Pillow**                                                           | Пять щитов с глифами одинаковой геометрии. Рисовать их вручную — расхождение в 1–2 пикселя между состояниями; генератор держит пропорции и повторяет палитру приложения              |
+| O89 | RAM меньше 300 МБ подтверждён в простое          | **53.8 МБ в рабочем состоянии, CPU 0 %**                                                    | Замер сделан на собранном debug-бинаре после сканирования стратегий и фоновой проверки обновлений                                                                                    |
 
 ### Что проверено запуском на этапе 15
 
-| Сценарий | Результат |
-|---|---|
-| Сборка | tsc 0, eslint 0, prettier 0, build 0, cargo test 307/307, NSIS 7.52 МиБ |
-| Иконки | все 14 файлов на месте, `icons/tray/` попадает в `bundle.resources` и в папку бинаря |
-| Трей в трее | иконка щита в скрытых значках, процесс живёт 16+ секунд |
-| Tooltip | «Zapret Manager — Отключено» поверх иконки |
-| Меню | «Zapret Manager», «Отключено», «Запустить стратегию», «Подключить VPN», «Открыть Dashboard», «Стратегии», «Логи», «Настройки», «Проверить обновления», «Выход» |
-| Переход из меню | клик по «Логи» показал окно и открыл страницу «Логи» с двумя строками журнала |
-| Лог пункта | `tray::runtime: Трей: пункт logs` в stdout приложения |
-| Закрытие окна | крестик не убивает процесс при `minimizeToTray = true` |
-| Ресурсы | CPU 0 % на простое, 53.8 МБ RAM |
-| Настройки | в `config.json` появились `showNotificationsOnStart`, `showNotificationsOnStop`, `showUpdateNotifications`; `animateTrayIcon` остался во «Внешнем виде» |
-| Уборка | процессов `zapret-manager` и `winws.exe` не осталось, временные файлы удалены |
+| Сценарий        | Результат                                                                                                                                                      |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Сборка          | tsc 0, eslint 0, prettier 0, build 0, cargo test 307/307, NSIS 7.52 МиБ                                                                                        |
+| Иконки          | все 14 файлов на месте, `icons/tray/` попадает в `bundle.resources` и в папку бинаря                                                                           |
+| Трей в трее     | иконка щита в скрытых значках, процесс живёт 16+ секунд                                                                                                        |
+| Tooltip         | «Zapret Manager — Отключено» поверх иконки                                                                                                                     |
+| Меню            | «Zapret Manager», «Отключено», «Запустить стратегию», «Подключить VPN», «Открыть Dashboard», «Стратегии», «Логи», «Настройки», «Проверить обновления», «Выход» |
+| Переход из меню | клик по «Логи» показал окно и открыл страницу «Логи» с двумя строками журнала                                                                                  |
+| Лог пункта      | `tray::runtime: Трей: пункт logs` в stdout приложения                                                                                                          |
+| Закрытие окна   | крестик не убивает процесс при `minimizeToTray = true`                                                                                                         |
+| Ресурсы         | CPU 0 % на простое, 53.8 МБ RAM                                                                                                                                |
+| Настройки       | в `config.json` появились `showNotificationsOnStart`, `showNotificationsOnStop`, `showUpdateNotifications`; `animateTrayIcon` остался во «Внешнем виде»        |
+| Уборка          | процессов `zapret-manager` и `winws.exe` не осталось, временные файлы удалены                                                                                  |
 
 Не проверено вживую: запуск стратегии из трея и системные Toast-уведомления.
 Первый требует UAC-диалога и запуска настоящего `winws.exe` из реального
@@ -996,57 +1005,57 @@ Rust разделён на `tray/mod.rs` (состояния и события),
 
 ### Что проверено запуском на этапе 13
 
-| Сценарий | Результат |
-|---|---|
-| Навигация | 8 пунктов слева, активный подсвечен, переход с анимацией |
-| Общие | язык, автозапуск, трей, свёрнутым, уведомления — 5 рабочих настроек |
-| Автозапуск | состояние читается из реестра при открытии секции, тумблер пишет через плагин |
-| Внешний вид | тема (светлая помечена «Скоро»), плотность, анимации, reduce-motion, трей |
-| Плотность | «Плотно» — интерфейс сжимается до 0.875, «Обычно» возвращает 1 |
-| Стратегии | папка из конфига, «Пересканировать сейчас» → «Найдено стратегий: 22» |
-| Outlast Trials | секция этапа 8 работает без изменений |
-| VPN | заглушка «Скоро», ссылка на этап 14 |
-| Обновления | секция этапа 12 на месте, бейдж и история бэкапов работают |
-| Продвинутые | уровень логирования, хранение логов, аргументы winws, отключение проверки |
-| Проверка конфигов | «Проверено 6: проблем не найдено» на настоящем архиве |
-| Опасная зона | 3 кнопки, модалка с вводом `DELETE` |
-| О приложении | ОС, архитектура, WebView2 154.0.4258.53, Tauri 2.12.1, Rust 1.98 |
-| Копирование отчёта | буфер содержит версию, ОС, WebView2, 22 стратегии и последние логи |
-| Смена языка | RU → EN переключает всю страницу мгновенно, «Сохранено» в углу |
-| Сброс секции | «Внешний вид» → «Плотно» → «Сбросить секцию» → «Обычно» |
-| Индикатор | «Сохранение…» → «Сохранено», исчезает через 1.5 с |
-| config.json | 8 ключей, из них `general`, `appearance`, `advanced` сгруппированы |
-| Экспорт | системный диалог «Сохранение» открывается, отмена возвращает управление |
-| Адаптив | на ширине меньше 768 px навигация уходит в горизонтальный ряд |
-| Проверки | tsc 0, eslint 0, prettier 0, build 0, 193/193 Rust-теста |
+| Сценарий           | Результат                                                                     |
+| ------------------ | ----------------------------------------------------------------------------- |
+| Навигация          | 8 пунктов слева, активный подсвечен, переход с анимацией                      |
+| Общие              | язык, автозапуск, трей, свёрнутым, уведомления — 5 рабочих настроек           |
+| Автозапуск         | состояние читается из реестра при открытии секции, тумблер пишет через плагин |
+| Внешний вид        | тема (светлая помечена «Скоро»), плотность, анимации, reduce-motion, трей     |
+| Плотность          | «Плотно» — интерфейс сжимается до 0.875, «Обычно» возвращает 1                |
+| Стратегии          | папка из конфига, «Пересканировать сейчас» → «Найдено стратегий: 22»          |
+| Outlast Trials     | секция этапа 8 работает без изменений                                         |
+| VPN                | заглушка «Скоро», ссылка на этап 14                                           |
+| Обновления         | секция этапа 12 на месте, бейдж и история бэкапов работают                    |
+| Продвинутые        | уровень логирования, хранение логов, аргументы winws, отключение проверки     |
+| Проверка конфигов  | «Проверено 6: проблем не найдено» на настоящем архиве                         |
+| Опасная зона       | 3 кнопки, модалка с вводом `DELETE`                                           |
+| О приложении       | ОС, архитектура, WebView2 154.0.4258.53, Tauri 2.12.1, Rust 1.98              |
+| Копирование отчёта | буфер содержит версию, ОС, WebView2, 22 стратегии и последние логи            |
+| Смена языка        | RU → EN переключает всю страницу мгновенно, «Сохранено» в углу                |
+| Сброс секции       | «Внешний вид» → «Плотно» → «Сбросить секцию» → «Обычно»                       |
+| Индикатор          | «Сохранение…» → «Сохранено», исчезает через 1.5 с                             |
+| config.json        | 8 ключей, из них `general`, `appearance`, `advanced` сгруппированы            |
+| Экспорт            | системный диалог «Сохранение» открывается, отмена возвращает управление       |
+| Адаптив            | на ширине меньше 768 px навигация уходит в горизонтальный ряд                 |
+| Проверки           | tsc 0, eslint 0, prettier 0, build 0, 193/193 Rust-теста                      |
 
 ### Отклонения этапа 13
 
-| # | Что было задумано | Что на самом деле | Почему |
-|---|---|---|---|
-| O69 | дополнить `AppSettings` группами `general`, `appearance`, `advanced` поверх плоских полей | **поля перенесены внутрь групп** | Плоские `autoStart`, `theme`, `language`, `loggingLevel` не читались нигде, кроме дефолтов. Держать их рядом с группами — значит держать два места хранения одной настройки. `useAppStore.theme/language` удалены как дубли |
-| O70 | версия WebView2 через API Tauri | **сканер папки `%PROGRAMFILES(X86)%\Microsoft\EdgeWebView\Application`** | В Tauri 2.11 метода `webview_version()` нет. Каталог рантайма — единственный источник, доступный без новой зависимости |
-| O71 | реальная версия Rust в отчёте | **минимальная поддерживаемая версия из `Cargo.toml`** | Сборщик не пишет версию rustc в бинарь, а `rustc --version` у пользователя может отсутствовать. MSRV — честная и проверяемая цифра |
-| O72 | `data-density` на `body` | **переменная `--density-scale` на `documentElement`** | Tailwind 4 задаёт размеры в `rem`, и `rem` берётся с корневого элемента. Менять `font-size` у `body` масштабировало бы только собственный текст, а не отступы и размеры контролов |
-| O73 | локализовать приложение целиком | **только страница Settings** | Этап 18. Ставить i18n-обёртки на все страницы сейчас — это 40+ файлов правок ради функции, которую никто не просил |
-| O74 | проверка конфигов в корне папки стратегий | **в `lists/`, с откатом на корень** | `list-*.txt` и `ipset-*.txt` лежат только в `lists/`. Проверка корня давала «Проверено 0» на настоящем архиве |
-| O75 | полный круг импорт/экспорт проверен автоматически | **диалог открывается и отменяется, содержимое валидируется zod при импорте** | Системный диалог Windows не поддаётся автоматизации: харнесс уводит фокус на окно приложения, и введённый путь не доезжает. Формат файла задаётся схемой `settingsSchema.ts` |
-| O76 | бандл целиком в один чанк | **changelog вынесен в ленивый чанк** | `react-markdown` весит 159 КБ и нужен только когда открыта модалка обновления. Основной чанк упал с 558 КБ до 401 КБ и перестал превышать порог предупреждения в 500 КБ |
-| O77 | `persist` без миграции | **`merge` нормализует старое хранилище** | После переезда на группы старый `localStorage` давал `appearance: undefined` и приложение падало на белый экран. `mergeSettings` прогоняет любое сохранение через дефолты |
+| #   | Что было задумано                                                                         | Что на самом деле                                                            | Почему                                                                                                                                                                                                                      |
+| --- | ----------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| O69 | дополнить `AppSettings` группами `general`, `appearance`, `advanced` поверх плоских полей | **поля перенесены внутрь групп**                                             | Плоские `autoStart`, `theme`, `language`, `loggingLevel` не читались нигде, кроме дефолтов. Держать их рядом с группами — значит держать два места хранения одной настройки. `useAppStore.theme/language` удалены как дубли |
+| O70 | версия WebView2 через API Tauri                                                           | **сканер папки `%PROGRAMFILES(X86)%\Microsoft\EdgeWebView\Application`**     | В Tauri 2.11 метода `webview_version()` нет. Каталог рантайма — единственный источник, доступный без новой зависимости                                                                                                      |
+| O71 | реальная версия Rust в отчёте                                                             | **минимальная поддерживаемая версия из `Cargo.toml`**                        | Сборщик не пишет версию rustc в бинарь, а `rustc --version` у пользователя может отсутствовать. MSRV — честная и проверяемая цифра                                                                                          |
+| O72 | `data-density` на `body`                                                                  | **переменная `--density-scale` на `documentElement`**                        | Tailwind 4 задаёт размеры в `rem`, и `rem` берётся с корневого элемента. Менять `font-size` у `body` масштабировало бы только собственный текст, а не отступы и размеры контролов                                           |
+| O73 | локализовать приложение целиком                                                           | **только страница Settings**                                                 | Этап 18. Ставить i18n-обёртки на все страницы сейчас — это 40+ файлов правок ради функции, которую никто не просил                                                                                                          |
+| O74 | проверка конфигов в корне папки стратегий                                                 | **в `lists/`, с откатом на корень**                                          | `list-*.txt` и `ipset-*.txt` лежат только в `lists/`. Проверка корня давала «Проверено 0» на настоящем архиве                                                                                                               |
+| O75 | полный круг импорт/экспорт проверен автоматически                                         | **диалог открывается и отменяется, содержимое валидируется zod при импорте** | Системный диалог Windows не поддаётся автоматизации: харнесс уводит фокус на окно приложения, и введённый путь не доезжает. Формат файла задаётся схемой `settingsSchema.ts`                                                |
+| O76 | бандл целиком в один чанк                                                                 | **changelog вынесен в ленивый чанк**                                         | `react-markdown` весит 159 КБ и нужен только когда открыта модалка обновления. Основной чанк упал с 558 КБ до 401 КБ и перестал превышать порог предупреждения в 500 КБ                                                     |
+| O77 | `persist` без миграции                                                                    | **`merge` нормализует старое хранилище**                                     | После переезда на группы старый `localStorage` давал `appearance: undefined` и приложение падало на белый экран. `mergeSettings` прогоняет любое сохранение через дефолты                                                   |
 
 ### Баги, найденные на этапе 13 вне его границ
 
 Пять из семи жили в коде, который компилируется и проходит типизацию.
 
-| # | Дефект | Симптом у пользователя | Где починено |
-|---|---|---|---|
-| B10 | `persist` восстанавливал старое хранилище как есть | белый экран сразу после обновления приложения: `Cannot read properties of undefined (reading 'theme')` | `useSettingsStore`: опция `merge` прогоняет сохранение через `mergeSettings` |
-| B11 | `SettingRow` дублировал подпись, потому что `Toggle` умеет рисовать её сам | каждая настройка-тумблер показывала название дважды | `Toggle` получил `ariaLabel`; секции передают его вместо `label` |
-| B12 | проверка конфигов искала `list-*.txt` в корне стратегий | «Проверено 0: проблем не найдено» при шести реальных файлах | `config_files` смотрит в `lists/` и только потом в корень |
-| B13 | проверка домена не знала про CIDR | 32 138 ложных «некорректных» записей вида `20.3.0.113.0/24` | `is_domain_like` разрешает `/ : * + @ ,` |
-| B14 | версия WebView2 парсилась через `semver` | «WebView2: неизвестно» — у Chromium четыре компоненты, semver их не ест | `build_info.version_parts` сравнивает числа покомпонентно |
-| B15 | `CARGO_PKG_RUST_VERSION` был пустым | строка «Rust» показывалась без значения | в `Cargo.toml` добавлено `rust-version = "1.98"`, плюс фолбэк |
-| B16 | сканирование стратегий жило только на странице «Стратегии» | «О приложении» писало `Strategies: 0`, хотя стратегии загружены | `useStrategies()` поднят в `App`, сканирование общее для всех страниц |
+| #   | Дефект                                                                     | Симптом у пользователя                                                                                 | Где починено                                                                 |
+| --- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------- |
+| B10 | `persist` восстанавливал старое хранилище как есть                         | белый экран сразу после обновления приложения: `Cannot read properties of undefined (reading 'theme')` | `useSettingsStore`: опция `merge` прогоняет сохранение через `mergeSettings` |
+| B11 | `SettingRow` дублировал подпись, потому что `Toggle` умеет рисовать её сам | каждая настройка-тумблер показывала название дважды                                                    | `Toggle` получил `ariaLabel`; секции передают его вместо `label`             |
+| B12 | проверка конфигов искала `list-*.txt` в корне стратегий                    | «Проверено 0: проблем не найдено» при шести реальных файлах                                            | `config_files` смотрит в `lists/` и только потом в корень                    |
+| B13 | проверка домена не знала про CIDR                                          | 32 138 ложных «некорректных» записей вида `20.3.0.113.0/24`                                            | `is_domain_like` разрешает `/ : * + @ ,`                                     |
+| B14 | версия WebView2 парсилась через `semver`                                   | «WebView2: неизвестно» — у Chromium четыре компоненты, semver их не ест                                | `build_info.version_parts` сравнивает числа покомпонентно                    |
+| B15 | `CARGO_PKG_RUST_VERSION` был пустым                                        | строка «Rust» показывалась без значения                                                                | в `Cargo.toml` добавлено `rust-version = "1.98"`, плюс фолбэк                |
+| B16 | сканирование стратегий жило только на странице «Стратегии»                 | «О приложении» писало `Strategies: 0`, хотя стратегии загружены                                        | `useStrategies()` поднят в `App`, сканирование общее для всех страниц        |
 
 Общий признак: пока данные не показывают пользователю, дефект не виден.
 Белый экран, дубль подписи и «Проверено 0» нашлись только прогоном.
@@ -1058,26 +1067,26 @@ Rust разделён на `tray/mod.rs` (состояния и события),
 Приложение стало самодостаточным: движок zapret и 22 стратегии лежат внутри
 установщика и распаковываются в папку пользователя при первом запуске.
 
-| Что сделано | Результат |
-|---|---|
-| Ресурсы в бандле | `src-tauri/resources/zapret/`: `bin/` (20 файлов), `lists/` (5), `utils/`, `outlast/`, 23 `.bat`, лицензия и README |
-| Переименование | 22 стратегии получили имена `general-00-baseline.bat` … `general-21-faketls-auto-alt3.bat` |
-| `service.bat` | оставлен без изменений и переноса — стратегии вызывают его через `call service.bat` |
-| ipset-all | восстановлен из `.backup`, 556 312 байт вместо заглушки на 18 байт |
-| Лицензии | `LICENSE-zapret.txt` с текстом MIT, NOTICE об источниках и лицензиях компонентов |
-| Документ | `README-zapret.md`: состав, происхождение, причина переименований, плоская раскладка |
-| check_updates | `utils/check_updates.enabled` в бандл **не** включён, штатный апдейт zapret отключён |
-| Манифест | `manifest.json`: 32 файла с SHA-256, версия 1.10.3 из `service.bat` |
-| Генератор | `scripts/generate-manifest.js`, только `fs`/`path`/`crypto`, без зависимостей |
-| bundle.resources | `resources/**/*` и `icons/tray/*.png` |
-| Rust | `resources.rs`, `resources_commands.rs`, `resources_core.rs`, `resources_fs.rs` + 55 тестов |
-| Команды | `init_resources`, `check_resources_integrity`, `restore_bundled_strategies`, `list_bundled_strategies`, `get_resources_version`, `get_resources_layout`, `get_resources_strategies_path`, `read_license_text` |
-| Маркер | `.initialized` с версией приложения, версией ресурсов, временем и числом стратегий |
-| Прогресс | `resource-extract-progress` со стадией, процентом и именем файла, троттлинг 100 мс |
-| Копирование | `tokio::fs`, чанками по 64 КиБ, процент по фактическим байтам |
-| Умное обновление | бэкап в `backups/update-{timestamp}/`, новые файлы добавляются, изменённые пользователем не трогаются |
-| Фронтенд | `useResourceInit`, `InitProgressModal`, `FirstRunModal`, `ResourcesSection`, `LicensesModal` |
-| Проверки | tsc 0, eslint 0, prettier 0, build 0, cargo test 358/358, NSIS 8.72 МиБ |
+| Что сделано      | Результат                                                                                                                                                                                                     |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Ресурсы в бандле | `src-tauri/resources/zapret/`: `bin/` (20 файлов), `lists/` (5), `utils/`, `outlast/`, 23 `.bat`, лицензия и README                                                                                           |
+| Переименование   | 22 стратегии получили имена `general-00-baseline.bat` … `general-21-faketls-auto-alt3.bat`                                                                                                                    |
+| `service.bat`    | оставлен без изменений и переноса — стратегии вызывают его через `call service.bat`                                                                                                                           |
+| ipset-all        | восстановлен из `.backup`, 556 312 байт вместо заглушки на 18 байт                                                                                                                                            |
+| Лицензии         | `LICENSE-zapret.txt` с текстом MIT, NOTICE об источниках и лицензиях компонентов                                                                                                                              |
+| Документ         | `README-zapret.md`: состав, происхождение, причина переименований, плоская раскладка                                                                                                                          |
+| check_updates    | `utils/check_updates.enabled` в бандл **не** включён, штатный апдейт zapret отключён                                                                                                                          |
+| Манифест         | `manifest.json`: 32 файла с SHA-256, версия 1.10.3 из `service.bat`                                                                                                                                           |
+| Генератор        | `scripts/generate-manifest.js`, только `fs`/`path`/`crypto`, без зависимостей                                                                                                                                 |
+| bundle.resources | `resources/**/*` и `icons/tray/*.png`                                                                                                                                                                         |
+| Rust             | `resources.rs`, `resources_commands.rs`, `resources_core.rs`, `resources_fs.rs` + 55 тестов                                                                                                                   |
+| Команды          | `init_resources`, `check_resources_integrity`, `restore_bundled_strategies`, `list_bundled_strategies`, `get_resources_version`, `get_resources_layout`, `get_resources_strategies_path`, `read_license_text` |
+| Маркер           | `.initialized` с версией приложения, версией ресурсов, временем и числом стратегий                                                                                                                            |
+| Прогресс         | `resource-extract-progress` со стадией, процентом и именем файла, троттлинг 100 мс                                                                                                                            |
+| Копирование      | `tokio::fs`, чанками по 64 КиБ, процент по фактическим байтам                                                                                                                                                 |
+| Умное обновление | бэкап в `backups/update-{timestamp}/`, новые файлы добавляются, изменённые пользователем не трогаются                                                                                                         |
+| Фронтенд         | `useResourceInit`, `InitProgressModal`, `FirstRunModal`, `ResourcesSection`, `LicensesModal`                                                                                                                  |
+| Проверки         | tsc 0, eslint 0, prettier 0, build 0, cargo test 358/358, NSIS 8.72 МиБ                                                                                                                                       |
 
 Rust разделён на четыре модуля: `resources.rs` — состояние и умное обновление,
 `resources_commands.rs` — команды Tauri, `resources_core.rs` — манифест, маркер,
@@ -1085,33 +1094,33 @@ Rust разделён на четыре модуля: `resources.rs` — сос�
 
 ### Отклонения этапа 16
 
-| # | Что было задумано | Что на самом деле | Почему |
-|---|---|---|---|
-| O90 | распаковка в `%APPDATA%/ZapretManager/strategies/` с подпапкой `zapret/` | **содержимое `zapret/` копируется прямо в `strategies/`** | Каждый `general-*.bat` делает `cd /d "%~dp0"` и ищет `bin\`, `lists\`, `service.bat` рядом с собой. Отдельный уровень `zapret/` ломал бы запуск всех стратегий. Плоская раскладка из оригинала zapret — требование самих скриптов |
-| O91 | `strategies/` и `zapret/` как две папки | **одна папка `strategies/`** | Следствие O90. `manifest.files` продолжает использовать ключи вида `zapret/…`, но `target_path` отображает их в `strategies/` — манифест остаётся привязан к структуре бандла |
-| O92 | `configs/` как отдельный каталог бандла | **каталога нет, `copy_configs_tree` пропускает его молча** | В zapret списки лежат в `lists/`, а не в `configs/`. Пустая ветка оставлена, чтобы при появлении каталога он подхватился без правок |
-| O93 | параллельное копирование с лимитом 4 | **последовательное копирование с emit прогресса** | Файлы маленькие, весь набор укладывается в 1,3 с. Параллелизм дал бы выигрыш меньше, чем усложнение кода и порядок emit |
-| O94 | `LICENSE-zapret.txt` взять из upstream | **текст MIT написан с NOTICE об источниках** | В архиве сборки файла лицензии нет, а скачивание во время разработки тянуло бы внешнюю зависимость. Текст MIT указан со ссылками на `bol-van/zapret` и `Flowseal/zapret-discord-youtube`, лицензии Cygwin и WinDivert перечислены отдельно |
-| O95 | стратегии из `strategies/` в бандле | **одна папка `zapret/`, всё в ней** | Дублировать 23 файла в двух местах бандла означало бы две копии и расхождение после обновления |
-| O96 | `useResourceInit` меняет `strategiesFolder` всегда | **только когда папка в настройках пуста** | У пользователя может быть уже настроенная папка с правками. Менять её молча — потеря настроек, поэтому запись идёт только при первом запуске |
-| O97 | кнопка «Открыть папку» в ресурсах | **`open_folder` с видом `config`** | Отдельного вида для папки ресурсов нет: она и есть `%APPDATA%\com.zapretmanager.app`. Переиспользован существующий путь вместо новой команды |
-| O98 | ресурсы копируются при установке NSIS | **при первом запуске приложения** | Согласовано с Решением 3 спецификации: у установщика может не быть прав на запись, а приложение контролирует процесс и показывает прогресс |
+| #   | Что было задумано                                                        | Что на самом деле                                          | Почему                                                                                                                                                                                                                                     |
+| --- | ------------------------------------------------------------------------ | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| O90 | распаковка в `%APPDATA%/ZapretManager/strategies/` с подпапкой `zapret/` | **содержимое `zapret/` копируется прямо в `strategies/`**  | Каждый `general-*.bat` делает `cd /d "%~dp0"` и ищет `bin\`, `lists\`, `service.bat` рядом с собой. Отдельный уровень `zapret/` ломал бы запуск всех стратегий. Плоская раскладка из оригинала zapret — требование самих скриптов          |
+| O91 | `strategies/` и `zapret/` как две папки                                  | **одна папка `strategies/`**                               | Следствие O90. `manifest.files` продолжает использовать ключи вида `zapret/…`, но `target_path` отображает их в `strategies/` — манифест остаётся привязан к структуре бандла                                                              |
+| O92 | `configs/` как отдельный каталог бандла                                  | **каталога нет, `copy_configs_tree` пропускает его молча** | В zapret списки лежат в `lists/`, а не в `configs/`. Пустая ветка оставлена, чтобы при появлении каталога он подхватился без правок                                                                                                        |
+| O93 | параллельное копирование с лимитом 4                                     | **последовательное копирование с emit прогресса**          | Файлы маленькие, весь набор укладывается в 1,3 с. Параллелизм дал бы выигрыш меньше, чем усложнение кода и порядок emit                                                                                                                    |
+| O94 | `LICENSE-zapret.txt` взять из upstream                                   | **текст MIT написан с NOTICE об источниках**               | В архиве сборки файла лицензии нет, а скачивание во время разработки тянуло бы внешнюю зависимость. Текст MIT указан со ссылками на `bol-van/zapret` и `Flowseal/zapret-discord-youtube`, лицензии Cygwin и WinDivert перечислены отдельно |
+| O95 | стратегии из `strategies/` в бандле                                      | **одна папка `zapret/`, всё в ней**                        | Дублировать 23 файла в двух местах бандла означало бы две копии и расхождение после обновления                                                                                                                                             |
+| O96 | `useResourceInit` меняет `strategiesFolder` всегда                       | **только когда папка в настройках пуста**                  | У пользователя может быть уже настроенная папка с правками. Менять её молча — потеря настроек, поэтому запись идёт только при первом запуске                                                                                               |
+| O97 | кнопка «Открыть папку» в ресурсах                                        | **`open_folder` с видом `config`**                         | Отдельного вида для папки ресурсов нет: она и есть `%APPDATA%\com.zapretmanager.app`. Переиспользован существующий путь вместо новой команды                                                                                               |
+| O98 | ресурсы копируются при установке NSIS                                    | **при первом запуске приложения**                          | Согласовано с Решением 3 спецификации: у установщика может не быть прав на запись, а приложение контролирует процесс и показывает прогресс                                                                                                 |
 
 ### Что проверено запуском на этапе 16
 
-| Сценарий | Результат |
-|---|---|
-| Первый запуск | распаковано 4 000 697 байт за 1,3 с, стратегий 0 → 22 |
-| Раскладка | `strategies/` содержит 23 `.bat`, `service.bat`, `bin/`, `lists/`, `utils/`, `outlast/`, обе лицензии |
-| Работоспособность | сканер нашёл 22 стратегии в распакованной папке |
-| ipset-all | 556 312 байт, полный список вместо заглушки |
-| check_updates | `utils/check_updates.enabled` в распакованной папке отсутствует |
-| Маркер | `.initialized` содержит версию 0.1.0, ресурсы 1.10.3, 22 стратегии |
-| Повторный запуск | без распаковки, модалок не было, 50.4 МБ RAM |
-| Папка стратегий | переключилась на `%APPDATA%\com.zapretmanager.app\strategies` при пустой настройке |
-| Умное обновление | добавление нового файла, сохранение правки пользователя, бэкап его `.bat` |
-| Целостность | 32 файла в манифесте, совпадение хешей после распаковки |
-| Уборка | тестовый `my_custom.bat` и правка `list-general.txt` удалены, процессов не осталось |
+| Сценарий          | Результат                                                                                             |
+| ----------------- | ----------------------------------------------------------------------------------------------------- |
+| Первый запуск     | распаковано 4 000 697 байт за 1,3 с, стратегий 0 → 22                                                 |
+| Раскладка         | `strategies/` содержит 23 `.bat`, `service.bat`, `bin/`, `lists/`, `utils/`, `outlast/`, обе лицензии |
+| Работоспособность | сканер нашёл 22 стратегии в распакованной папке                                                       |
+| ipset-all         | 556 312 байт, полный список вместо заглушки                                                           |
+| check_updates     | `utils/check_updates.enabled` в распакованной папке отсутствует                                       |
+| Маркер            | `.initialized` содержит версию 0.1.0, ресурсы 1.10.3, 22 стратегии                                    |
+| Повторный запуск  | без распаковки, модалок не было, 50.4 МБ RAM                                                          |
+| Папка стратегий   | переключилась на `%APPDATA%\com.zapretmanager.app\strategies` при пустой настройке                    |
+| Умное обновление  | добавление нового файла, сохранение правки пользователя, бэкап его `.bat`                             |
+| Целостность       | 32 файла в манифесте, совпадение хешей после распаковки                                               |
+| Уборка            | тестовый `my_custom.bat` и правка `list-general.txt` удалены, процессов не осталось                   |
 
 **Замечание о проверке целостности:** при ручной сверке SHA-256 после
 распаковки расхождений не было. Удаление файла вручную и правка списка
@@ -1140,89 +1149,89 @@ Tauri 2 собирает установщик через NSIS, но из кор�
 
 ### Принятые решения
 
-| # | Решение | Обоснование |
-|---|---|---|
-| РШ1 | NSIS, а не WiX/MSI/MSIX/Inno | Встроен в Tauri 2, кастомные страницы и хуки нативны, 150 КБ базы, Unicode из коробки. MSIX требует подписи, у Inno нет поддержки в Tauri |
-| РШ2 | `installMode: both`, по умолчанию текущий пользователь | Пользователь выбирает «для себя» или «для всех». Tauri по умолчанию ставит AllUsers для админов, поэтому добавлен `MULTIUSER_INSTALLMODE_DEFAULT_CURRENTUSER` |
-| РШ3 | Свой шаблон `custom-template.nsi` | В шаблоне Tauri страницы жёстко заданы, добавить свою страницу иначе нельзя. Шаблон скопирован из CLI 2.12.1, изменения точечные, `scripts/dump-nsis-template.mjs` показывает diff после обновления CLI |
-| РШ4 | Тёмная тема через bitmap'ы | MUI2 не даёт API для перекраски тела диалога. Брендинг несут sidebar 164x314 и header 150x57 в цветах приложения |
-| РШ5 | Страница параметров через `Page custom` + nsDialogs | Один экран вместо пяти: ярлык на рабочем столе, ярлык в меню «Пуск», автозапуск. Значения идут в переменные установщика и читаются в `NSIS_HOOK_POSTINSTALL` |
-| РШ6 | Шаги установки через `DetailPrint` | Пользователь видит «Извлечение файлов…», «Копирование ресурсов…», «Создание деинсталлятора…», «Регистрация…», «Создание ярлыков…», «Настройка автозапуска…» |
-| РШ7 | Проверки до копирования файлов | `NSIS_HOOK_PREINSTALL`: Windows 10+, x64, 200 МБ свободного места. В тихом режиме причина пишется в консоль, а не в MessageBox |
-| РШ8 | Финальный экран на родной странице MUI | Галочка «Запустить Zapret Manager» и вторая галочка — «Открыть папку установки» вместо readme. Сайдбар и заголовок остаются брендовыми |
-| РШ9 | Удаление с выбором судьбы данных | Деинсталлятор показывает галочку «Удалить данные приложения». Снята — `%APPDATA%\com.zapretmanager.app` остаётся, нажата — удаляется вместе с настройками языка установщика |
-| РШ10 | Регистрация в «Программах и компонентах» | Пишется Tauri: `DisplayName`, `DisplayVersion`, `Publisher`, `InstallLocation`, `UninstallString`, `EstimatedSize`, иконка приложения |
-| РШ11 | Проверка уже установленной версии | Страница «Уже установлено»: та же версия — переустановить или удалить, старая — обновить поверх или удалить. Настройки в `%APPDATA%` не трогаются |
-| РШ12 | `/S` и `/LOG=` | Тихая установка берёт значения по умолчанию. Лог пишется по `/LOG=<файл>`, для `/S` без флага — `%TEMP%\ZapretManager-install.log` |
-| РШ13 | Подпись подготовлена, не выполнена | `scripts/sign-windows.js` + `pnpm run sign:windows`. Без сертификата скрипт завершается успехом и перечисляет файлы без подписи. Применять на этапе деплоя |
-| РШ14 | RU + EN с выбором языка | Диалог выбора языка при первом запуске, выбор сохраняется в `HKCU\Software\zapretmanager\Zapret Manager\Installer Language`. Оба языка проверены прогоном |
-| РШ15 | Хуки делают то, что делать в шаблоне нельзя | Автозапуск в реестр, ярлыки по опциям, чистка ярлыков и записи автозапуска при удалении, логирование |
+| #    | Решение                                                | Обоснование                                                                                                                                                                                             |
+| ---- | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| РШ1  | NSIS, а не WiX/MSI/MSIX/Inno                           | Встроен в Tauri 2, кастомные страницы и хуки нативны, 150 КБ базы, Unicode из коробки. MSIX требует подписи, у Inno нет поддержки в Tauri                                                               |
+| РШ2  | `installMode: both`, по умолчанию текущий пользователь | Пользователь выбирает «для себя» или «для всех». Tauri по умолчанию ставит AllUsers для админов, поэтому добавлен `MULTIUSER_INSTALLMODE_DEFAULT_CURRENTUSER`                                           |
+| РШ3  | Свой шаблон `custom-template.nsi`                      | В шаблоне Tauri страницы жёстко заданы, добавить свою страницу иначе нельзя. Шаблон скопирован из CLI 2.12.1, изменения точечные, `scripts/dump-nsis-template.mjs` показывает diff после обновления CLI |
+| РШ4  | Тёмная тема через bitmap'ы                             | MUI2 не даёт API для перекраски тела диалога. Брендинг несут sidebar 164x314 и header 150x57 в цветах приложения                                                                                        |
+| РШ5  | Страница параметров через `Page custom` + nsDialogs    | Один экран вместо пяти: ярлык на рабочем столе, ярлык в меню «Пуск», автозапуск. Значения идут в переменные установщика и читаются в `NSIS_HOOK_POSTINSTALL`                                            |
+| РШ6  | Шаги установки через `DetailPrint`                     | Пользователь видит «Извлечение файлов…», «Копирование ресурсов…», «Создание деинсталлятора…», «Регистрация…», «Создание ярлыков…», «Настройка автозапуска…»                                             |
+| РШ7  | Проверки до копирования файлов                         | `NSIS_HOOK_PREINSTALL`: Windows 10+, x64, 200 МБ свободного места. В тихом режиме причина пишется в консоль, а не в MessageBox                                                                          |
+| РШ8  | Финальный экран на родной странице MUI                 | Галочка «Запустить Zapret Manager» и вторая галочка — «Открыть папку установки» вместо readme. Сайдбар и заголовок остаются брендовыми                                                                  |
+| РШ9  | Удаление с выбором судьбы данных                       | Деинсталлятор показывает галочку «Удалить данные приложения». Снята — `%APPDATA%\com.zapretmanager.app` остаётся, нажата — удаляется вместе с настройками языка установщика                             |
+| РШ10 | Регистрация в «Программах и компонентах»               | Пишется Tauri: `DisplayName`, `DisplayVersion`, `Publisher`, `InstallLocation`, `UninstallString`, `EstimatedSize`, иконка приложения                                                                   |
+| РШ11 | Проверка уже установленной версии                      | Страница «Уже установлено»: та же версия — переустановить или удалить, старая — обновить поверх или удалить. Настройки в `%APPDATA%` не трогаются                                                       |
+| РШ12 | `/S` и `/LOG=`                                         | Тихая установка берёт значения по умолчанию. Лог пишется по `/LOG=<файл>`, для `/S` без флага — `%TEMP%\ZapretManager-install.log`                                                                      |
+| РШ13 | Подпись подготовлена, не выполнена                     | `scripts/sign-windows.js` + `pnpm run sign:windows`. Без сертификата скрипт завершается успехом и перечисляет файлы без подписи. Применять на этапе деплоя                                              |
+| РШ14 | RU + EN с выбором языка                                | Диалог выбора языка при первом запуске, выбор сохраняется в `HKCU\Software\zapretmanager\Zapret Manager\Installer Language`. Оба языка проверены прогоном                                               |
+| РШ15 | Хуки делают то, что делать в шаблоне нельзя            | Автозапуск в реестр, ярлыки по опциям, чистка ярлыков и записи автозапуска при удалении, логирование                                                                                                    |
 
 ### Что сделано
 
-| Область | Решение |
-|---|---|
-| Структура | `src-tauri/installer/`: `custom-template.nsi`, `hooks.nsh`, `include/` (7 файлов), `languages/` (2), `bitmaps/` (2), `license.txt`, `README.md` |
-| Шаблон | 978 строк из CLI, 36 точечных правок Zapret Manager, номера страниц пересчитаны |
-| Хуки | `NSIS_HOOK_PREINSTALL`, `NSIS_HOOK_POSTINSTALL`, `NSIS_HOOK_PREUNINSTALL`, `NSIS_HOOK_POSTUNINSTALL` |
-| Генерация | `scripts/build-installer-hooks.js` собирает `hooks.nsh` из исходников, `pnpm run installer:check` падает на устаревшем файле |
-| Bitmap'ы | `scripts/build-bitmaps.js`, только `node:fs`, свой BMP-энкодер 24 бит и пиксельный шрифт 5x7 |
-| Иконка | `icons/icon.ico` уже мультиразмерный: 16, 24, 32, 48, 64, 256 |
-| Конфиг | `installerIcon`, `headerImage`, `sidebarImage`, `uninstallerIcon`, `installMode: both`, `languages`, `displayLanguageSelector`, `compression: lzma`, `installerHooks`, `template`, `licenseFile` |
-| Страницы | Welcome, License, Install mode, Уже установлено, Параметры установки, Папка установки, Установка, Финал |
-| Лицензия | `installer/license.txt`, страница лицензии MUI2 с обязательным принятием |
-| Логи | `include/Logging.nsh`, UTF-16, шаги установки и режим установки |
-| Подпись | `scripts/sign-windows.js`, `pnpm run sign:windows`, `.signing/` в `.gitignore` |
-| Сборка | makensis без предупреждений, NSIS 8.72 МиБ |
+| Область   | Решение                                                                                                                                                                                          |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Структура | `src-tauri/installer/`: `custom-template.nsi`, `hooks.nsh`, `include/` (7 файлов), `languages/` (2), `bitmaps/` (2), `license.txt`, `README.md`                                                  |
+| Шаблон    | 978 строк из CLI, 36 точечных правок Zapret Manager, номера страниц пересчитаны                                                                                                                  |
+| Хуки      | `NSIS_HOOK_PREINSTALL`, `NSIS_HOOK_POSTINSTALL`, `NSIS_HOOK_PREUNINSTALL`, `NSIS_HOOK_POSTUNINSTALL`                                                                                             |
+| Генерация | `scripts/build-installer-hooks.js` собирает `hooks.nsh` из исходников, `pnpm run installer:check` падает на устаревшем файле                                                                     |
+| Bitmap'ы  | `scripts/build-bitmaps.js`, только `node:fs`, свой BMP-энкодер 24 бит и пиксельный шрифт 5x7                                                                                                     |
+| Иконка    | `icons/icon.ico` уже мультиразмерный: 16, 24, 32, 48, 64, 256                                                                                                                                    |
+| Конфиг    | `installerIcon`, `headerImage`, `sidebarImage`, `uninstallerIcon`, `installMode: both`, `languages`, `displayLanguageSelector`, `compression: lzma`, `installerHooks`, `template`, `licenseFile` |
+| Страницы  | Welcome, License, Install mode, Уже установлено, Параметры установки, Папка установки, Установка, Финал                                                                                          |
+| Лицензия  | `installer/license.txt`, страница лицензии MUI2 с обязательным принятием                                                                                                                         |
+| Логи      | `include/Logging.nsh`, UTF-16, шаги установки и режим установки                                                                                                                                  |
+| Подпись   | `scripts/sign-windows.js`, `pnpm run sign:windows`, `.signing/` в `.gitignore`                                                                                                                   |
+| Сборка    | makensis без предупреждений, NSIS 8.72 МиБ                                                                                                                                                       |
 
 ### Найденные отклонения от этапа 17
 
-| # | Ожидание спецификации | Что сделано | Почему |
-|---|---|---|---|
-| O99 | «Для меня — без UAC» при `installMode: both` | **Один запрос UAC и для per-user установки** | NSIS MultiUser требует `MULTIUSER_EXECUTIONLEVEL` = Admin/Power/Highest, иначе ошибка компиляции. Тихий режим идёт в `%LOCALAPPDATA%` и пишет в HKCU, но процесс поднимается с наивысшими правами |
-| O100 | Тёмный фон установщика и неоновые акценты | **Тёмные bitmap'ы, светлое тело диалогов MUI2** | У MUI2 нет API для перекраски фона и текста. Перекрасить можно только то, что приложение рисует само |
-| O101 | `Checks.nsh`, `Components.nsh`, `Finish.nsh` подключаются напрямую | **Исходники есть, `hooks.nsh` собирается из них** | NSIS ищет относительный `!include` от каталога сгенерированного скрипта, а не от включающего файла, поэтому прямые включения не работают |
-| O102 | Хуки подключаются в начале шаблона | **Подключение перенесено после таблиц языков MUI** | `${LANG_RUSSIAN}` и `${LANG_ENGLISH}` становятся валидными только после `MUI_LANGUAGE`. Без этого русские строки попадали в английскую таблицу и страницы показывали пустоту |
-| O103 | Логи через `LogSet` | **Свой логгер на `FileOpen` + `FileWriteUTF16LE`** | `LogSet` требует флаг makensis `NSIS_CONFIG_LOG`, а бандлер Tauri его не передаёт |
-| O104 | NSIS-файлы в UTF-8 | **UTF-8 с BOM, кроме шаблона** | Без BOM makensis читает файл в системной кодировке, кириллица ломается. BOM в начале главного скрипта makensis отвергает: `Invalid command` |
-| O105 | Свои label'ы на странице приветствия | **Текст пишется в родные контролы MUI** | Страница приветствия уже рисует свой заголовок и текст, второй label перекрывался с ними. Сейчас меняются `$mui.WelcomePage.Title`, `$mui.WelcomePage.Text`, `$mui.FinishPage.Title`, `$mui.FinishPage.Text` и заголовок через `MUI_HEADER_TEXT` |
-| O106 | Флаг `MUI_FINISHPAGE_NOAUTOCLOSE` из шаблона Tauri | **Флаг убран, установщик сам переходит на финальный экран** | С флагом после копирования файлов пользователь обязан ещё раз нажать «Далее» |
-| O107 | Галочка запуска на странице параметров | **Запуск на финальном экране** | Спецификация описывает галочку в двух местах. На странице параметров остались ярлыки и автозапуск, на финальном экране — запуск и папка установки |
-| O108 | Галочка ассоциации `.bat` | **Не реализована** | Спецификация сама называет её спорной и отключённой по умолчанию; реализация тянула бы за собой реестровые классы `HKCR` |
-| O109 | CI workflow `build.yml` | **Не создан** | Помечен в спецификации как необязательный, репозиторий здесь без git. Непроверенный workflow был бы мёртвым грузом, вместо него добавлена подготовка подписи |
-| O110 | Подпись .exe | **Скрипт готов, подпись не выполнялась** | Нет сертификата. Конфигурация рассчитана на SignPath или Azure Trusted Signing на этапе деплоя |
-| O111 | Шаблон из репозитория Tauri | **Извлечён из бинарника CLI 2.12.1** | `scripts/dump-nsis-template.mjs` выгружает исходный шаблон, diff с `custom-template.nsi` показывает, что изменено только 36 строк |
-| O113 | Деинсталлятор сам определяет режим удаления | **Режим восстанавливается из метки в реестре** | `MULTIUSER_INSTALLMODE_DEFAULT_CURRENTUSER` заставляет деинсталлятор считать режимом текущего пользователя, поэтому per-machine установка оставляла ключ HKLM и общие ярлыки. В `un.onInit` после `MULTIUSER_UNINIT` добавлена проверка `AllUsers=1` в HKLM |
-| O112 | Ярлык на рабочем столе галочкой финального экрана | **Галочка на странице параметров** | Так выбор виден до начала копирования файлов, а не после |
+| #    | Ожидание спецификации                                              | Что сделано                                                 | Почему                                                                                                                                                                                                                                                      |
+| ---- | ------------------------------------------------------------------ | ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| O99  | «Для меня — без UAC» при `installMode: both`                       | **Один запрос UAC и для per-user установки**                | NSIS MultiUser требует `MULTIUSER_EXECUTIONLEVEL` = Admin/Power/Highest, иначе ошибка компиляции. Тихий режим идёт в `%LOCALAPPDATA%` и пишет в HKCU, но процесс поднимается с наивысшими правами                                                           |
+| O100 | Тёмный фон установщика и неоновые акценты                          | **Тёмные bitmap'ы, светлое тело диалогов MUI2**             | У MUI2 нет API для перекраски фона и текста. Перекрасить можно только то, что приложение рисует само                                                                                                                                                        |
+| O101 | `Checks.nsh`, `Components.nsh`, `Finish.nsh` подключаются напрямую | **Исходники есть, `hooks.nsh` собирается из них**           | NSIS ищет относительный `!include` от каталога сгенерированного скрипта, а не от включающего файла, поэтому прямые включения не работают                                                                                                                    |
+| O102 | Хуки подключаются в начале шаблона                                 | **Подключение перенесено после таблиц языков MUI**          | `${LANG_RUSSIAN}` и `${LANG_ENGLISH}` становятся валидными только после `MUI_LANGUAGE`. Без этого русские строки попадали в английскую таблицу и страницы показывали пустоту                                                                                |
+| O103 | Логи через `LogSet`                                                | **Свой логгер на `FileOpen` + `FileWriteUTF16LE`**          | `LogSet` требует флаг makensis `NSIS_CONFIG_LOG`, а бандлер Tauri его не передаёт                                                                                                                                                                           |
+| O104 | NSIS-файлы в UTF-8                                                 | **UTF-8 с BOM, кроме шаблона**                              | Без BOM makensis читает файл в системной кодировке, кириллица ломается. BOM в начале главного скрипта makensis отвергает: `Invalid command`                                                                                                                 |
+| O105 | Свои label'ы на странице приветствия                               | **Текст пишется в родные контролы MUI**                     | Страница приветствия уже рисует свой заголовок и текст, второй label перекрывался с ними. Сейчас меняются `$mui.WelcomePage.Title`, `$mui.WelcomePage.Text`, `$mui.FinishPage.Title`, `$mui.FinishPage.Text` и заголовок через `MUI_HEADER_TEXT`            |
+| O106 | Флаг `MUI_FINISHPAGE_NOAUTOCLOSE` из шаблона Tauri                 | **Флаг убран, установщик сам переходит на финальный экран** | С флагом после копирования файлов пользователь обязан ещё раз нажать «Далее»                                                                                                                                                                                |
+| O107 | Галочка запуска на странице параметров                             | **Запуск на финальном экране**                              | Спецификация описывает галочку в двух местах. На странице параметров остались ярлыки и автозапуск, на финальном экране — запуск и папка установки                                                                                                           |
+| O108 | Галочка ассоциации `.bat`                                          | **Не реализована**                                          | Спецификация сама называет её спорной и отключённой по умолчанию; реализация тянула бы за собой реестровые классы `HKCR`                                                                                                                                    |
+| O109 | CI workflow `build.yml`                                            | **Не создан**                                               | Помечен в спецификации как необязательный, репозиторий здесь без git. Непроверенный workflow был бы мёртвым грузом, вместо него добавлена подготовка подписи                                                                                                |
+| O110 | Подпись .exe                                                       | **Скрипт готов, подпись не выполнялась**                    | Нет сертификата. Конфигурация рассчитана на SignPath или Azure Trusted Signing на этапе деплоя                                                                                                                                                              |
+| O111 | Шаблон из репозитория Tauri                                        | **Извлечён из бинарника CLI 2.12.1**                        | `scripts/dump-nsis-template.mjs` выгружает исходный шаблон, diff с `custom-template.nsi` показывает, что изменено только 36 строк                                                                                                                           |
+| O113 | Деинсталлятор сам определяет режим удаления                        | **Режим восстанавливается из метки в реестре**              | `MULTIUSER_INSTALLMODE_DEFAULT_CURRENTUSER` заставляет деинсталлятор считать режимом текущего пользователя, поэтому per-machine установка оставляла ключ HKLM и общие ярлыки. В `un.onInit` после `MULTIUSER_UNINIT` добавлена проверка `AllUsers=1` в HKLM |
+| O112 | Ярлык на рабочем столе галочкой финального экрана                  | **Галочка на странице параметров**                          | Так выбор виден до начала копирования файлов, а не после                                                                                                                                                                                                    |
 
 ### Что проверено на практике
 
-| Проверка | Результат |
-|---|---|
-| Тихая установка `/S` | 2.3 с, код 0, `%LOCALAPPDATA%\Programs\Zapret Manager` |
-| Установка для всех `/AllUsers` | 1.1 с, `C:\Program Files\Zapret Manager`, ключ в HKLM, ярлыки в общих папках |
-| `/NS` | Установка без ярлыков на рабочем столе и в меню «Пуск» |
-| Удаление per-machine | Папка, ключ HKLM и общие ярлыки удалены, данные пользователя сохранены |
-| Удаление per-user | Папка, ключ HKCU и пользовательские ярлыки удалены, данные сохранены |
-| Тихая установка с логом | UTF-16 лог, русские строки, «Проверка системы…», «Создание ярлыков…», режим установки |
-| Повторный запуск | Установка выполняется поверх, маркер в данных пользователя сохранился |
-| Прогон GUI RU | 8 страниц: приветствие, лицензия, режим установки, уже установлено, параметры, папка, установка, финал |
-| Прогон GUI EN | Те же страницы на английском, включая выбор языка в диалоге |
-| Страница приветствия | «Добро пожаловать в Zapret Manager», список возможностей, bitmap 164x314 с логотипом и версией |
-| Страница лицензии | «Условия использования», текст из `license.txt`, кнопка «Принимаю» |
-| Режим установки | Радио «для всех» / «только для текущего пользователя (V1nskiy)», по умолчанию выбран текущий |
-| Уже установлено | «Zapret Manager 0.1.0 уже установлен», выбор переустановить или удалить |
-| Параметры установки | Три галочки с верными значениями по умолчанию, путь установки в подписи |
-| Автозапуск | `HKCU\...\Run\Zapret Manager` появился после включения галочки, исчез после удаления |
-| Ярлыки | Рабочий стол и меню «Пуск» созданы, при удалении исчезли |
-| Папка установки | «Доступно на диске: 406.6 Гбайт», «Требуется на диске: 38.9 Мбайт» |
-| Финальный экран | «Установка завершена!», галочки запуска и папки, кнопка «Готово» |
-| Запуск из финала | Приложение стартовало, 50.9 МБ RSS |
-| Реестр | `DisplayName`, `DisplayVersion` 0.1.0, `Publisher`, `InstallLocation`, `UninstallString`, `EstimatedSize` 39 891 КБ |
-| Тихое удаление | Папка, ключ реестра и ярлыки удалены, `%APPDATA%\com.zapretmanager.app` сохранена |
-| Удаление с галочкой | Данные приложения удалены вместе с ключом языка установщика |
-| WebView2 | 154.0.4258.53 уже установлен, загрузка не потребовалась |
-| Сборка | makensis без предупреждений, tsc 0, eslint 0, prettier 0, cargo test 358/358 |
+| Проверка                       | Результат                                                                                                           |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
+| Тихая установка `/S`           | 2.3 с, код 0, `%LOCALAPPDATA%\Programs\Zapret Manager`                                                              |
+| Установка для всех `/AllUsers` | 1.1 с, `C:\Program Files\Zapret Manager`, ключ в HKLM, ярлыки в общих папках                                        |
+| `/NS`                          | Установка без ярлыков на рабочем столе и в меню «Пуск»                                                              |
+| Удаление per-machine           | Папка, ключ HKLM и общие ярлыки удалены, данные пользователя сохранены                                              |
+| Удаление per-user              | Папка, ключ HKCU и пользовательские ярлыки удалены, данные сохранены                                                |
+| Тихая установка с логом        | UTF-16 лог, русские строки, «Проверка системы…», «Создание ярлыков…», режим установки                               |
+| Повторный запуск               | Установка выполняется поверх, маркер в данных пользователя сохранился                                               |
+| Прогон GUI RU                  | 8 страниц: приветствие, лицензия, режим установки, уже установлено, параметры, папка, установка, финал              |
+| Прогон GUI EN                  | Те же страницы на английском, включая выбор языка в диалоге                                                         |
+| Страница приветствия           | «Добро пожаловать в Zapret Manager», список возможностей, bitmap 164x314 с логотипом и версией                      |
+| Страница лицензии              | «Условия использования», текст из `license.txt`, кнопка «Принимаю»                                                  |
+| Режим установки                | Радио «для всех» / «только для текущего пользователя (V1nskiy)», по умолчанию выбран текущий                        |
+| Уже установлено                | «Zapret Manager 0.1.0 уже установлен», выбор переустановить или удалить                                             |
+| Параметры установки            | Три галочки с верными значениями по умолчанию, путь установки в подписи                                             |
+| Автозапуск                     | `HKCU\...\Run\Zapret Manager` появился после включения галочки, исчез после удаления                                |
+| Ярлыки                         | Рабочий стол и меню «Пуск» созданы, при удалении исчезли                                                            |
+| Папка установки                | «Доступно на диске: 406.6 Гбайт», «Требуется на диске: 38.9 Мбайт»                                                  |
+| Финальный экран                | «Установка завершена!», галочки запуска и папки, кнопка «Готово»                                                    |
+| Запуск из финала               | Приложение стартовало, 50.9 МБ RSS                                                                                  |
+| Реестр                         | `DisplayName`, `DisplayVersion` 0.1.0, `Publisher`, `InstallLocation`, `UninstallString`, `EstimatedSize` 39 891 КБ |
+| Тихое удаление                 | Папка, ключ реестра и ярлыки удалены, `%APPDATA%\com.zapretmanager.app` сохранена                                   |
+| Удаление с галочкой            | Данные приложения удалены вместе с ключом языка установщика                                                         |
+| WebView2                       | 154.0.4258.53 уже установлен, загрузка не потребовалась                                                             |
+| Сборка                         | makensis без предупреждений, tsc 0, eslint 0, prettier 0, cargo test 358/358                                        |
 
 **Что не проверено:** Windows 10 и DPI 150 % (тестировалось на Windows 11
 x64), установка в непустую `Program Files` и подпись .exe. Первые два
@@ -1243,62 +1252,62 @@ x64), установка в непустую `Program Files` и подпись .
 
 ### Принятые решения
 
-| # | Решение | Обоснование |
-|---|---|---|
-| РШ1 | CSS и SVG-фильтры, не WebGL | Интерфейс двумерный. Three.js дал бы +500 КБ бандла и отдельный canvas поверх DOM. `box-shadow`, `filter`, `backdrop-filter` ускоряются GPU в WebView2 |
-| РШ2 | Один слой `PostProcessingLayer` поверх `Layout` | Виньетка, развёртки и зерно живут в одном `pointer-events: none` слое, z-index 9998 — ниже шума 9999 и модалок |
-| РШ3 | Bloom через `box-shadow` | Тень не размывает содержимое, анимация только числовая и композитная |
-| РШ4 | Цвета только через CSS-переменные | В `globals.css` добавлены `--color-accent-*-rgb`, утилиты собирают `rgb(var(...) / alpha)`. Хардкод hex в TS запрещён |
-| РШ5 | Зерно на трёх SVG с CSS-анимацией | `feTurbulence` считается один раз, переключение кадров идёт через `steps(1, end)`, JS в рантайме не участвует |
-| РШ6 | Аберрация только на рамке карты | Фильтр на всём элементе fringes-ит текст. Отдельный слой с `inset` тенью и `group-hover` |
-| РШ7 | Размытие движения в раздаче карточек | `filter: blur(6px)` в начальном состоянии варианта, GPU-анимация в framer-motion |
-| РШ8 | Модалки: `blur(24px) saturate(0.8)` | Глубина резкости вместо плоского затемнения, значения в константах |
-| РШ9 | Настройки в `appearance.postProcessing` | Семь полей, отдельный `updatePostProcessing` в сторе, `zod`-схема с дефолтами |
-| РШ10 | `prefers-reduced-motion` отключает анимационные эффекты | Bloom и виньетка — статичные, зерно, развёртки, аберрация и размытие выключаются. Подписка на `matchMedia` уже была в `useDeviceTier` |
-| РШ11 | Low-tier определяется по `backdrop-filter` | Если браузер не умеет `backdrop-filter`, tier сразу `low`, качество опускается, зерно и развёртки отключаются |
-| РШ12 | Контекст читает стор напрямую | Один источник правды, значение мемоизировано, компоненты не получают пропсы |
+| #    | Решение                                                 | Обоснование                                                                                                                                            |
+| ---- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| РШ1  | CSS и SVG-фильтры, не WebGL                             | Интерфейс двумерный. Three.js дал бы +500 КБ бандла и отдельный canvas поверх DOM. `box-shadow`, `filter`, `backdrop-filter` ускоряются GPU в WebView2 |
+| РШ2  | Один слой `PostProcessingLayer` поверх `Layout`         | Виньетка, развёртки и зерно живут в одном `pointer-events: none` слое, z-index 9998 — ниже шума 9999 и модалок                                         |
+| РШ3  | Bloom через `box-shadow`                                | Тень не размывает содержимое, анимация только числовая и композитная                                                                                   |
+| РШ4  | Цвета только через CSS-переменные                       | В `globals.css` добавлены `--color-accent-*-rgb`, утилиты собирают `rgb(var(...) / alpha)`. Хардкод hex в TS запрещён                                  |
+| РШ5  | Зерно на трёх SVG с CSS-анимацией                       | `feTurbulence` считается один раз, переключение кадров идёт через `steps(1, end)`, JS в рантайме не участвует                                          |
+| РШ6  | Аберрация только на рамке карты                         | Фильтр на всём элементе fringes-ит текст. Отдельный слой с `inset` тенью и `group-hover`                                                               |
+| РШ7  | Размытие движения в раздаче карточек                    | `filter: blur(6px)` в начальном состоянии варианта, GPU-анимация в framer-motion                                                                       |
+| РШ8  | Модалки: `blur(24px) saturate(0.8)`                     | Глубина резкости вместо плоского затемнения, значения в константах                                                                                     |
+| РШ9  | Настройки в `appearance.postProcessing`                 | Семь полей, отдельный `updatePostProcessing` в сторе, `zod`-схема с дефолтами                                                                          |
+| РШ10 | `prefers-reduced-motion` отключает анимационные эффекты | Bloom и виньетка — статичные, зерно, развёртки, аберрация и размытие выключаются. Подписка на `matchMedia` уже была в `useDeviceTier`                  |
+| РШ11 | Low-tier определяется по `backdrop-filter`              | Если браузер не умеет `backdrop-filter`, tier сразу `low`, качество опускается, зерно и развёртки отключаются                                          |
+| РШ12 | Контекст читает стор напрямую                           | Один источник правды, значение мемоизировано, компоненты не получают пропсы                                                                            |
 
 ### Что сделано
 
-| Область | Решение |
-|---|---|
-| Типы | `types/appearance.ts`: `EffectIntensity`, `BloomColor`, `PostProcessingQuality`, `PostProcessingSettings` |
-| Значения по умолчанию | `bloom: normal`, `vignette: subtle`, зерно и развёртки выкл, аберрация и размытие вкл, качество `high` |
-| Токены | `lib/postProcessingTokens.ts`: профили свечения, градиенты виньетки, смещения аберрации, размытие, скейлы качества |
-| Утилиты | `lib/bloom.ts`, `lib/chromatic.ts`, `lib/vignette.ts`, `lib/motionBlur.ts` |
-| Контекст | `contexts/postProcessing.ts` + `contexts/PostProcessingProvider.tsx`, подключён в `main.tsx` через `app/providers.tsx` |
-| Хуки | `useBloom`, `useChromatic`, `useMotionBlur`, `useCardDealAnimation` учитывает размытие |
-| Слой | `components/shared/PostProcessingLayer.tsx` + `AnimatedGrain.tsx`, подключён в `Layout` |
-| Интерфейс | Button, Card, Badge, StatusOrb, Sidebar, StrategyGameCard, Modal |
-| Настройки | Секция «Пост-обработка» в `AppearanceSection` с семью контролами и сбросом |
-| Валидация | `settingsSchema.ts`, глубокий `mergeSettings`, обновление старых config.json без потери полей |
-| Переводы | RU и EN строки для секции |
+| Область               | Решение                                                                                                                |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Типы                  | `types/appearance.ts`: `EffectIntensity`, `BloomColor`, `PostProcessingQuality`, `PostProcessingSettings`              |
+| Значения по умолчанию | `bloom: normal`, `vignette: subtle`, зерно и развёртки выкл, аберрация и размытие вкл, качество `high`                 |
+| Токены                | `lib/postProcessingTokens.ts`: профили свечения, градиенты виньетки, смещения аберрации, размытие, скейлы качества     |
+| Утилиты               | `lib/bloom.ts`, `lib/chromatic.ts`, `lib/vignette.ts`, `lib/motionBlur.ts`                                             |
+| Контекст              | `contexts/postProcessing.ts` + `contexts/PostProcessingProvider.tsx`, подключён в `main.tsx` через `app/providers.tsx` |
+| Хуки                  | `useBloom`, `useChromatic`, `useMotionBlur`, `useCardDealAnimation` учитывает размытие                                 |
+| Слой                  | `components/shared/PostProcessingLayer.tsx` + `AnimatedGrain.tsx`, подключён в `Layout`                                |
+| Интерфейс             | Button, Card, Badge, StatusOrb, Sidebar, StrategyGameCard, Modal                                                       |
+| Настройки             | Секция «Пост-обработка» в `AppearanceSection` с семью контролами и сбросом                                             |
+| Валидация             | `settingsSchema.ts`, глубокий `mergeSettings`, обновление старых config.json без потери полей                          |
+| Переводы              | RU и EN строки для секции                                                                                              |
 
 ### Найденные отклонения от этапа 18
 
-| # | Ожидание спецификации | Что сделано | Почему |
-|---|---|---|---|
-| O114 | Модалки меняют `backdrop-filter` через класс | **Значения вынесены в константы и ставятся инлайном** | Tailwind-класс `backdrop-blur-xl` не умеет `saturate()`, а значение 24px должно совпадать с константой |
-| O115 | Отдельный файл `contexts/PostProcessingContext.tsx` | **Контекст и хук в `postProcessing.ts`, провайдер в `PostProcessingProvider.tsx`** | На Windows пути различаются только регистром, TypeScript путает `postProcessingContext.ts` и `PostProcessingContext.tsx`. Плюс так проходит правило fast refresh |
-| O116 | `useMotionBlur` возвращает `{ variants, transition }` | **Возвращает готовый пресет на framer-motion** | Типы `Variants` в framer-motion не принимают вложенный `transition` в объектах состояний, используется `TargetAndTransition` |
-| O117 | Bloom на кнопке усиливается через CSS-класс hover | **Через `onMouseEnter` и `onMouseLeave`** | Тень должна перетекать между состояниями без перерисовки компонента |
-| O118 | Аберрация применяется к карточке | **Только к отдельному слою рамки** | Иначе цвет расходится по тексту и цифрам, это заметно на тёмном фоне |
-| O119 | `PostProcessingLayer` z-index 9998 «ниже модалок» | **Слой выше модалок, но прозрачен в центре** | Модалки в проекте на `z-50`, поднять их выше 9998 нельзя без правки каждой. Виньетка начинается с 32–45 % радиуса, центральные окна не затрагиваются |
+| #    | Ожидание спецификации                                 | Что сделано                                                                        | Почему                                                                                                                                                           |
+| ---- | ----------------------------------------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| O114 | Модалки меняют `backdrop-filter` через класс          | **Значения вынесены в константы и ставятся инлайном**                              | Tailwind-класс `backdrop-blur-xl` не умеет `saturate()`, а значение 24px должно совпадать с константой                                                           |
+| O115 | Отдельный файл `contexts/PostProcessingContext.tsx`   | **Контекст и хук в `postProcessing.ts`, провайдер в `PostProcessingProvider.tsx`** | На Windows пути различаются только регистром, TypeScript путает `postProcessingContext.ts` и `PostProcessingContext.tsx`. Плюс так проходит правило fast refresh |
+| O116 | `useMotionBlur` возвращает `{ variants, transition }` | **Возвращает готовый пресет на framer-motion**                                     | Типы `Variants` в framer-motion не принимают вложенный `transition` в объектах состояний, используется `TargetAndTransition`                                     |
+| O117 | Bloom на кнопке усиливается через CSS-класс hover     | **Через `onMouseEnter` и `onMouseLeave`**                                          | Тень должна перетекать между состояниями без перерисовки компонента                                                                                              |
+| O118 | Аберрация применяется к карточке                      | **Только к отдельному слою рамки**                                                 | Иначе цвет расходится по тексту и цифрам, это заметно на тёмном фоне                                                                                             |
+| O119 | `PostProcessingLayer` z-index 9998 «ниже модалок»     | **Слой выше модалок, но прозрачен в центре**                                       | Модалки в проекте на `z-50`, поднять их выше 9998 нельзя без правки каждой. Виньетка начинается с 32–45 % радиуса, центральные окна не затрагиваются             |
 
 ### Что проверено на практике
 
-| Проверка | Результат |
-|---|---|
-| Сборка фронтенда | tsc 0, eslint 0, prettier 0, `pnpm build` 465 КБ |
-| Rust | cargo test 358/358, makensis без предупреждений |
-| Запуск приложения | Dashboard, Стратегии, Настройки → Внешний вид |
-| Секция настроек | Bloom, Виньетка, Зерно, Развёртки, Аберрация, Размытие, Качество |
-| Bloom «Сильно» | Ореол на кнопках «Подключить обход» и «Нет стратегий», на активном пункте меню и на легендарных карточках |
-| Все эффекты выкл | Ореолы исчезают, слой не рендерится |
-| Сохранение настроек | Значения из `config.json` подхватываются при старте, смена в UI пишется в файл |
-| Совместимость со старым config | Неизвестные поля получают дефолты при `mergeSettings` |
-| Производительность | Простой 0.3 % CPU, переключение страниц 0.5 % одного ядра, память 49 МБ |
-| Зерно и развёртки | Слой анимируется CSS-анимацией без JS-таймеров |
+| Проверка                       | Результат                                                                                                 |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------- |
+| Сборка фронтенда               | tsc 0, eslint 0, prettier 0, `pnpm build` 465 КБ                                                          |
+| Rust                           | cargo test 358/358, makensis без предупреждений                                                           |
+| Запуск приложения              | Dashboard, Стратегии, Настройки → Внешний вид                                                             |
+| Секция настроек                | Bloom, Виньетка, Зерно, Развёртки, Аберрация, Размытие, Качество                                          |
+| Bloom «Сильно»                 | Ореол на кнопках «Подключить обход» и «Нет стратегий», на активном пункте меню и на легендарных карточках |
+| Все эффекты выкл               | Ореолы исчезают, слой не рендерится                                                                       |
+| Сохранение настроек            | Значения из `config.json` подхватываются при старте, смена в UI пишется в файл                            |
+| Совместимость со старым config | Неизвестные поля получают дефолты при `mergeSettings`                                                     |
+| Производительность             | Простой 0.3 % CPU, переключение страниц 0.5 % одного ядра, память 49 МБ                                   |
+| Зерно и развёртки              | Слой анимируется CSS-анимацией без JS-таймеров                                                            |
 
 **Что не проверено:** профиль React DevTools (нет расширения в WebView2),
 throttling CPU в DevTools, системная настройка «уменьшить движение»
@@ -1321,71 +1330,70 @@ fullscreen) без горизонтального overflow.
 
 ### Принятые решения
 
-| # | Решение | Обоснование |
-|---|---|---|
-| РШ1 | Breakpoints xs/sm/md/lg/xl/2xl = 0/640/800/1024/1280/1536 | Совпадают с min-размером окна 800 и типовыми ноутбуками. 1366×768 при DPI 125 % даёт ~1093 CSS-пикселя и попадает в `lg` |
-| РШ2 | Sidebar сам сворачивается ниже `lg`, разворачивается от `xl` | Ручной выбор пользователя сохраняется, пока ширина в том же breakpoint. Ниже 1024 места для двух колонок нет |
-| РШ3 | Типографика и отступы через `clamp()` в `globals.css` | Плавно на resize без медиазапросов и JS. `--titlebar-height`, `--sidebar-width-*`, `--modal-width-*` тоже жидкие |
-| РШ4 | Container queries для Dashboard, карточек и логов | Компонент должен реагировать на ширину своего контейнера, а не окна: в сайдбаре и в модалке окно одно, а доступная ширина разная |
-| РШ5 | Сетка карточек `auto-fill` + `minmax(min(clamp(200px, 18vw, 260px), 100%), 1fr)` | Колонка всегда в диапазоне 200–260 px, значит карточка не разрастается до пустоты на 4K и не сжимается на 800×600 |
-| РШ6 | Соотношение сторон карточки 1:0.7 задаётся `aspect-ratio` | Высота следует за шириной колонки, отдельные фиксированные 280×400 px больше не нужны |
-| РШ7 | Скелетоны и пустые состояния на тех же fluid-токенах | Пока стратегии грузятся, сетка не «прыгает» при появлении карточек |
-| РШ8 | DPI не дублируется в CSS | WebView2 и так масштабирует интерфейс под системный DPI. Умножение `font-size` на scale factor дало бы двойное увеличение на 150 %. Вместо этого `useDpiScale` пересобирает backing store canvas графика трафика |
-| РШ9 | Canvas трафика пересчитывает ratio при смене DPI | `useTrafficCanvas` зависит от `useDpiScale`, поэтому при переносе окна между мониторами график остаётся чётким |
-| РШ10 | Полноэкранный режим — один хук `useFullscreen` в `Layout` | TitleBar получает состояние пропсом, слушатель клавиш один. `Escape` сначала закрывает модалку и только потом выходит из fullscreen |
-| РШ11 | В fullscreen TitleBar скрывается | Спецификация допускает скрытие или auto-hide. Скрытие проще: вернуть TitleBar можно по `Escape` или `F11` |
-| РШ12 | `MonitorInfo` отдаёт физический размер монитора и логический отдельно | `Monitor::size()` в Tauri уже в физических пикселях. Умножать его на scale factor было бы ошибкой вдвое |
-| РШ13 | Матрица конфигураций через Win32 `MoveWindow` вместо Playwright | Playwright не установлен, а Tauri-приложение всё равно проверяется живым окном. Сценарий временный, запускается из PowerShell и удаляется после прогона |
+| #    | Решение                                                                          | Обоснование                                                                                                                                                                                                      |
+| ---- | -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| РШ1  | Breakpoints xs/sm/md/lg/xl/2xl = 0/640/800/1024/1280/1536                        | Совпадают с min-размером окна 800 и типовыми ноутбуками. 1366×768 при DPI 125 % даёт ~1093 CSS-пикселя и попадает в `lg`                                                                                         |
+| РШ2  | Sidebar сам сворачивается ниже `lg`, разворачивается от `xl`                     | Ручной выбор пользователя сохраняется, пока ширина в том же breakpoint. Ниже 1024 места для двух колонок нет                                                                                                     |
+| РШ3  | Типографика и отступы через `clamp()` в `globals.css`                            | Плавно на resize без медиазапросов и JS. `--titlebar-height`, `--sidebar-width-*`, `--modal-width-*` тоже жидкие                                                                                                 |
+| РШ4  | Container queries для Dashboard, карточек и логов                                | Компонент должен реагировать на ширину своего контейнера, а не окна: в сайдбаре и в модалке окно одно, а доступная ширина разная                                                                                 |
+| РШ5  | Сетка карточек `auto-fill` + `minmax(min(clamp(200px, 18vw, 260px), 100%), 1fr)` | Колонка всегда в диапазоне 200–260 px, значит карточка не разрастается до пустоты на 4K и не сжимается на 800×600                                                                                                |
+| РШ6  | Соотношение сторон карточки 1:0.7 задаётся `aspect-ratio`                        | Высота следует за шириной колонки, отдельные фиксированные 280×400 px больше не нужны                                                                                                                            |
+| РШ7  | Скелетоны и пустые состояния на тех же fluid-токенах                             | Пока стратегии грузятся, сетка не «прыгает» при появлении карточек                                                                                                                                               |
+| РШ8  | DPI не дублируется в CSS                                                         | WebView2 и так масштабирует интерфейс под системный DPI. Умножение `font-size` на scale factor дало бы двойное увеличение на 150 %. Вместо этого `useDpiScale` пересобирает backing store canvas графика трафика |
+| РШ9  | Canvas трафика пересчитывает ratio при смене DPI                                 | `useTrafficCanvas` зависит от `useDpiScale`, поэтому при переносе окна между мониторами график остаётся чётким                                                                                                   |
+| РШ10 | Полноэкранный режим — один хук `useFullscreen` в `Layout`                        | TitleBar получает состояние пропсом, слушатель клавиш один. `Escape` сначала закрывает модалку и только потом выходит из fullscreen                                                                              |
+| РШ11 | В fullscreen TitleBar скрывается                                                 | Спецификация допускает скрытие или auto-hide. Скрытие проще: вернуть TitleBar можно по `Escape` или `F11`                                                                                                        |
+| РШ12 | `MonitorInfo` отдаёт физический размер монитора и логический отдельно            | `Monitor::size()` в Tauri уже в физических пикселях. Умножать его на scale factor было бы ошибкой вдвое                                                                                                          |
+| РШ13 | Матрица конфигураций через Win32 `MoveWindow` вместо Playwright                  | Playwright не установлен, а Tauri-приложение всё равно проверяется живым окном. Сценарий временный, запускается из PowerShell и удаляется после прогона                                                          |
 
 ### Что сделано
 
-| Область | Решение |
-|---|---|
-| Breakpoints | `lib/breakpoints.ts`: `BREAKPOINTS`, `resolveBreakpoint`, логика автосворачивания сайдбара |
-| Хуки | `useWindowResize` (троттлинг 100 мс), `useViewport` (размеры, DPR, соотношение сторон, breakpoint), `useMediaQuery`, `useAdaptiveSidebar`, `useFullscreen`, `useDpiScale` |
-| Токены | `globals.css`: жидкие `--space-*`, `--sidebar-width-*`, `--titlebar-height`, `--modal-width-*`, базовый `font-size` через `clamp()`, `min-width: 800px` / `min-height: 600px` на `body`, safe-area |
+| Область           | Решение                                                                                                                                                                                                         |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Breakpoints       | `lib/breakpoints.ts`: `BREAKPOINTS`, `resolveBreakpoint`, логика автосворачивания сайдбара                                                                                                                      |
+| Хуки              | `useWindowResize` (троттлинг 100 мс), `useViewport` (размеры, DPR, соотношение сторон, breakpoint), `useMediaQuery`, `useAdaptiveSidebar`, `useFullscreen`, `useDpiScale`                                       |
+| Токены            | `globals.css`: жидкие `--space-*`, `--sidebar-width-*`, `--titlebar-height`, `--modal-width-*`, базовый `font-size` через `clamp()`, `min-width: 800px` / `min-height: 600px` на `body`, safe-area              |
 | Container queries | `styles/container-queries.css`: `.dashboard-container`, `.logs-container`, `.cards-container`; при `≤640px` скрывается время в логах, при `≤460px` — источник, при `≤560px` карточки становятся одноколоночными |
-| Страницы | Dashboard (сетка 1/2/3 колонки), Стратегии (fluid-сетка + обрезка длинного пути), Логи (перенос панели фильтров), Монитор, Настройки, О приложении |
-| Компоненты | Sidebar (адаптивная ширина), TitleBar (кнопка fullscreen), StatusOrb (`clamp` 84–148 px), Modal (fluid-ширина и `max-h-[85vh]`) |
-| Окно | `tauri.conf.json`: `minWidth: 800`, `minHeight: 600`; capabilities — fullscreen, scale-factor, monitor |
-| Rust | `commands/window.rs`: `get_monitor_info`, `get_display_scale`, `toggle_fullscreen` + 2 теста |
-| Тесты | `usePrefersReducedMotion` переведён на общий `useMediaQuery` — один источник подписки на `matchMedia` |
+| Страницы          | Dashboard (сетка 1/2/3 колонки), Стратегии (fluid-сетка + обрезка длинного пути), Логи (перенос панели фильтров), Монитор, Настройки, О приложении                                                              |
+| Компоненты        | Sidebar (адаптивная ширина), TitleBar (кнопка fullscreen), StatusOrb (`clamp` 84–148 px), Modal (fluid-ширина и `max-h-[85vh]`)                                                                                 |
+| Окно              | `tauri.conf.json`: `minWidth: 800`, `minHeight: 600`; capabilities — fullscreen, scale-factor, monitor                                                                                                          |
+| Rust              | `commands/window.rs`: `get_monitor_info`, `get_display_scale`, `toggle_fullscreen` + 2 теста                                                                                                                    |
+| Тесты             | `usePrefersReducedMotion` переведён на общий `useMediaQuery` — один источник подписки на `matchMedia`                                                                                                           |
 
 ### Найденные отклонения от этапа 19
 
-| # | Ожидание спецификации | Что сделано | Почему |
-|---|---|---|---|
-| O120 | Сетка карточек становится 1-колоночной на 800×600 | **2–3 колонки по 200–260 px, одна колонка только при контейнере ≤560 px** | Минимальное окно 800 px оставляет ~700 px контента. Карточки 280 px в одну колонку превращаются в поле 700×400 с пустотой; в три колонки помещается шесть карточек без потери читаемости |
-| O121 | Playwright-тесты `tests/adaptive.spec.ts` с deviceScaleFactor | **Реальная матрица через Win32 `MoveWindow` и скриншоты** | Playwright в проекте нет, тестировать Tauri-окно через него дороже, чем напрямую. Матрица: 800×600, 1024×768 (4:3), 1280×720, 1366×768, 1920×1080, 2560×1080 (21:9), 2560×1440, fullscreen 2560×1440 |
-| O122 | `useDpiChange` пишет `--device-scale` в CSS | **Хук только отдаёт наружу scale factor** | Умножение `--device-scale` на базовый шрифт ломало бы вёрстку на 125–200 %. Переменная удалена из `globals.css` |
-| O123 | Отдельный `useFullscreen` не указан, логика в TitleBar | **Хук `useFullscreen` в `Layout`, TitleBar на пропсах** | TitleBar скрывается в fullscreen, а слушатель `F11`/`Escape` должен жить один; иначе `F11` переключал бы режим дважды |
-| O124 | TitleBar в fullscreen превращается в auto-hide | **Скрывается полностью** | Вариант из спецификации «скрывается или auto-hide». Возврат — `Escape`/`F11` |
-| O125 | `get_monitor_info` возвращает `size` с учётом scale | **Физический размер как есть, логический отдельно** | `Monitor::size()` в Tauri уже физический. Умножение давало бы 2880×1620 вместо 1920×1080 на мониторе 1920×1080 при 150 % |
-| O126 | Container query `.card-grid` переопределяет сетку на ≤560 px | **Сетка вынесена из inline-стиля в CSS** | Inline `style` всегда сильнее `@container`, правило было мёртвым |
+| #    | Ожидание спецификации                                         | Что сделано                                                               | Почему                                                                                                                                                                                               |
+| ---- | ------------------------------------------------------------- | ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| O120 | Сетка карточек становится 1-колоночной на 800×600             | **2–3 колонки по 200–260 px, одна колонка только при контейнере ≤560 px** | Минимальное окно 800 px оставляет ~700 px контента. Карточки 280 px в одну колонку превращаются в поле 700×400 с пустотой; в три колонки помещается шесть карточек без потери читаемости             |
+| O121 | Playwright-тесты `tests/adaptive.spec.ts` с deviceScaleFactor | **Реальная матрица через Win32 `MoveWindow` и скриншоты**                 | Playwright в проекте нет, тестировать Tauri-окно через него дороже, чем напрямую. Матрица: 800×600, 1024×768 (4:3), 1280×720, 1366×768, 1920×1080, 2560×1080 (21:9), 2560×1440, fullscreen 2560×1440 |
+| O122 | `useDpiChange` пишет `--device-scale` в CSS                   | **Хук только отдаёт наружу scale factor**                                 | Умножение `--device-scale` на базовый шрифт ломало бы вёрстку на 125–200 %. Переменная удалена из `globals.css`                                                                                      |
+| O123 | Отдельный `useFullscreen` не указан, логика в TitleBar        | **Хук `useFullscreen` в `Layout`, TitleBar на пропсах**                   | TitleBar скрывается в fullscreen, а слушатель `F11`/`Escape` должен жить один; иначе `F11` переключал бы режим дважды                                                                                |
+| O124 | TitleBar в fullscreen превращается в auto-hide                | **Скрывается полностью**                                                  | Вариант из спецификации «скрывается или auto-hide». Возврат — `Escape`/`F11`                                                                                                                         |
+| O125 | `get_monitor_info` возвращает `size` с учётом scale           | **Физический размер как есть, логический отдельно**                       | `Monitor::size()` в Tauri уже физический. Умножение давало бы 2880×1620 вместо 1920×1080 на мониторе 1920×1080 при 150 %                                                                             |
+| O126 | Container query `.card-grid` переопределяет сетку на ≤560 px  | **Сетка вынесена из inline-стиля в CSS**                                  | Inline `style` всегда сильнее `@container`, правило было мёртвым                                                                                                                                     |
 
 ### Что проверено на практике
 
-| Проверка | Результат |
-|---|---|
-| Сборка фронтенда | tsc 0, eslint 0, prettier 0, `pnpm build` 469.7 КБ |
-| Rust | `cargo test` 360/360, `tauri build --debug` и makensis без предупреждений, NSIS 8.74 МиБ |
-| 800×600 | Сайдбар свёрнут, Dashboard в одну колонку, карточки по 230 px, логи и модалка обновлений помещаются, панель фильтров логов переносится на две строки |
-| 1024×768 (4:3) | Сайдбар свёрнут, Dashboard в две колонки, четыре карточки в ряд |
-| 1280×720 | Сайдбар развёрнут (порог `xl`), карточки по 260 px |
-| 1366×768 | Четыре карточки в ряд, логи с колонкой времени |
-| 1920×1080 | Dashboard в три колонки, 6 карточек в ряд |
-| 2560×1080 (21:9) | Без горизонтального overflow, сайдбар развёрнут |
-| 2560×1440 | Монитор на всю ширину, графики чёткие, логи без обрезки |
-| Fullscreen | `F11` и кнопка в TitleBar дают 2560×1440, TitleBar скрыт, сайдбар на месте |
-| Escape | В модалке — закрывает модалку (окно остаётся fullscreen), вторым `Escape` выходит из fullscreen |
-| Модалка на 800×600 | Ширина по `--modal-width-lg`, changelog скроллится, футер с кнопками виден |
-| Логи | Время скрывается при контейнере ≤640 px, источник — при ≤460 px |
-| Путь к папке стратегий | Обрезается многоточием, полный путь в `title` |
+| Проверка               | Результат                                                                                                                                            |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Сборка фронтенда       | tsc 0, eslint 0, prettier 0, `pnpm build` 469.7 КБ                                                                                                   |
+| Rust                   | `cargo test` 360/360, `tauri build --debug` и makensis без предупреждений, NSIS 8.74 МиБ                                                             |
+| 800×600                | Сайдбар свёрнут, Dashboard в одну колонку, карточки по 230 px, логи и модалка обновлений помещаются, панель фильтров логов переносится на две строки |
+| 1024×768 (4:3)         | Сайдбар свёрнут, Dashboard в две колонки, четыре карточки в ряд                                                                                      |
+| 1280×720               | Сайдбар развёрнут (порог `xl`), карточки по 260 px                                                                                                   |
+| 1366×768               | Четыре карточки в ряд, логи с колонкой времени                                                                                                       |
+| 1920×1080              | Dashboard в три колонки, 6 карточек в ряд                                                                                                            |
+| 2560×1080 (21:9)       | Без горизонтального overflow, сайдбар развёрнут                                                                                                      |
+| 2560×1440              | Монитор на всю ширину, графики чёткие, логи без обрезки                                                                                              |
+| Fullscreen             | `F11` и кнопка в TitleBar дают 2560×1440, TitleBar скрыт, сайдбар на месте                                                                           |
+| Escape                 | В модалке — закрывает модалку (окно остаётся fullscreen), вторым `Escape` выходит из fullscreen                                                      |
+| Модалка на 800×600     | Ширина по `--modal-width-lg`, changelog скроллится, футер с кнопками виден                                                                           |
+| Логи                   | Время скрывается при контейнере ≤640 px, источник — при ≤460 px                                                                                      |
+| Путь к папке стратегий | Обрезается многоточием, полный путь в `title`                                                                                                        |
 
 **Что не проверено:** реальные 150/175/200 % DPI и перенос окна между
 мониторами с разным масштабом — на машине один монитор 2560×1440 при
 100 %; установка Playwright и прогон `tests/adaptive.spec.ts`.
-
 
 ---
 
@@ -1399,72 +1407,72 @@ fullscreen) без горизонтального overflow.
 
 ### Принятые решения
 
-| # | Решение | Обоснование |
-|---|---|---|
-| РШ1 | Метрики-цели до правок | Без измеримых целей оптимизация превращается в угадывание. Пороги вынесены в `PERF_TARGETS` в `lib/constants.ts` |
-| РШ2 | Baseline снимается на существующем коде | Сначала цифры, потом правки. Иначе невозможно доказать, что стало лучше |
-| РШ3 | Lazy только для нестартовых страниц | `Dashboard` и `Strategies` — 90 % времени пользователя, они остаются в главном чанке. `Monitor`, `Logs`, `Settings`, `About` грузятся по клику |
-| РШ4 | `Suspense` со скелетоном страницы | Ленивый чанк не должен показывать пустой экран. `PageSkeleton` повторяет структуру страницы |
-| РШ5 | `LicensesModal` ленивая, `UpdateModal` остаётся статичной | Модалка лицензий открывается вручную и редко. `UpdateModal` нужен на автопроверке при старте, выносить его в чанк бессмысленно |
-| РШ6 | `memo` только после стабилизации колбэков | `memo` без `useCallback` не даёт эффекта: новая функция каждый рендер. Поэтому `StrategyGameCardItem` и таблица обработчиков сайдбара |
-| РШ7 | Дашборд не перерисовывается из-за секундного тика | `useUptime` меняет значение раз в секунду. Виджеты пинга, логов и действий не зависят от uptime и закрыты `memo` |
-| РШ8 | `mousemove` карточек через `requestAnimationFrame` | На каждый `mousemove` читался `getBoundingClientRect()`, то есть принудительный layout. Теперь не чаще раза в кадр |
-| РШ9 | Флаш логов в `requestIdleCallback` с таймаутом 100 мс | Батчинг уже был, но шёл по таймеру и мог попасть в середину кадра. Idle отдаёт приоритет вводу, таймаут гарантирует flush |
-| РШ10 | Пинг пропускает запросы в фоне | Приложение живёт в трее; при `document.hidden` сетевые запросы не нужны |
-| РШ11 | `useShallow` не добавляем | Селекторы логов возвращают ссылки на массивы стора, производные значения считаются в `useMemo`. `useShallow` не меняет число ререндеров |
-| РШ12 | Шрифты не трогаем | Уже только нужные веса и subset latin + cyrillic, `font-display: swap`. Браузер грузит только woff2 — 158 КБ |
-| РШ13 | Rust не трогаем | Батчинг emit уже реализован: логи пачками раз в 100 мс, статистика сети раз в 100 мс, прогресс ресурсов троттлинг 100 мс |
-| РШ14 | `opt-level = 3`, не `"s"` | Этап ставит цели по скорости и памяти, а не по размеру бинарника. 12,28 МиБ и так укладывается в лимит 15 МБ |
-| РШ15 | Лимиты бандла проверяются скриптом | `scripts/perf-check.js` считает gzip каждого чанка и падает при превышении. Запуск: `pnpm perf:check` или `pnpm build:check` |
-| РШ16 | Dev-оверлей только в DEV | `PerfMonitor` показывает FPS, heap, число DOM-узлов и long tasks. В production вырезается на уровне `import.meta.env.DEV` |
+| #    | Решение                                                   | Обоснование                                                                                                                                    |
+| ---- | --------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| РШ1  | Метрики-цели до правок                                    | Без измеримых целей оптимизация превращается в угадывание. Пороги вынесены в `PERF_TARGETS` в `lib/constants.ts`                               |
+| РШ2  | Baseline снимается на существующем коде                   | Сначала цифры, потом правки. Иначе невозможно доказать, что стало лучше                                                                        |
+| РШ3  | Lazy только для нестартовых страниц                       | `Dashboard` и `Strategies` — 90 % времени пользователя, они остаются в главном чанке. `Monitor`, `Logs`, `Settings`, `About` грузятся по клику |
+| РШ4  | `Suspense` со скелетоном страницы                         | Ленивый чанк не должен показывать пустой экран. `PageSkeleton` повторяет структуру страницы                                                    |
+| РШ5  | `LicensesModal` ленивая, `UpdateModal` остаётся статичной | Модалка лицензий открывается вручную и редко. `UpdateModal` нужен на автопроверке при старте, выносить его в чанк бессмысленно                 |
+| РШ6  | `memo` только после стабилизации колбэков                 | `memo` без `useCallback` не даёт эффекта: новая функция каждый рендер. Поэтому `StrategyGameCardItem` и таблица обработчиков сайдбара          |
+| РШ7  | Дашборд не перерисовывается из-за секундного тика         | `useUptime` меняет значение раз в секунду. Виджеты пинга, логов и действий не зависят от uptime и закрыты `memo`                               |
+| РШ8  | `mousemove` карточек через `requestAnimationFrame`        | На каждый `mousemove` читался `getBoundingClientRect()`, то есть принудительный layout. Теперь не чаще раза в кадр                             |
+| РШ9  | Флаш логов в `requestIdleCallback` с таймаутом 100 мс     | Батчинг уже был, но шёл по таймеру и мог попасть в середину кадра. Idle отдаёт приоритет вводу, таймаут гарантирует flush                      |
+| РШ10 | Пинг пропускает запросы в фоне                            | Приложение живёт в трее; при `document.hidden` сетевые запросы не нужны                                                                        |
+| РШ11 | `useShallow` не добавляем                                 | Селекторы логов возвращают ссылки на массивы стора, производные значения считаются в `useMemo`. `useShallow` не меняет число ререндеров        |
+| РШ12 | Шрифты не трогаем                                         | Уже только нужные веса и subset latin + cyrillic, `font-display: swap`. Браузер грузит только woff2 — 158 КБ                                   |
+| РШ13 | Rust не трогаем                                           | Батчинг emit уже реализован: логи пачками раз в 100 мс, статистика сети раз в 100 мс, прогресс ресурсов троттлинг 100 мс                       |
+| РШ14 | `opt-level = 3`, не `"s"`                                 | Этап ставит цели по скорости и памяти, а не по размеру бинарника. 12,28 МиБ и так укладывается в лимит 15 МБ                                   |
+| РШ15 | Лимиты бандла проверяются скриптом                        | `scripts/perf-check.js` считает gzip каждого чанка и падает при превышении. Запуск: `pnpm perf:check` или `pnpm build:check`                   |
+| РШ16 | Dev-оверлей только в DEV                                  | `PerfMonitor` показывает FPS, heap, число DOM-узлов и long tasks. В production вырезается на уровне `import.meta.env.DEV`                      |
 
 ### Что сделано
 
-| Область | Решение |
-|---|---|
-| Code splitting | `React.lazy` для `Monitor`, `Logs`, `Settings`, `About`; `Suspense` в `app/App.tsx` |
-| Заглушка | `components/shared/PageSkeleton.tsx` с `aria-busy` и `sr-only` подписью |
-| Модалки | `LicensesModal` грузится по `lazy` в `AboutSection` |
-| Карточки | `StrategyGameCardItem` — `memo` + `useCallback` под id стратегии |
-| Сайдбар | `NavButton` — `memo`, обработчики в `useMemo` по `AppPage` |
-| Дашборд | `memo` для `DashboardConnection`, `DashboardPing`, `DashboardRecentLogs`, `DashboardQuickActions`; `useCallback` для `onRun`, `onStop`, `onOpenAllLogs` |
-| Логи | флаш батча на `requestIdleCallback` с `timeout`, отмена через `cancelScheduledFlush` |
-| Тилт карточек | `requestAnimationFrame` в `useCardTilt`, отмена кадра на `mouseleave` и при размонтировании |
-| Пинг | `document.hidden` пропускает запрос |
-| Сборка | `Cargo.toml`: `lto = "fat"`, `incremental = false`, `opt-level = 3`, `panic = "abort"`, `strip = true` |
-| Метрики | `lib/perf.ts` (`mark`, `measure`, `reportMetrics`), `hooks/useStartupMetrics.ts`, `hooks/usePerfSnapshot.ts`, `components/dev/PerfMonitor.tsx` |
-| Контроль | `scripts/perf-check.js`, скрипты `perf:check` и `build:check` в `package.json` |
+| Область        | Решение                                                                                                                                                 |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Code splitting | `React.lazy` для `Monitor`, `Logs`, `Settings`, `About`; `Suspense` в `app/App.tsx`                                                                     |
+| Заглушка       | `components/shared/PageSkeleton.tsx` с `aria-busy` и `sr-only` подписью                                                                                 |
+| Модалки        | `LicensesModal` грузится по `lazy` в `AboutSection`                                                                                                     |
+| Карточки       | `StrategyGameCardItem` — `memo` + `useCallback` под id стратегии                                                                                        |
+| Сайдбар        | `NavButton` — `memo`, обработчики в `useMemo` по `AppPage`                                                                                              |
+| Дашборд        | `memo` для `DashboardConnection`, `DashboardPing`, `DashboardRecentLogs`, `DashboardQuickActions`; `useCallback` для `onRun`, `onStop`, `onOpenAllLogs` |
+| Логи           | флаш батча на `requestIdleCallback` с `timeout`, отмена через `cancelScheduledFlush`                                                                    |
+| Тилт карточек  | `requestAnimationFrame` в `useCardTilt`, отмена кадра на `mouseleave` и при размонтировании                                                             |
+| Пинг           | `document.hidden` пропускает запрос                                                                                                                     |
+| Сборка         | `Cargo.toml`: `lto = "fat"`, `incremental = false`, `opt-level = 3`, `panic = "abort"`, `strip = true`                                                  |
+| Метрики        | `lib/perf.ts` (`mark`, `measure`, `reportMetrics`), `hooks/useStartupMetrics.ts`, `hooks/usePerfSnapshot.ts`, `components/dev/PerfMonitor.tsx`          |
+| Контроль       | `scripts/perf-check.js`, скрипты `perf:check` и `build:check` в `package.json`                                                                          |
 
 ### Найденные отклонения от этапа 20
 
-| # | Ожидание спецификации | Что сделано | Почему |
-|---|---|---|---|
-| O127 | `rollup-plugin-visualizer` в devDependencies | **Свой скрипт `scripts/perf-check.js` без новых зависимостей | Пакет не установлен и тянет граф зависимостей. Скрипт даёт нужное: размер каждого чанка в gzip и проверку лимитов |
-| O128 | `tests/performance.spec.ts` на Playwright | **Замеры скриптом на PowerShell и dev-оверлеем внутри приложения** | Playwright в проекте нет, ставить нельзя без сети. Вместо него: реальное окно, реальные клики, реальные цифры FPS и heap |
-| O129 | `opt-level = "s"` | **`opt-level = 3`** | Приоритет этапа — скорость и память. При `"s"` растёт время старта и просадки кадра. Бинарник 12,28 МиБ укладывается в лимит 15 МБ |
-| O130 | `useShallow` в селекторах логов | **Не добавлен** | Селекторы возвращают стабильные ссылки, производные объекты считаются в `useMemo`. Проверено чтением кода всех потребителей `useLogsStore` |
-| O131 | `UpdateModal` в lazy-чанке | **Оставлена статичной** | Открывается автоматически при проверке обновлений сразу после старта. Ленивая загрузка не дала бы выигрыша, но добавила бы вспышку `Suspense` |
-| O132 | Логи наполняются потоком от Rust | **Замерено добавление 10 000 логв пачками по 1000** | Потоковый сценарий требует запущенной стратегии и правки её `.bat`, измерить его на этой машине нельзя |
-| O133 | `THROTTLE_MOUSEMOVE_MS = 16` в константах | **rAF вместо таймера** | Таймер в 16 мс даёт джиттер, `requestAnimationFrame` синхронизирован с кадром. Константа не понадобилась |
-| O134 | `requestIdleCallback` без таймаута | **С `timeout: 100 мс`** | Без таймаута в занятом кадре батч логов мог бы задержаться на секунды, пользователь увидел бы «пустые» логи |
+| #    | Ожидание спецификации                        | Что сделано                                                        | Почему                                                                                                                                        |
+| ---- | -------------------------------------------- | ------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| O127 | `rollup-plugin-visualizer` в devDependencies | **Свой скрипт `scripts/perf-check.js` без новых зависимостей       | Пакет не установлен и тянет граф зависимостей. Скрипт даёт нужное: размер каждого чанка в gzip и проверку лимитов                             |
+| O128 | `tests/performance.spec.ts` на Playwright    | **Замеры скриптом на PowerShell и dev-оверлеем внутри приложения** | Playwright в проекте нет, ставить нельзя без сети. Вместо него: реальное окно, реальные клики, реальные цифры FPS и heap                      |
+| O129 | `opt-level = "s"`                            | **`opt-level = 3`**                                                | Приоритет этапа — скорость и память. При `"s"` растёт время старта и просадки кадра. Бинарник 12,28 МиБ укладывается в лимит 15 МБ            |
+| O130 | `useShallow` в селекторах логов              | **Не добавлен**                                                    | Селекторы возвращают стабильные ссылки, производные объекты считаются в `useMemo`. Проверено чтением кода всех потребителей `useLogsStore`    |
+| O131 | `UpdateModal` в lazy-чанке                   | **Оставлена статичной**                                            | Открывается автоматически при проверке обновлений сразу после старта. Ленивая загрузка не дала бы выигрыша, но добавила бы вспышку `Suspense` |
+| O132 | Логи наполняются потоком от Rust             | **Замерено добавление 10 000 логв пачками по 1000**                | Потоковый сценарий требует запущенной стратегии и правки её `.bat`, измерить его на этой машине нельзя                                        |
+| O133 | `THROTTLE_MOUSEMOVE_MS = 16` в константах    | **rAF вместо таймера**                                             | Таймер в 16 мс даёт джиттер, `requestAnimationFrame` синхронизирован с кадром. Константа не понадобилась                                      |
+| O134 | `requestIdleCallback` без таймаута           | **С `timeout: 100 мс`**                                            | Без таймаута в занятом кадре батч логов мог бы задержаться на секунды, пользователь увидел бы «пустые» логи                                   |
 
 ### Что проверено на практике
 
-| Проверка | Результат |
-|---|---|
-| Сборка фронтенда | tsc 0, eslint 0, prettier 0, `pnpm build` 291,6 КБ главный чанк |
-| `perf:check` | JS 311,5 / 400 КБ gzip, CSS 10,1 / 50 КБ, главный чанк 87,3 / 200 КБ — предел не достигнут |
-| Rust | `cargo test` 360/360, `tauri build` без ошибок |
-| Release-сборка | `zapret-manager.exe` 12,28 МиБ, NSIS 5,79 МиБ |
-| Холодный старт | 157 мс до появления окна (было 314 мс на debug) |
-| RAM в покое | 36,2 МБ working set, 9,4 МБ private (было 48,5 МБ) |
-| CPU | 188 мс за 10 с покоя, 750 мс за 120 переключений страниц (было 1328 мс) |
-| Утечки | 20×6 переключений: 36,2 → 37,9 МБ, через 8 с 37,5 МБ; handles 535 → 511 |
-| FPS | Dashboard 239, Стратегии 126, Монитор 130, Логи 236 |
-| Логи 10 000 строк | 236 FPS, heap 17,8 МБ, в DOM 419 узлов — виртуализация работает |
-| Lazy-страницы | Логи, Настройки, Монитор, «О приложении» открываются без пустого экрана, заглушка не задерживается |
-| Код-сплиттинг | В бандле появились отдельные чанки `Logs`, `Settings`, `About`, `Monitor`, `LicensesModal` |
-| Dev-оверлей | Показывает FPS, heap, DOM и long tasks, в production отсутствует |
+| Проверка          | Результат                                                                                          |
+| ----------------- | -------------------------------------------------------------------------------------------------- |
+| Сборка фронтенда  | tsc 0, eslint 0, prettier 0, `pnpm build` 291,6 КБ главный чанк                                    |
+| `perf:check`      | JS 311,5 / 400 КБ gzip, CSS 10,1 / 50 КБ, главный чанк 87,3 / 200 КБ — предел не достигнут         |
+| Rust              | `cargo test` 360/360, `tauri build` без ошибок                                                     |
+| Release-сборка    | `zapret-manager.exe` 12,28 МиБ, NSIS 5,79 МиБ                                                      |
+| Холодный старт    | 157 мс до появления окна (было 314 мс на debug)                                                    |
+| RAM в покое       | 36,2 МБ working set, 9,4 МБ private (было 48,5 МБ)                                                 |
+| CPU               | 188 мс за 10 с покоя, 750 мс за 120 переключений страниц (было 1328 мс)                            |
+| Утечки            | 20×6 переключений: 36,2 → 37,9 МБ, через 8 с 37,5 МБ; handles 535 → 511                            |
+| FPS               | Dashboard 239, Стратегии 126, Монитор 130, Логи 236                                                |
+| Логи 10 000 строк | 236 FPS, heap 17,8 МБ, в DOM 419 узлов — виртуализация работает                                    |
+| Lazy-страницы     | Логи, Настройки, Монитор, «О приложении» открываются без пустого экрана, заглушка не задерживается |
+| Код-сплиттинг     | В бандле появились отдельные чанки `Logs`, `Settings`, `About`, `Monitor`, `LicensesModal`         |
+| Dev-оверлей       | Показывает FPS, heap, DOM и long tasks, в production отсутствует                                   |
 
 **Что не проверено:** профилировщики Chrome DevTools (Performance,
 Memory, heap snapshots) и React DevTools Profiler — расширений нет в
@@ -1484,72 +1492,72 @@ WebView2; `cargo flamegraph` — нет `perf`; истинные 60 FPS на с�
 
 ### Принятые решения
 
-| # | Решение | Обоснование |
-|---|---|---|
-| РШ1 | Модель угроз STRIDE до правок | Без понимания, от кого защищаемся, проверки превращаются в гадания. Активы и «вне области» зафиксированы в `docs/SECURITY.md` |
-| РШ2 | Rust-команды не доверяют входным данным | Frontend может быть скомпрометирован через XSS, поэтому каждая команда валидирует аргументы сама |
-| РШ3 | Стратегия запускается только из последней просканированной папки | Раньше `run_strategy` принимал любой путь из интерфейса. Теперь Rust помнит папку после сканирования и сверяет путь через `canonicalize` |
-| РШ4 | Пути для `cmd.exe` не должны содержать `%`, `!` и кавычки | Проверено экспериментом: `%VAR%` расширяется даже внутри кавычек, а `^` не помогает. Такой путь отклоняется с записью в `security.log` |
-| РШ5 | Rate limit на критичных командах | 10 запусков стратегии в минуту, 1 установка обновления в 5 минут, 5 переключений VPN, 20 инъекций, 60 файловых операций |
-| РШ6 | Файлы и внешние ссылки открывает только Rust | fs и opener-плагины убраны из capabilities: путь, расширение, размер и схема URL проверяются на стороне Rust |
-| РШ7 | Ссылки открываются для любого публичного https-хоста | Открытие ссылки в системном браузере не даёт приложению доступа к сети. Запрещены только локальные и приватные адреса и ссылки с логином |
-| РШ8 | Скачивание обновлений — только по whitelist | `api.github.com`, `github.com`, `objects.githubusercontent.com`, `raw.githubusercontent.com`, `ipwho.is`, `ipapi.co` |
-| РШ9 | `security.log` отдельным таргетом tracing | Отказы безопасности отделены от обычных логов, файл не отправляется никуда, ротация на 1 МБ |
-| РШ10 | Никаких `unwrap`, `expect` и `panic` в production-коде | Вместо комментариев `// SAFETY` — конструкции кода: статические регулярные выражения инициализируются через `Lazy<Option<Regex>>` и ведут себя fail-closed, валидаторы доменов и IP написаны без регулярок |
-| РШ11 | Секреты не попадают в логи | `sanitize_log_message` скрывает `PrivateKey`, `password`, `token`; буферы VPN-конфигов обнуляются через `zeroize` |
-| РШ12 | Размеры файлов ограничены сверху | Текст 1 МБ, `.conf` 100 КБ, архив обновления 200 МБ, файл ресурса 50 МБ |
-| РШ13 | Zod-схемы на ответах IPC | Типы TypeScript не защищают в runtime. `strict()`-схемы ловят подмену ответа до того, как он попадёт в состояние |
-| РШ14 | Проверки безопасности без новых зависимостей | `eslint-plugin-security` и `rollup-plugin-visualizer` установить нельзя, поэтому `security-audit.mjs` проверяет опасные конструкции, capabilities и CSP своим кодом |
-| РШ15 | CSP усилен, devtools выключены | Добавлены `form-action 'none'` и `frame-ancestors 'none'`, `devtools: false` во всех сборках |
-| РШ16 | Тесты лимитеров не делят глобальное состояние | Команды разделены на command-обёртку (с rate limit) и внутреннюю функцию, которую зовут тесты |
+| #    | Решение                                                          | Обоснование                                                                                                                                                                                                |
+| ---- | ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| РШ1  | Модель угроз STRIDE до правок                                    | Без понимания, от кого защищаемся, проверки превращаются в гадания. Активы и «вне области» зафиксированы в `docs/SECURITY.md`                                                                              |
+| РШ2  | Rust-команды не доверяют входным данным                          | Frontend может быть скомпрометирован через XSS, поэтому каждая команда валидирует аргументы сама                                                                                                           |
+| РШ3  | Стратегия запускается только из последней просканированной папки | Раньше `run_strategy` принимал любой путь из интерфейса. Теперь Rust помнит папку после сканирования и сверяет путь через `canonicalize`                                                                   |
+| РШ4  | Пути для `cmd.exe` не должны содержать `%`, `!` и кавычки        | Проверено экспериментом: `%VAR%` расширяется даже внутри кавычек, а `^` не помогает. Такой путь отклоняется с записью в `security.log`                                                                     |
+| РШ5  | Rate limit на критичных командах                                 | 10 запусков стратегии в минуту, 1 установка обновления в 5 минут, 5 переключений VPN, 20 инъекций, 60 файловых операций                                                                                    |
+| РШ6  | Файлы и внешние ссылки открывает только Rust                     | fs и opener-плагины убраны из capabilities: путь, расширение, размер и схема URL проверяются на стороне Rust                                                                                               |
+| РШ7  | Ссылки открываются для любого публичного https-хоста             | Открытие ссылки в системном браузере не даёт приложению доступа к сети. Запрещены только локальные и приватные адреса и ссылки с логином                                                                   |
+| РШ8  | Скачивание обновлений — только по whitelist                      | `api.github.com`, `github.com`, `objects.githubusercontent.com`, `raw.githubusercontent.com`, `ipwho.is`, `ipapi.co`                                                                                       |
+| РШ9  | `security.log` отдельным таргетом tracing                        | Отказы безопасности отделены от обычных логов, файл не отправляется никуда, ротация на 1 МБ                                                                                                                |
+| РШ10 | Никаких `unwrap`, `expect` и `panic` в production-коде           | Вместо комментариев `// SAFETY` — конструкции кода: статические регулярные выражения инициализируются через `Lazy<Option<Regex>>` и ведут себя fail-closed, валидаторы доменов и IP написаны без регулярок |
+| РШ11 | Секреты не попадают в логи                                       | `sanitize_log_message` скрывает `PrivateKey`, `password`, `token`; буферы VPN-конфигов обнуляются через `zeroize`                                                                                          |
+| РШ12 | Размеры файлов ограничены сверху                                 | Текст 1 МБ, `.conf` 100 КБ, архив обновления 200 МБ, файл ресурса 50 МБ                                                                                                                                    |
+| РШ13 | Zod-схемы на ответах IPC                                         | Типы TypeScript не защищают в runtime. `strict()`-схемы ловят подмену ответа до того, как он попадёт в состояние                                                                                           |
+| РШ14 | Проверки безопасности без новых зависимостей                     | `eslint-plugin-security` и `rollup-plugin-visualizer` установить нельзя, поэтому `security-audit.mjs` проверяет опасные конструкции, capabilities и CSP своим кодом                                        |
+| РШ15 | CSP усилен, devtools выключены                                   | Добавлены `form-action 'none'` и `frame-ancestors 'none'`, `devtools: false` во всех сборках                                                                                                               |
+| РШ16 | Тесты лимитеров не делят глобальное состояние                    | Команды разделены на command-обёртку (с rate limit) и внутреннюю функцию, которую зовут тесты                                                                                                              |
 
 ### Что сделано
 
-| Область | Решение |
-|---|---|
-| Модуль `security` | `paths.rs`, `sanitize.rs`, `rate_limit.rs`, `url_validator.rs`, `mod.rs`, `audit_tests.rs` |
-| Пути | `safe_path`, `is_within`, `safe_filename`, `validate_strategy_id`, `validate_strategy_file` |
-| Команды | `escape_for_cmd`, `ensure_cmd_safe_value`, `validate_domain`, `validate_port`, `validate_ip`, `validate_ip_range`, `sanitize_log_message` |
-| Частоты | `RateLimiter` и пять глобальных лимитеров |
-| URL | `validate_https_url`, `validate_host` (whitelist), `is_public_host` |
-| Логи | `security.log` с ротацией 1 МБ, тесты записи и ротации |
-| Runner | `ScanState` запоминает просканированную папку; `run_strategy`, `stop_strategy`, `check_strategy_status` валидируют id, путь и частоту |
-| Scanner | папка проверяется на существование и запоминается как доверенная |
-| Инжектор | валидация каждого домена и CIDR, лимит частоты, валидация пути к `.bat` |
-| VPN | лимит 100 КБ, безопасное имя, `zeroize` для буфера, rate limit на переключение |
-| Обновления | whitelist доменов, лимит 200 МБ, rate limit 1 в 5 минут, проверка версии |
-| Ресурсы | отказ копировать файл больше 50 МБ |
-| Новые команды | `open_external_url`, `read_user_text_file`, `write_user_text_file` |
-| Frontend | `lib/sanitize.ts`, `lib/secureInvoke.ts`, `lib/userCommands.ts`, `types/ipcSchemas.ts` |
-| Конфигурация | `capabilities/default.json` — 31 разрешение без wildcard, CSP, `devtools: false` |
-| Линтер | `no-eval`, `no-implied-eval`, `no-new-func`, `no-script-url` |
-| Скрипты | `scripts/security-audit.mjs`, `.github/workflows/security.yml` |
+| Область           | Решение                                                                                                                                   |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Модуль `security` | `paths.rs`, `sanitize.rs`, `rate_limit.rs`, `url_validator.rs`, `mod.rs`, `audit_tests.rs`                                                |
+| Пути              | `safe_path`, `is_within`, `safe_filename`, `validate_strategy_id`, `validate_strategy_file`                                               |
+| Команды           | `escape_for_cmd`, `ensure_cmd_safe_value`, `validate_domain`, `validate_port`, `validate_ip`, `validate_ip_range`, `sanitize_log_message` |
+| Частоты           | `RateLimiter` и пять глобальных лимитеров                                                                                                 |
+| URL               | `validate_https_url`, `validate_host` (whitelist), `is_public_host`                                                                       |
+| Логи              | `security.log` с ротацией 1 МБ, тесты записи и ротации                                                                                    |
+| Runner            | `ScanState` запоминает просканированную папку; `run_strategy`, `stop_strategy`, `check_strategy_status` валидируют id, путь и частоту     |
+| Scanner           | папка проверяется на существование и запоминается как доверенная                                                                          |
+| Инжектор          | валидация каждого домена и CIDR, лимит частоты, валидация пути к `.bat`                                                                   |
+| VPN               | лимит 100 КБ, безопасное имя, `zeroize` для буфера, rate limit на переключение                                                            |
+| Обновления        | whitelist доменов, лимит 200 МБ, rate limit 1 в 5 минут, проверка версии                                                                  |
+| Ресурсы           | отказ копировать файл больше 50 МБ                                                                                                        |
+| Новые команды     | `open_external_url`, `read_user_text_file`, `write_user_text_file`                                                                        |
+| Frontend          | `lib/sanitize.ts`, `lib/secureInvoke.ts`, `lib/userCommands.ts`, `types/ipcSchemas.ts`                                                    |
+| Конфигурация      | `capabilities/default.json` — 31 разрешение без wildcard, CSP, `devtools: false`                                                          |
+| Линтер            | `no-eval`, `no-implied-eval`, `no-new-func`, `no-script-url`                                                                              |
+| Скрипты           | `scripts/security-audit.mjs`, `.github/workflows/security.yml`                                                                            |
 
 ### Найденные отклонения от этапа 21
 
-| # | Ожидание спецификации | Что сделано | Почему |
-|---|---|---|---|
-| O135 | Секция «Безопасность» в настройках с кнопкой проверки ресурсов | **Не добавлена** | Проверка целостности уже есть в «О приложении» и запускается автоматически. Отдельный экран дублировал бы существующий сценарий без новой ценности |
-| O136 | `useSecureInvoke` как хук | **`secureInvoke` как обычная функция** | Все вызовы команд идут из модулей и хуков данных, а не из компонентов. Хук нельзя вызвать вне React, поэтому он был бы мёртвым кодом |
-| O137 | `docs/SECURITY.md` и `SECURITY_AUDIT.md` в корне проекта | **`zapret-manager/docs/SECURITY.md` и `How to work/SECURITY_AUDIT.md`** | Документ для пользователей лежит рядом с приложением, отчёт по этапу — рядом с остальными отчётами проекта |
-| O138 | `escape_for_powershell` | **Не реализована** | PowerShell в приложении не вызывается: используются прямой `Command` и `ShellExecuteExW` |
-| O139 | `subtle` для constant-time сравнения хешей | **Не используется** | Хеши ресурсов сравниваются со строками из локального манифеста, а не с секретами. Константное время не даёт выигрыша |
-| O140 | `cargo audit` и `clippy` в чек-листе | **`pnpm audit` пройден, Rust-аудит записан как непроведённый** | `cargo-audit` не установлен и не собирается без сети, `clippy` отсутствует в тулчейне. CI-workflow содержит обе проверки для сред с сетью |
-| O141 | Отдельный `logs/security.log` через `tracing-appender` | **Свой writer без новой зависимости** | `tracing-appender` нет в `Cargo.lock`, а задача решается 40-строчным writer с ротацией |
+| #    | Ожидание спецификации                                          | Что сделано                                                             | Почему                                                                                                                                             |
+| ---- | -------------------------------------------------------------- | ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| O135 | Секция «Безопасность» в настройках с кнопкой проверки ресурсов | **Не добавлена**                                                        | Проверка целостности уже есть в «О приложении» и запускается автоматически. Отдельный экран дублировал бы существующий сценарий без новой ценности |
+| O136 | `useSecureInvoke` как хук                                      | **`secureInvoke` как обычная функция**                                  | Все вызовы команд идут из модулей и хуков данных, а не из компонентов. Хук нельзя вызвать вне React, поэтому он был бы мёртвым кодом               |
+| O137 | `docs/SECURITY.md` и `SECURITY_AUDIT.md` в корне проекта       | **`zapret-manager/docs/SECURITY.md` и `How to work/SECURITY_AUDIT.md`** | Документ для пользователей лежит рядом с приложением, отчёт по этапу — рядом с остальными отчётами проекта                                         |
+| O138 | `escape_for_powershell`                                        | **Не реализована**                                                      | PowerShell в приложении не вызывается: используются прямой `Command` и `ShellExecuteExW`                                                           |
+| O139 | `subtle` для constant-time сравнения хешей                     | **Не используется**                                                     | Хеши ресурсов сравниваются со строками из локального манифеста, а не с секретами. Константное время не даёт выигрыша                               |
+| O140 | `cargo audit` и `clippy` в чек-листе                           | **`pnpm audit` пройден, Rust-аудит записан как непроведённый**          | `cargo-audit` не установлен и не собирается без сети, `clippy` отсутствует в тулчейне. CI-workflow содержит обе проверки для сред с сетью          |
+| O141 | Отдельный `logs/security.log` через `tracing-appender`         | **Свой writer без новой зависимости**                                   | `tracing-appender` нет в `Cargo.lock`, а задача решается 40-строчным writer с ротацией                                                             |
 
 ### Что проверено на практике
 
-| Проверка | Результат |
-|---|---|
-| `node scripts/security-audit.mjs` | src чист, panic-конструкций нет, wildcard нет, CSP полный |
-| `cargo test` | 396/396 (было 360, добавлено 36 тестов безопасности) |
-| `pnpm exec tsc --noEmit` | 0 ошибок |
-| `pnpm exec eslint .` | 0 ошибок и предупреждений |
-| `pnpm exec prettier --check .` | без замечаний |
-| `pnpm audit --audit-level=high` и `--prod` | уязвимостей нет |
-| `pnpm run perf:check` | бандл в лимитах после изменений |
-| Запуск приложения | Все страницы работают, сканирование стратегий проходит Zod-проверку, RAM 49 МБ |
-| Кодировка файлов | Все изменённые исходники проверены на mojibake, восстановлены 7 файлов |
+| Проверка                                   | Результат                                                                      |
+| ------------------------------------------ | ------------------------------------------------------------------------------ |
+| `node scripts/security-audit.mjs`          | src чист, panic-конструкций нет, wildcard нет, CSP полный                      |
+| `cargo test`                               | 396/396 (было 360, добавлено 36 тестов безопасности)                           |
+| `pnpm exec tsc --noEmit`                   | 0 ошибок                                                                       |
+| `pnpm exec eslint .`                       | 0 ошибок и предупреждений                                                      |
+| `pnpm exec prettier --check .`             | без замечаний                                                                  |
+| `pnpm audit --audit-level=high` и `--prod` | уязвимостей нет                                                                |
+| `pnpm run perf:check`                      | бандл в лимитах после изменений                                                |
+| Запуск приложения                          | Все страницы работают, сканирование стратегий проходит Zod-проверку, RAM 49 МБ |
+| Кодировка файлов                           | Все изменённые исходники проверены на mojibake, восстановлены 7 файлов         |
 
 **Что не проверено:** ручные попытки вызова команд с
 вредоносными аргументами из DevTools (devtools отключены, логика закрыта
@@ -1565,16 +1573,16 @@ WebView2; `cargo flamegraph` — нет `perf`; истинные 60 FPS на с�
 
 ### Принятые решения
 
-| # | Решение | Почему |
-|---|---------|--------|
-| D27 | Vitest + jsdom, конфиг рядом с Vite, алиас `@` переиспользован | Тот же резолвер, что и у приложения, без дублирования конфигурации |
-| D28 | Покрытие считается только по `src/lib/**` и `src/stores/**` | IPC-адаптеры проверяются E2E-моками и Rust-тестами, мерить их отдельно бессмысленно; пороги 65/55/60/65 |
-| D29 | E2E гоняем в браузере с моками Tauri (`window.__TAURI_INTERNALS__`), без WebView2 | На CI нет WebView2, а покрытие сценариев от этого не страдает |
-| D30 | Каждый E2E-сценарий проверяет консоль на отсутствие `error` | «Чистая консоль» из чек-листа становится проверяемым критерием, а не ручным наблюдением |
-| D31 | Авто-режим сайдбара переведён с `toggle` на идемпотентный `setCollapsed` | В React StrictMode эффект выполняется дважды, и `toggle` дважды возвращал исходное состояние |
-| D32 | Мёртвый код удалён по данным knip + `tsc --noEmit` (noUnusedLocals) | Список «неиспользуемого» получается автоматически, а не на глаз |
-| D33 | Локализация контролируется счётчиком хардкодов (`scripts/i18n-check.mjs`) | Полный перенос строк в словари — отдельная задача; сейчас фиксируем базовую линию (305) и запрещаем рост |
-| D34 | Soak измеряет JS heap через CDP с принудительным GC | Метрика повторяема: без `collectGarbage` значения скачут и не сравнимы |
+| #   | Решение                                                                           | Почему                                                                                                   |
+| --- | --------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| D27 | Vitest + jsdom, конфиг рядом с Vite, алиас `@` переиспользован                    | Тот же резолвер, что и у приложения, без дублирования конфигурации                                       |
+| D28 | Покрытие считается только по `src/lib/**` и `src/stores/**`                       | IPC-адаптеры проверяются E2E-моками и Rust-тестами, мерить их отдельно бессмысленно; пороги 65/55/60/65  |
+| D29 | E2E гоняем в браузере с моками Tauri (`window.__TAURI_INTERNALS__`), без WebView2 | На CI нет WebView2, а покрытие сценариев от этого не страдает                                            |
+| D30 | Каждый E2E-сценарий проверяет консоль на отсутствие `error`                       | «Чистая консоль» из чек-листа становится проверяемым критерием, а не ручным наблюдением                  |
+| D31 | Авто-режим сайдбара переведён с `toggle` на идемпотентный `setCollapsed`          | В React StrictMode эффект выполняется дважды, и `toggle` дважды возвращал исходное состояние             |
+| D32 | Мёртвый код удалён по данным knip + `tsc --noEmit` (noUnusedLocals)               | Список «неиспользуемого» получается автоматически, а не на глаз                                          |
+| D33 | Локализация контролируется счётчиком хардкодов (`scripts/i18n-check.mjs`)         | Полный перенос строк в словари — отдельная задача; сейчас фиксируем базовую линию (305) и запрещаем рост |
+| D34 | Soak измеряет JS heap через CDP с принудительным GC                               | Метрика повторяема: без `collectGarbage` значения скачут и не сравнимы                                   |
 
 ### Что сделано
 
@@ -1595,27 +1603,27 @@ WebView2; `cargo flamegraph` — нет `perf`; истинные 60 FPS на с�
 
 ### Найденные отклонения от этапа 22
 
-| Отклонение | Причина | Решение |
-|---|---|---|
-| Не удалось покрыть unit-тестами все страницы (критерий «покрытие > 60 %») | UI-компоненты требуют рендера с Tauri-контекстом | Покрытие считается по `src/lib` + `src/stores` (76 % lines), страницы закрыты E2E |
-| `cargo clippy` дал 12 замечаний | код написан до включения `-D warnings` в ручном режиме | Все замечания исправлены, clippy чист |
-| Требование «Playwright недоступен без сети» не подтвердилось | сеть доступна | Playwright и Chromium установлены, E2E выполняются локально и в CI |
-| Полный перенос локализации в словари не сделан | 305 хардкодов в 40+ компонентах | Зафиксирована базовая линия и добавлен контроль роста; перенос — отдельная задача |
-| Реальный WireGuard- и multi-DPI soak не выполнены | WireGuard не установлен, один монитор | Зафиксировано в `TEST_REPORT.md` как ограничение |
+| Отклонение                                                                | Причина                                                | Решение                                                                           |
+| ------------------------------------------------------------------------- | ------------------------------------------------------ | --------------------------------------------------------------------------------- |
+| Не удалось покрыть unit-тестами все страницы (критерий «покрытие > 60 %») | UI-компоненты требуют рендера с Tauri-контекстом       | Покрытие считается по `src/lib` + `src/stores` (76 % lines), страницы закрыты E2E |
+| `cargo clippy` дал 12 замечаний                                           | код написан до включения `-D warnings` в ручном режиме | Все замечания исправлены, clippy чист                                             |
+| Требование «Playwright недоступен без сети» не подтвердилось              | сеть доступна                                          | Playwright и Chromium установлены, E2E выполняются локально и в CI                |
+| Полный перенос локализации в словари не сделан                            | 305 хардкодов в 40+ компонентах                        | Зафиксирована базовая линия и добавлен контроль роста; перенос — отдельная задача |
+| Реальный WireGuard- и multi-DPI soak не выполнены                         | WireGuard не установлен, один монитор                  | Зафиксировано в `TEST_REPORT.md` как ограничение                                  |
 
 ### Что проверено на практике
 
-| Проверка | Результат |
-|---|---|
-| `pnpm test:coverage` | 240 тестов, 16 файлов, покрытие 75.5 % statements / 64.7 % branches / 75.7 % functions / 76.0 % lines |
-| `pnpm e2e` | 30/30 сценариев, консоль чистая во всех |
-| `cargo test` | 396 unit + 14 интеграционных |
-| `cargo clippy --all-targets --all-features -- -D warnings` | 0 warning'ов |
-| `pnpm lint:dead` (knip) | 0 неиспользуемых файлов, зависимостей и экспортов |
-| `pnpm typecheck`, `pnpm lint`, `pnpm format:check` | 0 ошибок |
-| `pnpm build` | сборка успешна, бандл в лимитах |
-| `pnpm e2e:soak` (30 мин, 229 циклов) | рост heap 7.5 MB при бюджете 20 MB, ошибок консоли 0 |
-| `pnpm lint:i18n` | 305 хардкодов, роста нет |
+| Проверка                                                   | Результат                                                                                             |
+| ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `pnpm test:coverage`                                       | 240 тестов, 16 файлов, покрытие 75.5 % statements / 64.7 % branches / 75.7 % functions / 76.0 % lines |
+| `pnpm e2e`                                                 | 30/30 сценариев, консоль чистая во всех                                                               |
+| `cargo test`                                               | 396 unit + 14 интеграционных                                                                          |
+| `cargo clippy --all-targets --all-features -- -D warnings` | 0 warning'ов                                                                                          |
+| `pnpm lint:dead` (knip)                                    | 0 неиспользуемых файлов, зависимостей и экспортов                                                     |
+| `pnpm typecheck`, `pnpm lint`, `pnpm format:check`         | 0 ошибок                                                                                              |
+| `pnpm build`                                               | сборка успешна, бандл в лимитах                                                                       |
+| `pnpm e2e:soak` (30 мин, 229 циклов)                       | рост heap 7.5 MB при бюджете 20 MB, ошибок консоли 0                                                  |
+| `pnpm lint:i18n`                                           | 305 хардкодов, роста нет                                                                              |
 
 **Что не проверено:** soak в реальном WebView2 (замер шёл в браузере через Vite),
 реальный WireGuard, перенос окна между мониторами с разным DPI.
@@ -1624,13 +1632,13 @@ WebView2; `cargo flamegraph` — нет `perf`; истинные 60 FPS на с�
 
 ### Принятые решения
 
-| # | Решение | Почему |
-|---|---------|--------|
-| D35 | Скрипты релиза на Node (`bump-version.mjs`, `release-local.mjs`, `release-artifacts.mjs`), а не на bash | Проект кроссплатформенный по сборочному окружению, `package.json` в ESM; bash-скрипты из спецификации не запустились бы на Windows |
-| D36 | `release.yml` создаёт черновик релиза, публикация — ручным снятием draft | Стадия 23 запрещает публиковать без ручного smoke-теста, автоматическая публикация обошла бы этот запрет |
-| D37 | Checksums и portable ZIP собираются тем же скриптом, что и установщики | Хеши считаются по фактическим файлам на одной машине, расхождение исключено |
-| D38 | Скриншоты для README снимаются скриптом с моками Tauri | Реальные снимки интерфейса воспроизводимы и не содержат данных пользователя |
-| D39 | Версия синхронизируется в четырёх файлах (`package.json`, `Cargo.toml`, `tauri.conf.json`, `constants.ts`) | `APP_VERSION` показывается в UI, расхождение с билд-версией было бы заметно пользователю |
+| #   | Решение                                                                                                    | Почему                                                                                                                             |
+| --- | ---------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| D35 | Скрипты релиза на Node (`bump-version.mjs`, `release-local.mjs`, `release-artifacts.mjs`), а не на bash    | Проект кроссплатформенный по сборочному окружению, `package.json` в ESM; bash-скрипты из спецификации не запустились бы на Windows |
+| D36 | `release.yml` создаёт черновик релиза, публикация — ручным снятием draft                                   | Стадия 23 запрещает публиковать без ручного smoke-теста, автоматическая публикация обошла бы этот запрет                           |
+| D37 | Checksums и portable ZIP собираются тем же скриптом, что и установщики                                     | Хеши считаются по фактическим файлам на одной машине, расхождение исключено                                                        |
+| D38 | Скриншоты для README снимаются скриптом с моками Tauri                                                     | Реальные снимки интерфейса воспроизводимы и не содержат данных пользователя                                                        |
+| D39 | Версия синхронизируется в четырёх файлах (`package.json`, `Cargo.toml`, `tauri.conf.json`, `constants.ts`) | `APP_VERSION` показывается в UI, расхождение с билд-версией было бы заметно пользователю                                           |
 
 ### Что сделано
 
@@ -1659,25 +1667,46 @@ WebView2; `cargo flamegraph` — нет `perf`; истинные 60 FPS на с�
 
 ### Что проверено на практике
 
-| Проверка | Результат |
-|---|---|
-| `pnpm tauri build` (nsis + msi) | 2 бандла собраны, ошибок нет |
-| NSIS-установщик | `Zapret Manager_0.1.0_x64-setup.exe`, 5.81 MiB |
-| MSI-пакет | `Zapret Manager_0.1.0_x64_ru-RU.msi`, 7.57 MiB |
-| Portable | `ZapretManager_0.1.0_x64_portable.zip`, 5.84 MiB |
-| `pnpm release:artifacts` | артефакты в `release/`, `SHA256SUMS.txt` создан |
-| Проверка сумм | все три хеша совпадают (SHA-256) |
-| `pnpm screenshots` | 4 скриншота интерфейса без dev-оверлея |
-| Все проверки этапа 22 | зелёные (unit, E2E, cargo test, clippy, knip) |
+| Проверка                        | Результат                                        |
+| ------------------------------- | ------------------------------------------------ |
+| `pnpm tauri build` (nsis + msi) | 2 бандла собраны, ошибок нет                     |
+| NSIS-установщик                 | `Zapret Manager_0.1.0_x64-setup.exe`, 5.81 MiB   |
+| MSI-пакет                       | `Zapret Manager_0.1.0_x64_ru-RU.msi`, 7.57 MiB   |
+| Portable                        | `ZapretManager_0.1.0_x64_portable.zip`, 5.84 MiB |
+| `pnpm release:artifacts`        | артефакты в `release/`, `SHA256SUMS.txt` создан  |
+| Проверка сумм                   | все три хеша совпадают (SHA-256)                 |
+| `pnpm screenshots`              | 4 скриншота интерфейса без dev-оверлея           |
+| Все проверки этапа 22           | зелёные (unit, E2E, cargo test, clippy, knip)    |
 
 ### Найденные отклонения от этапа 23
 
-| Отклонение | Причина | Решение |
-|---|---|---|
-| MSI не собирается с двумя локалями (`LGHT0311`) | WiX 3.x не объединяет базы 1251 и 1252 в одной MSI | MSI собирается в `ru-RU`, английская установка идёт через двуязычный NSIS |
-| Текст лицензии установщика ломал линковку MSI | символы вне cp1251 (длинное тире, стрелка) | `installer/license.txt` приведён к cp1251 |
-| Скрипты релиза на Node, а не на bash | спецификация предлагает `.sh`, проект собирается на Windows | `bump-version.mjs`, `release-local.mjs`, `release-artifacts.mjs` |
-| Публикация релиза не выполнялась | требуется GitHub-репозиторий и ручной smoke-тест на чистой VM | подготовлены `release.yml`, чек-листы и артефакты; публикация — за пользователем |
+| Отклонение                                      | Причина                                                       | Решение                                                                          |
+| ----------------------------------------------- | ------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| MSI не собирается с двумя локалями (`LGHT0311`) | WiX 3.x не объединяет базы 1251 и 1252 в одной MSI            | MSI собирается в `ru-RU`, английская установка идёт через двуязычный NSIS        |
+| Текст лицензии установщика ломал линковку MSI   | символы вне cp1251 (длинное тире, стрелка)                    | `installer/license.txt` приведён к cp1251                                        |
+| Скрипты релиза на Node, а не на bash            | спецификация предлагает `.sh`, проект собирается на Windows   | `bump-version.mjs`, `release-local.mjs`, `release-artifacts.mjs`                 |
+| Публикация релиза не выполнялась                | требуется GitHub-репозиторий и ручной smoke-тест на чистой VM | подготовлены `release.yml`, чек-листы и артефакты; публикация — за пользователем |
 
 **Что не проверено:** публикация в GitHub Releases, smoke-тест на чистой Windows VM,
 работа автообновления после публикации — для этого нужны удалённый репозиторий и отдельная система.
+
+### Smoke-тест локального релиза
+
+Проведён на этой машине: установка NSIS, первый запуск, распаковка ресурсов, стабильность,
+удаление. Подробности — zapret-manager/docs/SMOKE_TEST.md.
+
+Найден и исправлен критичный дефект релизной сборки: ресурсы искались по пути машины сборки
+(env!(\"CARGO_MANIFEST_DIR\")), из-за чего на чистой машине первый запуск не распаковывал
+стратегии. Теперь этот путь используется только в debug-сборках
+(src-tauri/src/commands/resources_fs.rs, uild_resource_roots), добавлены 4 теста.
+После исправления повторная установка даёт 23 стратегии в %APPDATA%\com.zapretmanager.app\strategies.
+
+### Состояние репозитория
+
+- Локальный git-репозиторий создан (`main`), первый коммит `release: v0.1.0` (1011 файлов),
+  аннотированный тег `v0.1.0`.
+- Рабочее дерево чистое, артефакты сборки, `node_modules`, `target`, `release/` и `-args` в репозиторий
+  не попали (описаны в корневом `.gitignore`).
+- Автор коммита: `Zapret Manager Contributors <noreply@users.noreply.github.com>` — замените на свой
+  перед первым push, если нужен реальный автор.
+- Удалённый репозиторий не настроен: для публикации нужны `git remote add origin <url>` и push тега.

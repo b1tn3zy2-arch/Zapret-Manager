@@ -46,25 +46,39 @@ pub fn resources_dir(app: &tauri::AppHandle) -> AppResult<PathBuf> {
     Ok(fallback)
 }
 
-fn resource_roots(app: &tauri::AppHandle) -> Vec<PathBuf> {
-    use tauri::Manager;
-
+fn build_resource_roots(
+    resource_dir: Option<PathBuf>,
+    exe_path: Option<PathBuf>,
+    allow_manifest_dir: bool,
+) -> Vec<PathBuf> {
     let mut roots = Vec::new();
 
-    if let Ok(resource) = app.path().resource_dir() {
+    if let Some(resource) = resource_dir {
         roots.push(resource.join(RESOURCES_DIR));
         roots.push(resource);
     }
 
-    if let Ok(exe) = std::env::current_exe() {
+    if let Some(exe) = exe_path {
         if let Some(parent) = exe.parent() {
             roots.push(parent.join(RESOURCES_DIR));
         }
     }
 
-    roots.push(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(RESOURCES_DIR));
+    if allow_manifest_dir {
+        roots.push(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(RESOURCES_DIR));
+    }
 
     roots
+}
+
+fn resource_roots(app: &tauri::AppHandle) -> Vec<PathBuf> {
+    use tauri::Manager;
+
+    build_resource_roots(
+        app.path().resource_dir().ok(),
+        std::env::current_exe().ok(),
+        cfg!(debug_assertions),
+    )
 }
 
 pub fn ensure_app_dirs(app_dir: &Path) -> AppResult<()> {
