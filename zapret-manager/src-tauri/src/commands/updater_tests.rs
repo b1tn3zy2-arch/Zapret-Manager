@@ -1,4 +1,4 @@
-﻿use super::*;
+use super::*;
 
 fn asset(name: &str, url: &str, size: u64) -> GitHubAsset {
     GitHubAsset {
@@ -217,4 +217,50 @@ fn test_github_release_deserializes_from_api_shape() {
     assert_eq!(parsed.tag_name, "1.10.3");
     assert_eq!(parsed.assets.len(), 1);
     assert_eq!(parsed.assets[0].size, 1_510_219);
+}
+
+#[test]
+fn test_build_info_against_real_upstream_release() {
+    let raw = include_str!("../../tests/fixtures/upstream_release_1.10.3.json");
+    let release: GitHubRelease = serde_json::from_str(raw).expect("fixture is valid");
+
+    let info = build_info(&release, "1.10.2", &[]);
+
+    assert!(info.available, "обновление должно предлагаться");
+    assert_eq!(info.latest_version, "1.10.3");
+    assert_eq!(info.current_version, "1.10.2");
+    assert_eq!(
+        info.asset_name, "zapret-discord-youtube-1.10.3.zip",
+        "выбирается zip, а не rar или tar.gz"
+    );
+    assert_eq!(info.size, 1_510_219);
+    assert_eq!(
+        info.download_url,
+        "https://github.com/Flowseal/zapret-discord-youtube/releases/download/1.10.3/zapret-discord-youtube-1.10.3.zip"
+    );
+    assert_eq!(info.published_at, "2026-09-20T08:46:37Z");
+    assert!(info.release_notes.contains("GameFilter"));
+    assert!(!info.release_notes.is_empty());
+}
+
+#[test]
+fn test_build_info_real_release_is_up_to_date_for_same_version() {
+    let raw = include_str!("../../tests/fixtures/upstream_release_1.10.3.json");
+    let release: GitHubRelease = serde_json::from_str(raw).expect("fixture is valid");
+
+    let info = build_info(&release, "1.10.3", &[]);
+
+    assert!(!info.available, "актуальная версия не должна предлагаться");
+    assert!(!info.is_newer);
+}
+
+#[test]
+fn test_build_info_real_release_honours_ignore() {
+    let raw = include_str!("../../tests/fixtures/upstream_release_1.10.3.json");
+    let release: GitHubRelease = serde_json::from_str(raw).expect("fixture is valid");
+
+    let info = build_info(&release, "1.10.2", &["v1.10.3".to_string()]);
+
+    assert!(info.ignored);
+    assert!(!info.available);
 }

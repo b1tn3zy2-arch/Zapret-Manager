@@ -1,0 +1,23 @@
+{
+  "tag_name": "1.10.3",
+  "name": "1.10.3",
+  "body": "## What's Changed\n* **Добавлена возможность смены портов GameFilter**\n* Исправление загрузок с Github (IPv4 + IPv6)\n",
+  "published_at": "2026-09-20T08:46:37Z",
+  "assets": [
+    {
+      "name": "zapret-discord-youtube-1.10.3.rar",
+      "browser_download_url": "https://github.com/Flowseal/zapret-discord-youtube/releases/download/1.10.3/zapret-discord-youtube-1.10.3.rar",
+      "size": 1284679
+    },
+    {
+      "name": "zapret-discord-youtube-1.10.3.tar.gz",
+      "browser_download_url": "https://github.com/Flowseal/zapret-discord-youtube/releases/download/1.10.3/zapret-discord-youtube-1.10.3.tar.gz",
+      "size": 1493470
+    },
+    {
+      "name": "zapret-discord-youtube-1.10.3.zip",
+      "browser_download_url": "https://github.com/Flowseal/zapret-discord-youtube/releases/download/1.10.3/zapret-discord-youtube-1.10.3.zip",
+      "size": 1510219
+    }
+  ]
+}

@@ -36,8 +36,12 @@ e2e/mock-tauri.ts         мок Tauri IPC и событий
 e2e/helpers.ts            общие хелперы (bootstrap, sidebar, settingsNav)
 tests/setup.ts            jsdom-подготовка и cleanup
 src-tauri/tests/          интеграционные тесты Rust
+src-tauri/tests/fixtures/ фикстуры внешних API (например, ответ GitHub Releases)
 scripts/soak-check.mjs    soak-прогон с замером heap
 scripts/i18n-check.mjs    контроль хардкодов локализации
+scripts/check-release-metadata.mjs  версии, ссылки и плейсхолдеры релиза
+scripts/extract-changelog.mjs        извлечение секции CHANGELOG для релиза
+scripts/verify-portable.mjs          проверка portable-архива
 ```
 
 ## Локальный запуск
@@ -89,6 +93,18 @@ describe("formatBytes", () => {
   паузы — только там, где нет наблюдаемого состояния.
 - Обновление обновлений (`check_for_updates`) в моке умеет возвращать `available: true`;
   в этом случае приложение само открывает модалку релиза — это проверяется в `navigation.spec.ts`.
+
+## Rust-тесты
+
+```bash
+cargo test --manifest-path src-tauri/Cargo.toml
+cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings
+```
+
+403 unit-теста и 14 интеграционных. Логика обновления стратегий проверяется на настоящем
+ответе GitHub API: фикстура `src-tauri/tests/fixtures/upstream_release_1.10.3.json` содержит
+реальный релиз upstream (rar, tar.gz, zip) и проверяет, что выбирается zip, а также корректность
+размера, ссылки, даты, отсутствия предложения при актуальной версии и учёта списка игнора.
 
 ## Покрытие
 
