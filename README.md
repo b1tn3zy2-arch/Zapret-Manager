@@ -6,13 +6,13 @@
 
 Discord · YouTube · Outlast Trials
 
-[![CI](https://github.com/Flowseal/zapret-discord-youtube/actions/workflows/ci.yml/badge.svg)](https://github.com/Flowseal/zapret-discord-youtube/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/release/Flowseal/zapret-discord-youtube)](https://github.com/Flowseal/zapret-discord-youtube/releases)
+[![CI](https://github.com/USER/zapret-manager/actions/workflows/ci.yml/badge.svg)](https://github.com/USER/zapret-manager/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/USER/zapret-manager)](https://github.com/USER/zapret-manager/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-[Скачать](https://github.com/Flowseal/zapret-discord-youtube/releases/latest) ·
+[Скачать](https://github.com/USER/zapret-manager/releases/latest) ·
 [Установка](zapret-manager/docs/INSTALL.md) ·
-[Сообщить о баге](https://github.com/Flowseal/zapret-discord-youtube/issues)
+[Сообщить о баге](https://github.com/USER/zapret-manager/issues)
 
 </div>
 
@@ -58,7 +58,7 @@ Zapret Manager — приложение для управления страте
 
 ### Шаги
 
-1. Скачайте последний релиз: [Releases](https://github.com/Flowseal/zapret-discord-youtube/releases/latest)
+1. Скачайте последний релиз: [Releases](https://github.com/USER/zapret-manager/releases/latest)
 2. Запустите `ZapretManager_<версия>_x64-setup.exe` (или `.msi`, если нужна установка через Group Policy)
 3. Следуйте инструкциям установщика
 
@@ -97,7 +97,7 @@ Zapret Manager — приложение для управления страте
 ## Разработка
 
 ```bash
-git clone https://github.com/Flowseal/zapret-discord-youtube.git
+git clone https://github.com/USER/zapret-manager.git
 cd zapret-discord-youtube/zapret-manager
 pnpm install
 pnpm exec playwright install chromium

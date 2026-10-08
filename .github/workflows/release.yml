@@ -44,6 +44,10 @@ jobs:
             exit 1
           fi
 
+      - name: Check release metadata
+        working-directory: zapret-manager
+        run: node scripts/check-release-metadata.mjs
+
       - name: Extract changelog section
         run: |
           mkdir -p release-notes

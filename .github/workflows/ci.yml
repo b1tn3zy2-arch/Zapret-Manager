@@ -43,6 +43,10 @@ jobs:
       - name: Hardcoded strings
         run: pnpm lint:i18n
 
+      - name: Release metadata
+        if: github.ref == 'refs/heads/main'
+        run: pnpm lint:release
+
   test-frontend:
     name: Frontend unit tests
     runs-on: windows-latest

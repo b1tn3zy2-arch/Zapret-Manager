@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 
 import type { TranslationKey } from "@/i18n";
+import { APP_REPOSITORY_URL } from "@/lib/constants";
 import type { DensityMode, SettingsSection } from "@/types";
 
 export interface AboutLink {
@@ -23,22 +24,22 @@ export const ABOUT_LINKS: readonly AboutLink[] = [
   {
     id: "repo",
     labelKey: "settings.about.repo",
-    url: "https://github.com/Flowseal/zapret-discord-youtube",
+    url: APP_REPOSITORY_URL,
   },
   {
     id: "upstream",
     labelKey: "settings.about.upstream",
-    url: "https://github.com/Flowseal/zapret-discord-youtube/releases",
+    url: "https://github.com/Flowseal/zapret-discord-youtube",
   },
   {
     id: "docs",
     labelKey: "settings.about.docs",
-    url: "https://github.com/Flowseal/zapret-discord-youtube/wiki",
+    url: `${APP_REPOSITORY_URL}/blob/main/zapret-manager/docs/INSTALL.md`,
   },
   {
     id: "report",
     labelKey: "settings.about.report",
-    url: "https://github.com/Flowseal/zapret-discord-youtube/issues/new",
+    url: `${APP_REPOSITORY_URL}/issues/new/choose`,
   },
 ];
 

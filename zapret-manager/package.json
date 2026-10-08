@@ -19,6 +19,7 @@
     "e2e:soak": "node scripts/soak-check.mjs",
     "lint:dead": "knip",
     "lint:i18n": "node scripts/i18n-check.mjs",
+    "lint:release": "node scripts/check-release-metadata.mjs",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",

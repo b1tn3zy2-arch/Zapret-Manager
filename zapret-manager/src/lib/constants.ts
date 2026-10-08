@@ -106,6 +106,8 @@ export const UPDATE_MIN_INTERVAL_HOURS = 6;
 
 export const DEFAULT_GITHUB_REPO = "Flowseal/zapret-discord-youtube";
 
+export const APP_REPOSITORY_URL = "https://github.com/USER/zapret-manager";
+
 export const TRAFFIC_CHART_HEIGHT = 180;
 export const TRAFFIC_COLORS = {
   in: "#22d3ee",
