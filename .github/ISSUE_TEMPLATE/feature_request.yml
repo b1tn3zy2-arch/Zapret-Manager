@@ -1,0 +1,44 @@
+name: Feature Request
+description: Предложить функцию или улучшение
+title: "[Feature] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Какую задачу решает
+      description: Опишите ситуацию, в которой функции не хватает
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Предлагаемое решение
+      description: Как должна работать функция
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Альтернативы
+      description: Какими способами вы решаете задачу сейчас
+    validations:
+      required: false
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Раздел приложения
+      options:
+        - Стратегии
+        - Монитор и трафик
+        - Логи
+        - Настройки
+        - VPN
+        - Трей и уведомления
+        - Установка и обновление
+        - Другое
+    validations:
+      required: true

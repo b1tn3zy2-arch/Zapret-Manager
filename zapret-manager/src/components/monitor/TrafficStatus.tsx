@@ -1,0 +1,125 @@
+import { useEffect, useRef, useState } from "react";
+
+import { GlassPanel } from "@/components/shared/GlassPanel";
+import { Badge } from "@/components/ui";
+import { MONITOR_STALL_THRESHOLD_MS } from "@/lib/constants";
+import { formatSpeed } from "@/lib/trafficUtils";
+import type { MonitorState, NetworkStats, Strategy } from "@/types";
+
+export interface TrafficStatusProps {
+  stats: NetworkStats | null;
+  isPaused: boolean;
+  error: string | null;
+  activeStrategy: Strategy | undefined;
+}
+
+const STATUS_VIEW = {
+  background: {
+    label: "Фоновый режим",
+    variant: "neutral",
+    hint: "Стратегия не запущена — показываем весь трафик системы",
+  },
+  active: {
+    label: "Обход активен",
+    variant: "success",
+    hint: "Стратегия запущена, трафик идёт",
+  },
+  stalled: {
+    label: "Возможны проблемы с обходом",
+    variant: "warning",
+    hint: "Стратегия запущена, но входящего трафика нет больше 5 секунд",
+  },
+  error: {
+    label: "Ошибка мониторинга",
+    variant: "error",
+    hint: "Не удалось получить данные о трафике",
+  },
+} as const satisfies Record<
+  MonitorState,
+  {
+    label: string;
+    variant: "neutral" | "success" | "warning" | "error";
+    hint: string;
+  }
+>;
+
+function useStalled(stats: NetworkStats | null): boolean {
+  const lastTrafficRef = useRef(0);
+  const [stalled, setStalled] = useState(false);
+
+  useEffect(() => {
+    const speed = (stats?.speedIn ?? 0) + (stats?.speedOut ?? 0);
+
+    if (speed > 0) {
+      lastTrafficRef.current = Date.now();
+    }
+  }, [stats]);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      if (lastTrafficRef.current === 0) {
+        lastTrafficRef.current = Date.now();
+      }
+
+      setStalled(
+        Date.now() - lastTrafficRef.current > MONITOR_STALL_THRESHOLD_MS
+      );
+    }, 1000);
+
+    return () => {
+      window.clearInterval(timer);
+    };
+  }, []);
+
+  return stalled;
+}
+
+function TrafficStatus({
+  stats,
+  isPaused,
+  error,
+  activeStrategy,
+}: TrafficStatusProps) {
+  const stalled = useStalled(stats);
+  const isRunning = activeStrategy?.status === "running";
+  const total = (stats?.speedIn ?? 0) + (stats?.speedOut ?? 0);
+
+  const state: MonitorState =
+    error !== null
+      ? "error"
+      : isPaused
+        ? "background"
+        : isRunning && stalled
+          ? "stalled"
+          : isRunning
+            ? "active"
+            : "background";
+
+  const view = STATUS_VIEW[state];
+
+  return (
+    <GlassPanel padding="md" className="flex flex-col gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <Badge variant={view.variant} pulse={state === "active"}>
+            {view.label}
+          </Badge>
+          {isPaused ? <Badge variant="warning">Пауза</Badge> : null}
+          {activeStrategy !== undefined && isRunning ? (
+            <span className="text-text-secondary truncate text-xs">
+              {activeStrategy.name}
+            </span>
+          ) : null}
+        </div>
+
+        <span className="text-text-primary text-sm font-semibold tabular-nums">
+          {formatSpeed(total)}
+        </span>
+      </div>
+
+      <span className="text-text-tertiary text-xs">{view.hint}</span>
+    </GlassPanel>
+  );
+}
+
+export default TrafficStatus;

@@ -1,0 +1,27 @@
+* text=auto eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+*.nsh text eol=crlf
+*.nsi text eol=crlf
+*.rs text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.toml text eol=lf
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.ico binary
+*.icns binary
+*.bmp binary
+*.zip binary
+*.exe binary
+*.dll binary
+*.sys binary
+*.msi binary
+Cargo.lock -diff
+pnpm-lock.yaml -diff

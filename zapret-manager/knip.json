@@ -1,0 +1,25 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": [
+    "src/main.tsx",
+    "e2e/**/*.spec.ts",
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
+    "scripts/**/*.mjs"
+  ],
+  "project": ["src/**/*.{ts,tsx}", "e2e/**/*.ts", "scripts/**/*.mjs"],
+  "ignore": ["src/components/dev/**", "src/stores/mocks/**"],
+  "ignoreDependencies": [
+    "@fontsource/inter",
+    "@fontsource/jetbrains-mono",
+    "@fontsource/unbounded",
+    "@tauri-apps/plugin-updater",
+    "circle-flags",
+    "simple-icons",
+    "tailwindcss"
+  ],
+  "ignoreBinaries": ["tailwindcss"],
+  "rules": {
+    "types": "off"
+  }
+}

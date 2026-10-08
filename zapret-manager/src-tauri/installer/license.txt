@@ -1,0 +1,33 @@
+ZAPRET MANAGER - УСЛОВИЯ ИСПОЛЬЗОВАНИЯ / TERMS OF USE
+=====================================================
+
+1. ПРИЕМ УСЛОВИЙ / ACCEPTANCE
+Устанавливая Zapret Manager, вы принимаете эти условия.
+/ By installing Zapret Manager you accept these terms.
+
+2. ЛИЦЕНЗИЯ И ГАРАНТИИ / LICENSE AND WARRANTY
+Программа предоставляется «как есть», без гарантий любого рода.
+/ The software is provided "as is", without warranty of any kind.
+
+3. СТОРОННИЕ КОМПОНЕНТЫ / THIRD-PARTY COMPONENTS
+В поставку входят сторонние компоненты, каждый распространяется на
+собственных условиях и содержит собственные тексты лицензий:
+  • zapret (MIT License, Copyright (c) 2024 bol-van/zapret)
+  • WinDivert (LGPL v3), cygwin1.dll (LGPL), Go (BSD-3-Clause)
+Полные тексты лицензий доступны в приложении: «Настройки -> Лицензии».
+/ Third-party components keep their own licenses; full texts are available
+in the app under "Settings -> Licenses".
+
+4. ДАННЫЕ ПОЛЬЗОВАТЕЛЯ / USER DATA
+Настройки, стратегии и логи хранятся локально в профиле пользователя
+(%APPDATA%\com.zapretmanager.app). Приложение не передаёт данные третьим
+лицам. Данные удаляются штатным деинсталлятором по вашему выбору.
+/ Settings, strategies and logs stay on your machine. Nothing is uploaded.
+The uninstaller removes them when you choose to.
+
+5. ОТВЕТСТВЕННОСТЬ / RESPONSIBILITY
+Выбор стратегии обхода и её применение - решение пользователя.
+/ You decide which strategy to run and how to use it.
+
+Установка означает согласие с условиями выше.
+/ Installing the app means you accept the terms above.

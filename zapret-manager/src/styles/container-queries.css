@@ -1,0 +1,83 @@
+@layer components {
+  .dashboard-container {
+    container-type: inline-size;
+    container-name: dashboard;
+  }
+
+  .dashboard-grid {
+    display: grid;
+    gap: var(--space-lg);
+    grid-template-columns: 1fr;
+  }
+
+  @container dashboard (min-width: 700px) {
+    .dashboard-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .dashboard-grid > .dashboard-lead {
+      grid-column: span 2;
+    }
+  }
+
+  @container dashboard (min-width: 1100px) {
+    .dashboard-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .dashboard-grid > .dashboard-lead {
+      grid-column: span 2;
+    }
+  }
+
+  .logs-container {
+    container-type: inline-size;
+    container-name: logs;
+  }
+
+  .log-row {
+    container-type: inline-size;
+  }
+
+  @container logs (max-width: 640px) {
+    .log-row__time {
+      display: none;
+    }
+  }
+
+  @container logs (max-width: 460px) {
+    .log-row__source {
+      display: none;
+    }
+  }
+
+  .cards-container {
+    container-type: inline-size;
+    container-name: cards;
+  }
+
+  .card-grid {
+    display: grid;
+    gap: var(--space-md);
+    grid-template-columns: repeat(
+      auto-fill,
+      minmax(min(clamp(200px, 18vw, 260px), 100%), 1fr)
+    );
+  }
+
+  .strategy-list-grid {
+    display: grid;
+    gap: var(--space-md);
+    grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
+  }
+
+  @container cards (max-width: 560px) {
+    .card-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .strategy-card {
+      font-size: 0.9em;
+    }
+  }
+}

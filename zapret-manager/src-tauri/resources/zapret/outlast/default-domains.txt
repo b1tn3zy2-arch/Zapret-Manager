@@ -1,0 +1,13 @@
+steampowered.com
+steamcontent.com
+steamcommunity.com
+steamstatic.com
+steamusercontent.com
+epicgames.com
+easyanticheat.net
+battleye.com
+battleye.net
+gamelift.amazonaws.com
+redbarrelsgames.com
+outlasttrials.com
+cloudfront.net

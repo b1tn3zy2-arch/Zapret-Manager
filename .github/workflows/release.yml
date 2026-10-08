@@ -1,0 +1,132 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Версия (например v0.1.1)"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  create-release:
+    name: Draft release
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      release_id: ${{ steps.create.outputs.result }}
+      upload_url: ${{ steps.create.outputs.upload_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "version=${{ github.event.inputs.version }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Extract changelog section
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          VERSION_NO_V="${VERSION#v}"
+          mkdir -p release-notes
+          awk "/^## \[$VERSION_NO_V\]/{flag=1; next} /^## \[/{flag=0} flag" CHANGELOG.md > release-notes/body.md
+          test -s release-notes/body.md || { echo "Секция $VERSION_NO_V не найдена в CHANGELOG.md"; exit 1; }
+
+      - name: Create draft release
+        id: create
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.version.outputs.version }}
+          name: ${{ steps.version.outputs.version }}
+          body_path: release-notes/body.md
+          draft: true
+          prerelease: ${{ contains(steps.version.outputs.version, '-') }}
+
+  build:
+    name: Build artifacts
+    needs: create-release
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri -> target
+
+      - run: pnpm install --frozen-lockfile
+        working-directory: zapret-manager
+
+      - name: Unit tests
+        run: pnpm test
+        working-directory: zapret-manager
+
+      - name: Types
+        run: pnpm typecheck
+        working-directory: zapret-manager
+
+      - name: Rust tests
+        run: cargo test --manifest-path zapret-manager/src-tauri/Cargo.toml
+
+      - name: Clippy
+        run: cargo clippy --manifest-path zapret-manager/src-tauri/Cargo.toml --all-targets -- -D warnings
+
+      - name: Build Tauri app
+        working-directory: zapret-manager
+        run: pnpm tauri build
+
+      - name: Collect artifacts and checksums
+        working-directory: zapret-manager
+        run: node scripts/release-artifacts.mjs
+
+      - name: Upload assets
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ needs.create-release.outputs.version }}
+        run: |
+          $tag = $env:RELEASE_TAG
+          $version = $tag.TrimStart('v')
+          Get-ChildItem -Path "release" -File | Where-Object { $_.Name -ne "SHA256SUMS.txt" } | ForEach-Object {
+            $name = $_.Name -replace 'Zapret Manager_', 'ZapretManager_'
+            $name = $name -replace '_x64-setup\.exe$', "_x${version}_setup.exe"
+            $name = $name -replace '_en-US_x64\.msi$', "_x${version}_en-US.msi"
+            $name = $name -replace 'ZapretManager_(\d+\.\d+\.\d+)_x64_portable\.zip', "ZapretManager_`$${version}_x64_portable.zip"
+            gh release upload $tag $_.FullName --clobber --repo $env:GITHUB_REPOSITORY --name $name
+          }
+          gh release upload $tag "release/SHA256SUMS.txt" --clobber --repo $env:GITHUB_REPOSITORY
+
+      - name: Verify checksums
+        shell: pwsh
+        working-directory: zapret-manager
+        run: |
+          Get-Content release/SHA256SUMS.txt | ForEach-Object {
+            $parts = $_ -split '\s+', 2
+            $actual = (Get-FileHash -Algorithm SHA256 -Path (Join-Path "release" $parts[1])).Hash.ToLower()
+            if ($actual -ne $parts[0]) { throw "Checksum mismatch: $($parts[1])" }
+          }
+          Write-Host "checksums verified"
