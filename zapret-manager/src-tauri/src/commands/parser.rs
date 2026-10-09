@@ -1,4 +1,4 @@
-use std::path::{Path, PathBuf};
+﻿use std::path::{Path, PathBuf};
 use std::sync::LazyLock;
 
 use regex::Regex;
@@ -6,8 +6,8 @@ use regex::Regex;
 use crate::commands::scanner::StrategyInfo;
 use crate::constants::{
     DESCRIPTION_LINE_PREFIXES, EXCLUDED_FILENAMES, MAX_DESCRIPTION_LENGTH,
-    NAME_ACRONYMS, SERVICE_KEYWORDS, SKIP_DESCRIPTION_PREFIXES,
-    STRATEGY_TYPE_KEYWORDS, TECHNIQUE_KEYWORDS,
+    SERVICE_KEYWORDS, SKIP_DESCRIPTION_PREFIXES, STRATEGY_TYPE_KEYWORDS,
+    TECHNIQUE_KEYWORDS,
 };
 
 pub(crate) fn strip_bat_extension(filename: &str) -> &str {
@@ -24,42 +24,10 @@ pub(crate) fn is_excluded(filename: &str) -> bool {
         .any(|name| name.eq_ignore_ascii_case(filename))
 }
 
-fn capitalize_word(word: &str) -> String {
-    if word.is_empty() {
-        return String::new();
-    }
+#[path = "parser_name.rs"]
+mod parser_name;
 
-    let upper = word.to_ascii_uppercase();
-    if NAME_ACRONYMS.contains(&upper.as_str()) {
-        return upper;
-    }
-
-    let mut chars = word.chars();
-    match chars.next() {
-        Some(first) => first.to_uppercase().collect::<String>() + &chars.as_str().to_lowercase(),
-        None => String::new(),
-    }
-}
-
-pub(crate) fn extract_name(filename: &str) -> String {
-    let base = strip_bat_extension(filename);
-
-    let cleaned: String = base
-        .chars()
-        .map(|c| match c {
-            '(' | ')' | '[' | ']' => ' ',
-            '_' | '-' => ' ',
-            other => other,
-        })
-        .collect();
-
-    cleaned
-        .split_whitespace()
-        .filter(|word| !word.chars().all(|c| c.is_ascii_digit()))
-        .map(capitalize_word)
-        .collect::<Vec<String>>()
-        .join(" ")
-}
+pub(crate) use parser_name::{deduplicate_names, extract_name};
 
 fn should_skip_description(line: &str) -> bool {
     SKIP_DESCRIPTION_PREFIXES
@@ -126,8 +94,34 @@ fn detect_services_in(haystack: &str) -> Vec<String> {
     found
 }
 
+pub(crate) fn extract_winws_arguments(content: &str) -> String {
+    let mut collected = String::new();
+    let mut inside = false;
+
+    for raw_line in content.lines() {
+        let line = raw_line.trim();
+
+        if !inside {
+            if !line.contains("winws.exe") {
+                continue;
+            }
+
+            inside = true;
+        }
+
+        collected.push(' ');
+        collected.push_str(line);
+
+        if !line.ends_with('^') {
+            break;
+        }
+    }
+
+    collected
+}
+
 pub(crate) fn extract_techniques(content: &str) -> Vec<String> {
-    let lowered = content.to_lowercase();
+    let lowered = extract_winws_arguments(content).to_lowercase();
     let mut found: Vec<String> = Vec::new();
 
     for (technique, keywords) in TECHNIQUE_KEYWORDS.iter() {
@@ -211,3 +205,7 @@ pub(crate) fn analyze(
 #[cfg(test)]
 #[path = "parser_tests.rs"]
 mod parser_tests;
+
+#[cfg(test)]
+#[path = "parser_resources_tests.rs"]
+mod parser_resources_tests;

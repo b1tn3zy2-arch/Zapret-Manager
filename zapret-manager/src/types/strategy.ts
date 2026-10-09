@@ -14,6 +14,10 @@ export type TechniqueId =
   | "ipset"
   | "any-protocol"
   | "cutoff"
+  | "fakedsplit"
+  | "hostfakesplit"
+  | "multidisorder"
+  | "syndata"
   | "fake";
 
 export const TECHNIQUE_LABELS = {
@@ -25,6 +29,10 @@ export const TECHNIQUE_LABELS = {
   ipset: "IPSet",
   "any-protocol": "Any Protocol",
   cutoff: "Cutoff",
+  fakedsplit: "FakeSplit",
+  hostfakesplit: "HostFakeSplit",
+  multidisorder: "MultiDisorder",
+  syndata: "SynData",
   fake: "Fake",
 } as const satisfies Record<TechniqueId, string>;
 

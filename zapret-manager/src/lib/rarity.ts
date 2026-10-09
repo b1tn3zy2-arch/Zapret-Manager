@@ -9,23 +9,32 @@ import type {
 } from "@/types";
 
 export const TECHNIQUE_WEIGHTS = {
-  faketls: 2,
+  faketls: 3,
+  "split-seqovl": 3,
   ipset: 2,
   "l7-filter": 2,
   "quic-fake": 2,
   multisplit: 1,
-  "split-seqovl": 1,
-  "any-protocol": 1,
-  cutoff: 1,
   fake: 1,
+  cutoff: 1,
+  "any-protocol": 1,
+  fakedsplit: 1,
+  hostfakesplit: 1,
+  multidisorder: 1,
+  syndata: 1,
 } as const satisfies Record<TechniqueId, number>;
 
 const OUTLAST_BONUS = 1;
+const MULTI_SERVICE_BONUS = 1;
+const COMBINATION_BONUS = 2;
+const COMBINATION_PAIRS: ReadonlyArray<readonly [TechniqueId, TechniqueId]> = [
+  ["faketls", "quic-fake"],
+];
 
 const RARITY_THRESHOLDS = {
-  common: 10,
-  rare: 11,
-  epic: 12,
+  common: 14,
+  rare: 15,
+  epic: 19,
 } as const;
 
 const OUTLAST_SERVICE: ServiceType = "outlast-trials";
@@ -38,6 +47,12 @@ function has(techniques: readonly TechniqueId[], id: TechniqueId): boolean {
   return techniques.includes(id);
 }
 
+function countCombinations(techniques: readonly TechniqueId[]): number {
+  return COMBINATION_PAIRS.filter(
+    ([left, right]) => has(techniques, left) && has(techniques, right)
+  ).length;
+}
+
 export function computeRarityScore(
   services: readonly ServiceType[],
   techniques: readonly TechniqueId[],
@@ -48,10 +63,17 @@ export function computeRarityScore(
     0
   );
 
-  const fromServices = services.includes(OUTLAST_SERVICE) ? 1 : 0;
+  const fromServices = services.includes(OUTLAST_SERVICE) ? OUTLAST_BONUS : 0;
+
+  const fromMultiService = services.length >= 2 ? MULTI_SERVICE_BONUS : 0;
+  const fromCombinations = countCombinations(techniques) * COMBINATION_BONUS;
 
   return (
-    fromTechniques + fromServices + (hasOutlastSupport ? OUTLAST_BONUS : 0)
+    fromTechniques +
+    fromServices +
+    fromMultiService +
+    fromCombinations +
+    (hasOutlastSupport ? OUTLAST_BONUS : 0)
   );
 }
 

@@ -5,7 +5,7 @@ use serde::Serialize;
 use tauri::Manager;
 use tokio::task::JoinSet;
 
-use crate::commands::parser::{analyze, is_excluded};
+use crate::commands::parser::{analyze, deduplicate_names, is_excluded};
 use crate::constants::{MAX_CONCURRENT_READS, MAX_FILE_SIZE_FOR_PARSE};
 use crate::error::{AppError, AppResult};
 
@@ -199,6 +199,7 @@ pub async fn scan_folder(
     }
 
     results.sort_by(|left, right| left.filename.cmp(&right.filename));
+    deduplicate_names(&mut results);
 
     tracing::info!(
         "Просканировано {} стратегий в {folder}, пропущено {skipped}",

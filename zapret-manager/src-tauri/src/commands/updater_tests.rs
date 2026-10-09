@@ -176,6 +176,47 @@ fn test_read_version_treats_empty_file_as_unknown() {
 }
 
 #[test]
+fn test_read_version_falls_back_to_service_bat() {
+    let root = std::env::temp_dir().join("zapret-updater-fallback-test");
+    let _ = std::fs::remove_dir_all(&root);
+    std::fs::create_dir_all(&root).unwrap();
+    std::fs::write(
+        root.join("service.bat"),
+        "@echo off\r\nset \"VERSION=1.10.3\"\r\n",
+    )
+    .unwrap();
+
+    assert_eq!(read_version(&root), "1.10.3");
+
+    let _ = std::fs::remove_dir_all(&root);
+}
+
+#[test]
+fn test_read_version_prefers_version_file_over_service_bat() {
+    let root = std::env::temp_dir().join("zapret-updater-priority-test");
+    let _ = std::fs::remove_dir_all(&root);
+    std::fs::create_dir_all(&root).unwrap();
+    std::fs::write(root.join(VERSION_FILE_NAME), "1.11.0\n").unwrap();
+    std::fs::write(root.join("service.bat"), "set \"VERSION=1.10.3\"").unwrap();
+
+    assert_eq!(read_version(&root), "1.11.0");
+
+    let _ = std::fs::remove_dir_all(&root);
+}
+
+#[test]
+fn test_read_version_ignores_unparsable_service_bat() {
+    let root = std::env::temp_dir().join("zapret-updater-garbage-test");
+    let _ = std::fs::remove_dir_all(&root);
+    std::fs::create_dir_all(&root).unwrap();
+    std::fs::write(root.join("service.bat"), "@echo off\r\n:: no version here\r\n").unwrap();
+
+    assert_eq!(read_version(&root), UNKNOWN_VERSION);
+
+    let _ = std::fs::remove_dir_all(&root);
+}
+
+#[test]
 fn test_download_path_uses_version_and_temp() {
     let path = download_path("v1.10.3");
     let name = path.file_name().unwrap().to_string_lossy().to_string();

@@ -18,7 +18,7 @@ function UpdatesSection() {
   const patch = useSettingsStore((state) => state.updateStrategyUpdates);
   const info = useUpdateStore((state) => state.info);
   const status = useUpdateStore((state) => state.status);
-  const { check, markCurrentVersion, openModal } = useUpdater();
+  const { check, openModal } = useUpdater();
   const [repoError, setRepoError] = useState<string | null>(null);
 
   const patchSetting = <K extends keyof StrategyUpdateSettings>(
@@ -139,34 +139,13 @@ function UpdatesSection() {
         </Text>
       </div>
 
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-1">
         <Text variant="body" size="sm" className="text-text-secondary">
-          Если файла <span className="font-mono">.version</span> нет, отметьте
-          установленную версию вручную — иначе приложение не сможет сравнить
-          версии.
+          Версия определяется автоматически по файлу{" "}
+          <span className="font-mono">.version</span> и содержимому{" "}
+          <span className="font-mono">service.bat</span>. Если обе подсказки
+          отсутствуют, обновление не будет предлагаться.
         </Text>
-        <div className="flex flex-wrap items-center gap-2">
-          <Input
-            label="Отметить версию"
-            placeholder="1.10.3"
-            className="max-w-[160px]"
-            onKeyDown={(event) => {
-              if (event.key === "Enter") {
-                void markCurrentVersion(event.currentTarget.value.trim());
-              }
-            }}
-          />
-          {info !== null ? (
-            <Button
-              variant="secondary"
-              onClick={() => {
-                void markCurrentVersion(info.latestVersion);
-              }}
-            >
-              Отметить {info.latestVersion}
-            </Button>
-          ) : null}
-        </div>
       </div>
 
       {settings.ignoredVersions.length > 0 ? (

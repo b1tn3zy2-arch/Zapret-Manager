@@ -73,6 +73,10 @@ pub static TECHNIQUE_KEYWORDS: LazyLock<Vec<(&str, Vec<&str>)>> =
             ("ipset", vec!["--ipset=\""]),
             ("any-protocol", vec!["--dpi-desync-any-protocol"]),
             ("cutoff", vec!["--dpi-desync-cutoff="]),
+            ("fakedsplit", vec!["fakedsplit"]),
+            ("hostfakesplit", vec!["hostfakesplit"]),
+            ("multidisorder", vec!["multidisorder"]),
+            ("syndata", vec!["syndata"]),
             ("fake", vec!["--dpi-desync=fake"]),
         ]
     });
@@ -92,6 +96,8 @@ pub static SKIP_DESCRIPTION_PREFIXES: &[&str] = &[
 
 pub static NAME_ACRONYMS: &[&str] =
     &["TLS", "ALT", "TCP", "UDP", "UTF8", "EXP", "DNS", "HTTP", "QUIC"];
+
+pub static NAME_COMPOUNDS: &[(&str, &str)] = &[("FAKETLS", "Fake TLS")];
 
 pub const MARKER_START: &str = "# === ZAPRET MANAGER: OUTLAST TRIALS (start) ===";
 

@@ -1,8 +1,9 @@
 ﻿use std::path::PathBuf;
-use std::sync::Arc;
+use std::sync::{Arc, LazyLock};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
 
+use regex::Regex;
 use serde::{Deserialize, Serialize};
 
 use crate::commands::updater_install::VERSION_FILE_NAME;
@@ -134,19 +135,43 @@ pub fn pick_asset(assets: &[GitHubAsset]) -> Option<&GitHubAsset> {
         .find(|asset| asset.name.to_lowercase().ends_with(".zip"))
 }
 
-pub fn read_version(strategies_dir: &std::path::Path) -> String {
-    match std::fs::read_to_string(strategies_dir.join(VERSION_FILE_NAME)) {
-        Ok(content) => {
-            let trimmed = content.trim();
+static VERSION_FALLBACK_PATTERNS: LazyLock<Vec<Regex>> = LazyLock::new(|| {
+    [
+        r#"(?i)"?version"?\s*[:=]\s*"?v?(\d+\.\d+(?:\.\d+)?)"?"#,
+        r"(?i)zapret[-_ ]?v?(\d+\.\d+(?:\.\d+)?)",
+    ]
+    .iter()
+    .filter_map(|pattern| Regex::new(pattern).ok())
+    .collect()
+});
 
-            if trimmed.is_empty() {
-                UNKNOWN_VERSION.to_string()
-            } else {
-                normalize_version(trimmed)
-            }
+fn version_from_service_bat(strategies_dir: &std::path::Path) -> Option<String> {
+    let content = std::fs::read_to_string(strategies_dir.join("service.bat")).ok()?;
+
+    for pattern in VERSION_FALLBACK_PATTERNS.iter() {
+        if let Some(found) = pattern
+            .captures(&content)
+            .and_then(|caps| caps.get(1))
+            .map(|value| value.as_str())
+        {
+            return Some(normalize_version(found));
         }
-        Err(_) => UNKNOWN_VERSION.to_string(),
     }
+
+    None
+}
+
+pub fn read_version(strategies_dir: &std::path::Path) -> String {
+    if let Ok(content) = std::fs::read_to_string(strategies_dir.join(VERSION_FILE_NAME)) {
+        let trimmed = content.trim();
+
+        if !trimmed.is_empty() {
+            return normalize_version(trimmed);
+        }
+    }
+
+    version_from_service_bat(strategies_dir)
+        .unwrap_or_else(|| UNKNOWN_VERSION.to_string())
 }
 
 pub fn write_version(strategies_dir: &std::path::Path, version: &str) -> AppResult<()> {

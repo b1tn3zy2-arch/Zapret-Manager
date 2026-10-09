@@ -14,7 +14,7 @@ import {
   getRarityLabel,
   summarizeCollection,
 } from "@/lib/rarity";
-import type { Strategy } from "@/types";
+import type { Strategy, TechniqueId } from "@/types";
 
 function makeStrategy(overrides: Partial<Strategy> = {}): Strategy {
   return {
@@ -57,13 +57,13 @@ describe("computeRarityScore", () => {
 describe("computeRarity", () => {
   it("ниже порога rare — обычная", () => {
     expect(computeRarity(0)).toBe("common");
-    expect(computeRarity(10)).toBe("common");
+    expect(computeRarity(14)).toBe("common");
   });
 
   it("пороги редкости соблюдаются", () => {
-    expect(computeRarity(11)).toBe("rare");
-    expect(computeRarity(12)).toBe("epic");
-    expect(computeRarity(13)).toBe("legendary");
+    expect(computeRarity(15)).toBe("rare");
+    expect(computeRarity(19)).toBe("epic");
+    expect(computeRarity(20)).toBe("legendary");
   });
 
   it("значение выше максимума не ломает расчёт", () => {
@@ -186,6 +186,276 @@ describe("buildStrategyCard", () => {
     const supported = buildStrategyCard(makeStrategy(), true);
 
     expect(supported.score).toBeGreaterThan(plain.score);
+  });
+
+  it("набор техник из комплектной стратегии даёт legendary", () => {
+    const card = buildStrategyCard(
+      makeStrategy({
+        techniques: [
+          "faketls",
+          "ipset",
+          "l7-filter",
+          "quic-fake",
+          "multisplit",
+          "split-seqovl",
+          "multidisorder",
+          "syndata",
+          "any-protocol",
+          "cutoff",
+          "fake",
+        ],
+      }),
+      true
+    );
+
+    expect(card.rarity).toBe("legendary");
+  });
+
+  it("распределение редкости по комплектным стратегиям сбалансировано", () => {
+    const bundled: TechniqueId[][] = [
+      [
+        "faketls",
+        "multisplit",
+        "split-seqovl",
+        "quic-fake",
+        "l7-filter",
+        "ipset",
+        "any-protocol",
+        "cutoff",
+        "fake",
+      ],
+      [
+        "faketls",
+        "multisplit",
+        "split-seqovl",
+        "quic-fake",
+        "l7-filter",
+        "ipset",
+        "any-protocol",
+        "cutoff",
+        "fake",
+      ],
+      [
+        "faketls",
+        "multisplit",
+        "split-seqovl",
+        "quic-fake",
+        "l7-filter",
+        "ipset",
+        "any-protocol",
+        "cutoff",
+        "syndata",
+        "fake",
+      ],
+      [
+        "faketls",
+        "quic-fake",
+        "l7-filter",
+        "ipset",
+        "any-protocol",
+        "cutoff",
+        "fake",
+      ],
+      [
+        "faketls",
+        "quic-fake",
+        "l7-filter",
+        "ipset",
+        "any-protocol",
+        "cutoff",
+        "fake",
+      ],
+      [
+        "faketls",
+        "quic-fake",
+        "l7-filter",
+        "ipset",
+        "any-protocol",
+        "cutoff",
+        "fake",
+      ],
+      [
+        "faketls",
+        "quic-fake",
+        "l7-filter",
+        "ipset",
+        "any-protocol",
+        "cutoff",
+        "fakedsplit",
+        "fake",
+      ],
+      [
+        "faketls",
+        "quic-fake",
+        "l7-filter",
+        "ipset",
+        "any-protocol",
+        "cutoff",
+        "hostfakesplit",
+        "fake",
+      ],
+      [
+        "faketls",
+        "split-seqovl",
+        "quic-fake",
+        "l7-filter",
+        "ipset",
+        "any-protocol",
+        "cutoff",
+        "fake",
+      ],
+      [
+        "faketls",
+        "split-seqovl",
+        "quic-fake",
+        "l7-filter",
+        "ipset",
+        "any-protocol",
+        "cutoff",
+        "hostfakesplit",
+        "fake",
+      ],
+      [
+        "faketls",
+        "split-seqovl",
+        "quic-fake",
+        "l7-filter",
+        "ipset",
+        "any-protocol",
+        "cutoff",
+        "hostfakesplit",
+        "fake",
+      ],
+      [
+        "quic-fake",
+        "l7-filter",
+        "ipset",
+        "any-protocol",
+        "cutoff",
+        "hostfakesplit",
+        "fake",
+      ],
+      [
+        "quic-fake",
+        "l7-filter",
+        "ipset",
+        "any-protocol",
+        "cutoff",
+        "multidisorder",
+        "syndata",
+        "fake",
+      ],
+      [
+        "faketls",
+        "multisplit",
+        "split-seqovl",
+        "quic-fake",
+        "l7-filter",
+        "ipset",
+        "any-protocol",
+        "cutoff",
+        "fake",
+      ],
+      [
+        "faketls",
+        "split-seqovl",
+        "quic-fake",
+        "l7-filter",
+        "ipset",
+        "any-protocol",
+        "cutoff",
+        "hostfakesplit",
+        "fake",
+      ],
+      [
+        "faketls",
+        "quic-fake",
+        "l7-filter",
+        "ipset",
+        "any-protocol",
+        "cutoff",
+        "multidisorder",
+        "fake",
+      ],
+      [
+        "faketls",
+        "quic-fake",
+        "l7-filter",
+        "ipset",
+        "any-protocol",
+        "cutoff",
+        "fakedsplit",
+        "fake",
+      ],
+      [
+        "faketls",
+        "split-seqovl",
+        "quic-fake",
+        "l7-filter",
+        "ipset",
+        "any-protocol",
+        "cutoff",
+        "fake",
+      ],
+      [
+        "faketls",
+        "split-seqovl",
+        "quic-fake",
+        "l7-filter",
+        "ipset",
+        "any-protocol",
+        "cutoff",
+        "fake",
+      ],
+      [
+        "faketls",
+        "quic-fake",
+        "l7-filter",
+        "ipset",
+        "any-protocol",
+        "cutoff",
+        "hostfakesplit",
+        "fake",
+      ],
+      [
+        "faketls",
+        "quic-fake",
+        "l7-filter",
+        "ipset",
+        "any-protocol",
+        "cutoff",
+        "fake",
+      ],
+      [
+        "faketls",
+        "quic-fake",
+        "l7-filter",
+        "ipset",
+        "any-protocol",
+        "cutoff",
+        "fake",
+      ],
+    ];
+
+    const cards = bundled.map((techniques, index) =>
+      buildStrategyCard(
+        makeStrategy({
+          id: `st_${index}`,
+          techniques,
+          services: ["discord", "youtube", "general"],
+        }),
+        false
+      )
+    );
+
+    const tally = summarizeCollection(cards);
+
+    expect(tally.total).toBe(22);
+    expect(tally.common).toBeGreaterThanOrEqual(2);
+    expect(tally.rare).toBeGreaterThanOrEqual(2);
+    expect(tally.epic).toBeGreaterThanOrEqual(2);
+    expect(tally.legendary).toBeGreaterThanOrEqual(1);
+    expect(tally.legendary).toBeLessThanOrEqual(8);
   });
 });
 

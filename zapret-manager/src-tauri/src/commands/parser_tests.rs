@@ -2,19 +2,61 @@ use super::*;
 
 #[test]
 fn test_extract_name() {
-    assert_eq!(extract_name("general-00-baseline.bat"), "General Baseline");
+    assert_eq!(extract_name("general-00-baseline.bat"), "Baseline");
 }
 
 #[test]
 fn test_extract_name_with_parens() {
-    assert_eq!(extract_name("general (ALT2).bat"), "General Alt2");
+    assert_eq!(extract_name("general (ALT2).bat"), "ALT 2");
 }
 
 #[test]
 fn test_extract_name_acronyms() {
     assert_eq!(
         extract_name("general (FAKE TLS AUTO ALT2).bat"),
-        "General Fake TLS Auto Alt2"
+        "Fake TLS Auto ALT 2"
+    );
+}
+
+#[test]
+fn test_extract_name_keeps_glued_numbers() {
+    let names: Vec<String> = [
+        "general-00-baseline.bat",
+        "general (ALT).bat",
+        "general (ALT2).bat",
+        "general (EXPERIMENTAL).bat",
+        "general (SIMPLE FAKE).bat",
+        "general (SIMPLE FAKE ALT2).bat",
+        "general (FAKE TLS AUTO).bat",
+        "general (FAKE TLS AUTO ALT3).bat",
+    ]
+    .iter()
+    .map(|name| extract_name(name))
+    .collect();
+
+    assert_eq!(
+        names,
+        vec![
+            "Baseline",
+            "ALT",
+            "ALT 2",
+            "Experimental",
+            "Simple Fake",
+            "Simple Fake ALT 2",
+"Fake TLS Auto",
+            "Fake TLS Auto ALT 3",
+        ]
+    );
+
+    let unique: std::collections::BTreeSet<&String> = names.iter().collect();
+    assert_eq!(unique.len(), names.len(), "имена стратегий должны быть уникальными");
+}
+
+#[test]
+fn test_faketls_token_splits_into_words() {
+    assert_eq!(
+        extract_name("general-18-faketls-auto-alt3.bat"),
+        "Fake TLS Auto ALT 3"
     );
 }
 
@@ -74,7 +116,10 @@ fn test_extract_techniques_real_bat() {
 
 #[test]
 fn test_extract_techniques_unique_and_ordered() {
-    let content = "--dpi-desync=fake --filter-l7=x --ipset=\"y\"";
+    let content = concat!(
+        "start \"zapret\" /min \"%BIN%winws.exe\" --dpi-desync=fake ",
+        "--filter-l7=x --ipset=\"y\""
+    );
 
     assert_eq!(
         extract_techniques(content),
@@ -84,6 +129,32 @@ fn test_extract_techniques_unique_and_ordered() {
             "fake".to_string()
         ]
     );
+}
+
+#[test]
+fn test_extract_techniques_ignores_service_bat_calls() {
+    let content = concat!(
+        "call service.bat load_game_filter\n",
+        "call service.bat load_user_lists\n",
+        "start \"zapret\" /min \"%BIN%winws.exe\" --dpi-desync=fake"
+    );
+
+    assert_eq!(extract_techniques(content), vec!["fake".to_string()]);
+}
+
+#[test]
+fn test_extract_techniques_follows_multiline_continuation() {
+    let content = concat!(
+        "@echo off\n",
+        "start \"zapret\" /min \"%BIN%winws.exe\" --wf-tcp=80,443 ^\n",
+        "--dpi-desync=multisplit --new ^\n",
+        "--dpi-desync-fake-tls=\"%BIN%tls_clienthello_ru.bin\""
+    );
+
+    let techniques = extract_techniques(content);
+
+    assert!(techniques.contains(&"multisplit".to_string()));
+    assert!(techniques.contains(&"faketls".to_string()));
 }
 
 #[test]
