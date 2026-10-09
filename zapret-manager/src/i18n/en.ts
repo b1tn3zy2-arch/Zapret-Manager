@@ -219,10 +219,7 @@ export const en: Dictionary = {
       openConfig: "Open config folder",
       openStrategies: "Open strategies folder",
       copyInfo: "Copy system information",
-      repo: "Application repository",
       upstream: "zapret-discord-youtube repository",
-      docs: "Documentation",
-      report: "Report a bug",
       licenses: "Licenses",
     },
     resources: {

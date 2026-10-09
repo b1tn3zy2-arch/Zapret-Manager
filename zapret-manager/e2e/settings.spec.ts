@@ -99,4 +99,20 @@ test.describe("Настройки", () => {
     await page.keyboard.press("Escape");
     await expect(dialog).toBeHidden();
   });
+
+  test("показывает только ссылку на zapret-проект", async ({ page }) => {
+    await bootstrap(page);
+    await page.goto("/");
+    await openSettingsSection(page, "О приложении");
+
+    const links = page.getByRole("button", { name: /zapret-discord-youtube/ });
+
+    await expect(links).toHaveCount(1);
+
+    for (const label of ["Сообщить о баге", "Документация"]) {
+      await expect(
+        page.getByRole("button", { name: label, exact: true })
+      ).toHaveCount(0);
+    }
+  });
 });

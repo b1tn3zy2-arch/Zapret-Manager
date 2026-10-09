@@ -1,11 +1,1 @@
-blank_issues_enabled: false
-contact_links:
-  - name: Установка и обновление
-    url: https://github.com/USER/zapret-manager/blob/main/zapret-manager/docs/INSTALL.md
-    about: Требования, установка, проверка контрольных сумм, решение проблем
-  - name: Тестирование
-    url: https://github.com/USER/zapret-manager/blob/main/zapret-manager/docs/TESTING.md
-    about: Как запустить тесты и что они покрывают
-  - name: Релизы
-    url: https://github.com/USER/zapret-manager/releases
-    about: Готовые сборки и контрольные суммы
+blank_issues_enabled: true

@@ -1,51 +1,38 @@
-# Чек-лист публикации релиза
+# Чек-лист сборки релиза
 
-Всё, кроме шагов 1–4, выполняется автоматически в CI. Локально артефакты уже собраны
-и проверены (см. [SMOKE_TEST.md](SMOKE_TEST.md)).
+Приложение никуда не публикуется: сборки делаются локально и передаются вручную.
+Ни шага про `git push`, ни шага про публикацию релиза на GitHub здесь нет.
 
-## 0. Указать адрес своего репозитория
-
-APP_REPOSITORY_URL в src/lib/constants.ts и ссылки USER/zapret-manager в README.md
-и CHANGELOG.md — плейсхолдеры. Проверка:
-
-`ash
-cd zapret-manager
-pnpm lint:release
-`
-
-Она падает, пока в метаданных есть плейсхолдер или если баг-репорты уходят в upstream-репозиторий
-zapret. Замените плейсхолдер на адрес своего репозитория и повторите проверку.
-
-## 1. Проверить удалённый репозиторий
+## 1. Проверить состояние рабочей копии
 
 ```bash
-git remote -v          # должен быть origin
 git status             # дерево чистое
 git log --oneline -1
-git tag --points-at HEAD
 ```
 
 ## 2. Прогнать проверки локально
 
 ```bash
 cd zapret-manager
-pnpm typecheck && pnpm lint && pnpm format:check
-pnpm lint:dead && pnpm lint:i18n
-pnpm test:coverage
-pnpm e2e
-cargo test --manifest-path src-tauri/Cargo.toml
-cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings
+pnpm release:check:full
 ```
+
+Это единая цепочка: tsc, ESLint, Prettier, knip, контроль хардкодов локализации,
+метаданные релиза, unit-тесты, cargo test, cargo check, Playwright E2E, сборка
+фронтенда с замером производительности, проверка ссылок в бандле и сборка NSIS/MSI.
 
 ## 3. Проверить артефакты
 
 ```bash
 cd zapret-manager
 pnpm release:artifacts
+pnpm exec node scripts/verify-portable.mjs
 cat release/SHA256SUMS.txt
 ```
 
 Ожидаются три файла: NSIS `.exe`, MSI `.msi`, portable `.zip`.
+`verify-portable.mjs` распаковывает архив во временный каталог, запускает приложение
+и убеждается, что распакованы все 23 стратегии.
 
 ## 4. Smoke-тест на чистой машине
 
@@ -57,46 +44,34 @@ cat release/SHA256SUMS.txt
 4. запустить и остановить стратегию, проверить логи;
 5. удалить приложение и проверить, что установка чистая.
 
-## 5. Опубликовать
+## 5. Передать сборки
+
+Передать три файла из `zapret-manager/release/` и `SHA256SUMS.txt` тем, кто будет
+устанавливать. Получатель сверяет сумму перед установкой:
 
 ```bash
-git push origin main --tags
-```
-
-`release.yml` создаст **черновик** релиза с артефактами. Дальше вручную:
-
-1. открыть Releases → черновик;
-2. проверить тело релиза (секция из CHANGELOG), имена файлов и `SHA256SUMS.txt`;
-3. нажать **Publish release**;
-4. отметить релиз как latest.
-
-## 6. Проверить после публикации
-
-```bash
-# суммы скачанного релиза
 sha256sum -c SHA256SUMS.txt          # Linux/macOS/Git Bash
 certutil -hashfile ZapretManager_0.1.0_x64-setup.exe SHA256   # Windows
 ```
 
-- открыть страницу релиза, проверить загрузку всех файлов;
-- скачать релиз на чистую VM и установить;
-- проверить автообновление: установить предыдущую версию, дождаться проверки обновлений;
-- проверить иконку трея и нативные уведомления.
+## Сторонние компоненты
 
-## 7. Откат, если что-то пошло не так
+Дистрибутив содержит файлы zapret (MIT), Cygwin runtime и WinDivert (LGPL). Сверьтесь
+с `../../THIRD_PARTY_NOTICES.md` и отметьте пункты «Перед публикацией».
 
-1. Releases → Edit → отметить релиз как pre-release;
-2. выпустить hotfix `vX.Y.Z+1` с описанием проблемы;
-3. теги не удалять.
+## Что должно быть зелёным
 
-## Что должно быть зелёным в CI
-
-| Job                   | Что проверяет                                          |
-| --------------------- | ------------------------------------------------------ |
-| `Lint and types`      | tsc, ESLint, Prettier, knip, контроль хардкодов        |
-| `Frontend unit tests` | Vitest с порогами покрытия                             |
-| `Rust tests`          | cargo test + clippy `-D warnings`                      |
-| `Playwright E2E`      | 30 сценариев, чистая консоль                           |
-| `Bundle build`        | сборка NSIS + MSI, артефакты, проверка portable и сумм |
-| `Release`             | черновик релиза по тегу `v*`                           |
-| `Security`            | cargo-audit, security-аудит проекта                    |
+| Проверка                     | Что проверяет                                          |
+| ---------------------------- | ------------------------------------------------------ |
+| `pnpm lint` и `format:check` | ESLint, Prettier                                       |
+| `pnpm lint:dead`             | knip: мёртвые файлы, экспорты и зависимости            |
+| `pnpm lint:i18n`             | контроль роста хардкодов локализации                   |
+| `pnpm lint:release`          | согласованность версий, CHANGELOG, ссылки в документах |
+| `pnpm test`                  | Vitest с порогами покрытия                             |
+| `pnpm lint:bundle`           | ссылки в собранном бандле не ведут в никуда            |
+| `cargo test`                 | unit и интеграционные тесты Rust                       |
+| `cargo clippy`               | `-D warnings`                                          |
+| `pnpm e2e`                   | 30 сценариев, чистая консоль                           |
+| `pnpm build:check`           | сборка фронтенда и бюджет производительности           |
+| `pnpm tauri build`           | сборка NSIS + MSI                                      |
+| `pnpm release:artifacts`     | portable-архив и `SHA256SUMS.txt`                      |

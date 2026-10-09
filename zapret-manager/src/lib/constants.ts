@@ -104,9 +104,8 @@ export const NETWORK_INFO_CACHE_MS = 5 * 60 * 1000;
 export const UPDATE_CHECK_DELAY_MS = 3000;
 export const UPDATE_MIN_INTERVAL_HOURS = 6;
 
+/** Репозиторий zapret: источник стратегий и обновлений. */
 export const DEFAULT_GITHUB_REPO = "Flowseal/zapret-discord-youtube";
-
-export const APP_REPOSITORY_URL = "https://github.com/USER/zapret-manager";
 
 export const TRAFFIC_CHART_HEIGHT = 180;
 export const TRAFFIC_COLORS = {

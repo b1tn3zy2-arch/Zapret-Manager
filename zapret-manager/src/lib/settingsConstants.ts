@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 
 import type { TranslationKey } from "@/i18n";
-import { APP_REPOSITORY_URL } from "@/lib/constants";
 import type { DensityMode, SettingsSection } from "@/types";
 
 export interface AboutLink {
@@ -20,26 +19,18 @@ export interface AboutLink {
   readonly url: string;
 }
 
+/**
+ * Ссылки в разделе «О приложении».
+ *
+ * Репозиторий приложения не публикуется, поэтому ссылки на исходный код, документацию
+ * и баг-репорты не выводились бы: они вели бы в никуда. Раздел показывает только
+ * upstream-проект zapret, откуда взяты стратегии и на который реально можно перейти.
+ */
 export const ABOUT_LINKS: readonly AboutLink[] = [
-  {
-    id: "repo",
-    labelKey: "settings.about.repo",
-    url: APP_REPOSITORY_URL,
-  },
   {
     id: "upstream",
     labelKey: "settings.about.upstream",
     url: "https://github.com/Flowseal/zapret-discord-youtube",
-  },
-  {
-    id: "docs",
-    labelKey: "settings.about.docs",
-    url: `${APP_REPOSITORY_URL}/blob/main/zapret-manager/docs/INSTALL.md`,
-  },
-  {
-    id: "report",
-    labelKey: "settings.about.report",
-    url: `${APP_REPOSITORY_URL}/issues/new/choose`,
   },
 ];
 

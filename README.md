@@ -6,13 +6,10 @@
 
 Discord · YouTube · Outlast Trials
 
-[![CI](https://github.com/USER/zapret-manager/actions/workflows/ci.yml/badge.svg)](https://github.com/USER/zapret-manager/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/release/USER/zapret-manager)](https://github.com/USER/zapret-manager/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-[Скачать](https://github.com/USER/zapret-manager/releases/latest) ·
 [Установка](zapret-manager/docs/INSTALL.md) ·
-[Сообщить о баге](https://github.com/USER/zapret-manager/issues)
+[Сборка из исходников](#разработка)
 
 </div>
 
@@ -58,9 +55,10 @@ Zapret Manager — приложение для управления страте
 
 ### Шаги
 
-1. Скачайте последний релиз: [Releases](https://github.com/USER/zapret-manager/releases/latest)
-2. Запустите `ZapretManager_<версия>_x64-setup.exe` (или `.msi`, если нужна установка через Group Policy)
-3. Следуйте инструкциям установщика
+1. Возьмите готовую сборку: `ZapretManager_<версия>_x64-setup.exe` (или `.msi`, если нужна
+   установка через Group Policy) либо portable-архив `.zip`
+2. Сверьте SHA-256 с `SHA256SUMS.txt` из комплекта сборки
+3. Запустите установщик и следуйте его указаниям
 
 Подробности, включая portable-версию и проверку контрольных сумм — в
 [docs/INSTALL.md](zapret-manager/docs/INSTALL.md).
@@ -96,9 +94,10 @@ Zapret Manager — приложение для управления страте
 
 ## Разработка
 
+Сборка выполняется локально из этого дерева, публикации на внешний репозиторий нет.
+
 ```bash
-git clone https://github.com/USER/zapret-manager.git
-cd zapret-discord-youtube/zapret-manager
+cd zapret-discord-youtube-1.10.3/zapret-manager
 pnpm install
 pnpm exec playwright install chromium
 

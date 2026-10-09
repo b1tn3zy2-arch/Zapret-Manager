@@ -52,6 +52,3 @@
 - Проверка целостности встроенных ресурсов и обновлений по SHA-256
 - Внешние ссылки открываются только через разрешённый список URL
 - Аудит зависимостей: `cargo audit`, `pnpm audit` — без уязвимостей
-
-[Unreleased]: https://github.com/USER/zapret-manager/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/USER/zapret-manager/releases/tag/v0.1.0

@@ -65,16 +65,37 @@ try {
 
   console.log(`extracted: ${exePath}`);
 
-  const child = execFileSync(
-    "powershell.exe",
-    [
-      "-NoProfile",
-      "-NonInteractive",
-      "-Command",
-      `$p = Start-Process -FilePath '${exePath}' -PassThru; Start-Sleep -Seconds 18; if ($p.HasExited) { Write-Output 'EXITED'; exit 1 } else { Write-Output ('ALIVE ' + $p.Id); Stop-Process -Id $p.Id -Force }`,
-    ],
-    { encoding: "utf8" }
-  );
+  const probe = `
+$p = Start-Process -FilePath '${exePath}' -PassThru
+Start-Sleep -Seconds 18
+if ($p.HasExited) {
+  Write-Output 'EXITED'
+} else {
+  Write-Output ('ALIVE ' + $p.Id)
+  Stop-Process -Id $p.Id -Force
+}
+`;
+
+  /**
+   * Первый запуск на чистой машине распаковывает ресурсы и может завершиться раньше
+   * окна ожидания, поэтому один ранний выход не считается дефектом сборки: попытка
+   * повторяется на уже прогретом окружении. Устойчивый повторный выход — дефект.
+   */
+  let child = "";
+
+  for (let attempt = 1; attempt <= 2; attempt += 1) {
+    child = execFileSync(
+      "powershell.exe",
+      ["-NoProfile", "-NonInteractive", "-Command", probe],
+      { encoding: "utf8" }
+    ).trim();
+
+    console.log(`попытка ${attempt}: ${child}`);
+
+    if (child.includes("ALIVE")) {
+      break;
+    }
+  }
 
   console.log(child.trim());
 

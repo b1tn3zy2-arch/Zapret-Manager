@@ -220,10 +220,7 @@ export const ru = {
       openConfig: "Открыть папку с конфигом",
       openStrategies: "Открыть папку со стратегиями",
       copyInfo: "Скопировать информацию о системе",
-      repo: "Репозиторий приложения",
       upstream: "Репозиторий zapret-discord-youtube",
-      docs: "Документация",
-      report: "Сообщить о баге",
       licenses: "Лицензии",
     },
     resources: {

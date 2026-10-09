@@ -27,7 +27,29 @@ describe("formatRelativeTime", () => {
     expect(formatRelativeTime(now - 5_000)).toBe("только что");
     expect(formatRelativeTime(now - 5 * 60_000)).toContain("минут");
     expect(formatRelativeTime(now - 3 * 3_600_000)).toContain("час");
-    expect(formatRelativeTime(now - 3 * 86_400_000)).toMatch(/дн|в [а-я]+/);
+  });
+
+  it("formats 1 day as вчера", () => {
+    const now = Date.now();
+
+    expect(formatRelativeTime(now - 86_400_000)).toBe("вчера");
+  });
+
+  it("formats 2..6 days as a weekday name", () => {
+    const now = Date.now();
+
+    for (const days of [2, 3, 4, 5, 6]) {
+      expect(formatRelativeTime(now - days * 86_400_000)).toMatch(
+        /^(в|во) [а-я]+$/
+      );
+    }
+  });
+
+  it("formats 7+ days as a date", () => {
+    const now = Date.now();
+    const sevenDays = now - 7 * 86_400_000;
+
+    expect(formatRelativeTime(sevenDays)).toMatch(/^\d{2}\.\d{2}\.\d{4}$/);
   });
 });
 
