@@ -47,7 +47,7 @@
 |---|---|
 | `pnpm audit --audit-level=high` | уязвимостей нет |
 | `pnpm audit --audit-level=high --prod` | уязвимостей нет |
-| `cargo audit` | выполнено на этапе 22 после установки `cargo-audit` (результат в `TEST_REPORT.md`) |
+| `cargo audit` | выполнено на этапе 22 после установки `cargo-audit`: уязвимостей нет (577 зависимостей) |
 
 Версии критичных Rust-пакетов из `Cargo.lock`:
 
@@ -102,7 +102,7 @@
 | Проверка | Результат |
 |---|---|
 | `cargo clippy --all-targets --all-features -- -D warnings` | 0 warning'ов (исправлено 12 замечаний) |
-| `cargo audit` | запущен, результат в `zapret-manager/TEST_REPORT.md` |
+| `cargo audit` | запущен на этапе 22: уязвимостей нет, 577 зависимостей |
 | `pnpm audit --audit-level=high` и `--prod` | уязвимостей нет |
 | `pnpm lint:dead` (knip) | 0 неиспользуемых файлов, зависимостей и экспортов |
 | `pnpm exec tsc --noEmit` / `eslint` / `prettier --check` | 0 ошибок |

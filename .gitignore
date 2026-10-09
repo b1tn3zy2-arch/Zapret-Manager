@@ -30,11 +30,8 @@ Thumbs.db
 desktop.ini
 *.sw?
 
-# Служебные файлы
--args
-
 # Списки пользователя: приложение создаёт их рядом с собой при первом запуске.
-# В репозитории лежат только эталоны lists/*.txt из upstream zapret.
+# Эталоны лежат в zapret-manager/src-tauri/resources/zapret/lists/.
 lists/*-user.txt
 lists/*-user.txt.backup
 lists/ipset-*-user.txt
