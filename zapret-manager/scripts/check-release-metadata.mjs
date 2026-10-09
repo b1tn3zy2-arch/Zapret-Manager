@@ -2,6 +2,13 @@ import { readFileSync, existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import {
+  PLACEHOLDER,
+  checkDocument,
+  extractRepoUrl,
+  isPlaceholder,
+} from "./lib/release-metadata.mjs";
+
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const root = join(scriptDir, "..");
 const problems = [];
@@ -18,14 +25,20 @@ function check(condition, message) {
   }
 }
 
+const allowPlaceholder = process.env.ALLOW_PLACEHOLDER_REPO === "1";
+const options = { allowPlaceholder };
+
+if (allowPlaceholder) {
+  console.warn(
+    "ВНИМАНИЕ: ALLOW_PLACEHOLDER_REPO=1 — проверка плейсхолдера отключена. Допустимо только для локальной проверки сборки; CI и release.yml эту переменную не задают."
+  );
+}
+
 const pkg = JSON.parse(read("package.json"));
 const tauriConf = JSON.parse(read("src-tauri/tauri.conf.json"));
 const cargo = read("src-tauri/Cargo.toml");
 const constants = read("src/lib/constants.ts");
 const settingsConstants = read("src/lib/settingsConstants.ts");
-const changelog = read("../CHANGELOG.md");
-const readme = read("../README.md");
-
 const version = pkg.version;
 
 check(
@@ -37,47 +50,36 @@ check(
   `версия не найдена в src-tauri/Cargo.toml: ${version}`
 );
 check(
-  constants !== null &&
-    constants.includes(`export const APP_VERSION = "${version}"`),
+  constants !== null && constants.includes(`APP_VERSION = "${version}"`),
   `APP_VERSION в src/lib/constants.ts не совпадает с ${version}`
 );
 check(
-  changelog !== null && changelog.includes(`## [${version}]`),
+  read("../CHANGELOG.md") !== null &&
+    read("../CHANGELOG.md").includes(`## [${version}]`),
   `в CHANGELOG.md нет секции [${version}]`
 );
 
-const repoUrl = constants?.match(/APP_REPOSITORY_URL = "([^"]+)"/)?.[1];
+const repoUrl = extractRepoUrl(constants);
 
 check(repoUrl !== undefined, "APP_REPOSITORY_URL не найден в constants.ts");
-check(
-  repoUrl !== undefined && !repoUrl.includes("USER/"),
-  `APP_REPOSITORY_URL всё ещё содержит плейсхолдер: ${repoUrl}`
-);
+
+if (!allowPlaceholder) {
+  check(
+    !isPlaceholder(repoUrl),
+    `APP_REPOSITORY_URL всё ещё содержит плейсхолдер: ${repoUrl}`
+  );
+}
+
 check(
   settingsConstants !== null &&
-    repoUrl !== undefined &&
     settingsConstants.includes("APP_REPOSITORY_URL"),
   "ABOUT_LINKS не использует APP_REPOSITORY_URL"
 );
 
-for (const [name, content] of [
-  ["README.md", readme],
-  ["CHANGELOG.md", changelog],
-]) {
-  if (content === null) {
-    problems.push(`${name} не найден`);
-    continue;
-  }
-
-  check(
-    !content.includes("USER/zapret-manager"),
-    `${name} содержит плейсхолдер USER/zapret-manager — укажите реальный репозиторий`
-  );
-  check(
-    !content.includes("github.com/Flowseal/zapret-discord-youtube/issues"),
-    `${name} отправляет баг-репорты в upstream-репозиторий zapret`
-  );
-}
+problems.push(
+  ...checkDocument("README.md", read("../README.md"), options),
+  ...checkDocument("CHANGELOG.md", read("../CHANGELOG.md"), options)
+);
 
 if (problems.length > 0) {
   console.error("Метаданные релиза требуют правки:");
@@ -85,7 +87,7 @@ if (problems.length > 0) {
     console.error(`  - ${problem}`);
   }
   console.error(
-    `\nКак исправить одной командой: pnpm release:repo <owner/name>\nНапример: pnpm release:repo my-account/zapret-manager`
+    `\nКак исправить одной командой: pnpm release:repo <owner/name>\nНапример: pnpm release:repo my-account/zapret-manager\nПлейсхолдер в исходниках: ${PLACEHOLDER}`
   );
   process.exitCode = 1;
 } else {

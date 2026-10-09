@@ -6,6 +6,13 @@ export interface ConsoleCollector {
   readonly errors: string[];
 }
 
+/**
+ * Приветствие на Dashboard зависит от времени суток: «Доброе утро», «Добрый день»,
+ * «Добрый вечер», «Доброй ночи». Раньше тесты искали только /Доброе/, из-за чего падали
+ * с 12:00 до 23:00 и в CI на раннерах в произвольное время.
+ */
+export const GREETING = /Добр(?:ое|ый|ой)/;
+
 function collectConsole(page: Page): ConsoleCollector {
   const errors: string[] = [];
 

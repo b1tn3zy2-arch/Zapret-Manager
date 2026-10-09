@@ -112,6 +112,9 @@ jobs:
       - name: Build installers
         run: pnpm tauri build
 
+      - name: Check links in built bundle
+        run: pnpm lint:bundle
+
       - name: Collect artifacts
         run: node scripts/release-artifacts.mjs
 

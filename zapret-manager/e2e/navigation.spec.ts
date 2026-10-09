@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 
 import { mockTauri, MOCK_FOLDER } from "./mock-tauri";
+import { GREETING } from "./helpers";
 
 async function bootstrap(
   page: Page,
@@ -35,7 +36,7 @@ test.describe("Навигация и загрузка", () => {
 
     await page.goto("/");
     await expect(
-      page.getByRole("heading", { name: /Доброе/ }).first()
+      page.getByRole("heading", { name: GREETING }).first()
     ).toBeVisible();
 
     expect(errors).toEqual([]);
@@ -51,7 +52,7 @@ test.describe("Навигация и загрузка", () => {
       { name: "Логи", heading: /Логи/i },
       { name: "Настройки", heading: /Настройки/i },
       { name: "О приложении", heading: /Дизайн-система/i },
-      { name: "Главная", heading: /Доброе/i },
+      { name: "Главная", heading: GREETING },
     ];
 
     for (const section of sections) {

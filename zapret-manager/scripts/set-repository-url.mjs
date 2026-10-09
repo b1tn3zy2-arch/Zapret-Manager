@@ -37,6 +37,7 @@ const targets = [
 ];
 
 let changed = 0;
+const touchedPaths = [];
 
 for (const target of targets) {
   if (!existsSync(target.path)) {
@@ -53,11 +54,33 @@ for (const target of targets) {
 
   writeFileSync(target.path, content.split(PLACEHOLDER).join(raw), "utf8");
   changed += 1;
+  touchedPaths.push(target.path);
   console.log(`обновлено: ${target.label}`);
 }
 
 console.log(`\nРепозиторий: ${repoUrl}`);
 console.log(`Изменено файлов: ${changed}`);
+
+const touched = touchedPaths.filter(existsSync);
+
+if (touched.length > 0) {
+  const prettier = spawnSync(
+    process.execPath,
+    [
+      join(appRoot, "node_modules/prettier/bin/prettier.cjs"),
+      "--write",
+      ...touched,
+    ],
+    { cwd: appRoot, stdio: "inherit" }
+  );
+
+  if (prettier.status !== 0) {
+    console.error(
+      "Не удалось отформатировать изменённые файлы (prettier завершился с ошибкой)"
+    );
+    process.exitCode = 1;
+  }
+}
 
 const check = spawnSync(
   process.execPath,

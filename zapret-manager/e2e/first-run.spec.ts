@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { bootstrap } from "./helpers";
+import { bootstrap, GREETING } from "./helpers";
 
 test.describe("Первый запуск", () => {
   test("открывает Dashboard и рисует сводку", async ({ page }) => {
@@ -8,7 +8,7 @@ test.describe("Первый запуск", () => {
     await page.goto("/");
 
     await expect(
-      page.getByRole("heading", { name: /Доброе/ }).first()
+      page.getByRole("heading", { name: GREETING }).first()
     ).toBeVisible();
     await expect(page.getByText("Провайдер")).toBeVisible();
     await expect(page.getByText("203.0.113.10")).toBeVisible();

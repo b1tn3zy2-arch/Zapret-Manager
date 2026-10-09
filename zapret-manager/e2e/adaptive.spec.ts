@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { bootstrap, sidebar } from "./helpers";
+import { bootstrap, sidebar, GREETING } from "./helpers";
 
 const VIEWPORTS = [
   { name: "минимальное окно", width: 800, height: 600, sidebarCollapsed: true },
@@ -24,7 +24,7 @@ test.describe("Адаптивность", () => {
       await page.goto("/");
 
       await expect(
-        page.getByRole("heading", { name: /Доброе/ }).first()
+        page.getByRole("heading", { name: GREETING }).first()
       ).toBeVisible();
 
       await sidebar(page, "Стратегии").click();

@@ -32,3 +32,9 @@ desktop.ini
 
 # Служебные файлы
 -args
+
+# Списки пользователя: приложение создаёт их рядом с собой при первом запуске.
+# В репозитории лежат только эталоны lists/*.txt из upstream zapret.
+lists/*-user.txt
+lists/*-user.txt.backup
+lists/ipset-*-user.txt
