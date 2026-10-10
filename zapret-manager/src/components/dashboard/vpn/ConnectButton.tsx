@@ -6,64 +6,55 @@ import { useI18n } from "@/i18n";
 import { ANIMATION } from "@/lib/constants";
 import { SWITCH_STEP_LABELS } from "@/lib/vpnConstants";
 import { cn } from "@/lib/utils";
-import type { SwitchStep, VpnState } from "@/types";
+import type { SwitchStep } from "@/types";
 
 export interface ConnectButtonProps {
-  status: VpnState;
+  connected: boolean;
+  connecting: boolean;
   isSwitching: boolean;
   switchStep: SwitchStep | null;
   activeServerName: string | null;
   onClick: () => void;
 }
 
-const RING_CLASSES: Record<VpnState, string> = {
-  disconnected: "border-white/15",
-  connecting: "border-accent-warning",
-  connected: "border-accent-success bg-accent-success/10",
-  disconnecting: "border-accent-warning",
-  error: "border-accent-danger",
-};
-
 const PULSE_KEYFRAMES = {
   scale: [1, 1.05, 1],
 };
 
 export default function ConnectButton({
-  status,
+  connected,
+  connecting,
   isSwitching,
   switchStep,
   activeServerName,
   onClick,
 }: ConnectButtonProps) {
   const { t } = useI18n();
-  const isConnected = status === "connected";
-  const isBusy = status === "connecting" || status === "disconnecting";
+  const isBusy = connecting;
 
   const caption = isBusy
     ? switchStep !== null
       ? t(SWITCH_STEP_LABELS[switchStep])
       : t("dashboard.vpn.connecting")
-    : isConnected
+    : connected
       ? t("dashboard.vpn.connectedTo").replace("{name}", activeServerName ?? "")
-      : status === "error"
-        ? t("dashboard.vpn.connectFailed")
-        : t("dashboard.vpn.clickToConnect");
+      : t("dashboard.vpn.clickToConnect");
 
   return (
     <div className="flex flex-col items-center gap-4">
       <motion.button
         type="button"
         aria-label={
-          isConnected
+          connected
             ? t("dashboard.vpn.disconnectAria")
             : t("dashboard.vpn.connectAria")
         }
         aria-busy={isBusy}
         disabled={isSwitching}
         onClick={onClick}
-        animate={isConnected ? PULSE_KEYFRAMES : { scale: 1 }}
+        animate={connected ? PULSE_KEYFRAMES : { scale: 1 }}
         transition={
-          isConnected
+          connected
             ? { duration: 2, repeat: Infinity, ease: "easeInOut" }
             : { duration: ANIMATION.normal }
         }
@@ -74,7 +65,11 @@ export default function ConnectButton({
           "size-[clamp(160px,18vw,200px)] transition-colors",
           "hover:border-accent-primary/60 duration-300",
           "disabled:cursor-not-allowed disabled:opacity-60",
-          RING_CLASSES[status]
+          connected
+            ? "border-accent-success bg-accent-success/10"
+            : isBusy
+              ? "border-accent-warning"
+              : "border-white/15"
         )}
       >
         <Power
@@ -82,7 +77,7 @@ export default function ConnectButton({
           className={cn(
             "size-16 transition-colors duration-300",
             isBusy && "animate-spin",
-            isConnected ? "text-accent-success" : "text-text-secondary"
+            connected ? "text-accent-success" : "text-text-secondary"
           )}
           strokeWidth={1.75}
         />
@@ -93,11 +88,7 @@ export default function ConnectButton({
         size="sm"
         className={cn(
           "text-center",
-          isConnected
-            ? "text-accent-success"
-            : status === "error"
-              ? "text-accent-danger"
-              : "text-text-secondary"
+          connected ? "text-accent-success" : "text-text-secondary"
         )}
       >
         {caption}

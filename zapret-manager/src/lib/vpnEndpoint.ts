@@ -49,3 +49,25 @@ export function guessCountryCode(endpoint: string): CountryCode | null {
 
   return leading === undefined ? null : toCountryCode(leading);
 }
+
+export function validateSubscriptionUrl(url: string): string | null {
+  const trimmed = url.trim();
+
+  if (trimmed === "") {
+    return "Вставьте ссылку на подписку";
+  }
+
+  if (trimmed.length > 2_048) {
+    return "Ссылка слишком длинная";
+  }
+
+  if (/\s/.test(trimmed)) {
+    return "Ссылка содержит пробелы";
+  }
+
+  if (!/^https?:\/\//i.test(trimmed)) {
+    return "Ссылка должна начинаться с https://";
+  }
+
+  return null;
+}

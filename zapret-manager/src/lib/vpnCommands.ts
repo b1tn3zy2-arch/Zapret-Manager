@@ -1,8 +1,12 @@
-import { open } from "@tauri-apps/plugin-dialog";
-
 import { secureInvoke, secureInvokeValidated } from "@/lib/secureInvoke";
 import { VpnConfigInfoSchema, VpnStatusSchema } from "@/types/ipcSchemas";
-import type { VpnConfigInfo, VpnStats, VpnStatus } from "@/types";
+import type {
+  SubscriptionServer,
+  VpnConfigInfo,
+  VpnStats,
+  VpnStatus,
+  XrayStatus,
+} from "@/types";
 
 export async function isWireguardInstalled(): Promise<boolean> {
   return secureInvoke<boolean>("is_wireguard_installed");
@@ -15,34 +19,8 @@ export async function listConfigs(): Promise<VpnConfigInfo[]> {
   );
 }
 
-export async function importConfigFromDialog(): Promise<VpnConfigInfo | null> {
-  const selected = await open({
-    multiple: false,
-    directory: false,
-    filters: [{ name: "WireGuard", extensions: ["conf"] }],
-  });
-
-  if (typeof selected !== "string" || selected === "") {
-    return null;
-  }
-
-  return await secureInvokeValidated("import_vpn_config", VpnConfigInfoSchema, {
-    sourcePath: selected,
-  });
-}
-
 export async function removeConfig(id: string): Promise<boolean> {
   return secureInvoke<boolean>("delete_vpn_config", { id });
-}
-
-export async function importConfigFromText(
-  content: string
-): Promise<VpnConfigInfo> {
-  return await secureInvokeValidated(
-    "import_vpn_config_text",
-    VpnConfigInfoSchema,
-    { content }
-  );
 }
 
 export async function fetchStatus(): Promise<VpnStatus> {
@@ -57,6 +35,48 @@ export async function fetchStats(): Promise<VpnStats> {
 
 export async function reconcileTunnels(): Promise<void> {
   await secureInvoke<number>("reconcile_vpn_tunnels");
+}
+
+export async function fetchSubscription(
+  url: string
+): Promise<SubscriptionServer[]> {
+  return secureInvoke<SubscriptionServer[]>("fetch_vpn_subscription", { url });
+}
+
+export async function installVpnCore(): Promise<boolean> {
+  return secureInvoke<boolean>("install_vpn_core");
+}
+
+export async function fetchVpnCoreStatus(): Promise<XrayStatus> {
+  return secureInvoke<XrayStatus>("vpn_core_status");
+}
+
+export async function connectVpnServer(
+  link: string,
+  name: string
+): Promise<XrayStatus> {
+  return secureInvoke<XrayStatus>("connect_vpn_server", { link, name });
+}
+
+export async function disconnectVpnServer(): Promise<XrayStatus> {
+  return secureInvoke<XrayStatus>("disconnect_vpn_server");
+}
+
+export interface EndpointInput {
+  host: string;
+  port: number;
+}
+
+export interface EndpointPing {
+  endpoint: string;
+  latencyMs: number | null;
+  success: boolean;
+}
+
+export async function pingEndpoints(
+  endpoints: EndpointInput[]
+): Promise<EndpointPing[]> {
+  return secureInvoke<EndpointPing[]>("ping_endpoints", { endpoints });
 }
 
 export interface VpnRunResult {

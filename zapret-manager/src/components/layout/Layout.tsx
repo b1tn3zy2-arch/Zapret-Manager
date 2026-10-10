@@ -1,10 +1,12 @@
 import type { ReactNode } from "react";
+import { useRef } from "react";
 
 import Sidebar from "@/components/layout/Sidebar";
 import TitleBar from "@/components/layout/TitleBar";
 import NoiseOverlay from "@/components/shared/NoiseOverlay";
 import PostProcessingLayer from "@/components/shared/PostProcessingLayer";
 import { useFullscreen } from "@/hooks/useFullscreen";
+import { useSmoothWheelScroll } from "@/hooks/useSmoothWheelScroll";
 
 export interface LayoutProps {
   children: ReactNode;
@@ -12,6 +14,9 @@ export interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   const { isFullscreen, toggleFullscreen } = useFullscreen();
+  const scrollRef = useRef<HTMLElement>(null);
+
+  useSmoothWheelScroll(scrollRef);
 
   return (
     <div className="bg-bg-primary flex h-screen w-screen flex-col overflow-hidden">
@@ -21,7 +26,8 @@ export default function Layout({ children }: LayoutProps) {
       <div className="flex min-h-0 flex-1 overflow-hidden">
         <Sidebar />
         <main
-          className="flex min-w-0 flex-1 scrollbar-thin flex-col overflow-x-hidden overflow-y-auto"
+          ref={scrollRef}
+          className="flex min-w-0 flex-1 scrollbar-none flex-col overflow-x-hidden overflow-y-auto"
           style={{
             paddingTop: "max(var(--space-lg), env(safe-area-inset-top, 0px))",
             paddingRight:

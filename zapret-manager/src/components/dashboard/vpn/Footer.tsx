@@ -1,28 +1,25 @@
-import { formatBytes } from "@/lib/trafficUtils";
-import { formatHandshakeTime, formatUptime } from "@/lib/vpnUtils";
+import { formatUptime } from "@/lib/vpnUtils";
 import { useI18n } from "@/i18n";
-import type { VpnStatus } from "@/types";
+import type { XrayStatus } from "@/types";
 
 export interface VpnFooterProps {
-  status: VpnStatus;
+  status: XrayStatus | null;
 }
 
 export default function VpnFooter({ status }: VpnFooterProps) {
   const { t } = useI18n();
+  const running = status?.running === true;
 
   return (
     <div className="text-text-tertiary grid grid-cols-3 items-center gap-3 border-t border-white/5 pt-3 text-center font-mono text-[11px]">
       <span>
-        {t("dashboard.vpn.traffic")}: {formatBytes(status.bytesIn ?? 0)} ↓{" "}
-        {formatBytes(status.bytesOut ?? 0)} ↑
+        {t("dashboard.vpn.uptime")}:{" "}
+        {running ? formatUptime(status?.uptimeSec ?? null) : "—"}
       </span>
       <span>
-        {t("dashboard.vpn.uptime")}: {formatUptime(status.uptimeSec)}
+        SOCKS: {status?.socksPort ?? "—"} · HTTP: {status?.httpPort ?? "—"}
       </span>
-      <span>
-        {t("dashboard.vpn.handshake")}:{" "}
-        {formatHandshakeTime(status.handshakeAt, t)}
-      </span>
+      <span>PID: {running ? (status?.pid ?? "—") : "—"}</span>
     </div>
   );
 }

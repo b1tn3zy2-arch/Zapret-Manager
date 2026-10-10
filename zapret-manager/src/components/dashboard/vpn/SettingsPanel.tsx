@@ -1,121 +1,135 @@
 import { useState } from "react";
+import { Download, Link2, Trash2 } from "lucide-react";
 
-import SettingRow from "@/components/settings/SettingRow";
-import VpnKillSwitchWarning from "@/components/vpn/VpnKillSwitchWarning";
-import { Input, Modal, Toggle } from "@/components/ui";
+import { Button, Input, Modal, Text } from "@/components/ui";
 import { useI18n } from "@/i18n";
-import {
-  MAX_HANDSHAKE_TIMEOUT_SEC,
-  MIN_HANDSHAKE_TIMEOUT_SEC,
-} from "@/lib/settingsSchema";
-import { useSettingsStore } from "@/stores/useSettingsStore";
+import { useVpnCore } from "@/hooks/useVpnCore";
+import { useVpnCoreStore } from "@/stores/useVpnCoreStore";
 
 export interface SettingsPanelProps {
   open: boolean;
   onClose: () => void;
 }
 
-function clampTimeout(value: string): number {
-  const parsed = Number.parseInt(value, 10);
-
-  if (Number.isNaN(parsed)) {
-    return MIN_HANDSHAKE_TIMEOUT_SEC;
-  }
-
-  return Math.min(
-    Math.max(parsed, MIN_HANDSHAKE_TIMEOUT_SEC),
-    MAX_HANDSHAKE_TIMEOUT_SEC
-  );
-}
-
 export default function SettingsPanel({ open, onClose }: SettingsPanelProps) {
   const { t } = useI18n();
-  const [warning, setWarning] = useState(false);
-
-  const autoConnectOnStart = useSettingsStore(
-    (state) => state.settings.vpn.autoConnectOnStart
+  const subscriptionUrl = useVpnCoreStore((state) => state.subscriptionUrl);
+  const servers = useVpnCoreStore((state) => state.servers);
+  const status = useVpnCoreStore((state) => state.status);
+  const isLoading = useVpnCoreStore((state) => state.isLoading);
+  const error = useVpnCoreStore((state) => state.error);
+  const setSubscriptionUrl = useVpnCoreStore(
+    (state) => state.setSubscriptionUrl
   );
-  const killSwitch = useSettingsStore((state) => state.settings.vpn.killSwitch);
-  const handshakeTimeoutSec = useSettingsStore(
-    (state) => state.settings.vpn.handshakeTimeoutSec
-  );
-  const updateVpn = useSettingsStore((state) => state.updateVpn);
+  const setServers = useVpnCoreStore((state) => state.setServers);
+  const [draft, setDraft] = useState(subscriptionUrl);
+  const { loadServers, installCore } = useVpnCore();
 
   return (
-    <>
-      <Modal
-        open={open}
-        onClose={onClose}
-        title={t("dashboard.vpn.settingsPanel")}
-        description={t("settings.vpn.description")}
-        size="md"
-      >
-        <div className="flex flex-col gap-4">
-          <SettingRow
-            label={t("settings.vpn.autoConnect")}
-            description={t("settings.vpn.autoConnectHint")}
-            control={
-              <Toggle
-                ariaLabel={t("settings.vpn.autoConnect")}
-                checked={autoConnectOnStart}
-                onChange={(value) => {
-                  updateVpn({ autoConnectOnStart: value });
-                }}
-              />
-            }
-          />
+    <Modal
+      open={open}
+      onClose={onClose}
+      title={t("dashboard.vpn.settingsPanel")}
+      size="md"
+    >
+      <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-2">
+          <Text variant="label" className="text-text-primary">
+            {t("dashboard.vpn.coreTitle")}
+          </Text>
 
-          <SettingRow
-            label={t("settings.vpn.killSwitch")}
-            description={t("settings.vpn.killSwitchHint")}
-            control={
-              <Toggle
-                ariaLabel={t("settings.vpn.killSwitch")}
-                checked={killSwitch}
-                onChange={(value) => {
-                  if (value) {
-                    setWarning(true);
-                    return;
-                  }
+          <Text variant="body" size="sm" className="text-text-secondary">
+            {status?.installed === true
+              ? t("dashboard.vpn.coreInstalled")
+              : t("dashboard.vpn.coreMissing")}
+          </Text>
 
-                  updateVpn({ killSwitch: false });
-                }}
-              />
-            }
-          />
-
-          <SettingRow
-            label={t("settings.vpn.handshakeTimeout")}
-            description={t("settings.vpn.handshakeTimeoutHint")}
-            control={
-              <Input
-                variant="filled"
-                type="number"
-                min={MIN_HANDSHAKE_TIMEOUT_SEC}
-                max={MAX_HANDSHAKE_TIMEOUT_SEC}
-                value={String(handshakeTimeoutSec)}
-                aria-label={t("settings.vpn.handshakeTimeout")}
-                onChange={(event) => {
-                  updateVpn({
-                    handshakeTimeoutSec: clampTimeout(event.target.value),
-                  });
-                }}
-              />
-            }
-          />
+          {status?.installed !== true ? (
+            <Button
+              size="sm"
+              disabled={isLoading}
+              onClick={() => {
+                void installCore();
+              }}
+              icon={
+                <Download
+                  aria-hidden="true"
+                  className="size-4"
+                  strokeWidth={2}
+                />
+              }
+            >
+              {isLoading
+                ? t("dashboard.vpn.coreInstalling")
+                : t("dashboard.vpn.installCore")}
+            </Button>
+          ) : null}
         </div>
-      </Modal>
 
-      <VpnKillSwitchWarning
-        open={warning}
-        onCancel={() => {
-          setWarning(false);
-        }}
-        onConfirm={() => {
-          setWarning(false);
-          updateVpn({ killSwitch: true });
-        }}
-      />
-    </>
+        <div className="flex flex-col gap-2">
+          <Input
+            label={t("dashboard.vpn.subscriptionUrl")}
+            placeholder="https://example.com/api/sub/..."
+            value={draft}
+            onChange={(event) => {
+              setDraft(event.target.value);
+            }}
+          />
+
+          <div className="flex flex-wrap gap-2">
+            <Button
+              size="sm"
+              disabled={isLoading || draft.trim() === ""}
+              onClick={() => {
+                void loadServers(draft.trim());
+              }}
+              icon={
+                <Link2 aria-hidden="true" className="size-4" strokeWidth={2} />
+              }
+            >
+              {isLoading
+                ? t("dashboard.vpn.subscriptionLoading")
+                : t("dashboard.vpn.subscriptionLoad")}
+            </Button>
+
+            {servers.length > 0 ? (
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => {
+                  setServers([]);
+                  setSubscriptionUrl("");
+                  setDraft("");
+                }}
+                icon={
+                  <Trash2
+                    aria-hidden="true"
+                    className="size-4"
+                    strokeWidth={2}
+                  />
+                }
+              >
+                {t("dashboard.vpn.subscriptionClear")}
+              </Button>
+            ) : null}
+          </div>
+
+          {servers.length > 0 ? (
+            <Text variant="caption" size="sm" className="text-text-tertiary">
+              {t("dashboard.vpn.subscriptionCount").replace(
+                "{count}",
+                String(servers.length)
+              )}
+            </Text>
+          ) : null}
+        </div>
+
+        {error !== null ? (
+          <Text variant="caption" size="sm" className="text-accent-danger">
+            {error}
+          </Text>
+        ) : null}
+      </div>
+    </Modal>
   );
 }

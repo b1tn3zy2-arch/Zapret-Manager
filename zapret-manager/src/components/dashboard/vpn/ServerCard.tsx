@@ -1,33 +1,28 @@
 import { memo } from "react";
-import { Globe, MoreVertical } from "lucide-react";
+import { Globe, Link2 } from "lucide-react";
 
 import CountryFlag from "@/components/dashboard/CountryFlag";
+import { Badge } from "@/components/ui";
 import { useI18n } from "@/i18n";
 import { guessCountryCode } from "@/lib/vpnEndpoint";
 import { formatPing, getPingColor } from "@/lib/pingUtils";
 import { cn } from "@/lib/utils";
-import type { VpnConfigInfo } from "@/types";
+import type { SubscriptionServer } from "@/types";
 
 export interface ServerCardProps {
-  config: VpnConfigInfo;
+  server: SubscriptionServer;
   isActive: boolean;
   ping: number | null;
-  onSelect: (id: string) => void;
-  onOpenMenu: (id: string) => void;
+  onSelect: (server: SubscriptionServer) => void;
 }
 
-function ServerCardImpl({
-  config,
-  isActive,
-  ping,
-  onSelect,
-  onOpenMenu,
-}: ServerCardProps) {
+function ServerCardImpl({ server, isActive, ping, onSelect }: ServerCardProps) {
   const { t } = useI18n();
-  const country = guessCountryCode(config.endpoint);
+  const country = guessCountryCode(server.host);
 
   return (
-    <li
+    <div
+      role="listitem"
       className={cn(
         "flex items-center gap-3 rounded-lg border p-3 transition-colors",
         "duration-200 hover:bg-white/5",
@@ -39,11 +34,11 @@ function ServerCardImpl({
       <button
         type="button"
         onClick={() => {
-          onSelect(config.id);
+          onSelect(server);
         }}
         aria-label={t("dashboard.vpn.selectServer").replace(
           "{name}",
-          config.name
+          server.name
         )}
         className="flex min-w-0 flex-1 items-center gap-3 text-left"
       >
@@ -60,14 +55,16 @@ function ServerCardImpl({
 
         <span className="flex min-w-0 flex-1 flex-col">
           <span className="text-text-primary truncate text-sm font-semibold">
-            {config.name}
+            {server.name}
           </span>
-          <span className="text-text-tertiary truncate font-mono text-[11px]">
-            {config.endpoint === ""
-              ? t("dashboard.vpn.endpointUnknown")
-              : config.endpoint}
+          <span className="text-text-tertiary flex items-center gap-1.5 truncate font-mono text-[11px]">
+            {server.host}:{server.port}
           </span>
         </span>
+
+        <Badge variant="neutral" size="sm">
+          {server.protocol.toUpperCase()}
+        </Badge>
       </button>
 
       <span
@@ -77,17 +74,14 @@ function ServerCardImpl({
         {formatPing(ping)}
       </span>
 
-      <button
-        type="button"
-        onClick={() => {
-          onOpenMenu(config.id);
-        }}
-        aria-label={`${t("dashboard.vpn.moreActions")}: ${config.name}`}
-        className="text-text-tertiary hover:text-text-primary shrink-0 rounded-md p-1 transition-colors hover:bg-white/5"
-      >
-        <MoreVertical aria-hidden="true" className="size-4" strokeWidth={2} />
-      </button>
-    </li>
+      {isActive ? (
+        <Link2
+          aria-hidden="true"
+          className="text-accent-primary size-4 shrink-0"
+          strokeWidth={2}
+        />
+      ) : null}
+    </div>
   );
 }
 

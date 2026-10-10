@@ -246,6 +246,11 @@ fn handle_tray_event(
             ..
         } => toggle_window(app),
         TrayIconEvent::Click {
+            button: tauri::tray::MouseButton::Right,
+            button_state: tauri::tray::MouseButtonState::Up,
+            ..
+        } => show_window(app),
+        TrayIconEvent::Click {
             button: tauri::tray::MouseButton::Middle,
             button_state: tauri::tray::MouseButtonState::Up,
             ..

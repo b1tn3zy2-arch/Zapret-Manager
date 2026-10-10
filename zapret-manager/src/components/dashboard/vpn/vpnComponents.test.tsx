@@ -6,18 +6,15 @@ import ModeSwitcher from "@/components/dashboard/ModeSwitcher";
 import ConnectButton from "@/components/dashboard/vpn/ConnectButton";
 import ActionsRow from "@/components/dashboard/vpn/ActionsRow";
 import ServerCard from "@/components/dashboard/vpn/ServerCard";
-import type { VpnConfigInfo } from "@/types";
+import type { SubscriptionServer } from "@/types";
 
-const CONFIG: VpnConfigInfo = {
-  id: "nl1",
+const SERVER: SubscriptionServer = {
+  id: "srv_1",
   name: "Амстердам 🇳🇱",
-  path: "C:/vpn/nl1.conf",
-  endpoint: "node.amsterdam.nl:51820",
-  address: ["10.0.0.2/32"],
-  dns: ["1.1.1.1"],
-  allowedIps: ["0.0.0.0/0"],
-  size: 320,
-  importedAt: 5,
+  protocol: "vless",
+  host: "node.amsterdam.nl",
+  port: 443,
+  link: "vless://uuid@node.amsterdam.nl:443?security=tls#Amsterdam",
 };
 
 describe("ModeSwitcher", () => {
@@ -101,6 +98,7 @@ describe("ModeSwitcher", () => {
 
 describe("ConnectButton", () => {
   const base = {
+    connecting: false,
     isSwitching: false,
     switchStep: null,
     activeServerName: "Амстердам",
@@ -108,27 +106,21 @@ describe("ConnectButton", () => {
   };
 
   it("приглашает подключиться в покое", () => {
-    render(<ConnectButton status="disconnected" {...base} />);
+    render(<ConnectButton connected={false} {...base} />);
 
     expect(screen.getByText("Нажмите для подключения")).toBeTruthy();
   });
 
   it("показывает имя активного сервера", () => {
-    render(<ConnectButton status="connected" {...base} />);
+    render(<ConnectButton connected {...base} />);
 
     expect(screen.getByText("Подключено к Амстердам")).toBeTruthy();
-  });
-
-  it("сообщает об ошибке", () => {
-    render(<ConnectButton status="error" {...base} />);
-
-    expect(screen.getByText("Ошибка подключения")).toBeTruthy();
   });
 
   it("переключает надпись на подключение", async () => {
     const onClick = vi.fn();
 
-    render(<ConnectButton status="disconnected" {...base} onClick={onClick} />);
+    render(<ConnectButton connected={false} {...base} onClick={onClick} />);
 
     await userEvent.click(
       screen.getByRole("button", { name: "Подключить VPN" })
@@ -138,13 +130,13 @@ describe("ConnectButton", () => {
   });
 
   it("меняет aria-label при подключении", () => {
-    render(<ConnectButton status="connected" {...base} />);
+    render(<ConnectButton connected {...base} />);
 
     expect(screen.getByRole("button", { name: "Отключить VPN" })).toBeTruthy();
   });
 
   it("помечает busy при подключении", () => {
-    render(<ConnectButton status="connecting" {...base} />);
+    render(<ConnectButton connected={false} {...base} connecting />);
 
     expect(
       screen.getByRole("button", { name: "Подключить VPN" })
@@ -154,27 +146,29 @@ describe("ConnectButton", () => {
 
 describe("ActionsRow", () => {
   it("вызывает все три обработчика", async () => {
-    const onAddFile = vi.fn();
-    const onPaste = vi.fn();
+    const onAddLink = vi.fn();
+    const onPasteLink = vi.fn();
     const onOpenSettings = vi.fn();
 
     render(
       <ActionsRow
         disabled={false}
-        onAddFile={onAddFile}
-        onPaste={onPaste}
+        onAddLink={onAddLink}
+        onPasteLink={onPasteLink}
         onOpenSettings={onOpenSettings}
       />
     );
 
-    await userEvent.click(screen.getByRole("button", { name: "Добавить" }));
+    await userEvent.click(
+      screen.getByRole("button", { name: "Добавить ссылку" })
+    );
     await userEvent.click(screen.getByRole("button", { name: "Вставить" }));
     await userEvent.click(
       screen.getByRole("button", { name: "Настройки VPN" })
     );
 
-    expect(onAddFile).toHaveBeenCalledTimes(1);
-    expect(onPaste).toHaveBeenCalledTimes(1);
+    expect(onAddLink).toHaveBeenCalledTimes(1);
+    expect(onPasteLink).toHaveBeenCalledTimes(1);
     expect(onOpenSettings).toHaveBeenCalledTimes(1);
   });
 
@@ -182,66 +176,66 @@ describe("ActionsRow", () => {
     render(
       <ActionsRow
         disabled
-        onAddFile={vi.fn()}
-        onPaste={vi.fn()}
+        onAddLink={vi.fn()}
+        onPasteLink={vi.fn()}
         onOpenSettings={vi.fn()}
       />
     );
 
-    expect(screen.getByRole("button", { name: "Добавить" })).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: "Добавить ссылку" })
+    ).toBeDisabled();
     expect(screen.getByRole("button", { name: "Вставить" })).toBeDisabled();
   });
 });
 
 describe("ServerCard", () => {
-  it("показывает имя, endpoint и флаг страны", () => {
+  it("показывает имя, endpoint, протокол и флаг страны", () => {
     render(
-      <ul>
+      <div role="list">
         <ServerCard
-          config={CONFIG}
+          server={SERVER}
           isActive={false}
           ping={61}
           onSelect={vi.fn()}
-          onOpenMenu={vi.fn()}
         />
-      </ul>
+      </div>
     );
 
     expect(screen.getByText("Амстердам 🇳🇱")).toBeTruthy();
-    expect(screen.getByText("node.amsterdam.nl:51820")).toBeTruthy();
+    expect(screen.getByText("node.amsterdam.nl:443")).toBeTruthy();
+    expect(screen.getByText("VLESS")).toBeTruthy();
     expect(screen.getByText("61 мс")).toBeTruthy();
     expect(screen.getByAltText("NL")).toBeTruthy();
   });
 
   it("показывает прочерк при отсутствии пинга", () => {
     render(
-      <ul>
+      <div role="list">
         <ServerCard
-          config={CONFIG}
+          server={SERVER}
           isActive={false}
           ping={null}
           onSelect={vi.fn()}
-          onOpenMenu={vi.fn()}
         />
-      </ul>
+      </div>
     );
 
     expect(screen.getByText("—")).toBeTruthy();
   });
 
-  it("подключается по клику на тело карточки", async () => {
+  it("выбирает сервер по клику", async () => {
     const onSelect = vi.fn();
 
     render(
-      <ul>
+      <div role="list">
         <ServerCard
-          config={CONFIG}
+          server={SERVER}
           isActive={false}
           ping={null}
           onSelect={onSelect}
-          onOpenMenu={vi.fn()}
         />
-      </ul>
+      </div>
     );
 
     await userEvent.click(
@@ -250,44 +244,19 @@ describe("ServerCard", () => {
       })
     );
 
-    expect(onSelect).toHaveBeenCalledWith("nl1");
-  });
-
-  it("открывает меню по кнопке с точками", async () => {
-    const onOpenMenu = vi.fn();
-
-    render(
-      <ul>
-        <ServerCard
-          config={CONFIG}
-          isActive={false}
-          ping={null}
-          onSelect={vi.fn()}
-          onOpenMenu={onOpenMenu}
-        />
-      </ul>
-    );
-
-    await userEvent.click(
-      screen.getByRole("button", {
-        name: "Действия со списком серверов: Амстердам 🇳🇱",
-      })
-    );
-
-    expect(onOpenMenu).toHaveBeenCalledWith("nl1");
+    expect(onSelect).toHaveBeenCalledWith(SERVER);
   });
 
   it("подставляет глобус при неизвестной стране", () => {
     render(
-      <ul>
+      <div role="list">
         <ServerCard
-          config={{ ...CONFIG, endpoint: "vpn.acme.internal:51820" }}
+          server={{ ...SERVER, host: "vpn.acme.internal" }}
           isActive={false}
           ping={null}
           onSelect={vi.fn()}
-          onOpenMenu={vi.fn()}
         />
-      </ul>
+      </div>
     );
 
     expect(screen.queryByAltText("NL")).toBeNull();

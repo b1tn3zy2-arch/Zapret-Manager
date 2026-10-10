@@ -6,156 +6,189 @@ import EmptyState from "@/components/dashboard/vpn/EmptyState";
 import ServerList from "@/components/dashboard/vpn/ServerList";
 import SettingsPanel from "@/components/dashboard/vpn/SettingsPanel";
 import VpnFooter from "@/components/dashboard/vpn/Footer";
-import WireguardNotInstalled from "@/components/vpn/WireguardNotInstalled";
-import { Button, Modal } from "@/components/ui";
+import { Button, Input, Modal, Text } from "@/components/ui";
 import { useI18n } from "@/i18n";
-import { useVpn } from "@/hooks/useVpn";
-import { useVpnImport } from "@/hooks/useVpnImport";
-import { useVpnPings } from "@/hooks/useVpnPings";
-import { selectActiveConfig, useVpnStore } from "@/stores/useVpnStore";
+import { useVpnCore } from "@/hooks/useVpnCore";
+import { useSubscriptionPings } from "@/hooks/useSubscriptionPings";
+import { useVpnCoreStore } from "@/stores/useVpnCoreStore";
+import { validateSubscriptionUrl } from "@/lib/vpnEndpoint";
+import type { SubscriptionServer } from "@/types";
 
-export interface VpnModeProps {
-  onOpenConfigMenu?: (configId: string) => void;
-}
-
-export default function VpnMode({ onOpenConfigMenu }: VpnModeProps = {}) {
+export default function VpnMode() {
   const { t } = useI18n();
-  const configs = useVpnStore((state) => state.configs);
-  const activeConfigId = useVpnStore((state) => state.activeConfigId);
-  const status = useVpnStore((state) => state.status);
-  const switchStep = useVpnStore((state) => state.switchStep);
-  const isSwitching = useVpnStore((state) => state.isSwitching);
-  const installed = useVpnStore((state) => state.wireguardInstalled);
-  const activeConfig = useVpnStore(selectActiveConfig);
+  const servers = useVpnCoreStore((state) => state.servers);
+  const status = useVpnCoreStore((state) => state.status);
+  const activeServerId = useVpnCoreStore((state) => state.activeServerId);
+  const subscriptionUrl = useVpnCoreStore((state) => state.subscriptionUrl);
+  const isLoading = useVpnCoreStore((state) => state.isLoading);
+  const error = useVpnCoreStore((state) => state.error);
 
-  const { connect, connectActive, disconnect, deleteConfig } = useVpn();
-  const { importConfig, importConfigFromClipboard } = useVpnImport();
+  const { loadServers, connectServer, disconnect } = useVpnCore();
+  const { pings, isRefreshing, refresh } = useSubscriptionPings(servers);
 
-  const { pings, isRefreshing, refresh } = useVpnPings(configs);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [menuConfigId, setMenuConfigId] = useState<string | null>(null);
-  const [pasteNotice, setPasteNotice] = useState<string | null>(null);
+  const [linkOpen, setLinkOpen] = useState(false);
+  const [draftLink, setDraftLink] = useState("");
+  const [linkError, setLinkError] = useState<string | null>(null);
 
-  const menuConfig = configs.find((item) => item.id === menuConfigId) ?? null;
-
-  const isConnected = status.state === "connected";
-  const isBusy = isSwitching || status.state === "connecting";
+  const connected = status?.running === true;
+  const activeServer =
+    servers.find((server) => server.id === activeServerId) ?? null;
 
   const handleToggle = useCallback((): void => {
-    if (isConnected) {
+    if (connected) {
       void disconnect();
       return;
     }
 
-    void connectActive();
-  }, [connectActive, disconnect, isConnected]);
+    if (activeServer !== null) {
+      void connectServer(activeServer);
+    }
+  }, [activeServer, connectServer, connected, disconnect]);
 
   const handleSelect = useCallback(
-    (configId: string): void => {
-      void connect(configId);
-    },
-    [connect]
-  );
-
-  const handleOpenMenu = useCallback(
-    (configId: string): void => {
-      if (onOpenConfigMenu !== undefined) {
-        onOpenConfigMenu(configId);
+    (server: SubscriptionServer): void => {
+      if (connected || isLoading) {
         return;
       }
 
-      setMenuConfigId((current) => (current === configId ? null : configId));
+      void connectServer(server);
     },
-    [onOpenConfigMenu]
+    [connectServer, connected, isLoading]
   );
 
-  const handlePaste = useCallback((): void => {
-    setPasteNotice(null);
+  const handlePasteLink = useCallback((): void => {
+    void navigator.clipboard
+      .readText()
+      .then((text) => {
+        const value = text.trim();
 
-    void importConfigFromClipboard().then((config) => {
-      if (config === null) {
-        setPasteNotice(t("dashboard.vpn.pasteEmpty"));
-      }
-    });
-  }, [importConfigFromClipboard, t]);
+        if (value === "") {
+          setLinkError(t("dashboard.vpn.pasteEmpty"));
+          return;
+        }
 
-  if (!installed) {
-    return <WireguardNotInstalled />;
-  }
+        setDraftLink(value);
+        setLinkError(null);
+        setLinkOpen(true);
+      })
+      .catch(() => {
+        setLinkOpen(true);
+      });
+  }, [t]);
+
+  const handleApplyLink = useCallback((): void => {
+    const check = validateSubscriptionUrl(draftLink);
+
+    if (check !== null) {
+      setLinkError(check);
+      return;
+    }
+
+    setLinkError(null);
+    setLinkOpen(false);
+    void loadServers(draftLink.trim());
+  }, [draftLink, loadServers]);
 
   return (
     <div className="flex flex-col gap-6">
       <ConnectButton
-        status={status.state}
-        isSwitching={isSwitching}
-        switchStep={switchStep}
-        activeServerName={activeConfig?.name ?? null}
+        connected={connected}
+        connecting={isLoading && connected}
+        isSwitching={isLoading}
+        switchStep={null}
+        activeServerName={activeServer?.name ?? null}
         onClick={handleToggle}
       />
 
       <ActionsRow
-        disabled={isBusy}
-        onAddFile={() => {
-          void importConfig();
+        disabled={isLoading}
+        onAddLink={() => {
+          setDraftLink(subscriptionUrl);
+          setLinkError(null);
+          setLinkOpen(true);
         }}
-        onPaste={handlePaste}
+        onPasteLink={handlePasteLink}
         onOpenSettings={() => {
           setSettingsOpen(true);
         }}
       />
 
-      {pasteNotice !== null ? (
-        <p className="text-accent-warning text-center text-xs">{pasteNotice}</p>
+      {error !== null ? (
+        <p className="text-accent-danger text-center text-xs">{error}</p>
       ) : null}
 
-      {configs.length === 0 ? (
+      {servers.length === 0 ? (
         <EmptyState
-          disabled={isBusy}
-          onChooseFile={() => {
-            void importConfig();
-          }}
-          onDrop={() => {
-            void importConfig();
+          disabled={isLoading}
+          onAddLink={() => {
+            setDraftLink(subscriptionUrl);
+            setLinkError(null);
+            setLinkOpen(true);
           }}
         />
       ) : (
         <ServerList
-          configs={configs}
-          activeConfigId={activeConfigId}
+          servers={servers}
+          activeServerId={activeServerId}
           pings={pings}
           isRefreshing={isRefreshing}
           onSelect={handleSelect}
-          onOpenMenu={handleOpenMenu}
           onRefreshPings={refresh}
+          onRefreshSubscription={() => {
+            if (subscriptionUrl !== "") {
+              void loadServers(subscriptionUrl);
+            }
+          }}
         />
       )}
 
       <VpnFooter status={status} />
 
       <Modal
-        open={menuConfig !== null}
+        open={linkOpen}
         onClose={() => {
-          setMenuConfigId(null);
+          setLinkOpen(false);
         }}
-        title={menuConfig?.name ?? ""}
+        title={t("dashboard.vpn.addLinkTitle")}
+        description={t("dashboard.vpn.addLinkHint")}
         size="sm"
       >
-        <div className="flex flex-col gap-3">
-          <Button
-            size="sm"
-            variant="danger"
-            onClick={() => {
-              const id = menuConfig?.id;
-
-              setMenuConfigId(null);
-
-              if (id !== undefined) {
-                void deleteConfig(id);
-              }
+        <div className="flex flex-col gap-4">
+          <Input
+            label={t("dashboard.vpn.subscriptionUrl")}
+            placeholder="https://example.com/api/sub/..."
+            value={draftLink}
+            error={linkError !== null}
+            errorMessage={linkError ?? undefined}
+            onChange={(event) => {
+              setDraftLink(event.target.value);
             }}
-          >
-            {t("dashboard.vpn.delete")}
-          </Button>
+          />
+
+          {error !== null ? (
+            <Text variant="caption" size="sm" className="text-accent-danger">
+              {error}
+            </Text>
+          ) : null}
+
+          <div className="flex justify-end gap-2">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => {
+                setLinkOpen(false);
+              }}
+            >
+              {t("licenses.close")}
+            </Button>
+
+            <Button size="sm" disabled={isLoading} onClick={handleApplyLink}>
+              {isLoading
+                ? t("dashboard.vpn.subscriptionLoading")
+                : t("dashboard.vpn.subscriptionLoad")}
+            </Button>
+          </div>
         </div>
       </Modal>
 

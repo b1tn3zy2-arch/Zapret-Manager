@@ -207,6 +207,46 @@ export async function mockTauri(
         }),
         get_vpn_stats: () => ({ bytesIn: 1024, bytesOut: 2048, uptimeSec: 0 }),
         reconcile_vpn_tunnels: () => 0,
+        vpn_core_status: () => ({
+          installed: false,
+          running: false,
+          activeServerId: null,
+          uptimeSec: 0,
+          socksPort: 12080,
+          httpPort: 12081,
+          pid: null,
+        }),
+        install_vpn_core: () => true,
+        fetch_vpn_subscription: () => [],
+        connect_vpn_server: () => ({
+          installed: true,
+          running: true,
+          activeServerId: "srv_e2e",
+          uptimeSec: 0,
+          socksPort: 12080,
+          httpPort: 12081,
+          pid: 4321,
+        }),
+        disconnect_vpn_server: () => ({
+          installed: true,
+          running: false,
+          activeServerId: null,
+          uptimeSec: 0,
+          socksPort: 12080,
+          httpPort: 12081,
+          pid: null,
+        }),
+        ping_endpoints: (args: unknown) => {
+          const endpoints =
+            (args as { endpoints?: { host: string; port: number }[] })
+              .endpoints ?? [];
+
+          return endpoints.map(({ host }) => ({
+            endpoint: host,
+            latencyMs: 42,
+            success: true,
+          }));
+        },
         enable_kill_switch: () => true,
         disable_kill_switch: () => true,
         inject_outlast: () => ({

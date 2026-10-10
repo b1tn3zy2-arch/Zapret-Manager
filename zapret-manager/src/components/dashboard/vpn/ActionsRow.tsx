@@ -1,19 +1,19 @@
-import { ClipboardPaste, Plus, Settings } from "lucide-react";
+import { ClipboardPaste, Link2, Settings } from "lucide-react";
 
 import { Button } from "@/components/ui";
 import { useI18n } from "@/i18n";
 
 export interface ActionsRowProps {
   disabled: boolean;
-  onAddFile: () => void;
-  onPaste: () => void;
+  onAddLink: () => void;
+  onPasteLink: () => void;
   onOpenSettings: () => void;
 }
 
 export default function ActionsRow({
   disabled,
-  onAddFile,
-  onPaste,
+  onAddLink,
+  onPasteLink,
   onOpenSettings,
 }: ActionsRowProps) {
   const { t } = useI18n();
@@ -23,17 +23,17 @@ export default function ActionsRow({
       <Button
         size="lg"
         disabled={disabled}
-        onClick={onAddFile}
-        icon={<Plus aria-hidden="true" className="size-4" strokeWidth={2.5} />}
+        onClick={onAddLink}
+        icon={<Link2 aria-hidden="true" className="size-4" strokeWidth={2.5} />}
       >
-        {t("dashboard.vpn.add")}
+        {t("dashboard.vpn.addLink")}
       </Button>
 
       <Button
         size="lg"
         variant="secondary"
         disabled={disabled}
-        onClick={onPaste}
+        onClick={onPasteLink}
         icon={
           <ClipboardPaste
             aria-hidden="true"

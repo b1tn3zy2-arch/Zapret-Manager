@@ -111,6 +111,61 @@ pub async fn ping_hosts(hosts: Vec<String>) -> Vec<PingResult> {
     results
 }
 
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct EndpointPingResult {
+    pub endpoint: String,
+    pub latency_ms: Option<u64>,
+    pub success: bool,
+}
+
+pub async fn measure_endpoint(endpoint: &str, port: u16) -> EndpointPingResult {
+    let started = Instant::now();
+    let connected = tokio::time::timeout(
+        PING_TIMEOUT,
+        TcpStream::connect((endpoint, port)),
+    )
+    .await
+    .ok()
+    .map(|result| result.is_ok())
+    .unwrap_or(false);
+
+    EndpointPingResult {
+        endpoint: endpoint.to_string(),
+        latency_ms: connected.then(|| started.elapsed().as_millis() as u64),
+        success: connected,
+    }
+}
+
+#[tauri::command]
+pub async fn ping_endpoints(
+    endpoints: Vec<EndpointInput>,
+) -> Vec<EndpointPingResult> {
+    let mut set = tokio::task::JoinSet::new();
+
+    for item in &endpoints {
+        let host = item.host.clone();
+        let port = item.port;
+        set.spawn(async move { measure_endpoint(&host, port).await });
+    }
+
+    let mut results = Vec::new();
+
+    while let Some(joined) = set.join_next().await {
+        if let Ok(result) = joined {
+            results.push(result);
+        }
+    }
+
+    results
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct EndpointInput {
+    pub host: String,
+    pub port: u16,
+}
+
 fn from_primary(payload: PrimaryPayload) -> Option<NetworkInfo> {
     if !payload.success {
         return None;

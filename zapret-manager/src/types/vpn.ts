@@ -43,3 +43,22 @@ export interface VpnStats {
   isSwitching: boolean;
   killSwitchOn: boolean;
 }
+
+export interface SubscriptionServer {
+  id: string;
+  name: string;
+  protocol: string;
+  host: string;
+  port: number;
+  link: string;
+}
+
+export interface XrayStatus {
+  installed: boolean;
+  running: boolean;
+  activeServerId: string | null;
+  uptimeSec: number;
+  socksPort: number;
+  httpPort: number;
+  pid: number | null;
+}

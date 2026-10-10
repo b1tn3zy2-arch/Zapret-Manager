@@ -33,6 +33,7 @@ pub fn run() {
         .manage(commands::monitor::MonitorState::new())
         .manage(commands::updater::UpdateState::new())
         .manage(commands::vpn::VpnState::new())
+        .manage(commands::vpn_core::XrayRuntime::new())
         .manage(commands::runner::ScanState::default())
         .invoke_handler(tauri::generate_handler![
             commands::scanner::scan_strategies,
@@ -49,6 +50,7 @@ pub fn run() {
             commands::injector::list_backups,
             commands::injector::extract_config_paths,
             commands::network::ping_hosts,
+            commands::network::ping_endpoints,
             commands::network::fetch_network_info,
             commands::monitor::get_network_stats,
             commands::monitor::start_monitoring,
@@ -74,6 +76,11 @@ commands::system::get_system_info,
             commands::vpn::detect_wireguard_command,
             commands::vpn::import_vpn_config,
             commands::vpn::import_vpn_config_text,
+            commands::vpn_core::fetch_vpn_subscription,
+            commands::vpn_core::install_vpn_core,
+            commands::vpn_core::vpn_core_status,
+            commands::vpn_core::connect_vpn_server,
+            commands::vpn_core::disconnect_vpn_server,
             commands::vpn::list_vpn_configs,
             commands::vpn::delete_vpn_config,
             commands::vpn::switch_to_vpn,

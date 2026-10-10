@@ -25,7 +25,7 @@ export const MIN_LOG_RETENTION_DAYS = 1;
 
 export const MAX_LOG_RETENTION_DAYS = 365;
 
-export const MIN_HANDSHAKE_TIMEOUT_SEC = 5;
+const MIN_HANDSHAKE_TIMEOUT_SEC = 5;
 
 export const MAX_HANDSHAKE_TIMEOUT_SEC = 60;
 

@@ -85,7 +85,9 @@ test.describe("Режимы дашборда", () => {
       modeSwitcher(page).getByRole("radio", { name: "Переключить на VPN" })
     ).toHaveAttribute("aria-checked", "true");
     await expect(page.getByText("Нажмите для подключения")).toBeVisible();
-    await expect(page.getByRole("button", { name: "Добавить" })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Добавить ссылку" }).first()
+    ).toBeVisible();
 
     expect(errors).toEqual([]);
   });
@@ -108,7 +110,9 @@ test.describe("Режимы дашборда", () => {
     expect(errors).toEqual([]);
   });
 
-  test("показывает список серверов в режиме VPN", async ({ page }) => {
+  test("показывает пустое состояние подписки в режиме VPN", async ({
+    page,
+  }) => {
     const errors = await bootstrap(page);
     await page.goto("/");
 
@@ -116,8 +120,12 @@ test.describe("Режимы дашборда", () => {
       .getByRole("radio", { name: "Переключить на VPN" })
       .click();
 
-    await expect(page.getByText("СЕРВЕРЫ")).toBeVisible();
-    await expect(page.getByText("e2e")).toBeVisible();
+    await expect(page.getByText("Нет VPN-конфигов")).toBeVisible();
+    await expect(
+      page.getByText(
+        "Добавьте ссылку на подписку, чтобы получить список серверов"
+      )
+    ).toBeVisible();
 
     expect(errors).toEqual([]);
   });

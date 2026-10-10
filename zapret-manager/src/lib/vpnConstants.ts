@@ -5,8 +5,6 @@ export const VPN_STATS_INTERVAL_MS = 2000;
 
 export const VPN_AUTO_CONNECT_DELAY_MS = 5000;
 
-export const WIREGUARD_DOWNLOAD_URL = "https://www.wireguard.com/install/";
-
 export const HANDSHAKE_FRESH_SEC = 60;
 
 export const SWITCH_STEP_LABELS: Record<SwitchStep, TranslationKey> = {
