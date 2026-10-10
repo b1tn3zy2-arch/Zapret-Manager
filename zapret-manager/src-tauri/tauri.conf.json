@@ -27,6 +27,21 @@
         "theme": "Dark",
         "titleBarStyle": "Overlay",
         "hiddenTitle": true
+      },
+      {
+        "label": "tray-menu",
+        "title": "Zapret Manager",
+        "url": "index.html?view=tray",
+        "width": 300,
+        "height": 380,
+        "decorations": false,
+        "transparent": true,
+        "resizable": false,
+        "alwaysOnTop": true,
+        "skipTaskbar": true,
+        "visible": false,
+        "center": false,
+        "shadow": false
       }
     ],
     "security": {

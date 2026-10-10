@@ -7,6 +7,7 @@ mod logger;
 mod process_manager;
 pub mod security;
 pub mod tray;
+pub mod tray_menu;
 mod window_behavior;
 mod winapi_helpers;
 

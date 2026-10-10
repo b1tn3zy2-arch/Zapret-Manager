@@ -7,6 +7,7 @@ import "@/styles/container-queries.css";
 
 import App from "@/app/App";
 import Providers from "@/app/providers";
+import TrayMenuRoot from "@/tray/TrayMenuRoot";
 import { mark } from "@/lib/perf";
 
 const container = document.getElementById("root");
@@ -17,10 +18,10 @@ if (container === null) {
 
 mark("app:boot");
 
+const isTrayWindow = new URLSearchParams(window.location.search).get("view") === "tray";
+
 ReactDOM.createRoot(container).render(
   <React.StrictMode>
-    <Providers>
-      <App />
-    </Providers>
+    <Providers>{isTrayWindow ? <TrayMenuRoot /> : <App />}</Providers>
   </React.StrictMode>
 );

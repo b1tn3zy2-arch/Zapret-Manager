@@ -266,6 +266,14 @@ fn handle_tray_event(
             show_window(app);
             let _ = app.emit(super::menu::EVENT_NAVIGATE_DASHBOARD, ());
         }
+        TrayIconEvent::Click {
+            button: tauri::tray::MouseButton::Right,
+            button_state: tauri::tray::MouseButtonState::Up,
+            position,
+            ..
+        } => {
+            crate::tray_menu::show_menu(app, position);
+        }
         _ => {}
     }
 }

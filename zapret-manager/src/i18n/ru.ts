@@ -274,6 +274,19 @@ export const ru = {
     },
   },
   dashboard: {
+    tray: {
+      disconnected: "Отключено",
+      active: "Активно",
+      run: "Запустить последнюю стратегию",
+      stop: "Остановить",
+      dashboard: "Открыть главную",
+      strategies: "Стратегии",
+      logs: "Логи",
+      settings: "Настройки",
+      checkUpdates: "Проверить обновления",
+      quit: "Выход",
+      hint: "Правый клик по иконке открывает это меню",
+    },
     modeSwitcher: {
       ariaLabel: "Переключить режим обхода",
       dpi: "Обход",

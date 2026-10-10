@@ -8,6 +8,7 @@ use crate::tray::WINDOW_LABEL;
 pub struct WindowBehavior {
     pub minimize_to_tray: RwLock<bool>,
     pub quitting: RwLock<bool>,
+    pub minimize_hint_shown: RwLock<bool>,
 }
 
 impl WindowBehavior {
@@ -15,6 +16,7 @@ impl WindowBehavior {
         Self {
             minimize_to_tray: RwLock::new(true),
             quitting: RwLock::new(false),
+            minimize_hint_shown: RwLock::new(false),
         }
     }
 
@@ -40,6 +42,33 @@ impl WindowBehavior {
             *slot = true;
         }
     }
+
+    pub fn mark_minimize_hint_shown(&self) -> bool {
+        let Ok(mut slot) = self.minimize_hint_shown.write() else {
+            return false;
+        };
+
+        if *slot {
+            return false;
+        }
+
+        *slot = true;
+
+        true
+    }
+}
+
+fn notify_first_minimize(app: &AppHandle, state: &WindowBehavior) {
+    if !state.mark_minimize_hint_shown() {
+        return;
+    }
+
+    let _ = crate::commands::notify::send(
+        app,
+        "Zapret Manager",
+        "Приложение свёрнуто в трей. Окно можно вернуть кликом по иконке.",
+        crate::tray::NotificationKind::Info,
+    );
 }
 
 pub fn register(app: &AppHandle) {
@@ -74,9 +103,9 @@ pub fn handle_window_event(
     event: &WindowEvent,
     cleanup: impl FnOnce() -> usize,
 ) {
-    if !matches!(event, WindowEvent::CloseRequested { .. }) {
+    let WindowEvent::CloseRequested { api, .. } = event else {
         return;
-    }
+    };
 
     let Some(state) = app.try_state::<WindowBehavior>() else {
         cleanup();
@@ -84,14 +113,15 @@ pub fn handle_window_event(
         return;
     };
 
-    if !state.is_quitting() && state.minimize_to_tray() {
-        state.begin_quit();
-        hide_window(app);
+    if state.is_quitting() || !state.minimize_to_tray() {
+        cleanup();
 
         return;
     }
 
-    cleanup();
+    api.prevent_close();
+    hide_window(app);
+    notify_first_minimize(app, &state);
 }
 
 #[cfg(test)]
@@ -118,11 +148,30 @@ mod tests {
         assert!(behavior.minimize_to_tray());
     }
 
-    #[test]
-    fn test_begin_quit_latches() {
+#[test]
+fn test_begin_quit_latches() {
         let behavior = WindowBehavior::new();
         behavior.begin_quit();
 
         assert!(behavior.is_quitting());
+    }
+
+    #[test]
+    fn test_minimize_hint_shown_only_once() {
+        let behavior = WindowBehavior::new();
+
+        assert!(behavior.mark_minimize_hint_shown());
+        assert!(!behavior.mark_minimize_hint_shown());
+    }
+
+    #[test]
+    fn test_minimize_does_not_latch_quit() {
+        let behavior = WindowBehavior::new();
+
+        assert!(behavior.minimize_to_tray());
+
+        behavior.mark_minimize_hint_shown();
+
+        assert!(!behavior.is_quitting());
     }
 }
