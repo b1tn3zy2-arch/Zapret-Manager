@@ -95,8 +95,20 @@ export function useVpnCore(): UseVpnCoreResult {
       const store = useVpnCoreStore.getState();
 
       store.setError(null);
+      store.setLoading(true);
 
       try {
+        if (store.status?.installed !== true) {
+          addLog({
+            level: "info",
+            source: "vpn",
+            message: "Ядро Xray не найдено, устанавливаю…",
+          });
+
+          await commands.installVpnCore();
+          await refreshStatus();
+        }
+
         const status = await commands.connectVpnServer(
           server.link,
           server.name
@@ -119,6 +131,8 @@ export function useVpnCore(): UseVpnCoreResult {
           message: `Подключение не удалось: ${message}`,
         });
         await refreshStatus();
+      } finally {
+        useVpnCoreStore.getState().setLoading(false);
       }
     },
     [addLog, refreshStatus]

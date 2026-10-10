@@ -36,6 +36,55 @@ fn test_vless_reality_config() {
 }
 
 #[test]
+fn test_real_user_reality_link_config() {
+    let link = "vless://a0aa9819-ea0d-4134-8371-bae21584ffdd@uk-24.gnodes.club:443?type=tcp&headerType=none&security=reality&fp=firefox&sni=dl.google.com&pbk=HfAZfvgOj5UVpSy5POBr_cyX-W1Tn5LOkIlcx6EBNkM&alpn=h2#%F0%9F%87%AC%F0%9F%87%A7+%D0%A5%D0%BE%D0%B3%D0%B2%D0%B0%D1%80%D1%82%D1%81+%F0%9F%A7%99";
+    let config = build_config(&server(link), 10808, 10809).unwrap();
+    let outbound = &config["outbounds"][0];
+
+    assert_eq!(outbound["protocol"], "vless");
+    assert_eq!(outbound["settings"]["vnext"][0]["address"], "uk-24.gnodes.club");
+    assert_eq!(outbound["settings"]["vnext"][0]["port"], 443);
+    assert_eq!(
+        outbound["settings"]["vnext"][0]["users"][0]["id"],
+        "a0aa9819-ea0d-4134-8371-bae21584ffdd"
+    );
+    assert_eq!(
+        outbound["settings"]["vnext"][0]["users"][0]["encryption"],
+        "none"
+    );
+    assert_eq!(outbound["streamSettings"]["network"], "tcp");
+    assert_eq!(outbound["streamSettings"]["security"], "reality");
+    assert_eq!(
+        outbound["streamSettings"]["realitySettings"]["serverName"],
+        "dl.google.com"
+    );
+    assert_eq!(
+        outbound["streamSettings"]["realitySettings"]["fingerprint"],
+        "firefox"
+    );
+    assert_eq!(
+        outbound["streamSettings"]["realitySettings"]["publicKey"],
+        "HfAZfvgOj5UVpSy5POBr_cyX-W1Tn5LOkIlcx6EBNkM"
+    );
+    assert!(
+        outbound["streamSettings"]
+            .get("tcpSettings")
+            .is_none()
+    );
+}
+
+#[test]
+fn test_socks_outbound_with_auth() {
+    let link = "socks://user:pass@127.0.0.1:1080#Proxy";
+    let config = build_config(&server(link), 10808, 10809).unwrap();
+    let outbound = &config["outbounds"][0];
+
+    assert_eq!(outbound["protocol"], "socks");
+    assert_eq!(outbound["settings"]["servers"][0]["users"][0]["user"], "user");
+    assert_eq!(outbound["settings"]["servers"][0]["users"][0]["pass"], "pass");
+}
+
+#[test]
 fn test_vless_tls_ws_config() {
     let link = "vless://uuid@example.com:443?type=ws&security=tls&sni=cdn.example.com&path=%2Fws&host=cdn.example.com&fp=firefox#WS";
     let config = build_config(&server(link), 10808, 10809).unwrap();

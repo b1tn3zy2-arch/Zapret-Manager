@@ -24,6 +24,14 @@ function toMessage(error: unknown): string {
     return redactSecrets(error);
   }
 
+  if (typeof error === "object" && error !== null) {
+    const message = Reflect.get(error, "message");
+
+    if (typeof message === "string" && message !== "") {
+      return redactSecrets(message);
+    }
+  }
+
   return "Неизвестная ошибка IPC";
 }
 

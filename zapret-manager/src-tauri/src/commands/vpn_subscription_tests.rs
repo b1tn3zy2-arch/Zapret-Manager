@@ -17,6 +17,25 @@ fn test_parse_vless_link() {
 }
 
 #[test]
+fn test_parse_real_reality_link_with_plus_name() {
+    let link = "vless://a0aa9819-ea0d-4134-8371-bae21584ffdd@uk-24.gnodes.club:443?type=tcp&headerType=none&security=reality&fp=firefox&sni=dl.google.com&pbk=HfAZfvgOj5UVpSy5POBr_cyX-W1Tn5LOkIlcx6EBNkM&alpn=h2#%F0%9F%87%AC%F0%9F%87%A7+%D0%A5%D0%BE%D0%B3%D0%B2%D0%B0%D1%80%D1%82%D1%81+%F0%9F%A7%99";
+    let server = parse_link(link).expect("ссылка пользователя должна разобраться");
+
+    assert_eq!(server.protocol, "vless");
+    assert_eq!(server.host, "uk-24.gnodes.club");
+    assert_eq!(server.port, 443);
+    assert_eq!(server.name, "🇬🇧 Хогвартс 🧙");
+}
+
+#[test]
+fn test_parse_plus_in_name_becomes_space() {
+    let link = "vless://uuid@example.com:443#Hello+World";
+    let server = parse_link(link).expect("плюс в имени");
+
+    assert_eq!(server.name, "Hello World");
+}
+
+#[test]
 fn test_parse_vless_without_name_uses_host() {
     let link = "vless://uuid@1.2.3.4:8443?security=tls";
     let server = parse_link(link).expect("vless без имени");

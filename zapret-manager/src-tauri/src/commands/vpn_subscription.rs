@@ -260,11 +260,17 @@ fn percent_decode(value: &str) -> String {
             }
         }
 
+        if bytes[index] == b'+' {
+            out.push(b' ');
+            index += 1;
+            continue;
+        }
+
         out.push(bytes[index]);
         index += 1;
     }
 
-    String::from_utf8_lossy(&out).to_string()
+    String::from_utf8_lossy(&out).trim().to_string()
 }
 
 fn hash_link(link: &str) -> String {

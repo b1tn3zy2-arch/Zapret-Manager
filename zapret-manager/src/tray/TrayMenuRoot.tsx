@@ -1,6 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { useEffect, useState } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   Layers,
   LayoutDashboard,
@@ -69,21 +70,30 @@ function Separator() {
 export default function TrayMenuRoot() {
   const { t } = useI18n();
   const [snapshot, setSnapshot] = useState<TraySnapshot | null>(null);
-
-  useEffect(() => {
-    void invoke<TraySnapshot>("tray_menu_snapshot")
-      .then((value) => {
-        setSnapshot(value);
-      })
-      .catch(() => undefined);
-  }, []);
+  const [openCount, setOpenCount] = useState(0);
 
   useEffect(() => {
     const appWindow = getCurrentWindow();
-    const pending = appWindow.onFocusChanged((event) => {
-      if (!event.payload) {
-        void invoke("tray_menu_hide").catch(() => undefined);
+    let unlisten: (() => void) | undefined;
+
+    const refresh = (): void => {
+      setOpenCount((value) => value + 1);
+      void invoke<TraySnapshot>("tray_menu_snapshot")
+        .then((value) => {
+          setSnapshot(value);
+        })
+        .catch(() => undefined);
+    };
+
+    void appWindow.onFocusChanged((event) => {
+      if (event.payload) {
+        refresh();
+        return;
       }
+
+      void invoke("tray_menu_hide").catch(() => undefined);
+    }).then((stop) => {
+      unlisten = stop;
     });
 
     const onKeyDown = (event: KeyboardEvent): void => {
@@ -96,9 +106,7 @@ export default function TrayMenuRoot() {
 
     return () => {
       document.removeEventListener("keydown", onKeyDown);
-      void pending.then((stop) => {
-        stop();
-      });
+      unlisten?.();
     };
   }, []);
 
@@ -106,74 +114,77 @@ export default function TrayMenuRoot() {
   const subject = snapshot?.vpnName ?? snapshot?.activeStrategy ?? null;
 
   return (
-    <div className="border-glass-border bg-bg-secondary/95 m-2 flex flex-col rounded-lg border p-1.5 shadow-2xl backdrop-blur-xl">
-      <header className="flex items-center gap-2 px-2 py-1.5">
-        <span
-          aria-hidden="true"
-          className={cn(
-            "size-2 shrink-0 rounded-full",
-            isActive ? "bg-accent-success" : "bg-text-tertiary"
-          )}
-        />
+    <div className="flex h-full w-full p-2">
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={openCount}
+          initial={{ opacity: 0, scale: 0.96, y: 4 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.98, transition: { duration: 0.08 } }}
+          transition={{ duration: 0.14, ease: [0.16, 1, 0.3, 1] }}
+          className="border-glass-border bg-bg-secondary/95 flex w-full flex-col rounded-lg border p-1.5 shadow-2xl backdrop-blur-xl"
+        >
+          <header className="flex items-center gap-2 px-2 py-1.5">
+            <span
+              aria-hidden="true"
+              className={cn(
+                "size-2 shrink-0 rounded-full",
+                isActive ? "bg-accent-success" : "bg-text-tertiary"
+              )}
+            />
 
-        <span className="text-text-primary min-w-0 flex-1 truncate text-xs font-semibold">
-          Zapret Manager
-        </span>
+            <span className="text-text-primary min-w-0 flex-1 truncate text-xs font-semibold">
+              Zapret Manager
+            </span>
 
-        <Badge variant={isActive ? "success" : "neutral"} size="sm">
-          {isActive
-            ? (subject ?? t("dashboard.tray.active"))
-            : t("dashboard.tray.disconnected")}
-        </Badge>
-      </header>
+            <Badge variant={isActive ? "success" : "neutral"} size="sm">
+              {isActive
+                ? (subject ?? t("dashboard.tray.active"))
+                : t("dashboard.tray.disconnected")}
+            </Badge>
+          </header>
 
-      <Separator />
+          <Separator />
 
-      <MenuRow
-        label={t("dashboard.tray.run")}
-        icon={Play}
-        action="run"
-      />
-      <MenuRow
-        label={t("dashboard.tray.stop")}
-        icon={Square}
-        action="stop"
-      />
+          <MenuRow label={t("dashboard.tray.run")} icon={Play} action="run" />
+          <MenuRow label={t("dashboard.tray.stop")} icon={Square} action="stop" />
 
-      <Separator />
+          <Separator />
 
-      <MenuRow
-        label={t("dashboard.tray.dashboard")}
-        icon={LayoutDashboard}
-        action="dashboard"
-      />
-      <MenuRow
-        label={t("dashboard.tray.strategies")}
-        icon={Layers}
-        action="strategies"
-      />
-      <MenuRow
-        label={t("dashboard.tray.logs")}
-        icon={ScrollText}
-        action="logs"
-      />
-      <MenuRow
-        label={t("dashboard.tray.settings")}
-        icon={SettingsIcon}
-        action="settings"
-      />
+          <MenuRow
+            label={t("dashboard.tray.dashboard")}
+            icon={LayoutDashboard}
+            action="dashboard"
+          />
+          <MenuRow
+            label={t("dashboard.tray.strategies")}
+            icon={Layers}
+            action="strategies"
+          />
+          <MenuRow
+            label={t("dashboard.tray.logs")}
+            icon={ScrollText}
+            action="logs"
+          />
+          <MenuRow
+            label={t("dashboard.tray.settings")}
+            icon={SettingsIcon}
+            action="settings"
+          />
 
-      <Separator />
+          <Separator />
 
-      <MenuRow
-        label={t("dashboard.tray.checkUpdates")}
-        icon={RefreshCw}
-        action="updates"
-      />
+          <MenuRow
+            label={t("dashboard.tray.checkUpdates")}
+            icon={RefreshCw}
+            action="updates"
+          />
 
-      <Separator />
+          <Separator />
 
-      <MenuRow label={t("dashboard.tray.quit")} icon={LogOut} action="quit" />
+          <MenuRow label={t("dashboard.tray.quit")} icon={LogOut} action="quit" />
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 }

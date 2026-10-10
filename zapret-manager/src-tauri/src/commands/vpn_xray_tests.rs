@@ -1,6 +1,8 @@
 use super::*;
 use crate::commands::vpn_subscription::parse_link;
 
+static CONFIG_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
+
 fn server() -> SubscriptionServer {
     parse_link("vless://uuid@example.com:443?security=tls&sni=example.com#Test")
         .expect("ссылка")
@@ -70,6 +72,7 @@ fn test_core_download_url_is_https_github() {
 
 #[test]
 fn test_write_config_creates_valid_json() {
+    let _guard = CONFIG_LOCK.lock().unwrap();
     let path = write_config(&server()).expect("конфиг должен записаться");
     let text = std::fs::read_to_string(&path).unwrap();
     let value: serde_json::Value = serde_json::from_str(&text).unwrap();
@@ -81,7 +84,18 @@ fn test_write_config_creates_valid_json() {
 }
 
 #[test]
+#[ignore = "ручная проверка: пишет конфиг реальной ссылки в core_dir"]
+fn dump_real_link_config() {
+    let link = "vless://a0aa9819-ea0d-4134-8371-bae21584ffdd@uk-24.gnodes.club:443?type=tcp&headerType=none&security=reality&fp=firefox&sni=dl.google.com&pbk=HfAZfvgOj5UVpSy5POBr_cyX-W1Tn5LOkIlcx6EBNkM&alpn=h2#%F0%9F%87%AC%F0%9F%87%A7+%D0%A5%D0%BE%D0%B3%D0%B2%D0%B0%D1%80%D1%82%D1%81+%F0%9F%A7%99";
+    let server = parse_link(link).expect("реальная ссылка");
+    let path = write_config(&server).expect("конфиг записан");
+
+    println!("CONFIG_PATH {}", path.display());
+}
+
+#[test]
 fn test_spawn_without_core_fails_cleanly() {
+    let _guard = CONFIG_LOCK.lock().unwrap();
     let dir = core_dir().unwrap();
     let target = dir.join(CORE_EXE);
     let existed = target.is_file();
