@@ -1,7 +1,6 @@
 import AdvancedSection from "@/components/settings/AdvancedSection";
 import AppearanceSection from "@/components/settings/AppearanceSection";
 import GeneralSection from "@/components/settings/GeneralSection";
-import GamesSection from "@/components/settings/GamesSection";
 import ImportExportButtons from "@/components/settings/ImportExportButtons";
 import SaveIndicator, {
   SaveErrorIndicator,
@@ -9,7 +8,6 @@ import SaveIndicator, {
 import SettingsLayout from "@/components/settings/SettingsLayout";
 import StrategiesSection from "@/components/settings/StrategiesSection";
 import UpdatesSection from "@/components/settings/UpdatesSection";
-import VpnSection from "@/components/settings/VpnSection";
 import { Heading, Text } from "@/components/ui";
 import { useI18n } from "@/i18n";
 import { useAppStore } from "@/stores/useAppStore";
@@ -60,10 +58,6 @@ function renderSection(section: SettingsSection) {
       return <AppearanceSection />;
     case "strategies":
       return <StrategiesSection />;
-    case "games":
-      return <GamesSection />;
-    case "vpn":
-      return <VpnSection />;
     case "updates":
       return <UpdatesSection />;
     case "advanced":

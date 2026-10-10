@@ -5,8 +5,7 @@ import { readTextFile } from "@tauri-apps/plugin-fs";
 
 import AddGameButton from "@/components/settings/games/AddGameButton";
 import GameCard from "@/components/settings/games/GameCard";
-import SectionContainer from "@/components/settings/SectionContainer";
-import { Button, Text } from "@/components/ui";
+import { Button, Heading, Text } from "@/components/ui";
 import { useI18n } from "@/i18n";
 import { useGameLibrary } from "@/hooks/useGameLibrary";
 import { useLogsStore } from "@/stores/useLogsStore";
@@ -25,7 +24,7 @@ function safeFileName(name: string): string {
   return `${slug === "" ? "game" : slug}.game.json`;
 }
 
-export default function GamesSection() {
+export default function Games() {
   const { t } = useI18n();
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const { games, updateGame, addGame, removeGame, resetGames } =
@@ -111,11 +110,15 @@ export default function GamesSection() {
   );
 
   return (
-    <SectionContainer
-      title={t("settings.games.title")}
-      description={t("settings.games.description")}
-    >
-      <div className="flex flex-col gap-3 py-3">
+    <section className="flex flex-col gap-6 pb-8">
+      <header className="flex flex-col gap-2">
+        <Heading level={1}>{t("settings.games.title")}</Heading>
+        <Text variant="body" size="lg" className="text-text-secondary">
+          {t("settings.games.description")}
+        </Text>
+      </header>
+
+      <div className="flex flex-col gap-3">
         {games.length === 0 ? (
           <Text variant="body" size="sm" className="text-text-tertiary">
             {t("settings.games.empty")}
@@ -181,6 +184,6 @@ export default function GamesSection() {
           {t("settings.games.hint")}
         </Text>
       </div>
-    </SectionContainer>
+    </section>
   );
 }

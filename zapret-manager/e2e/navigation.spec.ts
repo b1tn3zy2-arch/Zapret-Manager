@@ -42,12 +42,13 @@ test.describe("Навигация и загрузка", () => {
     expect(errors).toEqual([]);
   });
 
-  test("открывает все шесть разделов", async ({ page }) => {
+  test("открывает все семь разделов", async ({ page }) => {
     const errors = await bootstrap(page);
     await page.goto("/");
 
     const sections = [
       { name: "Стратегии", heading: /Стратегии/i },
+      { name: "Игры", heading: /^Игры$/ },
       { name: "Монитор", heading: /Монитор/i },
       { name: "Логи", heading: /Логи/i },
       { name: "Настройки", heading: /Настройки/i },
@@ -127,7 +128,7 @@ test.describe("Режимы дашборда", () => {
 
     const nav = page.getByRole("navigation", { name: "Основная навигация" });
 
-    await expect(nav.getByRole("button")).toHaveCount(6);
+    await expect(nav.getByRole("button")).toHaveCount(7);
     await expect(
       nav.getByRole("button", { name: "VPN", exact: true })
     ).toHaveCount(0);

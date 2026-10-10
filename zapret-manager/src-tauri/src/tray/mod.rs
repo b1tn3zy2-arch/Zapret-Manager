@@ -1,5 +1,5 @@
 mod icons;
-mod menu;
+
 mod runtime;
 
 use serde::{Deserialize, Serialize};
@@ -9,10 +9,11 @@ use crate::error::{AppError, AppResult};
 pub use icons::{
     icon_file, icon_path, icons_dir, load_icon, tooltip, ANIMATION_FRAMES, ICONS_DIR, ICON_SIZES,
 };
-pub use menu::{
-    build_menu, emit_for_menu, menu_event_for, EVENT_NAVIGATE_DASHBOARD,
-    EVENT_NAVIGATE_LOGS, EVENT_NAVIGATE_SETTINGS, EVENT_NAVIGATE_STRATEGIES,
-};
+pub const EVENT_NAVIGATE_DASHBOARD: &str = "navigate-dashboard";
+pub const EVENT_NAVIGATE_STRATEGIES: &str = "navigate-strategies";
+pub const EVENT_NAVIGATE_LOGS: &str = "navigate-logs";
+pub const EVENT_NAVIGATE_SETTINGS: &str = "navigate-settings";
+
 pub use runtime::{
     apply_state, configure, create_tray, register, set_icon_state, show_window, start_animation,
     stop_animation, toggle_window, tray_handle, update_tooltip_and_menu, TrayStateHolder,

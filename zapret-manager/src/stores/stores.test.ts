@@ -155,11 +155,22 @@ describe("migratePersistedAppState", () => {
   it("не сбрасывает секцию, исправляя только режим", () => {
     const migrated = migratePersistedAppState({
       dashboardMode: "proxy" as never,
-      settingsSection: "vpn",
+      settingsSection: "updates",
     });
 
     expect(migrated.dashboardMode).toBe("dpi");
-    expect(migrated.settingsSection).toBe("vpn");
+    expect(migrated.settingsSection).toBe("updates");
+  });
+
+  it("сбрасывает удалённые секции vpn и games на general", () => {
+    expect(
+      migratePersistedAppState({ settingsSection: "vpn" as never })
+        .settingsSection
+    ).toBe("general");
+    expect(
+      migratePersistedAppState({ settingsSection: "games" as never })
+        .settingsSection
+    ).toBe("general");
   });
 
   it("сбрасывает значение не строкового типа", () => {

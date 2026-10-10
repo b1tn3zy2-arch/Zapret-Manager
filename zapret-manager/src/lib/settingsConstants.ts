@@ -1,10 +1,8 @@
 import {
   Activity,
-  Gamepad2,
   Layers,
   RefreshCw,
   Settings,
-  Shield,
   SlidersHorizontal,
   type LucideIcon,
 } from "lucide-react";
@@ -38,8 +36,6 @@ export const SETTINGS_SECTIONS = [
   "general",
   "appearance",
   "strategies",
-  "games",
-  "vpn",
   "updates",
   "advanced",
 ] as const satisfies readonly SettingsSection[];
@@ -52,8 +48,6 @@ export const SETTINGS_SECTION_ICONS = {
   general: SlidersHorizontal,
   appearance: Settings,
   strategies: Layers,
-  games: Gamepad2,
-  vpn: Shield,
   updates: RefreshCw,
   advanced: Activity,
 } as const satisfies Record<SettingsSection, LucideIcon>;

@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Lock, Zap } from "lucide-react";
 
 import { useI18n } from "@/i18n";
-import { ANIMATION, type DashboardMode } from "@/lib/constants";
+import { type DashboardMode } from "@/lib/constants";
 import { SWITCH_STEP_LABELS } from "@/lib/vpnConstants";
 import { cn } from "@/lib/utils";
 import type { SwitchStep } from "@/types";
@@ -14,8 +14,6 @@ export interface ModeSwitcherProps {
   disabled?: boolean;
   onChange: (mode: DashboardMode) => void;
 }
-
-const THUMB_ID = "dashboard-mode-thumb";
 
 export default function ModeSwitcher({
   mode,
@@ -47,13 +45,15 @@ export default function ModeSwitcher({
       >
         <motion.span
           aria-hidden="true"
-          layoutId={THUMB_ID}
+          animate={{ x: isVpn ? "100%" : "0%" }}
           transition={{
-            duration: ANIMATION.normal,
-            ease: ANIMATION.easeOutExpo,
+            type: "spring",
+            stiffness: 380,
+            damping: 32,
+            mass: 0.7,
           }}
           className={cn(
-            "absolute inset-y-1 left-1 w-[calc(50%-4px)] rounded-full",
+            "absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] rounded-full",
             isVpn ? "bg-accent-secondary" : "bg-accent-primary"
           )}
         />

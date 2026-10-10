@@ -65,12 +65,6 @@ function resetSection(settings: AppSettings, section: SettingsSection): void {
     case "strategies":
       settings.advanced = structuredClone(DEFAULT_ADVANCED);
       break;
-    case "games":
-      settings.games = getDefaultGames();
-      break;
-    case "vpn":
-      settings.vpn = structuredClone(DEFAULT_VPN);
-      break;
     case "updates":
       settings.strategyUpdates = structuredClone(DEFAULT_STRATEGY_UPDATES);
       break;

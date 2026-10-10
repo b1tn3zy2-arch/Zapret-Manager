@@ -7,7 +7,7 @@ use tauri::{AppHandle, Emitter, Manager, Wry};
 
 use crate::error::{AppError, AppResult};
 use crate::tray::icons::{load_icon, tooltip};
-use crate::tray::menu::{build_menu, emit_for_menu};
+
 use crate::tray::TrayState;
 
 pub const TRAY_ID: &str = "zapret-manager-tray";
@@ -128,9 +128,7 @@ pub fn update_tooltip_and_menu(app: &AppHandle) -> AppResult<()> {
     };
 
     let (state, active, vpn) = snapshot(app);
-    let menu = build_menu(app, state, active.as_deref(), vpn.as_deref())?;
 
-    tray.set_menu(Some(menu))?;
     tray.set_tooltip(Some(tooltip(state, active.as_deref(), vpn.as_deref())))?;
 
     Ok(())
@@ -218,19 +216,11 @@ pub fn configure(app: &AppHandle, animate_on_connect: bool) {
 
 pub fn create_tray(app: &AppHandle) -> AppResult<TrayIcon<Wry>> {
     let icon = load_icon(app, TrayState::Idle, 0)?;
-    let menu = build_menu(app, TrayState::Idle, None, None)?;
 
     let tray = TrayIconBuilder::with_id(TRAY_ID)
         .icon(icon)
         .tooltip(tooltip(TrayState::Idle, None, None))
-        .menu(&menu)
         .show_menu_on_left_click(false)
-        .on_menu_event(|app, event| {
-            let id = event.id().0.as_str();
-
-            tracing::info!("Трей: пункт {id}");
-            emit_for_menu(app, id);
-        })
         .on_tray_icon_event(handle_tray_event)
         .build(app)
         .map_err(|error| AppError::custom(format!("Трей не создан: {error}")))?;
@@ -264,15 +254,7 @@ fn handle_tray_event(
         }
         TrayIconEvent::DoubleClick { .. } => {
             show_window(app);
-            let _ = app.emit(super::menu::EVENT_NAVIGATE_DASHBOARD, ());
-        }
-        TrayIconEvent::Click {
-            button: tauri::tray::MouseButton::Right,
-            button_state: tauri::tray::MouseButtonState::Up,
-            position,
-            ..
-        } => {
-            crate::tray_menu::show_menu(app, position);
+            let _ = app.emit(super::EVENT_NAVIGATE_DASHBOARD, ());
         }
         _ => {}
     }

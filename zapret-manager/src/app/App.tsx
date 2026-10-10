@@ -29,6 +29,7 @@ import { useUpdateStore } from "@/stores/useUpdateStore";
 import { startLogsFlusher, stopLogsFlusher } from "@/stores/useLogsStore";
 
 const About = lazy(async () => await import("@/pages/About"));
+const Games = lazy(async () => await import("@/pages/Games"));
 const Logs = lazy(async () => await import("@/pages/Logs"));
 const Monitor = lazy(async () => await import("@/pages/Monitor"));
 const Settings = lazy(async () => await import("@/pages/Settings"));
@@ -36,6 +37,7 @@ const Settings = lazy(async () => await import("@/pages/Settings"));
 const PAGE_COMPONENTS = {
   [ROUTES.dashboard]: Dashboard,
   [ROUTES.strategies]: Strategies,
+  [ROUTES.games]: Games,
   [ROUTES.monitor]: Monitor,
   [ROUTES.logs]: Logs,
   [ROUTES.settings]: Settings,

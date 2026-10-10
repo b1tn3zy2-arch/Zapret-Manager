@@ -8,8 +8,6 @@ export const en: Dictionary = {
       general: "General",
       appearance: "Appearance",
       strategies: "Strategies",
-      games: "Games",
-      vpn: "VPN",
       updates: "Updates",
       advanced: "Advanced",
     },
@@ -273,19 +271,6 @@ export const en: Dictionary = {
     },
   },
   dashboard: {
-    tray: {
-      disconnected: "Disconnected",
-      active: "Active",
-      run: "Run last strategy",
-      stop: "Stop",
-      dashboard: "Open dashboard",
-      strategies: "Strategies",
-      logs: "Logs",
-      settings: "Settings",
-      checkUpdates: "Check for updates",
-      quit: "Quit",
-      hint: "Right-click the tray icon to open this menu",
-    },
     modeSwitcher: {
       ariaLabel: "Switch bypass mode",
       dpi: "Bypass",

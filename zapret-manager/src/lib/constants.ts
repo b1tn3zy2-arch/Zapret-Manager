@@ -1,5 +1,6 @@
 import {
   Activity,
+  Gamepad2,
   Info,
   Layers,
   LayoutDashboard,
@@ -16,6 +17,7 @@ export const APP_VERSION = "0.1.0";
 export const ROUTES = {
   dashboard: "dashboard",
   strategies: "strategies",
+  games: "games",
   monitor: "monitor",
   logs: "logs",
   settings: "settings",
@@ -62,6 +64,7 @@ export interface NavItem {
 export const NAV_ITEMS = [
   { route: ROUTES.dashboard, label: "Главная", icon: LayoutDashboard },
   { route: ROUTES.strategies, label: "Стратегии", icon: Layers },
+  { route: ROUTES.games, label: "Игры", icon: Gamepad2 },
   { route: ROUTES.monitor, label: "Монитор", icon: Activity },
   { route: ROUTES.logs, label: "Логи", icon: ScrollText },
   { route: ROUTES.settings, label: "Настройки", icon: Settings },
