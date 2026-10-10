@@ -5,6 +5,7 @@ import VpnConfigCard from "@/components/vpn/VpnConfigCard";
 import { Button, Modal, Text } from "@/components/ui";
 import { useI18n } from "@/i18n";
 import { useVpn } from "@/hooks/useVpn";
+import { useVpnImport } from "@/hooks/useVpnImport";
 import { useVpnStore } from "@/stores/useVpnStore";
 
 function VpnConfigList() {
@@ -15,7 +16,8 @@ function VpnConfigList() {
     (state) => state.status.state === "connected"
   );
   const setActive = useVpnStore((state) => state.setActiveConfig);
-  const { importConfig, deleteConfig } = useVpn();
+  const { deleteConfig } = useVpn();
+  const { importConfig } = useVpnImport();
 
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
 

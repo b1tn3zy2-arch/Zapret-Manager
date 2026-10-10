@@ -49,3 +49,7 @@ export function sidebar(page: Page, name: string) {
 export function settingsNav(page: Page) {
   return page.getByRole("navigation", { name: "Общие" });
 }
+
+export function modeSwitcher(page: Page) {
+  return page.getByRole("radiogroup", { name: "Переключить режим обхода" });
+}

@@ -149,6 +149,12 @@ pub fn detect_wireguard_command() -> Option<String> {
 pub fn import_vpn_config(source_path: String) -> AppResult<VpnConfigInfo> {
     vpn_store::import_config(&source_path)
 }
+
+#[tauri::command]
+pub fn import_vpn_config_text(content: String) -> AppResult<VpnConfigInfo> {
+    vpn_store::import_config_text(&content)
+}
+
 #[tauri::command]
 pub fn list_vpn_configs() -> AppResult<Vec<VpnConfigInfo>> {
     vpn_store::list_configs()

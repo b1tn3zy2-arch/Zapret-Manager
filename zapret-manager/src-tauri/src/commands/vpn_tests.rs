@@ -1,8 +1,13 @@
 use super::*;
 
+use std::path::Path;
+
 use crate::commands::vpn_config::parse_endpoint;
-use crate::commands::vpn_store::info_from_file;
+use crate::commands::vpn_store::{
+    import_config_text_into, info_from_file, pasted_config_name,
+};
 use crate::commands::vpn_wireguard::parse_wg_show_output;
+use crate::security::MAX_VPN_CONF_BYTES;
 
 #[test]
 fn test_parse_endpoint_is_reachable_from_vpn_module() {
@@ -159,4 +164,79 @@ fn test_info_from_file_reads_valid_config() {
     assert_eq!(info.imported_at, 5);
 
     let _ = std::fs::remove_dir_all(&dir);
+}
+
+const VALID_CONF: &str = "[Interface]\nPrivateKey = k\nAddress = 10.0.0.2/32\n\n[Peer]\nPublicKey = p\nAllowedIPs = 0.0.0.0/0\nEndpoint = 5.6.7.8:51820\n";
+
+#[test]
+fn test_import_config_text_creates_file() {
+    let dir = std::env::temp_dir().join("zapret-vpn-text-import");
+    let _ = std::fs::remove_dir_all(&dir);
+
+    let info = import_config_text_into(&dir, VALID_CONF, 7).unwrap();
+
+    assert_eq!(info.endpoint, "5.6.7.8:51820");
+    assert_eq!(info.imported_at, 7_000);
+    assert!(info.name.starts_with("pasted-"), "имя: {}", info.name);
+    assert!(Path::new(&info.path).is_file(), "файл должен существовать");
+
+    let written = std::fs::read_to_string(&info.path).unwrap();
+
+    assert_eq!(written, VALID_CONF);
+
+    let _ = std::fs::remove_dir_all(&dir);
+}
+
+#[test]
+fn test_import_config_text_rejects_empty() {
+    let dir = std::env::temp_dir().join("zapret-vpn-text-empty");
+    let _ = std::fs::remove_dir_all(&dir);
+
+    let error = import_config_text_into(&dir, "   \n  ", 1).unwrap_err();
+
+    assert!(error.to_string().contains("пуст"), "{}", error);
+
+    let _ = std::fs::remove_dir_all(&dir);
+}
+
+#[test]
+fn test_import_config_text_rejects_garbage() {
+    let dir = std::env::temp_dir().join("zapret-vpn-text-garbage");
+    let _ = std::fs::remove_dir_all(&dir);
+
+    let error =
+        import_config_text_into(&dir, "просто текст без секций", 1).unwrap_err();
+
+    assert!(
+        error.to_string().contains("Невалидный"),
+        "{}",
+        error
+    );
+
+    let _ = std::fs::remove_dir_all(&dir);
+}
+
+#[test]
+fn test_import_config_text_rejects_oversized() {
+    let dir = std::env::temp_dir().join("zapret-vpn-text-big");
+    let _ = std::fs::remove_dir_all(&dir);
+
+    let huge = "x".repeat(MAX_VPN_CONF_BYTES as usize + 1);
+    let error = import_config_text_into(&dir, &huge, 1).unwrap_err();
+
+    assert!(error.to_string().contains("больше"), "{}", error);
+
+    let _ = std::fs::remove_dir_all(&dir);
+}
+
+#[test]
+fn test_pasted_config_name_sanitizes_label() {
+    let name = pasted_config_name(VALID_CONF);
+    let stem = name.strip_suffix(".conf").unwrap_or("");
+
+    assert!(!stem.is_empty(), "{name}");
+    assert!(stem.starts_with("pasted-"), "{name}");
+    assert!(!stem.contains(':'), "двоеточие недопустимо: {name}");
+    assert!(!stem.contains('.'), "точка недопустима внутри имени: {name}");
+    assert!(!stem.contains('/'), "слэш недопустим: {name}");
 }

@@ -35,6 +35,16 @@ export async function removeConfig(id: string): Promise<boolean> {
   return secureInvoke<boolean>("delete_vpn_config", { id });
 }
 
+export async function importConfigFromText(
+  content: string
+): Promise<VpnConfigInfo> {
+  return await secureInvokeValidated(
+    "import_vpn_config_text",
+    VpnConfigInfoSchema,
+    { content }
+  );
+}
+
 export async function fetchStatus(): Promise<VpnStatus> {
   const status = await secureInvokeValidated("get_vpn_status", VpnStatusSchema);
 

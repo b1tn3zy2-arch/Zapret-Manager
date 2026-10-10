@@ -24,6 +24,16 @@ export const ROUTES = {
 
 export type AppPage = (typeof ROUTES)[keyof typeof ROUTES];
 
+export type DashboardMode = "dpi" | "vpn";
+
+export function isDashboardMode(value: string): value is DashboardMode {
+  return value === "dpi" || value === "vpn";
+}
+
+export const VPN_PING_INTERVAL_MS = 30_000;
+
+export const MODE_CROSSFADE_MS = 400;
+
 export const CONNECTION_STATUS = {
   connected: "connected",
   connecting: "connecting",

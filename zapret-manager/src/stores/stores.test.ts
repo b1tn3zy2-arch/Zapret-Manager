@@ -27,12 +27,23 @@ describe("useAppStore", () => {
     useAppStore.setState({
       activePage: ROUTES.dashboard,
       sidebarCollapsed: false,
+      dashboardMode: "dpi",
       settingsSection: "general",
       strategiesViewMode: "cards",
       strategiesSortMode: "rarity-desc",
       strategiesRarityFilter: [],
       strategiesServiceFilter: [],
     });
+  });
+
+  it("стартует в режиме обхода DPI", () => {
+    expect(useAppStore.getState().dashboardMode).toBe("dpi");
+  });
+
+  it("переключает режим дашборда", () => {
+    useAppStore.getState().setDashboardMode("vpn");
+
+    expect(useAppStore.getState().dashboardMode).toBe("vpn");
   });
 
   it("переключает страницу", () => {
@@ -126,6 +137,29 @@ describe("migratePersistedAppState", () => {
   it("переживает пустое и отсутствующее состояние", () => {
     expect(migratePersistedAppState(undefined)).toEqual({});
     expect(migratePersistedAppState({})).toEqual({});
+  });
+
+  it("сохраняет корректный режим дашборда", () => {
+    expect(
+      migratePersistedAppState({ dashboardMode: "vpn" }).dashboardMode
+    ).toBe("vpn");
+  });
+
+  it("сбрасывает неизвестный режим на dpi", () => {
+    expect(
+      migratePersistedAppState({ dashboardMode: "proxy" as never })
+        .dashboardMode
+    ).toBe("dpi");
+  });
+
+  it("не сбрасывает секцию, исправляя только режим", () => {
+    const migrated = migratePersistedAppState({
+      dashboardMode: "proxy" as never,
+      settingsSection: "vpn",
+    });
+
+    expect(migrated.dashboardMode).toBe("dpi");
+    expect(migrated.settingsSection).toBe("vpn");
   });
 
   it("сбрасывает значение не строкового типа", () => {

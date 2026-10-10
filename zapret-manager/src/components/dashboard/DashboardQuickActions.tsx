@@ -1,11 +1,9 @@
-import { memo, useState } from "react";
+import { memo } from "react";
 import { Play, Square } from "lucide-react";
 
-import VpnToggle from "@/components/dashboard/VpnToggle";
-import { Button, Text } from "@/components/ui";
+import { Button } from "@/components/ui";
 import { GlassPanel } from "@/components/shared/GlassPanel";
 import { useI18n } from "@/i18n";
-import { useVpn } from "@/hooks/useVpn";
 import { useVpnStore } from "@/stores/useVpnStore";
 import type { Strategy } from "@/types";
 
@@ -25,42 +23,9 @@ function DashboardQuickActions({
   onStop,
 }: DashboardQuickActionsProps) {
   const { t } = useI18n();
-  const [notice, setNotice] = useState<string | null>(null);
-  const vpnState = useVpnStore((state) => state.status.state);
-  const switchStep = useVpnStore((state) => state.switchStep);
-  const isSwitching = useVpnStore((state) => state.isSwitching);
-  const activeId = useVpnStore((state) => state.activeConfigId);
-  const installed = useVpnStore((state) => state.wireguardInstalled);
-  const { connectActive, switchToDpi } = useVpn();
-
-  const vpnConnected = vpnState === "connected";
-
-  const handleVpnToggle = (value: boolean): void => {
-    if (!installed) {
-      setNotice(t("settings.vpn.noticeInstallFirst"));
-      return;
-    }
-
-    if (value && activeId === null) {
-      setNotice(t("settings.vpn.noActiveConfig"));
-      return;
-    }
-
-    if (value && activeId === null) {
-      setNotice("Выберите конфиг VPN в Настройках → VPN");
-
-      return;
-    }
-
-    setNotice(null);
-
-    if (value) {
-      void connectActive();
-      return;
-    }
-
-    void switchToDpi();
-  };
+  const vpnConnected = useVpnStore(
+    (state) => state.status.state === "connected"
+  );
 
   return (
     <GlassPanel padding="lg" className="flex flex-col gap-5">
@@ -72,9 +37,7 @@ function DashboardQuickActions({
         <Button
           fullWidth
           size="lg"
-          disabled={
-            isBusy || isActive || isSwitching || lastStrategy === undefined
-          }
+          disabled={isBusy || isActive || lastStrategy === undefined}
           onClick={onRun}
           icon={
             <Play aria-hidden="true" className="size-4" strokeWidth={2.5} />
@@ -103,19 +66,6 @@ function DashboardQuickActions({
             : t("settings.vpn.stopBypass")}
         </Button>
       </div>
-
-      <VpnToggle
-        isVpn={vpnConnected}
-        switchStep={switchStep}
-        isSwitching={isSwitching}
-        onChange={handleVpnToggle}
-      />
-
-      {notice !== null ? (
-        <Text variant="caption" size="sm" className="text-accent-warning">
-          {notice}
-        </Text>
-      ) : null}
     </GlassPanel>
   );
 }

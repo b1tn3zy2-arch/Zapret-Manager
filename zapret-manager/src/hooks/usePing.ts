@@ -25,6 +25,7 @@ export interface UsePingOptions {
 export interface UsePingResult {
   history: PingHistory;
   isLoading: boolean;
+  refresh: () => void;
 }
 
 function buildHistory(hosts: readonly { host: string }[]): PingHistory {
@@ -132,5 +133,9 @@ export function usePing(options: UsePingOptions = {}): UsePingResult {
     };
   }, [intervalMs, probe]);
 
-  return { history, isLoading };
+  const refresh = useCallback((): void => {
+    void probe();
+  }, [probe]);
+
+  return { history, isLoading, refresh };
 }

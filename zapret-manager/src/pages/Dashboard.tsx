@@ -1,122 +1,69 @@
 import { useCallback } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 
-import DashboardConnection from "@/components/dashboard/DashboardConnection";
-import DashboardHero from "@/components/dashboard/DashboardHero";
-import DashboardPing from "@/components/dashboard/DashboardPing";
-import DashboardQuickActions from "@/components/dashboard/DashboardQuickActions";
-import DashboardRecentLogs from "@/components/dashboard/DashboardRecentLogs";
-import DashboardStats from "@/components/dashboard/DashboardStats";
+import DpiMode from "@/components/dashboard/DpiMode";
+import ModeSwitcher from "@/components/dashboard/ModeSwitcher";
+import VpnMode from "@/components/dashboard/VpnMode";
 import { Heading, Text } from "@/components/ui";
-import { useStrategyRunner } from "@/hooks/useStrategyRunner";
-import { useUptime } from "@/hooks/useUptime";
-import { useVpn } from "@/hooks/useVpn";
-import { ROUTES } from "@/lib/constants";
+import {
+  ANIMATION,
+  MODE_CROSSFADE_MS,
+  type DashboardMode,
+} from "@/lib/constants";
 import { getGreeting } from "@/lib/geo";
 import { useAppStore } from "@/stores/useAppStore";
-import {
-  useActiveStrategy,
-  useConnectionStatus,
-  useLastStrategy,
-  useRunningStartedAt,
-} from "@/stores/selectors";
-import { selectActiveConfig, useVpnStore } from "@/stores/useVpnStore";
+import { useVpnStore } from "@/stores/useVpnStore";
 
 export default function Dashboard() {
-  const setActivePage = useAppStore((state) => state.setActivePage);
-  const connectionStatus = useConnectionStatus();
-  const activeStrategy = useActiveStrategy();
-  const lastStrategy = useLastStrategy();
-  const startedAt = useRunningStartedAt();
-  const activeVpnConfig = useVpnStore(selectActiveConfig);
-  const vpnConnected = useVpnStore(
-    (state) => state.status.state === "connected"
+  const mode = useAppStore((state) => state.dashboardMode);
+  const setDashboardMode = useAppStore((state) => state.setDashboardMode);
+  const switchStep = useVpnStore((state) => state.switchStep);
+  const isSwitching = useVpnStore((state) => state.isSwitching);
+
+  const handleModeChange = useCallback(
+    (next: DashboardMode): void => {
+      setDashboardMode(next);
+    },
+    [setDashboardMode]
   );
-
-  const { run, stop, isStarting, isStopping } = useStrategyRunner();
-  const { disconnect: disconnectVpn } = useVpn();
-
-  const uptime = useUptime(startedAt);
-
-  const strategyName = activeStrategy?.name ?? lastStrategy?.name ?? null;
-  const isBusy = isStarting || isStopping;
-
-  const handleConnect = useCallback((): void => {
-    if (vpnConnected) {
-      return;
-    }
-
-    const target = activeStrategy ?? lastStrategy;
-
-    if (target === undefined) {
-      setActivePage(ROUTES.strategies);
-      return;
-    }
-
-    void run(target.id, target.path);
-  }, [activeStrategy, lastStrategy, run, setActivePage, vpnConnected]);
-
-  const handleDisconnect = useCallback((): void => {
-    if (connectionStatus === "vpn") {
-      void disconnectVpn();
-      return;
-    }
-
-    if (activeStrategy === undefined) {
-      return;
-    }
-
-    void stop(activeStrategy.id, activeStrategy.path);
-  }, [activeStrategy, connectionStatus, disconnectVpn, stop]);
-
-  const handleOpenAllLogs = useCallback((): void => {
-    setActivePage(ROUTES.logs);
-  }, [setActivePage]);
 
   return (
     <section
       className="dashboard-container flex flex-col"
       style={{ gap: "var(--space-lg)" }}
     >
-      <header className="flex flex-col gap-2">
-        <Heading level={1}>{getGreeting()}</Heading>
-        <Text variant="body" size="lg" className="text-text-secondary">
-          Управление обходом блокировок
-        </Text>
+      <header className="flex flex-col gap-4">
+        <div className="flex flex-col gap-2">
+          <Heading level={1}>{getGreeting()}</Heading>
+          <Text variant="body" size="lg" className="text-text-secondary">
+            Управление обходом блокировок
+          </Text>
+        </div>
+
+        <ModeSwitcher
+          mode={mode}
+          switchStep={switchStep}
+          isSwitching={isSwitching}
+          onChange={handleModeChange}
+        />
       </header>
 
-      <div className="dashboard-grid">
-        <div
-          className="dashboard-lead flex flex-col"
-          style={{ gap: "var(--space-md)" }}
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.div
+          key={mode}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{
+            duration: MODE_CROSSFADE_MS / 1000,
+            ease: ANIMATION.easeOutExpo,
+          }}
+          className="flex flex-col"
+          style={{ gap: "var(--space-lg)" }}
         >
-          <DashboardHero
-            status={connectionStatus}
-            strategyName={strategyName}
-            vpnLabel={activeVpnConfig?.name ?? null}
-            uptime={uptime}
-            isConnecting={isBusy}
-            onConnect={handleConnect}
-            onDisconnect={handleDisconnect}
-          />
-          <DashboardStats uptime={uptime} />
-        </div>
-
-        <div className="flex flex-col" style={{ gap: "var(--space-md)" }}>
-          <DashboardConnection />
-          <DashboardPing />
-        </div>
-      </div>
-
-      <div className="dashboard-grid">
-        <DashboardQuickActions
-          lastStrategy={lastStrategy}
-          isActive={activeStrategy !== undefined}
-          isBusy={isBusy || vpnConnected}
-          onRun={handleConnect}
-          onStop={handleDisconnect}
-        />
-        <DashboardRecentLogs onOpenAllLogs={handleOpenAllLogs} />
-      </div>
+          {mode === "vpn" ? <VpnMode /> : <DpiMode />}
+        </motion.div>
+      </AnimatePresence>
     </section>
   );
 }

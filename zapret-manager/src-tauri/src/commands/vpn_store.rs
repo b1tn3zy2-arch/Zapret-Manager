@@ -99,6 +99,59 @@ pub fn import_config(source_path: &str) -> AppResult<VpnConfigInfo> {
     import_config_into(&configs_dir()?, source_path)
 }
 
+pub fn import_config_text(text: &str) -> AppResult<VpnConfigInfo> {
+    import_config_text_into(&configs_dir()?, text, now_secs())
+}
+
+pub fn import_config_text_into(
+    dir: &Path,
+    text: &str,
+    stamp: u64,
+) -> AppResult<VpnConfigInfo> {
+    check_file_io("vpn-import")?;
+
+    if text.trim().is_empty() {
+        return Err(AppError::custom("Буфер обмена пуст"));
+    }
+
+    if text.len() as u64 > MAX_VPN_CONF_BYTES {
+        return Err(AppError::custom(format!(
+            "Конфиг больше {MAX_VPN_CONF_BYTES} байт"
+        )));
+    }
+
+    parse_config(text)
+        .map_err(|error| AppError::custom(format!("Невалидный WireGuard конфиг: {error}")))?;
+
+    let safe_name = safe_filename(&pasted_config_name(text))?;
+    let target = dir.join(safe_name);
+
+    std::fs::create_dir_all(dir)?;
+    std::fs::write(&target, Zeroizing::new(text.as_bytes().to_vec()))?;
+
+    let info = info_from_file(&target, stamp * 1000)?;
+    tracing::info!("Импортирован VPN конфиг из буфера обмена: {}", info.name);
+
+    Ok(info)
+}
+
+pub fn pasted_config_name(text: &str) -> String {
+    let label = parse_config(text)
+        .ok()
+        .and_then(|config| {
+            config
+                .address
+                .first()
+                .map(|address| address.split('/').next().unwrap_or(address).to_string())
+        })
+        .filter(|value| !value.is_empty())
+        .unwrap_or_else(|| "config".to_string());
+
+    let safe = label.replace(['.', ':', ' '], "_");
+
+    format!("pasted-{}-{}.conf", safe, now_secs())
+}
+
 pub fn import_config_into(dir: &Path, source_path: &str) -> AppResult<VpnConfigInfo> {
     check_file_io("vpn-import")?;
 

@@ -6,14 +6,12 @@ import { useLogsStore } from "@/stores/useLogsStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import { useStrategiesStore } from "@/stores/useStrategiesStore";
 import { useVpnStore } from "@/stores/useVpnStore";
-import type { VpnConfigInfo } from "@/types";
 
 export interface UseVpnResult {
   error: string | null;
   detectWireguard: () => Promise<void>;
   refreshConfigs: () => Promise<void>;
   refreshStatus: () => Promise<void>;
-  importConfig: () => Promise<VpnConfigInfo | null>;
   deleteConfig: (id: string) => Promise<void>;
   connect: (configId: string) => Promise<void>;
   connectActive: () => Promise<void>;
@@ -91,38 +89,6 @@ export function useVpn(): UseVpnResult {
       useVpnStore.getState().setError(toErrorMessage(caught));
     }
   }, [refreshConfigs]);
-
-  const importConfig = useCallback(async (): Promise<VpnConfigInfo | null> => {
-    useVpnStore.getState().setError(null);
-
-    try {
-      const config = await commands.importConfigFromDialog();
-
-      if (config === null) {
-        return null;
-      }
-
-      useVpnStore.getState().addConfig(config);
-      addLog({
-        level: "success",
-        source: "vpn",
-        message: `Импортирован конфиг: ${config.name}`,
-      });
-
-      return config;
-    } catch (caught) {
-      const message = toErrorMessage(caught);
-
-      useVpnStore.getState().setError(message);
-      addLog({
-        level: "error",
-        source: "vpn",
-        message: `Импорт конфига не удался: ${message}`,
-      });
-
-      return null;
-    }
-  }, [addLog]);
 
   const deleteConfig = useCallback(
     async (id: string): Promise<void> => {
@@ -252,7 +218,6 @@ export function useVpn(): UseVpnResult {
     detectWireguard,
     refreshConfigs,
     refreshStatus,
-    importConfig,
     deleteConfig,
     connect,
     connectActive,

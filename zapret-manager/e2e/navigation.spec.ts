@@ -1,7 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 
 import { mockTauri, MOCK_FOLDER } from "./mock-tauri";
-import { GREETING } from "./helpers";
+import { GREETING, modeSwitcher } from "./helpers";
 
 async function bootstrap(
   page: Page,
@@ -63,6 +63,74 @@ test.describe("Навигация и загрузка", () => {
     }
 
     expect(errors).toEqual([]);
+  });
+});
+
+test.describe("Режимы дашборда", () => {
+  test("стартует в режиме обхода и переключается в VPN", async ({ page }) => {
+    const errors = await bootstrap(page);
+    await page.goto("/");
+
+    await expect(
+      modeSwitcher(page).getByRole("radio", { name: "Переключить на обход" })
+    ).toHaveAttribute("aria-checked", "true");
+    await expect(page.getByText("Пинг до сервисов").first()).toBeVisible();
+
+    await modeSwitcher(page)
+      .getByRole("radio", { name: "Переключить на VPN" })
+      .click();
+
+    await expect(
+      modeSwitcher(page).getByRole("radio", { name: "Переключить на VPN" })
+    ).toHaveAttribute("aria-checked", "true");
+    await expect(page.getByText("Нажмите для подключения")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Добавить" })).toBeVisible();
+
+    expect(errors).toEqual([]);
+  });
+
+  test("возвращается в режим обхода", async ({ page }) => {
+    const errors = await bootstrap(page);
+    await page.goto("/");
+
+    await modeSwitcher(page)
+      .getByRole("radio", { name: "Переключить на VPN" })
+      .click();
+    await expect(page.getByText("Нажмите для подключения")).toBeVisible();
+
+    await modeSwitcher(page)
+      .getByRole("radio", { name: "Переключить на обход" })
+      .click();
+
+    await expect(page.getByText("Пинг до сервисов").first()).toBeVisible();
+
+    expect(errors).toEqual([]);
+  });
+
+  test("показывает список серверов в режиме VPN", async ({ page }) => {
+    const errors = await bootstrap(page);
+    await page.goto("/");
+
+    await modeSwitcher(page)
+      .getByRole("radio", { name: "Переключить на VPN" })
+      .click();
+
+    await expect(page.getByText("СЕРВЕРЫ")).toBeVisible();
+    await expect(page.getByText("e2e")).toBeVisible();
+
+    expect(errors).toEqual([]);
+  });
+
+  test("VPN-режим не добавляет пункт в Sidebar", async ({ page }) => {
+    await bootstrap(page);
+    await page.goto("/");
+
+    const nav = page.getByRole("navigation", { name: "Основная навигация" });
+
+    await expect(nav.getByRole("button")).toHaveCount(6);
+    await expect(
+      nav.getByRole("button", { name: "VPN", exact: true })
+    ).toHaveCount(0);
   });
 });
 
