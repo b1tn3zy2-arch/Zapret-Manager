@@ -1,3 +1,5 @@
+export { default as AnimatedNumber } from "./AnimatedNumber";
+export type { AnimatedNumberProps } from "./AnimatedNumber";
 export { default as Badge } from "./Badge";
 export type { BadgeProps } from "./Badge";
 export { Button } from "./Button";

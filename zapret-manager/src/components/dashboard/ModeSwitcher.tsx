@@ -1,8 +1,13 @@
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { Lock, Zap } from "lucide-react";
 
 import { useI18n } from "@/i18n";
-import { type DashboardMode } from "@/lib/constants";
+import { usePrefersReducedMotion } from "@/hooks/useDeviceTier";
+import {
+  ANIMATION,
+  MODE_SWITCH_THUMB_MS,
+  type DashboardMode,
+} from "@/lib/constants";
 import { SWITCH_STEP_LABELS } from "@/lib/vpnConstants";
 import { cn } from "@/lib/utils";
 import type { SwitchStep } from "@/types";
@@ -23,6 +28,7 @@ export default function ModeSwitcher({
   onChange,
 }: ModeSwitcherProps) {
   const { t } = useI18n();
+  const reducedMotion = usePrefersReducedMotion();
   const isVpn = mode === "vpn";
 
   const caption = isSwitching
@@ -32,6 +38,13 @@ export default function ModeSwitcher({
     : isVpn
       ? t("dashboard.modeSwitcher.activeVpn")
       : t("dashboard.modeSwitcher.activeDpi");
+
+  const thumbTransition = reducedMotion
+    ? { duration: 0 }
+    : {
+        duration: MODE_SWITCH_THUMB_MS / 1000,
+        ease: ANIMATION.easeOutExpo,
+      };
 
   return (
     <div className="flex flex-col items-center gap-2">
@@ -43,20 +56,23 @@ export default function ModeSwitcher({
           "w-[clamp(200px,20vw,280px)] rounded-full border p-1"
         )}
       >
-        <motion.span
-          aria-hidden="true"
-          animate={{ x: isVpn ? "100%" : "0%" }}
-          transition={{
-            type: "spring",
-            stiffness: 380,
-            damping: 32,
-            mass: 0.7,
-          }}
-          className={cn(
-            "absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] rounded-full",
-            isVpn ? "bg-accent-secondary" : "bg-accent-primary"
-          )}
-        />
+        {isVpn ? (
+          <motion.span
+            key="vpn-thumb"
+            aria-hidden="true"
+            layoutId="mode-thumb"
+            transition={thumbTransition}
+            className="bg-accent-secondary absolute top-1 right-1 bottom-1 w-[calc(50%-4px)] rounded-full shadow-[0_0_16px_rgb(var(--color-accent-secondary-rgb)/0.4)]"
+          />
+        ) : (
+          <motion.span
+            key="dpi-thumb"
+            aria-hidden="true"
+            layoutId="mode-thumb"
+            transition={thumbTransition}
+            className="bg-accent-primary absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] rounded-full shadow-[0_0_16px_rgb(var(--color-accent-primary-rgb)/0.4)]"
+          />
+        )}
 
         {(["dpi", "vpn"] as const).map((value) => {
           const active = value === mode;
@@ -103,12 +119,21 @@ export default function ModeSwitcher({
         })}
       </div>
 
-      <p
-        aria-live="polite"
-        className="text-text-tertiary flex min-h-4 items-center justify-center text-center text-xs"
-      >
-        {caption}
-      </p>
+      <div className="relative flex min-h-4 items-center justify-center">
+        <AnimatePresence initial={false}>
+          <motion.p
+            key={caption}
+            aria-live="polite"
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: reducedMotion ? 0 : ANIMATION.fast }}
+            className="text-text-tertiary absolute text-center text-xs"
+          >
+            {caption}
+          </motion.p>
+        </AnimatePresence>
+      </div>
     </div>
   );
 }

@@ -25,10 +25,7 @@ describe("PlayOverlay", () => {
     const parentClick = vi.fn();
 
     render(
-      <div
-        onClick={parentClick}
-        role="presentation"
-      >
+      <div onClick={parentClick} role="presentation">
         <PlayOverlay isRunning={false} {...base} onRun={onRun} />
       </div>
     );

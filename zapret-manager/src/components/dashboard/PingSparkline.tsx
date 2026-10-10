@@ -1,10 +1,17 @@
 import { useId, useMemo } from "react";
+import { motion } from "framer-motion";
 
-import { SPARKLINE_HEIGHT, SPARKLINE_WIDTH } from "@/lib/constants";
+import { usePrefersReducedMotion } from "@/hooks/useDeviceTier";
+import {
+  CHART_PULSE_PERIOD_MS,
+  SPARKLINE_HEIGHT,
+  SPARKLINE_WIDTH,
+} from "@/lib/constants";
 import {
   buildSparklineFill,
   buildSparklinePath,
   getPingColor,
+  lastSparklinePoint,
   type PingPoint,
 } from "@/lib/pingUtils";
 
@@ -14,20 +21,25 @@ export interface PingSparklineProps {
   height?: number;
 }
 
+const ENDPOINT_RADIUS = 2.6;
+const ENDPOINT_PULSE_SCALE = 1.5;
+
 function PingSparkline({
   points,
   width = SPARKLINE_WIDTH,
   height = SPARKLINE_HEIGHT,
 }: PingSparklineProps) {
   const gradientId = useId();
+  const reducedMotion = usePrefersReducedMotion();
 
-  const { line, fill, color } = useMemo(() => {
+  const { line, fill, color, endpoint } = useMemo(() => {
     const last = points[points.length - 1];
 
     return {
       line: buildSparklinePath(points, width, height),
       fill: buildSparklineFill(points, width, height),
       color: getPingColor(last?.latencyMs ?? null),
+      endpoint: lastSparklinePoint(points, width, height),
     };
   }, [points, width, height]);
 
@@ -67,6 +79,29 @@ function PingSparkline({
         strokeLinejoin="round"
         style={{ willChange: "d" }}
       />
+
+      {endpoint !== null ? (
+        <motion.circle
+          cx={endpoint.x}
+          cy={endpoint.y}
+          r={ENDPOINT_RADIUS}
+          fill={color}
+          {...(reducedMotion
+            ? {}
+            : {
+                animate: {
+                  scale: [1, ENDPOINT_PULSE_SCALE, 1],
+                  opacity: [1, 0.6, 1],
+                },
+                transition: {
+                  duration: CHART_PULSE_PERIOD_MS / 1000,
+                  repeat: Infinity,
+                  ease: "easeInOut" as const,
+                },
+              })}
+          style={{ transformBox: "fill-box", transformOrigin: "center" }}
+        />
+      ) : null}
     </svg>
   );
 }

@@ -1,11 +1,18 @@
 import { useEffect, useRef, useState } from "react";
 import type { RefObject } from "react";
 
+import { usePrefersReducedMotion } from "@/hooks/useDeviceTier";
 import {
+  CHART_PULSE_PERIOD_MS,
+  CHART_SMOOTH_TENSION,
   MONITOR_LABEL_REFRESH_MS,
   TRAFFIC_AXIS_COLOR,
-  TRAFFIC_GRID_COLOR,
+  TRAFFIC_GRID_COLOR_DARK,
+  TRAFFIC_GRID_COLOR_LIGHT,
+  TRAFFIC_GRID_VERTICAL_DARK,
+  TRAFFIC_GRID_VERTICAL_LIGHT,
 } from "@/lib/constants";
+import { buildAreaPath, buildSmoothPath } from "@/lib/smoothPath";
 import { applyEWMA, computeMax, pickSeries } from "@/lib/trafficUtils";
 import type { TrafficKey, TrafficPoint } from "@/types";
 
@@ -43,17 +50,27 @@ function withAlpha(color: string, alpha: number): string {
   return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
 }
 
+function isLightTheme(): boolean {
+  return document.documentElement.dataset.theme === "light";
+}
+
 function drawGrid(
   context: CanvasRenderingContext2D,
   width: number,
   height: number
 ): void {
+  const light = isLightTheme();
+  const horizontal = light ? TRAFFIC_GRID_COLOR_LIGHT : TRAFFIC_GRID_COLOR_DARK;
+  const vertical = light
+    ? TRAFFIC_GRID_VERTICAL_LIGHT
+    : TRAFFIC_GRID_VERTICAL_DARK;
+
   context.lineWidth = 1;
 
   for (let index = 1; index < HORIZONTAL_LINES; index += 1) {
     const y = Math.round((height / HORIZONTAL_LINES) * index) + 0.5;
 
-    context.strokeStyle = TRAFFIC_GRID_COLOR;
+    context.strokeStyle = horizontal;
     context.beginPath();
     context.moveTo(0, y);
     context.lineTo(width, y);
@@ -63,7 +80,7 @@ function drawGrid(
   for (let index = 1; index < VERTICAL_LINES; index += 1) {
     const x = Math.round((width / VERTICAL_LINES) * index) + 0.5;
 
-    context.strokeStyle = TRAFFIC_GRID_COLOR;
+    context.strokeStyle = vertical;
     context.beginPath();
     context.moveTo(x, 0);
     context.lineTo(x, height);
@@ -87,6 +104,27 @@ function drawFrame(
   context.textAlign = "left";
 }
 
+function drawEndpoint(
+  context: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  color: string,
+  animate: boolean
+): void {
+  const pulse = animate
+    ? 1 +
+      Math.sin((performance.now() / CHART_PULSE_PERIOD_MS) * Math.PI * 2) * 0.2
+    : 1;
+
+  context.beginPath();
+  context.arc(x, y, 3.2 * pulse, 0, Math.PI * 2);
+  context.fillStyle = color;
+  context.shadowColor = color;
+  context.shadowBlur = animate ? 12 : 0;
+  context.fill();
+  context.shadowBlur = 0;
+}
+
 export function useTrafficCanvas({
   buffer,
   canvasRef,
@@ -99,6 +137,7 @@ export function useTrafficCanvas({
   const valueRef = useRef(0);
   const [currentValue, setCurrentValue] = useState(0);
   const scale = useDpiScale();
+  const reducedMotion = usePrefersReducedMotion();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -138,60 +177,59 @@ export function useTrafficCanvas({
       valueRef.current = last;
       maxRef.current = computeMax(values, maxRef.current);
 
-      const scale = maxRef.current || 1;
+      const scaleValue = maxRef.current || 1;
       const step = raw.length > 1 ? width / (raw.length - 1) : width;
       const toY = (value: number): number =>
-        height - (Math.min(value, scale) / scale) * height;
+        height - (Math.min(value, scaleValue) / scaleValue) * height;
 
       context.clearRect(0, 0, width, height);
       drawGrid(context, width, height);
-      drawFrame(context, width, height, scale);
+      drawFrame(context, width, height, scaleValue);
 
       if (values.length < 2) {
         frame = window.requestAnimationFrame(render);
         return;
       }
 
-      context.beginPath();
-      context.moveTo(0, height);
-      values.forEach((value, index) => {
-        context.lineTo(index * step, toY(value));
-      });
-      context.lineTo((values.length - 1) * step, height);
-      context.closePath();
+      const points = values.map((value, index) => ({
+        x: index * step,
+        y: toY(value),
+      }));
+
+      const areaPath = new Path2D(
+        buildAreaPath(points, height, CHART_SMOOTH_TENSION)
+      );
+      const linePath = new Path2D(
+        buildSmoothPath(points, CHART_SMOOTH_TENSION)
+      );
 
       const fill = context.createLinearGradient(0, 0, 0, height);
       fill.addColorStop(0, withAlpha(color, 0.32));
+      fill.addColorStop(0.5, withAlpha(color, 0.12));
       fill.addColorStop(1, withAlpha(color, 0));
       context.fillStyle = fill;
-      context.fill();
+      context.fill(areaPath);
 
-      context.beginPath();
-      values.forEach((value, index) => {
-        const x = index * step;
-        const y = toY(value);
-
-        if (index === 0) {
-          context.moveTo(x, y);
-        } else {
-          context.lineTo(x, y);
-        }
-      });
       context.strokeStyle = color;
       context.lineWidth = 1.6;
       context.lineJoin = "round";
+      context.lineCap = "round";
       context.shadowColor = withAlpha(color, paused ? 0 : 0.5);
       context.shadowBlur = paused ? 0 : 8;
-      context.stroke();
+      context.stroke(linePath);
       context.shadowBlur = 0;
 
-      const endX = (values.length - 1) * step;
-      const endY = toY(values[values.length - 1] ?? 0);
+      const lastPoint = points[points.length - 1];
 
-      context.beginPath();
-      context.arc(endX, endY, 2.6, 0, Math.PI * 2);
-      context.fillStyle = color;
-      context.fill();
+      if (lastPoint !== undefined) {
+        drawEndpoint(
+          context,
+          lastPoint.x,
+          lastPoint.y,
+          color,
+          !paused && !reducedMotion
+        );
+      }
 
       frame = window.requestAnimationFrame(render);
     };
@@ -202,7 +240,7 @@ export function useTrafficCanvas({
       window.cancelAnimationFrame(frame);
       observer.disconnect();
     };
-  }, [buffer, canvasRef, color, dataKey, height, paused, scale]);
+  }, [buffer, canvasRef, color, dataKey, height, paused, reducedMotion, scale]);
 
   useEffect(() => {
     const timer = window.setInterval(() => {

@@ -5,6 +5,7 @@ import DpiMode from "@/components/dashboard/DpiMode";
 import ModeSwitcher from "@/components/dashboard/ModeSwitcher";
 import VpnMode from "@/components/dashboard/VpnMode";
 import { Heading, Text } from "@/components/ui";
+import { usePrefersReducedMotion } from "@/hooks/useDeviceTier";
 import {
   ANIMATION,
   MODE_CROSSFADE_MS,
@@ -19,6 +20,7 @@ export default function Dashboard() {
   const setDashboardMode = useAppStore((state) => state.setDashboardMode);
   const switchStep = useVpnStore((state) => state.switchStep);
   const isSwitching = useVpnStore((state) => state.isSwitching);
+  const reducedMotion = usePrefersReducedMotion();
 
   const handleModeChange = useCallback(
     (next: DashboardMode): void => {
@@ -32,7 +34,15 @@ export default function Dashboard() {
       className="dashboard-container flex flex-col"
       style={{ gap: "var(--space-lg)" }}
     >
-      <header className="flex flex-col gap-4">
+      <motion.header
+        className="flex flex-col gap-4"
+        initial={reducedMotion ? false : { opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{
+          duration: reducedMotion ? 0 : ANIMATION.slow,
+          ease: ANIMATION.easeOutExpo,
+        }}
+      >
         <div className="flex flex-col gap-2">
           <Heading level={1}>{getGreeting()}</Heading>
           <Text variant="body" size="lg" className="text-text-secondary">
@@ -46,7 +56,7 @@ export default function Dashboard() {
           isSwitching={isSwitching}
           onChange={handleModeChange}
         />
-      </header>
+      </motion.header>
 
       <AnimatePresence mode="wait" initial={false}>
         <motion.div
@@ -55,7 +65,7 @@ export default function Dashboard() {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{
-            duration: MODE_CROSSFADE_MS / 1000,
+            duration: reducedMotion ? 0 : MODE_CROSSFADE_MS / 1000,
             ease: ANIMATION.easeOutExpo,
           }}
           className="flex flex-col"

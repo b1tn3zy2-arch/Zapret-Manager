@@ -1,5 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import { save } from "@tauri-apps/plugin-dialog";
+import { motion } from "framer-motion";
 import { useCallback, useRef, useState } from "react";
 
 import MonitorControls from "@/components/monitor/MonitorControls";
@@ -8,6 +9,7 @@ import StatsCounters from "@/components/monitor/StatsCounters";
 import TrafficChart from "@/components/monitor/TrafficChart";
 import TrafficStatus from "@/components/monitor/TrafficStatus";
 import { Heading, Text } from "@/components/ui";
+import { useDashboardStagger } from "@/hooks/useDashboardStagger";
 import { useNetworkMonitor } from "@/hooks/useNetworkMonitor";
 import { TRAFFIC_COLORS } from "@/lib/constants";
 import { composeSnapshot, snapshotFileName } from "@/lib/monitorSnapshot";
@@ -25,6 +27,7 @@ export default function Monitor() {
   const inboundRef = useRef<HTMLCanvasElement | null>(null);
   const outboundRef = useRef<HTMLCanvasElement | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const { containerVariants, itemVariants } = useDashboardStagger();
 
   const handleSnapshot = useCallback(async () => {
     setIsSaving(true);
@@ -69,15 +72,20 @@ export default function Monitor() {
   }, [addLog]);
 
   return (
-    <section className="flex flex-col gap-6">
-      <header className="flex flex-col gap-2">
+    <motion.section
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="flex flex-col gap-6"
+    >
+      <motion.header variants={itemVariants} className="flex flex-col gap-2">
         <Heading level={1}>Монитор</Heading>
         <Text variant="body" size="lg" className="text-text-secondary">
           Трафик и соединения в реальном времени
         </Text>
-      </header>
+      </motion.header>
 
-      <div className="flex flex-col gap-3">
+      <motion.div variants={itemVariants} className="flex flex-col gap-3">
         <TrafficStatus
           stats={stats}
           isPaused={isPaused}
@@ -101,11 +109,16 @@ export default function Monitor() {
         </div>
 
         <StatsCounters stats={stats} />
-      </div>
+      </motion.div>
 
-      <PingMonitor />
+      <motion.div variants={itemVariants}>
+        <PingMonitor />
+      </motion.div>
 
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+      <motion.div
+        variants={itemVariants}
+        className="grid grid-cols-1 gap-4 xl:grid-cols-2"
+      >
         <TrafficChart
           buffer={bufferRef}
           dataKey="in"
@@ -122,7 +135,7 @@ export default function Monitor() {
           isPaused={isPaused}
           canvasRef={outboundRef}
         />
-      </div>
-    </section>
+      </motion.div>
+    </motion.section>
   );
 }

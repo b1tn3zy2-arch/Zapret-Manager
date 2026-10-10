@@ -1,14 +1,21 @@
 import { useMemo } from "react";
+import { motion } from "framer-motion";
 
 import { GlassPanel } from "@/components/shared/GlassPanel";
+import { usePrefersReducedMotion } from "@/hooks/useDeviceTier";
 import { usePing } from "@/hooks/usePing";
-import { MONITOR_PING_HISTORY_SIZE, PING_HOSTS } from "@/lib/constants";
+import {
+  CHART_PULSE_PERIOD_MS,
+  MONITOR_PING_HISTORY_SIZE,
+  PING_HOSTS,
+} from "@/lib/constants";
 import {
   buildSparklineFill,
   buildSparklinePath,
   formatPing,
   getPingColor,
   lastLatency,
+  lastSparklinePoint,
 } from "@/lib/pingUtils";
 import type { PingHistory } from "@/hooks/usePing";
 import type { PingPoint } from "@/lib/pingUtils";
@@ -23,6 +30,7 @@ interface PingCardProps {
 }
 
 function PingCard({ label, points, title }: PingCardProps) {
+  const reducedMotion = usePrefersReducedMotion();
   const latency = lastLatency(points);
   const color = getPingColor(latency);
   const line = useMemo(
@@ -31,6 +39,10 @@ function PingCard({ label, points, title }: PingCardProps) {
   );
   const fill = useMemo(
     () => buildSparklineFill(points, SPARK_WIDTH, SPARK_HEIGHT),
+    [points]
+  );
+  const endpoint = useMemo(
+    () => lastSparklinePoint(points, SPARK_WIDTH, SPARK_HEIGHT),
     [points]
   );
 
@@ -58,6 +70,29 @@ function PingCard({ label, points, title }: PingCardProps) {
           strokeWidth={1.4}
           strokeLinejoin="round"
         />
+
+        {endpoint !== null ? (
+          <motion.circle
+            cx={endpoint.x}
+            cy={endpoint.y}
+            r={2.2}
+            fill={color}
+            {...(reducedMotion
+              ? {}
+              : {
+                  animate: {
+                    scale: [1, 1.5, 1],
+                    opacity: [1, 0.6, 1],
+                  },
+                  transition: {
+                    duration: CHART_PULSE_PERIOD_MS / 1000,
+                    repeat: Infinity,
+                    ease: "easeInOut" as const,
+                  },
+                })}
+            style={{ transformBox: "fill-box", transformOrigin: "center" }}
+          />
+        ) : null}
       </svg>
 
       <span className="text-text-tertiary text-[10px]">

@@ -1,3 +1,6 @@
+import { CHART_SMOOTH_TENSION } from "@/lib/constants";
+import { buildSmoothPath, type SmoothPathPoint } from "@/lib/smoothPath";
+
 export interface PingPoint {
   timestamp: number;
   latencyMs: number | null;
@@ -6,6 +9,7 @@ export interface PingPoint {
 
 const GOOD_MS = 50;
 const FAIR_MS = 150;
+const SPARKLINE_PADDING = 2;
 
 export function getPingColor(latencyMs: number | null): string {
   if (latencyMs === null) {
@@ -47,36 +51,45 @@ function segments(points: PingPoint[]): PingPoint[][] {
   return groups;
 }
 
-export function buildSparklinePath(
+function project(
   points: PingPoint[],
   width: number,
   height: number
-): string {
+): SmoothPathPoint[] {
   const usable = points.filter(
     (point) => point.success && point.latencyMs !== null
   );
 
   if (usable.length < 2) {
-    return "";
+    return [];
   }
 
   const values = usable.map((point) => point.latencyMs ?? 0);
   const min = Math.min(...values);
   const max = Math.max(...values);
   const span = max - min || 1;
-  const padding = 2;
-  const usableHeight = height - padding * 2;
+  const usableHeight = height - SPARKLINE_PADDING * 2;
   const step = width / (usable.length - 1);
 
-  return usable
-    .map((point, index) => {
-      const value = point.latencyMs ?? 0;
-      const x = index * step;
-      const y = padding + usableHeight - ((value - min) / span) * usableHeight;
+  return usable.map((point, index) => {
+    const value = point.latencyMs ?? 0;
 
-      return `${index === 0 ? "M" : "L"}${x.toFixed(2)},${y.toFixed(2)}`;
-    })
-    .join(" ");
+    return {
+      x: index * step,
+      y:
+        SPARKLINE_PADDING +
+        usableHeight -
+        ((value - min) / span) * usableHeight,
+    };
+  });
+}
+
+export function buildSparklinePath(
+  points: PingPoint[],
+  width: number,
+  height: number
+): string {
+  return buildSmoothPath(project(points, width, height), CHART_SMOOTH_TENSION);
 }
 
 export function buildSparklineFill(
@@ -95,9 +108,19 @@ export function buildSparklineFill(
         return "";
       }
 
-      return `${line} L${width},${height} L0,${height} Z`;
+      return `${line} L${width.toFixed(2)},${height.toFixed(2)} L0,${height.toFixed(2)} Z`;
     })
     .join(" ");
+}
+
+export function lastSparklinePoint(
+  points: PingPoint[],
+  width: number,
+  height: number
+): SmoothPathPoint | null {
+  const projected = project(points, width, height);
+
+  return projected[projected.length - 1] ?? null;
 }
 
 export function lastLatency(points: PingPoint[]): number | null {

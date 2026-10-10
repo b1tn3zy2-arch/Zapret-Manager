@@ -196,20 +196,20 @@ function StrategyGameCardImpl({
             color={palette.solid}
             disabled={particlesDisabled}
           />
-
-          <AnimatePresence>
-            {showOverlay ? (
-              <PlayOverlay
-                key="play-overlay"
-                isRunning={isRunning}
-                isBusy={isBusy}
-                motionDisabled={motionDisabled}
-                onRun={onRun}
-                onStop={onStop}
-              />
-            ) : null}
-          </AnimatePresence>
         </button>
+
+        <AnimatePresence>
+          {showOverlay ? (
+            <PlayOverlay
+              key="play-overlay"
+              isRunning={isRunning}
+              isBusy={isBusy}
+              motionDisabled={motionDisabled}
+              onRun={onRun}
+              onStop={onStop}
+            />
+          ) : null}
+        </AnimatePresence>
 
         <div
           className="bg-bg-secondary/95 absolute inset-0 flex [transform:rotateY(180deg)] flex-col rounded-xl border p-0 [backface-visibility:hidden]"

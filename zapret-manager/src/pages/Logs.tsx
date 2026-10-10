@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
 
 import ClearLogsDialog from "@/components/logs/ClearLogsDialog";
 import LogFilters from "@/components/logs/LogFilters";
@@ -8,6 +9,7 @@ import LogsToast, { type ToastTone } from "@/components/logs/LogsToast";
 import ScrollToBottomButton from "@/components/logs/ScrollToBottomButton";
 import { Heading, Text } from "@/components/ui";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
+import { useDashboardStagger } from "@/hooks/useDashboardStagger";
 import { COPY_TOAST_DURATION_MS } from "@/lib/constants";
 import { formatLogLine } from "@/lib/format";
 import { exportLogsToFile } from "@/lib/logExport";
@@ -111,38 +113,50 @@ export default function Logs() {
     listRef.current?.scrollToBottom();
   }, []);
 
+  const { containerVariants, itemVariants } = useDashboardStagger();
+
   return (
-    <section className="flex min-h-0 flex-1 flex-col gap-3">
-      <div className="flex flex-col gap-1">
+    <motion.section
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="flex min-h-0 flex-1 flex-col gap-3"
+    >
+      <motion.div variants={itemVariants} className="flex flex-col gap-1">
         <Heading level={1}>Логи</Heading>
         <Text variant="body" size="sm" className="text-text-secondary">
           Логи работы стратегий в реальном времени
         </Text>
-      </div>
+      </motion.div>
 
-      <LogFilters
-        filter={filter}
-        onChange={setFilter}
-        onReset={resetFilter}
-        levelCounts={levelCounts}
-        sourceCounts={sourceCounts}
-        strategyOptions={strategies.map((item) => ({
-          id: item.id,
-          name: item.name,
-        }))}
-        autoScroll={autoScroll}
-        onAutoScrollChange={setAutoScroll}
-        onExport={handleExport}
-        onClear={() => {
-          setConfirmOpen(true);
-        }}
-        canExport={logs.length > 0}
-        filterActive={filterActive}
-        totalCount={totalCount}
-        shownCount={logs.length}
-      />
+      <motion.div variants={itemVariants}>
+        <LogFilters
+          filter={filter}
+          onChange={setFilter}
+          onReset={resetFilter}
+          levelCounts={levelCounts}
+          sourceCounts={sourceCounts}
+          strategyOptions={strategies.map((item) => ({
+            id: item.id,
+            name: item.name,
+          }))}
+          autoScroll={autoScroll}
+          onAutoScrollChange={setAutoScroll}
+          onExport={handleExport}
+          onClear={() => {
+            setConfirmOpen(true);
+          }}
+          canExport={logs.length > 0}
+          filterActive={filterActive}
+          totalCount={totalCount}
+          shownCount={logs.length}
+        />
+      </motion.div>
 
-      <div className="border-glass-border bg-glass-bg relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border">
+      <motion.div
+        variants={itemVariants}
+        className="border-glass-border bg-glass-bg relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border"
+      >
         {totalCount === 0 ? (
           <LogsEmptyState variant="empty" />
         ) : logs.length === 0 ? (
@@ -164,7 +178,7 @@ export default function Logs() {
         />
 
         <LogsToast message={toast.message} tone={toast.tone} />
-      </div>
+      </motion.div>
 
       <ClearLogsDialog
         open={confirmOpen}
@@ -174,6 +188,6 @@ export default function Logs() {
         }}
         onConfirm={handleClear}
       />
-    </section>
+    </motion.section>
   );
 }

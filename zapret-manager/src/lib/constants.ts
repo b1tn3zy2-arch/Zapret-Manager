@@ -125,11 +125,16 @@ export const TRAFFIC_COLORS = {
   in: "#22d3ee",
   out: "#a855f7",
 } as const;
-export const TRAFFIC_AXIS_COLOR = "rgba(161, 161, 170, 0.6)";
-export const TRAFFIC_GRID_COLOR = "rgba(255, 255, 255, 0.06)";
+export const TRAFFIC_AXIS_COLOR = "rgba(128, 128, 138, 0.75)";
+export const TRAFFIC_GRID_COLOR_DARK = "rgba(255, 255, 255, 0.04)";
+export const TRAFFIC_GRID_COLOR_LIGHT = "rgba(0, 0, 0, 0.06)";
+export const TRAFFIC_GRID_VERTICAL_DARK = "rgba(255, 255, 255, 0.02)";
+export const TRAFFIC_GRID_VERTICAL_LIGHT = "rgba(0, 0, 0, 0.03)";
 export const TRAFFIC_MAX_HEADROOM = 1.2;
 export const TRAFFIC_MIN_SCALE = 4096;
 export const EWMA_ALPHA = 0.3;
+export const CHART_SMOOTH_TENSION = 0.4;
+export const CHART_PULSE_PERIOD_MS = 2000;
 
 export const MODAL_BACKDROP_BLUR_PX = 24;
 export const MODAL_BACKDROP_SATURATE = 0.8;
@@ -145,6 +150,12 @@ export const CARD_DEAL_DURATION_MS = 400;
 export const CARD_DEAL_STAGGER_MS = 50;
 export const CARD_TILT_CARD_LIMIT = 12;
 export const CARD_TILT_SPRING = { stiffness: 200, damping: 20 } as const;
+
+export const DASHBOARD_STAGGER_MS = 50;
+export const DASHBOARD_ITEM_DURATION_MS = 400;
+export const MODE_SWITCH_THUMB_MS = 250;
+export const COUNT_UP_DURATION_MS = 400;
+export const MONITOR_COUNT_UP_DURATION_MS = 300;
 
 export const RESOURCE_PROGRESS_EVENT = "resource-progress";
 export const STRATEGIES_SUBDIR = "strategies";

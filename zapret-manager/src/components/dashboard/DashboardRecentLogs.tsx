@@ -1,10 +1,15 @@
 import { memo } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRight, ScrollText } from "lucide-react";
 
 import { Button, Text } from "@/components/ui";
 import { GlassPanel } from "@/components/shared/GlassPanel";
-import { RECENT_LOGS_COUNT } from "@/lib/constants";
-import { LOG_LEVEL_CLASSES } from "@/lib/constants";
+import { usePrefersReducedMotion } from "@/hooks/useDeviceTier";
+import {
+  ANIMATION,
+  LOG_LEVEL_CLASSES,
+  RECENT_LOGS_COUNT,
+} from "@/lib/constants";
 import { formatLogTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { useLogsStore } from "@/stores/useLogsStore";
@@ -14,9 +19,28 @@ export interface DashboardRecentLogsProps {
   onOpenAllLogs: () => void;
 }
 
-function RecentRow({ entry }: { entry: LogEntry }) {
+const ROW_STAGGER_S = 0.04;
+const ROW_STAGGER_LIMIT = 0.2;
+
+interface RecentRowProps {
+  entry: LogEntry;
+  index: number;
+  reducedMotion: boolean;
+}
+
+function RecentRow({ entry, index, reducedMotion }: RecentRowProps) {
+  const delay = reducedMotion
+    ? 0
+    : Math.min(index * ROW_STAGGER_S, ROW_STAGGER_LIMIT);
+
   return (
-    <div className="flex items-center gap-2 text-xs">
+    <motion.div
+      initial={reducedMotion ? false : { opacity: 0, y: -8 }}
+      animate={{ opacity: 1, y: 0 }}
+      {...(reducedMotion ? {} : { exit: { opacity: 0 } })}
+      transition={{ duration: ANIMATION.fast, delay }}
+      className="flex items-center gap-2 text-xs"
+    >
       <span className="text-text-tertiary shrink-0 font-mono">
         {formatLogTime(entry.timestamp)}
       </span>
@@ -31,12 +55,13 @@ function RecentRow({ entry }: { entry: LogEntry }) {
       <span className="text-text-secondary truncate" title={entry.message}>
         {entry.message}
       </span>
-    </div>
+    </motion.div>
   );
 }
 
 function DashboardRecentLogs({ onOpenAllLogs }: DashboardRecentLogsProps) {
   const logs = useLogsStore((state) => state.logs);
+  const reducedMotion = usePrefersReducedMotion();
   const recent = logs.slice(-RECENT_LOGS_COUNT).reverse();
 
   return (
@@ -69,9 +94,16 @@ function DashboardRecentLogs({ onOpenAllLogs }: DashboardRecentLogsProps) {
         </div>
       ) : (
         <div className="flex flex-col gap-1.5">
-          {recent.map((entry) => (
-            <RecentRow key={entry.id} entry={entry} />
-          ))}
+          <AnimatePresence initial={false}>
+            {recent.map((entry, index) => (
+              <RecentRow
+                key={entry.id}
+                entry={entry}
+                index={index}
+                reducedMotion={reducedMotion}
+              />
+            ))}
+          </AnimatePresence>
         </div>
       )}
     </GlassPanel>

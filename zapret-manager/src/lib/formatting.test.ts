@@ -63,11 +63,11 @@ describe("lastLatency", () => {
 });
 
 describe("buildSparklinePath", () => {
-  it("строит SVG-путь", () => {
+  it("строит сглаженный SVG-путь", () => {
     const path = buildSparklinePath(POINTS, 100, 40);
 
     expect(path.startsWith("M")).toBe(true);
-    expect(path).toContain("L");
+    expect(path).toContain("C");
   });
 
   it("пустой ввод даёт пустую строку", () => {
