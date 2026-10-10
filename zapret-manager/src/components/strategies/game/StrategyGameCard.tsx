@@ -1,8 +1,9 @@
-import { memo, useCallback } from "react";
-import { motion } from "framer-motion";
+import { memo, useCallback, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { Gamepad2 } from "lucide-react";
 
 import CardStatsBars from "@/components/strategies/game/CardStatsBars";
+import PlayOverlay from "@/components/strategies/game/PlayOverlay";
 import RarityBadge from "@/components/strategies/game/RarityBadge";
 import RarityParticles from "@/components/strategies/game/RarityParticles";
 import StrategyCardBack from "@/components/strategies/game/StrategyCardBack";
@@ -61,6 +62,7 @@ function StrategyGameCardImpl({
   const bloomIntensity = rarity === "legendary" ? "strong" : "subtle";
   const bloom = useBloom(bloomColor, bloomIntensity);
   const chromatic = useChromatic(!motionDisabled);
+  const [isHovered, setIsHovered] = useState(false);
 
   const {
     containerRef,
@@ -75,12 +77,27 @@ function StrategyGameCardImpl({
     glowColor: palette.glow,
   });
 
+  const handleCardLeave = useCallback((): void => {
+    setIsHovered(false);
+    handleMouseLeave();
+  }, [handleMouseLeave]);
+
+  const showOverlay = (isHovered || isRunning) && !flipped;
+
   return (
     <motion.div
       ref={containerRef}
       onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      className="strategy-card relative [perspective:1000px]"
+      onMouseEnter={() => {
+        setIsHovered(true);
+      }}
+      onMouseLeave={handleCardLeave}
+      whileHover={motionDisabled ? { scale: 1 } : { scale: 1.03, zIndex: 10 }}
+      transition={{ duration: 0.2, ease: "easeOut" }}
+      className={cn(
+        "strategy-card relative [perspective:1000px]",
+        isRunning && !motionDisabled && "card-running-pulse"
+      )}
       style={{ width: "100%", aspectRatio: String(CARD_ASPECT_RATIO) }}
     >
       <motion.div
@@ -179,6 +196,19 @@ function StrategyGameCardImpl({
             color={palette.solid}
             disabled={particlesDisabled}
           />
+
+          <AnimatePresence>
+            {showOverlay ? (
+              <PlayOverlay
+                key="play-overlay"
+                isRunning={isRunning}
+                isBusy={isBusy}
+                motionDisabled={motionDisabled}
+                onRun={onRun}
+                onStop={onStop}
+              />
+            ) : null}
+          </AnimatePresence>
         </button>
 
         <div
