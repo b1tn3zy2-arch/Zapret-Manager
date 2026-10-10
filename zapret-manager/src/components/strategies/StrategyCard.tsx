@@ -7,7 +7,10 @@ import {
   formatRelativeTime,
 } from "@/lib/format";
 import { serviceColor } from "@/lib/serviceColors";
-import { useSettingsStore } from "@/stores/useSettingsStore";
+import {
+  selectHasEnabledGame,
+  useSettingsStore,
+} from "@/stores/useSettingsStore";
 import { TECHNIQUE_LABELS, type Strategy, type StrategyStatus } from "@/types";
 
 const STATUS_VARIANTS = {
@@ -45,9 +48,7 @@ export default function StrategyCard({
   const { status } = strategy;
   const isBusy = status === "starting" || status === "stopping";
   const isRunning = status === "running";
-  const outlastEnabled = useSettingsStore(
-    (state) => state.settings.outlastTrials.enabled
-  );
+  const outlastEnabled = useSettingsStore(selectHasEnabledGame);
 
   const modified =
     strategy.modifiedAt === undefined

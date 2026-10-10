@@ -2,7 +2,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { useOutlastInjector } from "@/hooks/useOutlastInjector";
+import { useGamesInjector } from "@/hooks/useGamesInjector";
 import { useLogsStore } from "@/stores/useLogsStore";
 import { useStrategiesStore } from "@/stores/useStrategiesStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
@@ -51,11 +51,13 @@ export function useStrategyRunner(): UseStrategyRunnerResult {
   const setStrategyError = useStrategiesStore((state) => state.setError);
   const addLogs = useLogsStore((state) => state.addLogs);
   const addLog = useLogsStore((state) => state.addLog);
-  const outlast = useSettingsStore((state) => state.settings.outlastTrials);
+  const games = useSettingsStore((state) => state.settings.games);
+  const hasEnabledGames = games.some((game) => game.enabled);
+  const autoRestore = games.some((game) => game.enabled && game.autoRestore);
   const setLastStrategyId = useSettingsStore(
     (state) => state.setLastStrategyId
   );
-  const { inject, restore } = useOutlastInjector();
+  const { injectAll, restoreAll: restore } = useGamesInjector();
   const busy = useRef(false);
 
   useEffect(() => {
@@ -134,10 +136,10 @@ export function useStrategyRunner(): UseStrategyRunnerResult {
           });
         }
 
-        if (outlast.enabled) {
-          const report = await inject(path);
+        if (hasEnabledGames) {
+          const summary = await injectAll(path);
 
-          if (report === null) {
+          if (summary === null) {
             setStatus(strategyId, "idle");
 
             return;
@@ -179,8 +181,8 @@ export function useStrategyRunner(): UseStrategyRunnerResult {
     },
     [
       addLog,
-      inject,
-      outlast.enabled,
+      hasEnabledGames,
+      injectAll,
       setLastStrategyId,
       setPid,
       setStatus,
@@ -210,7 +212,7 @@ export function useStrategyRunner(): UseStrategyRunnerResult {
           strategyId,
         });
 
-        if (outlast.enabled && outlast.autoRestore) {
+        if (hasEnabledGames && autoRestore) {
           await restore(path);
         }
       } catch (caught) {
@@ -227,7 +229,7 @@ export function useStrategyRunner(): UseStrategyRunnerResult {
         setIsStopping(false);
       }
     },
-    [addLog, outlast.autoRestore, outlast.enabled, restore, setPid, setStatus]
+    [addLog, autoRestore, hasEnabledGames, restore, setPid, setStatus]
   );
 
   const checkStatus = useCallback(

@@ -3,13 +3,19 @@ import { z } from "zod";
 import {
   DEFAULT_ADVANCED,
   DEFAULT_APPEARANCE,
+  DEFAULT_GAMES,
   DEFAULT_GENERAL,
   DEFAULT_SETTINGS,
   DEFAULT_STRATEGY_UPDATES,
   DEFAULT_VPN,
 } from "@/lib/defaults";
+import {
+  MAX_GAME_PORTS,
+  MAX_GAMES,
+  MAX_INJECTED_ENTRIES,
+} from "@/lib/settingsLimits";
 import { isValidRepo } from "@/lib/updateUtils";
-import type { AppSettings } from "@/types";
+import type { AppSettings, GameSettings } from "@/types";
 
 export const MIN_TIMEOUT_SEC = 5;
 
@@ -47,19 +53,19 @@ const postProcessingSchema = z.object({
   ),
 });
 
-const outlastTrialsSchema = z.object({
-  enabled: z.boolean().default(DEFAULT_SETTINGS.outlastTrials.enabled),
-  domains: z.array(z.string()).default(DEFAULT_SETTINGS.outlastTrials.domains),
-  ipRanges: z
-    .array(z.string())
-    .default(DEFAULT_SETTINGS.outlastTrials.ipRanges),
-  ports: z
-    .array(z.number().int().min(1).max(65535))
-    .default(DEFAULT_SETTINGS.outlastTrials.ports),
-  autoRestore: z.boolean().default(DEFAULT_SETTINGS.outlastTrials.autoRestore),
-  createBackup: z
-    .boolean()
-    .default(DEFAULT_SETTINGS.outlastTrials.createBackup),
+const gameSchema = z.object({
+  id: z.string().min(1).max(64),
+  name: z.string().min(1).max(64),
+  icon: z.string().min(1).max(32),
+  enabled: z.boolean(),
+  priority: z.boolean(),
+  builtin: z.boolean(),
+  domains: z.array(z.string().max(253)).max(MAX_INJECTED_ENTRIES),
+  ipRanges: z.array(z.string().max(64)).max(MAX_INJECTED_ENTRIES),
+  ports: z.array(z.number().int().min(1).max(65535)).max(MAX_GAME_PORTS),
+  autoRestore: z.boolean(),
+  createBackup: z.boolean(),
+  createdAt: z.number().int().min(0),
 });
 
 const generalSchema = z.object({
@@ -154,13 +160,57 @@ const appSettingsSchema = z.object({
   general: generalSchema.default(DEFAULT_GENERAL),
   appearance: appearanceSchema.default(DEFAULT_APPEARANCE),
   strategyUpdates: strategyUpdatesSchema.default(DEFAULT_STRATEGY_UPDATES),
-  outlastTrials: outlastTrialsSchema.default(DEFAULT_SETTINGS.outlastTrials),
+  games: z.array(gameSchema).max(MAX_GAMES).default(DEFAULT_GAMES),
   vpn: vpnSchema.default(DEFAULT_VPN),
   advanced: advancedSchema.default(DEFAULT_ADVANCED),
 });
 
+const LEGACY_OUTLAST_ID = "outlast-trials";
+
+function migrateLegacyOutlast(
+  value: Record<string, unknown>
+): Record<string, unknown> {
+  if (typeof value.games === "object" && value.games !== null) {
+    return value;
+  }
+
+  const legacy = value.outlastTrials;
+
+  if (typeof legacy !== "object" || legacy === null) {
+    return value;
+  }
+
+  const source = legacy as Record<string, unknown>;
+  const migrated: GameSettings = {
+    id: LEGACY_OUTLAST_ID,
+    name: "Outlast Trials",
+    icon: "Gamepad2",
+    enabled: source.enabled === true,
+    priority: true,
+    builtin: true,
+    domains: Array.isArray(source.domains) ? (source.domains as string[]) : [],
+    ipRanges: Array.isArray(source.ipRanges)
+      ? (source.ipRanges as string[])
+      : [],
+    ports: Array.isArray(source.ports) ? (source.ports as number[]) : [],
+    autoRestore: source.autoRestore !== false,
+    createBackup: source.createBackup !== false,
+    createdAt: 0,
+  };
+
+  const rest = DEFAULT_GAMES.filter((item) => item.id !== LEGACY_OUTLAST_ID);
+  const { outlastTrials: _legacy, ...withoutLegacy } = value;
+
+  return { ...withoutLegacy, games: [migrated, ...rest] };
+}
+
 export function validateSettings(data: unknown): AppSettings {
-  const result = appSettingsSchema.safeParse(data);
+  const prepared =
+    typeof data === "object" && data !== null
+      ? migrateLegacyOutlast(data as Record<string, unknown>)
+      : data;
+
+  const result = appSettingsSchema.safeParse(prepared);
 
   if (!result.success) {
     const first = result.error.issues[0];

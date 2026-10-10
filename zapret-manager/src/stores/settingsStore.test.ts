@@ -62,20 +62,90 @@ describe("useSettingsStore: обновления", () => {
     ).toBe("strong");
   });
 
-  it("обновляет outlast, vpn, advanced и настройки стратегий", () => {
+  it("обновляет игры, vpn, advanced и настройки стратегий", () => {
     const store = useSettingsStore.getState();
 
-    store.updateOutlastTrials({ enabled: true });
+    store.updateGame("outlast-trials", { enabled: true });
     store.updateVpn({ autoConnect: true });
     store.updateAdvanced({ strategyStartTimeoutSec: 15 });
     store.updateStrategyUpdates({ autoCheck: false });
 
     const settings = useSettingsStore.getState().settings;
 
-    expect(settings.outlastTrials.enabled).toBe(true);
+    expect(
+      settings.games.find((game) => game.id === "outlast-trials")?.enabled
+    ).toBe(true);
     expect(settings.vpn.autoConnect).toBe(true);
     expect(settings.advanced.strategyStartTimeoutSec).toBe(15);
     expect(settings.strategyUpdates.autoCheck).toBe(false);
+  });
+
+  it("добавляет и удаляет пользовательские игры", () => {
+    const store = useSettingsStore.getState();
+
+    store.addGame({
+      id: "my-game",
+      name: "Моя игра",
+      icon: "Gamepad2",
+      enabled: false,
+      priority: false,
+      builtin: false,
+      domains: [],
+      ipRanges: [],
+      ports: [],
+      autoRestore: true,
+      createBackup: true,
+      createdAt: 1,
+    });
+
+    expect(
+      useSettingsStore.getState().settings.games.some((g) => g.id === "my-game")
+    ).toBe(true);
+
+    store.removeGame("my-game");
+
+    expect(
+      useSettingsStore.getState().settings.games.some((g) => g.id === "my-game")
+    ).toBe(false);
+  });
+
+  it("не удаляет встроенные игры", () => {
+    const store = useSettingsStore.getState();
+    const before = store.settings.games.length;
+
+    store.removeGame("outlast-trials");
+
+    expect(useSettingsStore.getState().settings.games).toHaveLength(before);
+    expect(
+      useSettingsStore
+        .getState()
+        .settings.games.some((game) => game.id === "outlast-trials")
+    ).toBe(true);
+  });
+
+  it("сбрасывает список игр к дефолтному", () => {
+    const store = useSettingsStore.getState();
+
+    store.addGame({
+      id: "temp",
+      name: "Временная",
+      icon: "Gamepad2",
+      enabled: true,
+      priority: false,
+      builtin: false,
+      domains: [],
+      ipRanges: [],
+      ports: [],
+      autoRestore: true,
+      createBackup: true,
+      createdAt: 1,
+    });
+    store.resetGames();
+
+    const games = useSettingsStore.getState().settings.games;
+
+    expect(games.some((game) => game.id === "temp")).toBe(false);
+    expect(games.every((game) => game.enabled)).toBe(false);
   });
 
   it("заменяет настройки целиком", () => {

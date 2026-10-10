@@ -1,4 +1,5 @@
 import type { PostProcessingSettings } from "./appearance";
+import type { GameSettings } from "./games";
 import type { LogLevel } from "./log";
 import type { VpnProvider } from "./vpn";
 
@@ -9,15 +10,6 @@ export type DensityMode = "compact" | "normal" | "comfy";
 export type Language = "ru" | "en";
 
 export type UpdateChannel = "stable" | "beta" | "nightly";
-
-export interface OutlastTrialsSettings {
-  enabled: boolean;
-  domains: string[];
-  ipRanges: string[];
-  ports: number[];
-  autoRestore: boolean;
-  createBackup: boolean;
-}
 
 export type ConfigKind = "domains" | "ips";
 
@@ -113,7 +105,7 @@ export interface AppSettings {
   general: GeneralSettings;
   appearance: AppearanceSettings;
   strategyUpdates: StrategyUpdateSettings;
-  outlastTrials: OutlastTrialsSettings;
+  games: GameSettings[];
   vpn: VpnSettings;
   advanced: AdvancedSettings;
 }
@@ -122,7 +114,7 @@ export type SettingsSection =
   | "general"
   | "appearance"
   | "strategies"
-  | "outlast"
+  | "games"
   | "vpn"
   | "updates"
   | "advanced";

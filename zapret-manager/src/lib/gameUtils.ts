@@ -1,0 +1,92 @@
+import type { GameSettings } from "@/types";
+
+const MAX_ID_ATTEMPTS = 50;
+
+export function slugifyGameName(name: string): string {
+  const slug = name
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+  return slug === "" ? "game" : slug.slice(0, 48);
+}
+
+export function generateGameId(
+  name: string,
+  existingIds: readonly string[]
+): string {
+  const base = slugifyGameName(name);
+
+  if (!existingIds.includes(base)) {
+    return base;
+  }
+
+  for (let suffix = 2; suffix < MAX_ID_ATTEMPTS; suffix += 1) {
+    const candidate = `${base}-${suffix}`;
+
+    if (!existingIds.includes(candidate)) {
+      return candidate;
+    }
+  }
+
+  return `${base}-${Date.now()}`;
+}
+
+export function countFilled(entries: readonly string[]): number {
+  return entries.filter((entry) => entry.trim() !== "").length;
+}
+
+export function formatGameStats(game: GameSettings): string {
+  const domains = countFilled(game.domains);
+  const ips = countFilled(game.ipRanges);
+  const ports = game.ports.filter((port) => Number.isFinite(port)).length;
+
+  return [
+    `${domains} ${pluralize(domains, domainForms())}`,
+    `${ips} ${pluralize(ips, ipForms())}`,
+    `${ports} ${pluralize(ports, portForms())}`,
+  ].join(" · ");
+}
+
+export function gameHasEntries(game: GameSettings): boolean {
+  return countFilled(game.domains) > 0 || countFilled(game.ipRanges) > 0;
+}
+
+export function enabledGames(games: readonly GameSettings[]): GameSettings[] {
+  return games.filter((game) => game.enabled && gameHasEntries(game));
+}
+
+function pluralize(
+  count: number,
+  forms: readonly [string, string, string]
+): string {
+  const mod100 = count % 100;
+  const mod10 = count % 10;
+
+  if (mod100 >= 11 && mod100 <= 14) {
+    return forms[2];
+  }
+
+  if (mod10 === 1) {
+    return forms[0];
+  }
+
+  if (mod10 >= 2 && mod10 <= 4) {
+    return forms[1];
+  }
+
+  return forms[2];
+}
+
+function domainForms(): readonly [string, string, string] {
+  return ["домен", "домена", "доменов"];
+}
+
+function portForms(): readonly [string, string, string] {
+  return ["порт", "порта", "портов"];
+}
+
+function ipForms(): readonly [string, string, string] {
+  return ["IP", "IP", "IP"];
+}

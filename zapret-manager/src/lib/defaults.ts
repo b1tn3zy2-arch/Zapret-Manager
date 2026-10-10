@@ -1,4 +1,5 @@
 import { DEFAULT_GITHUB_REPO } from "@/lib/constants";
+import { getDefaultGames } from "@/lib/defaultGames";
 
 export const SETTINGS_FILE_NAME = "settings.json";
 export const SETTINGS_SYNC_DEBOUNCE_MS = 400;
@@ -6,37 +7,14 @@ import type {
   AdvancedSettings,
   AppearanceSettings,
   AppSettings,
+  GameSettings,
   GeneralSettings,
-  OutlastTrialsSettings,
   PostProcessingSettings,
   StrategyUpdateSettings,
   VpnSettings,
 } from "@/types";
 
-export const DEFAULT_OUTLAST_TRIALS: OutlastTrialsSettings = {
-  enabled: false,
-  domains: [
-    "steampowered.com",
-    "steamcontent.com",
-    "steamcommunity.com",
-    "steamstatic.com",
-    "steamusercontent.com",
-    "epicgames.com",
-    "easyanticheat.net",
-    "battleye.com",
-    "battleye.net",
-    "gamelift.amazonaws.com",
-    "redbarrelsgames.com",
-    "outlasttrials.com",
-    "cloudfront.net",
-  ],
-  ipRanges: [],
-  ports: [
-    27015, 27016, 27017, 27018, 27019, 27020, 27031, 27036, 3478, 4379, 4380,
-  ],
-  autoRestore: true,
-  createBackup: true,
-};
+export const DEFAULT_GAMES: GameSettings[] = getDefaultGames();
 
 export const DEFAULT_VPN: VpnSettings = {
   enabled: false,
@@ -106,7 +84,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   general: DEFAULT_GENERAL,
   appearance: DEFAULT_APPEARANCE,
   strategyUpdates: DEFAULT_STRATEGY_UPDATES,
-  outlastTrials: DEFAULT_OUTLAST_TRIALS,
+  games: DEFAULT_GAMES,
   vpn: DEFAULT_VPN,
   advanced: DEFAULT_ADVANCED,
 };

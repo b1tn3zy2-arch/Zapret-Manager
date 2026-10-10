@@ -7,12 +7,12 @@ describe("SETTINGS_SECTIONS", () => {
     expect(SETTINGS_SECTIONS).not.toContain("about");
   });
 
-  it("содержит семь секций в ожидаемом порядке", () => {
+  it("содержит шесть секций в ожидаемом порядке", () => {
     expect(SETTINGS_SECTIONS).toEqual([
       "general",
       "appearance",
       "strategies",
-      "outlast",
+      "games",
       "vpn",
       "updates",
       "advanced",
@@ -31,12 +31,13 @@ describe("isSettingsSection", () => {
     }
   });
 
-  it("отклоняет удалённую секцию about", () => {
+  it("отклоняет удалённые секции", () => {
     expect(isSettingsSection("about")).toBe(false);
+    expect(isSettingsSection("outlast")).toBe(false);
   });
 
   it("отклоняет неизвестные значения", () => {
-    expect(isSettingsSection("games")).toBe(false);
+    expect(isSettingsSection("proxy")).toBe(false);
     expect(isSettingsSection("")).toBe(false);
   });
 });

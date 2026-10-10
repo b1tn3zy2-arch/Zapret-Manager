@@ -7,13 +7,14 @@ import {
 } from "@tauri-apps/plugin-fs";
 
 import { SETTINGS_FILE_NAME } from "@/lib/defaults";
+import { getDefaultGames } from "@/lib/defaultGames";
 import { validateSettings } from "@/lib/settingsSchema";
 import type {
   AdvancedSettings,
   AppearanceSettings,
   AppSettings,
+  GameSettings,
   GeneralSettings,
-  OutlastTrialsSettings,
   StrategyUpdateSettings,
   VpnSettings,
 } from "@/types";
@@ -49,6 +50,14 @@ function stringList(value: unknown): string[] {
     : [];
 }
 
+function gameList(value: unknown): GameSettings[] | undefined {
+  if (!Array.isArray(value)) {
+    return undefined;
+  }
+
+  return value.filter(isRecord).map((item) => section<GameSettings>(item));
+}
+
 function parseSections(parsed: Record<string, unknown>): AppSettings {
   const updates = isRecord(parsed.strategyUpdates)
     ? parsed.strategyUpdates
@@ -65,7 +74,7 @@ function parseSections(parsed: Record<string, unknown>): AppSettings {
       lastCheckAt:
         typeof updates.lastCheckAt === "number" ? updates.lastCheckAt : null,
     },
-    outlastTrials: section<OutlastTrialsSettings>(parsed.outlastTrials),
+    games: gameList(parsed.games) ?? getDefaultGames(),
     vpn: section<VpnSettings>(parsed.vpn),
     advanced: section<AdvancedSettings>(parsed.advanced),
   };

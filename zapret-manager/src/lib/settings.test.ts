@@ -69,7 +69,57 @@ describe("validateSettings", () => {
   it("значение по умолчанию совпадает с DEFAULT_SETTINGS", () => {
     const settings = validateSettings({});
 
-    expect(settings.outlastTrials).toEqual(DEFAULT_SETTINGS.outlastTrials);
+    expect(settings.games).toEqual(DEFAULT_SETTINGS.games);
+  });
+
+  it("переносит прежние настройки Outlast Trials в список игр", () => {
+    const settings = validateSettings({
+      outlastTrials: {
+        enabled: true,
+        domains: ["outlasttrials.com"],
+        ipRanges: ["203.0.113.0/24"],
+        ports: [27015],
+        autoRestore: false,
+        createBackup: true,
+      },
+    });
+
+    const outlast = settings.games.find((game) => game.id === "outlast-trials");
+
+    expect(outlast).toBeDefined();
+    expect(outlast?.enabled).toBe(true);
+    expect(outlast?.priority).toBe(true);
+    expect(outlast?.builtin).toBe(true);
+    expect(outlast?.domains).toEqual(["outlasttrials.com"]);
+    expect(outlast?.ipRanges).toEqual(["203.0.113.0/24"]);
+    expect(outlast?.ports).toEqual([27015]);
+    expect(outlast?.autoRestore).toBe(false);
+    expect(settings.games.length).toBe(DEFAULT_SETTINGS.games.length);
+  });
+
+  it("не трогает готовый список игр", () => {
+    const settings = validateSettings({
+      games: [
+        {
+          id: "my-game",
+          name: "Моя игра",
+          icon: "Gamepad2",
+          enabled: false,
+          priority: false,
+          builtin: false,
+          domains: ["example.com"],
+          ipRanges: [],
+          ports: [],
+          autoRestore: true,
+          createBackup: true,
+          createdAt: 10,
+        },
+      ],
+      outlastTrials: { enabled: true, domains: ["legacy.com"] },
+    });
+
+    expect(settings.games).toHaveLength(1);
+    expect(settings.games[0]?.id).toBe("my-game");
   });
 });
 

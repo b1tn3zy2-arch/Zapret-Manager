@@ -13,7 +13,10 @@ import { CARD_ASPECT_RATIO, CARD_FLIP_DURATION_MS } from "@/lib/constants";
 import { capitalizeService } from "@/lib/format";
 import { getRarityColor } from "@/lib/rarity";
 import { cn } from "@/lib/utils";
-import { useSettingsStore } from "@/stores/useSettingsStore";
+import {
+  selectHasEnabledGame,
+  useSettingsStore,
+} from "@/stores/useSettingsStore";
 import type { Strategy, StrategyCard } from "@/types";
 
 export interface StrategyGameCardProps {
@@ -53,9 +56,7 @@ function StrategyGameCardImpl({
   const isRunning = strategy.status === "running";
   const isBusy =
     strategy.status === "starting" || strategy.status === "stopping";
-  const outlastEnabled = useSettingsStore(
-    (state) => state.settings.outlastTrials.enabled
-  );
+  const outlastEnabled = useSettingsStore(selectHasEnabledGame);
   const bloomColor = rarity === "legendary" ? "primary" : "secondary";
   const bloomIntensity = rarity === "legendary" ? "strong" : "subtle";
   const bloom = useBloom(bloomColor, bloomIntensity);

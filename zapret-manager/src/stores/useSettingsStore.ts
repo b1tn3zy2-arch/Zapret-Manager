@@ -10,14 +10,15 @@ import {
   DEFAULT_STRATEGY_UPDATES,
   DEFAULT_VPN,
 } from "@/lib/defaults";
+import { getDefaultGames } from "@/lib/defaultGames";
 import { readSettingsFile, writeSettingsFile } from "@/lib/storage";
 import { toErrorMessage } from "@/lib/utils";
 import type {
   AdvancedSettings,
   AppearanceSettings,
   AppSettings,
+  GameSettings,
   GeneralSettings,
-  OutlastTrialsSettings,
   PostProcessingSettings,
   SaveState,
   SettingsSection,
@@ -44,10 +45,10 @@ function mergeSettings(fromFile: AppSettings): AppSettings {
       ...fromFile.strategyUpdates,
       ignoredVersions: fromFile.strategyUpdates?.ignoredVersions ?? [],
     },
-    outlastTrials: {
-      ...DEFAULT_SETTINGS.outlastTrials,
-      ...fromFile.outlastTrials,
-    },
+    games:
+      fromFile.games === undefined
+        ? getDefaultGames()
+        : fromFile.games.map((game) => ({ ...game })),
     vpn: { ...DEFAULT_VPN, ...fromFile.vpn },
     advanced: { ...DEFAULT_ADVANCED, ...fromFile.advanced },
   };
@@ -64,8 +65,8 @@ function resetSection(settings: AppSettings, section: SettingsSection): void {
     case "strategies":
       settings.advanced = structuredClone(DEFAULT_ADVANCED);
       break;
-    case "outlast":
-      settings.outlastTrials = structuredClone(DEFAULT_SETTINGS.outlastTrials);
+    case "games":
+      settings.games = getDefaultGames();
       break;
     case "vpn":
       settings.vpn = structuredClone(DEFAULT_VPN);
@@ -90,7 +91,10 @@ export interface SettingsStoreState {
   updateGeneral: (patch: Partial<GeneralSettings>) => void;
   updateAppearance: (patch: Partial<AppearanceSettings>) => void;
   updatePostProcessing: (patch: Partial<PostProcessingSettings>) => void;
-  updateOutlastTrials: (patch: Partial<OutlastTrialsSettings>) => void;
+  updateGame: (id: string, patch: Partial<GameSettings>) => void;
+  addGame: (game: GameSettings) => void;
+  removeGame: (id: string) => void;
+  resetGames: () => void;
   updateVpn: (patch: Partial<VpnSettings>) => void;
   updateAdvanced: (patch: Partial<AdvancedSettings>) => void;
   updateStrategyUpdates: (patch: Partial<StrategyUpdateSettings>) => void;
@@ -133,9 +137,30 @@ export const useSettingsStore = create<SettingsStoreState>()(
           Object.assign(state.settings.appearance.postProcessing, patch);
         }),
 
-      updateOutlastTrials: (patch) =>
+      updateGame: (id, patch) =>
         set((state) => {
-          Object.assign(state.settings.outlastTrials, patch);
+          const game = state.settings.games.find((item) => item.id === id);
+
+          if (game !== undefined) {
+            Object.assign(game, patch);
+          }
+        }),
+
+      addGame: (game) =>
+        set((state) => {
+          state.settings.games.push(game);
+        }),
+
+      removeGame: (id) =>
+        set((state) => {
+          state.settings.games = state.settings.games.filter(
+            (item) => item.builtin || item.id !== id
+          );
+        }),
+
+      resetGames: () =>
+        set((state) => {
+          state.settings.games = getDefaultGames();
         }),
 
       updateVpn: (patch) =>
@@ -251,3 +276,6 @@ export const useSettingsStore = create<SettingsStoreState>()(
 
 export const selectSettings = (state: SettingsStoreState): AppSettings =>
   state.settings;
+
+export const selectHasEnabledGame = (state: SettingsStoreState): boolean =>
+  state.settings.games.some((game) => game.enabled);

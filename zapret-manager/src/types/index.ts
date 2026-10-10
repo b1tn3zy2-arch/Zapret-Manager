@@ -1,5 +1,6 @@
 export * from "./appearance";
 export * from "./game";
+export * from "./games";
 export * from "./log";
 export * from "./monitor";
 export * from "./resources";

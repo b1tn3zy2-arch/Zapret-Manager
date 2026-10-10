@@ -10,19 +10,20 @@ import {
   selectStrategies,
   useStrategiesStore,
 } from "@/stores/useStrategiesStore";
-import { useSettingsStore } from "@/stores/useSettingsStore";
+import {
+  selectHasEnabledGame,
+  useSettingsStore,
+} from "@/stores/useSettingsStore";
 import type { CollectionSummary, SortMode, StrategyCard } from "@/types";
 
 function useStrategyCards(): StrategyCard[] {
   const strategies = useStrategiesStore(selectStrategies);
-  const outlastEnabled = useSettingsStore(
-    (state) => state.settings.outlastTrials.enabled
-  );
+  const hasEnabledGame = useSettingsStore(selectHasEnabledGame);
 
   return useMemo(
     () =>
-      strategies.map((strategy) => buildStrategyCard(strategy, outlastEnabled)),
-    [strategies, outlastEnabled]
+      strategies.map((strategy) => buildStrategyCard(strategy, hasEnabledGame)),
+    [strategies, hasEnabledGame]
   );
 }
 

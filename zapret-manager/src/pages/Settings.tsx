@@ -1,8 +1,8 @@
 import AdvancedSection from "@/components/settings/AdvancedSection";
 import AppearanceSection from "@/components/settings/AppearanceSection";
 import GeneralSection from "@/components/settings/GeneralSection";
+import GamesSection from "@/components/settings/GamesSection";
 import ImportExportButtons from "@/components/settings/ImportExportButtons";
-import OutlastTrialsSection from "@/components/settings/OutlastTrialsSection";
 import SaveIndicator, {
   SaveErrorIndicator,
 } from "@/components/settings/SaveIndicator";
@@ -60,8 +60,8 @@ function renderSection(section: SettingsSection) {
       return <AppearanceSection />;
     case "strategies":
       return <StrategiesSection />;
-    case "outlast":
-      return <OutlastTrialsSection />;
+    case "games":
+      return <GamesSection />;
     case "vpn":
       return <VpnSection />;
     case "updates":
