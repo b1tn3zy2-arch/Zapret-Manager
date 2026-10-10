@@ -7,7 +7,7 @@ use crate::error::{AppError, AppResult};
 
 const MAX_SUBSCRIPTION_BYTES: usize = 4 * 1024 * 1024;
 const MAX_SERVERS: usize = 2_000;
-const SUPPORTED_SCHEMES: [&str; 4] = ["vless", "vmess", "trojan", "ss"];
+const SUPPORTED_SCHEMES: [&str; 6] = ["vless", "vmess", "trojan", "ss", "socks", "socks5"];
 
 #[derive(Debug, Clone, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
@@ -83,6 +83,7 @@ pub fn parse_link(link: &str) -> Option<SubscriptionServer> {
         "ss" => parse_shadowsocks(link)?,
         "vless" => parse_standard(link, "vless")?,
         "trojan" => parse_standard(link, "trojan")?,
+        "socks" | "socks5" => parse_standard(link, "socks")?,
         _ => return None,
     };
 

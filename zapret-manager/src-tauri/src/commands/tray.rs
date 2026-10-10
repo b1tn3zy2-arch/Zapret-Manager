@@ -1,8 +1,8 @@
 use serde::{Deserialize, Serialize};
 
-use tauri::Manager;
+use tauri::{Emitter, Manager};
 
-use crate::error::AppResult;
+use crate::error::{AppError, AppResult};
 use crate::tray::{NotificationKind, TrayConfig, TrayState};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -60,6 +60,89 @@ pub async fn quit_app(app: tauri::AppHandle) -> AppResult<()> {
 #[tauri::command]
 pub fn show_tray_window(app: tauri::AppHandle) {
     crate::tray::show_window(&app);
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TrayMenuSnapshot {
+    pub state: String,
+    pub active_strategy: Option<String>,
+    pub vpn_name: Option<String>,
+}
+
+#[tauri::command]
+pub fn tray_menu_snapshot(app: tauri::AppHandle) -> TrayMenuSnapshot {
+    let (state, active_strategy, vpn_name) = crate::tray::snapshot(&app);
+
+    TrayMenuSnapshot {
+        state: match state {
+            TrayState::Idle => "idle",
+            TrayState::Connecting => "connecting",
+            TrayState::Connected => "connected",
+            TrayState::Vpn => "vpn",
+            TrayState::Error => "error",
+        }
+        .to_string(),
+        active_strategy,
+        vpn_name,
+    }
+}
+
+#[tauri::command]
+pub fn tray_menu_hide(app: tauri::AppHandle) {
+    crate::tray_menu::hide(&app);
+}
+
+#[tauri::command]
+pub fn tray_menu_action(app: tauri::AppHandle, action: String) -> AppResult<()> {
+    crate::tray_menu::hide(&app);
+
+    match action.as_str() {
+        "open" => {
+            crate::tray::show_window(&app);
+
+            Ok(())
+        }
+        "run" => {
+            crate::tray::show_window(&app);
+            let _ = app.emit(crate::tray::EVENT_QUICK_RUN, ());
+
+            Ok(())
+        }
+        "stop" => {
+            let _ = app.emit(crate::tray::EVENT_STOP_STRATEGY, ());
+
+            Ok(())
+        }
+        "dashboard" | "strategies" | "logs" | "settings" => {
+            crate::tray::show_window(&app);
+            let _ = app.emit(navigation_event(&action), ());
+
+            Ok(())
+        }
+        "updates" => {
+            crate::tray::show_window(&app);
+            let _ = app.emit(crate::tray::EVENT_CHECK_UPDATES, ());
+
+            Ok(())
+        }
+        "quit" => {
+            crate::window_behavior::begin_quit(&app);
+            app.exit(0);
+
+            Ok(())
+        }
+        other => Err(AppError::custom(format!("Неизвестное действие меню: {other}"))),
+    }
+}
+
+fn navigation_event(action: &str) -> &'static str {
+    match action {
+        "strategies" => crate::tray::EVENT_NAVIGATE_STRATEGIES,
+        "logs" => crate::tray::EVENT_NAVIGATE_LOGS,
+        "settings" => crate::tray::EVENT_NAVIGATE_SETTINGS,
+        _ => crate::tray::EVENT_NAVIGATE_DASHBOARD,
+    }
 }
 
 fn clean(value: Option<String>) -> Option<String> {

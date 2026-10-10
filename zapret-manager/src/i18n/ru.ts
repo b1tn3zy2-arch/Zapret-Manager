@@ -272,6 +272,18 @@ export const ru = {
     },
   },
   dashboard: {
+    tray: {
+      disconnected: "Отключено",
+      active: "Активно",
+      run: "Запустить последнюю стратегию",
+      stop: "Остановить",
+      dashboard: "Главная",
+      strategies: "Стратегии",
+      logs: "Логи",
+      settings: "Настройки",
+      checkUpdates: "Проверить обновления",
+      quit: "Выход",
+    },
     modeSwitcher: {
       ariaLabel: "Переключить режим обхода",
       dpi: "Обход",
@@ -316,10 +328,11 @@ export const ru = {
       settingsPanel: "Настройки VPN",
       closeSettings: "Закрыть настройки VPN",
       addLink: "Добавить ссылку",
-      addLinkTitle: "Ссылка на подписку",
+      addLinkTitle: "Ссылка или подписка",
       addLinkHint:
-        "Вставьте ссылку на подписку VPN, приложение загрузит список серверов",
-      subscriptionUrl: "Ссылка подписки",
+        "Поддерживаются https-подписки и ссылки vless, vmess, trojan, ss, socks",
+      subscriptionUrl: "Ссылка или подписка",
+      linkPlaceholder: "https://… или vless://…",
       subscriptionLoad: "Загрузить серверы",
       subscriptionLoading: "Загрузка…",
       subscriptionClear: "Очистить подписку",

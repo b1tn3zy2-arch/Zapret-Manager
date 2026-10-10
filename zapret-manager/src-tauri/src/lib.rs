@@ -7,6 +7,7 @@ mod logger;
 mod process_manager;
 pub mod security;
 pub mod tray;
+mod tray_menu;
 mod window_behavior;
 mod winapi_helpers;
 
@@ -76,7 +77,7 @@ commands::system::get_system_info,
             commands::vpn::detect_wireguard_command,
             commands::vpn::import_vpn_config,
             commands::vpn::import_vpn_config_text,
-            commands::vpn_core::fetch_vpn_subscription,
+            commands::vpn_core::import_vpn_source,
             commands::vpn_core::install_vpn_core,
             commands::vpn_core::vpn_core_status,
             commands::vpn_core::connect_vpn_server,
@@ -97,6 +98,9 @@ commands::system::get_system_info,
             commands::tray::show_notification,
             commands::tray::toggle_tray_window,
             commands::tray::show_tray_window,
+            commands::tray::tray_menu_snapshot,
+            commands::tray::tray_menu_hide,
+            commands::tray::tray_menu_action,
             commands::tray::quit_app,
             window_behavior::set_minimize_to_tray_cmd,
             commands::resources_commands::init_resources,
@@ -138,6 +142,12 @@ commands::resources_commands::read_license_text,
             Ok(())
         })
         .on_window_event(|window, event| {
+            if window.label() == tray_menu::MENU_WINDOW_LABEL {
+                tray_menu::handle_window_event(window, event);
+
+                return;
+            }
+
             let handle = window.app_handle().clone();
 
             window_behavior::handle_window_event(&handle, event, || {

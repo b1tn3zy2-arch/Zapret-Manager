@@ -1,0 +1,12 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "tray-menu",
+  "description": "Права окна контекстного меню трея: показать окно, скрыться, отправить команду",
+  "windows": ["tray-menu"],
+  "permissions": [
+    "core:default",
+    "core:event:default",
+    "core:window:allow-hide",
+    "core:window:allow-set-focus"
+  ]
+}

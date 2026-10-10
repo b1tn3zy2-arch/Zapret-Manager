@@ -248,8 +248,9 @@ fn handle_tray_event(
         TrayIconEvent::Click {
             button: tauri::tray::MouseButton::Right,
             button_state: tauri::tray::MouseButtonState::Up,
+            position,
             ..
-        } => show_window(app),
+        } => crate::tray_menu::show(app, position),
         TrayIconEvent::Click {
             button: tauri::tray::MouseButton::Middle,
             button_state: tauri::tray::MouseButtonState::Up,

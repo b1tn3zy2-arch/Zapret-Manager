@@ -37,10 +37,15 @@ export async function reconcileTunnels(): Promise<void> {
   await secureInvoke<number>("reconcile_vpn_tunnels");
 }
 
-export async function fetchSubscription(
-  url: string
-): Promise<SubscriptionServer[]> {
-  return secureInvoke<SubscriptionServer[]>("fetch_vpn_subscription", { url });
+export interface VpnSourceResult {
+  subscriptionUrl: string | null;
+  servers: SubscriptionServer[];
+}
+
+export async function importVpnSource(
+  text: string
+): Promise<VpnSourceResult> {
+  return secureInvoke<VpnSourceResult>("import_vpn_source", { text });
 }
 
 export async function installVpnCore(): Promise<boolean> {

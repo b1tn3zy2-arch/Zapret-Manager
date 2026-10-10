@@ -30,21 +30,21 @@ export function useVpnCore(): UseVpnCoreResult {
   }, [refreshStatus]);
 
   const loadServers = useCallback(
-    async (url: string): Promise<void> => {
+    async (text: string): Promise<void> => {
       const store = useVpnCoreStore.getState();
 
       store.setLoading(true);
       store.setError(null);
 
       try {
-        const servers = await commands.fetchSubscription(url);
+        const result = await commands.importVpnSource(text);
 
-        store.setServers(servers);
-        store.setSubscriptionUrl(url);
+        store.setServers(result.servers);
+        store.setSubscriptionUrl(result.subscriptionUrl ?? "");
         addLog({
           level: "success",
           source: "vpn",
-          message: `Подписка загружена: серверов ${servers.length}`,
+          message: `Загружено серверов: ${result.servers.length}`,
         });
       } catch (caught) {
         const message = toErrorMessage(caught);
@@ -53,7 +53,7 @@ export function useVpnCore(): UseVpnCoreResult {
         addLog({
           level: "error",
           source: "vpn",
-          message: `Подписка не загружена: ${message}`,
+          message: `Ссылка не обработана: ${message}`,
         });
       } finally {
         useVpnCoreStore.getState().setLoading(false);

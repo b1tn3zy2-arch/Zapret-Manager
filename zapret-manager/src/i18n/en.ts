@@ -271,6 +271,18 @@ export const en: Dictionary = {
     },
   },
   dashboard: {
+    tray: {
+      disconnected: "Disconnected",
+      active: "Active",
+      run: "Run last strategy",
+      stop: "Stop",
+      dashboard: "Dashboard",
+      strategies: "Strategies",
+      logs: "Logs",
+      settings: "Settings",
+      checkUpdates: "Check for updates",
+      quit: "Quit",
+    },
     modeSwitcher: {
       ariaLabel: "Switch bypass mode",
       dpi: "Bypass",
@@ -314,10 +326,11 @@ export const en: Dictionary = {
       settingsPanel: "VPN settings",
       closeSettings: "Close VPN settings",
       addLink: "Add link",
-      addLinkTitle: "Subscription link",
+      addLinkTitle: "Link or subscription",
       addLinkHint:
-        "Paste a VPN subscription link and the app will load the server list",
-      subscriptionUrl: "Subscription URL",
+        "Supports https subscriptions and vless, vmess, trojan, ss, socks links",
+      subscriptionUrl: "Link or subscription",
+      linkPlaceholder: "https://… or vless://…",
       subscriptionLoad: "Load servers",
       subscriptionLoading: "Loading…",
       subscriptionClear: "Clear subscription",

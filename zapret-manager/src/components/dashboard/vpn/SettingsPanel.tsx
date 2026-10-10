@@ -69,7 +69,7 @@ export default function SettingsPanel({ open, onClose }: SettingsPanelProps) {
         <div className="flex flex-col gap-2">
           <Input
             label={t("dashboard.vpn.subscriptionUrl")}
-            placeholder="https://example.com/api/sub/..."
+            placeholder={t("dashboard.vpn.linkPlaceholder")}
             value={draft}
             onChange={(event) => {
               setDraft(event.target.value);

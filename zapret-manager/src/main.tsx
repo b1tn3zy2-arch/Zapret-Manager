@@ -7,6 +7,7 @@ import "@/styles/container-queries.css";
 
 import App from "@/app/App";
 import Providers from "@/app/providers";
+import TrayMenuRoot from "@/tray/TrayMenuRoot";
 import { mark } from "@/lib/perf";
 
 const container = document.getElementById("root");
@@ -17,10 +18,29 @@ if (container === null) {
 
 mark("app:boot");
 
+document.addEventListener("contextmenu", (event) => {
+  const target = event.target;
+
+  if (
+    target instanceof HTMLElement &&
+    (target.closest("input, textarea, [contenteditable='true']") !== null ||
+      window.getSelection()?.toString() !== "")
+  ) {
+    return;
+  }
+
+  event.preventDefault();
+});
+
+const isTrayView =
+  new URLSearchParams(window.location.search).get("view") === "tray";
+
+if (isTrayView) {
+  document.documentElement.dataset.view = "tray";
+}
+
 ReactDOM.createRoot(container).render(
   <React.StrictMode>
-    <Providers>
-      <App />
-    </Providers>
+    <Providers>{isTrayView ? <TrayMenuRoot /> : <App />}</Providers>
   </React.StrictMode>
 );

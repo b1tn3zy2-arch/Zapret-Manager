@@ -37,11 +37,50 @@ pub struct XrayStatus {
     pub pid: Option<u32>,
 }
 
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct VpnSourceResult {
+    pub subscription_url: Option<String>,
+    pub servers: Vec<SubscriptionServer>,
+}
+
 #[tauri::command]
-pub async fn fetch_vpn_subscription(
-    url: String,
-) -> AppResult<Vec<SubscriptionServer>> {
-    vpn_subscription::fetch_subscription(&url).await
+pub async fn import_vpn_source(text: String) -> AppResult<VpnSourceResult> {
+    let trimmed = text.trim();
+
+    if trimmed.is_empty() {
+        return Err(AppError::custom("Вставьте ссылку на подписку или конфиг"));
+    }
+
+    let lower = trimmed.to_ascii_lowercase();
+
+    if lower.starts_with("http://") || lower.starts_with("https://") {
+        let servers = vpn_subscription::fetch_subscription(trimmed).await?;
+
+        return Ok(VpnSourceResult {
+            subscription_url: Some(trimmed.to_string()),
+            servers,
+        });
+    }
+
+    if lower.contains("hysteria2://") || lower.contains("hy2://") {
+        return Err(AppError::custom(
+            "Hysteria2 пока не поддерживается ядром Xray",
+        ));
+    }
+
+    let servers = vpn_subscription::parse_subscription(trimmed);
+
+    if servers.is_empty() {
+        return Err(AppError::custom(
+            "Не найдено ни одной поддерживаемой ссылки",
+        ));
+    }
+
+    Ok(VpnSourceResult {
+        subscription_url: None,
+        servers,
+    })
 }
 
 #[tauri::command]

@@ -50,24 +50,26 @@ export function guessCountryCode(endpoint: string): CountryCode | null {
   return leading === undefined ? null : toCountryCode(leading);
 }
 
-export function validateSubscriptionUrl(url: string): string | null {
-  const trimmed = url.trim();
+const LINK_SCHEMES = /^(vless|vmess|trojan|ss|socks|socks5):\/\//i;
+
+export function validateVpnSource(text: string): string | null {
+  const trimmed = text.trim();
 
   if (trimmed === "") {
-    return "Вставьте ссылку на подписку";
+    return "Вставьте ссылку на подписку или конфиг";
   }
 
-  if (trimmed.length > 2_048) {
+  if (trimmed.length > 8 * 1024) {
     return "Ссылка слишком длинная";
   }
 
-  if (/\s/.test(trimmed)) {
-    return "Ссылка содержит пробелы";
+  if (/^https?:\/\//i.test(trimmed) || LINK_SCHEMES.test(trimmed)) {
+    return null;
   }
 
-  if (!/^https?:\/\//i.test(trimmed)) {
-    return "Ссылка должна начинаться с https://";
+  if (trimmed.includes("://")) {
+    return null;
   }
 
-  return null;
+  return "Ожидается https-адрес подписки или ссылка vless, vmess, trojan, ss";
 }

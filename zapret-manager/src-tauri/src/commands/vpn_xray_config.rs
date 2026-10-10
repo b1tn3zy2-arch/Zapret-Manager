@@ -17,6 +17,7 @@ pub fn build_config(
         "vmess" => vmess_outbound(server)?,
         "trojan" => trojan_outbound(server)?,
         "ss" => shadowsocks_outbound(server)?,
+        "socks" => socks_outbound(server)?,
         other => {
             return Err(AppError::custom(format!("Протокол {other} не поддержан")));
         }
@@ -184,6 +185,25 @@ fn shadowsocks_outbound(server: &SubscriptionServer) -> AppResult<Value> {
     Ok(json!({
         "tag": "proxy",
         "protocol": "shadowsocks",
+        "settings": { "servers": [entry] },
+        "streamSettings": { "network": "tcp" }
+    }))
+}
+
+fn socks_outbound(server: &SubscriptionServer) -> AppResult<Value> {
+    let credentials = credentials_of(&server.link, "socks://")
+        .or_else(|_| credentials_of(&server.link, "socks5://"))
+        .unwrap_or_default();
+
+    let mut entry = server_address(server);
+
+    if let Some((user, password)) = credentials.split_once(':') {
+        entry["users"] = json!([{ "user": user, "pass": password }]);
+    }
+
+    Ok(json!({
+        "tag": "proxy",
+        "protocol": "socks",
         "settings": { "servers": [entry] },
         "streamSettings": { "network": "tcp" }
     }))

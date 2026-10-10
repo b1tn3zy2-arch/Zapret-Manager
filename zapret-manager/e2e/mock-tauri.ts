@@ -217,7 +217,17 @@ export async function mockTauri(
           pid: null,
         }),
         install_vpn_core: () => true,
-        fetch_vpn_subscription: () => [],
+        import_vpn_source: () => ({
+          subscriptionUrl: null,
+          servers: [],
+        }),
+        tray_menu_snapshot: () => ({
+          state: "idle",
+          activeStrategy: null,
+          vpnName: null,
+        }),
+        tray_menu_action: () => null,
+        tray_menu_hide: () => null,
         connect_vpn_server: () => ({
           installed: true,
           running: true,

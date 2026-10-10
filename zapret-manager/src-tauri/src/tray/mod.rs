@@ -15,9 +15,9 @@ pub const EVENT_NAVIGATE_LOGS: &str = "navigate-logs";
 pub const EVENT_NAVIGATE_SETTINGS: &str = "navigate-settings";
 
 pub use runtime::{
-    apply_state, configure, create_tray, register, set_icon_state, show_window, start_animation,
-    stop_animation, toggle_window, tray_handle, update_tooltip_and_menu, TrayStateHolder,
-    ANIMATION_DURATION_MS, ANIMATION_INTERVAL_MS, TRAY_ID, WINDOW_LABEL,
+    apply_state, configure, create_tray, register, set_icon_state, show_window, snapshot,
+    start_animation, stop_animation, toggle_window, tray_handle, update_tooltip_and_menu,
+    TrayStateHolder, ANIMATION_DURATION_MS, ANIMATION_INTERVAL_MS, TRAY_ID, WINDOW_LABEL,
 };
 
 pub const EVENT_RUN_STRATEGY: &str = "tray-run-strategy";

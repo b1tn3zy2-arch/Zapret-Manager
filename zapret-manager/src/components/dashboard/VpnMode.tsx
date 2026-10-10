@@ -11,7 +11,7 @@ import { useI18n } from "@/i18n";
 import { useVpnCore } from "@/hooks/useVpnCore";
 import { useSubscriptionPings } from "@/hooks/useSubscriptionPings";
 import { useVpnCoreStore } from "@/stores/useVpnCoreStore";
-import { validateSubscriptionUrl } from "@/lib/vpnEndpoint";
+import { validateVpnSource } from "@/lib/vpnEndpoint";
 import type { SubscriptionServer } from "@/types";
 
 export default function VpnMode() {
@@ -78,7 +78,7 @@ export default function VpnMode() {
   }, [t]);
 
   const handleApplyLink = useCallback((): void => {
-    const check = validateSubscriptionUrl(draftLink);
+    const check = validateVpnSource(draftLink);
 
     if (check !== null) {
       setLinkError(check);
@@ -157,7 +157,7 @@ export default function VpnMode() {
         <div className="flex flex-col gap-4">
           <Input
             label={t("dashboard.vpn.subscriptionUrl")}
-            placeholder="https://example.com/api/sub/..."
+            placeholder={t("dashboard.vpn.linkPlaceholder")}
             value={draftLink}
             error={linkError !== null}
             errorMessage={linkError ?? undefined}
