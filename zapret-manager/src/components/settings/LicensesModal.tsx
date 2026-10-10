@@ -24,39 +24,39 @@ interface LicenseEntry {
 const LICENSES: LicenseEntry[] = [
   {
     id: "zapret",
-    label: "settings.licenses.item.zapret",
+    label: "licenses.item.zapret",
     license: "MIT",
     url: "https://github.com/bol-van/zapret",
     file: "LICENSE-zapret.txt",
   },
   {
     id: "zapretNotes",
-    label: "settings.licenses.item.zapretNotes",
+    label: "licenses.item.zapretNotes",
     license: "MIT",
     url: "https://github.com/Flowseal/zapret-discord-youtube",
     file: "README-zapret.md",
   },
   {
     id: "tauri",
-    label: "settings.licenses.item.tauri",
+    label: "licenses.item.tauri",
     license: "MIT / Apache-2.0",
     url: "https://github.com/tauri-apps/tauri",
   },
   {
     id: "react",
-    label: "settings.licenses.item.react",
+    label: "licenses.item.react",
     license: "MIT",
     url: "https://github.com/facebook/react",
   },
   {
     id: "lucide",
-    label: "settings.licenses.item.lucide",
+    label: "licenses.item.lucide",
     license: "ISC",
     url: "https://github.com/lucide-icons/lucide",
   },
   {
     id: "framerMotion",
-    label: "settings.licenses.item.framerMotion",
+    label: "licenses.item.framerMotion",
     license: "MIT",
     url: "https://github.com/motiondivision/motion",
   },
@@ -90,8 +90,8 @@ function LicensesModal({ open, onClose }: LicensesModalProps) {
     <Modal
       open={open}
       onClose={onClose}
-      title={t("settings.licenses.title")}
-      description={t("settings.licenses.description")}
+      title={t("licenses.title")}
+      description={t("licenses.description")}
       size="lg"
     >
       <div className="flex flex-col gap-3">
@@ -119,7 +119,7 @@ function LicensesModal({ open, onClose }: LicensesModalProps) {
               href={entry.url}
               target="_blank"
               rel="noreferrer noopener"
-              aria-label={t("settings.licenses.openSource")}
+              aria-label={t("licenses.openSource")}
               className="text-text-tertiary hover:text-text-primary ml-auto"
             >
               <ExternalLink
@@ -144,14 +144,12 @@ function LicensesModal({ open, onClose }: LicensesModalProps) {
                   setActive(null);
                 }}
               >
-                {t("settings.licenses.close")}
+                {t("licenses.close")}
               </Button>
             </div>
 
             <pre className="text-text-secondary max-h-64 scrollbar-thin overflow-auto rounded-lg border border-white/10 bg-black/30 p-3 font-mono text-xs whitespace-pre-wrap">
-              {active.file === undefined
-                ? t("settings.licenses.remoteOnly")
-                : text}
+              {active.file === undefined ? t("licenses.remoteOnly") : text}
             </pre>
           </div>
         ) : null}

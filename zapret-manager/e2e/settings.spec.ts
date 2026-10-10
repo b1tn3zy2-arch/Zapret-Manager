@@ -1,11 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import {
-  bootstrap,
-  openSettingsSection,
-  settingsNav,
-  sidebar,
-} from "./helpers";
+import { bootstrap, settingsNav, sidebar } from "./helpers";
 
 const LANGUAGE_TRIGGER_RU = "Язык интерфейса";
 const LANGUAGE_TRIGGER_EN = "Interface language";
@@ -86,7 +81,7 @@ test.describe("Настройки", () => {
   }) => {
     await bootstrap(page);
     await page.goto("/");
-    await openSettingsSection(page, "О приложении");
+    await sidebar(page, "О приложении").click();
 
     await page
       .getByRole("button", { name: "Лицензии", exact: true })
@@ -103,7 +98,7 @@ test.describe("Настройки", () => {
   test("показывает только ссылку на zapret-проект", async ({ page }) => {
     await bootstrap(page);
     await page.goto("/");
-    await openSettingsSection(page, "О приложении");
+    await sidebar(page, "О приложении").click();
 
     const links = page.getByRole("button", { name: /zapret-discord-youtube/ });
 
@@ -114,5 +109,15 @@ test.describe("Настройки", () => {
         page.getByRole("button", { name: label, exact: true })
       ).toHaveCount(0);
     }
+  });
+
+  test("в Settings нет секции «О приложении»", async ({ page }) => {
+    await bootstrap(page);
+    await page.goto("/");
+    await sidebar(page, "Настройки").click();
+
+    await expect(
+      settingsNav(page).getByRole("button", { name: "О приложении" })
+    ).toHaveCount(0);
   });
 });

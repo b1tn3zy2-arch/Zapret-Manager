@@ -49,13 +49,3 @@ export function sidebar(page: Page, name: string) {
 export function settingsNav(page: Page) {
   return page.getByRole("navigation", { name: "Общие" });
 }
-
-export async function openSettingsSection(
-  page: Page,
-  section: string
-): Promise<void> {
-  await sidebar(page, "Настройки").click();
-  await settingsNav(page)
-    .getByRole("button", { name: section, exact: true })
-    .click();
-}

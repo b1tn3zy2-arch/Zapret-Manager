@@ -51,7 +51,7 @@ test.describe("Навигация и загрузка", () => {
       { name: "Монитор", heading: /Монитор/i },
       { name: "Логи", heading: /Логи/i },
       { name: "Настройки", heading: /Настройки/i },
-      { name: "О приложении", heading: /Дизайн-система/i },
+      { name: "О приложении", heading: /Zapret Manager/i },
       { name: "Главная", heading: GREETING },
     ];
 

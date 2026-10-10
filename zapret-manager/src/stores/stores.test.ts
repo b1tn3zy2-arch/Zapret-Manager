@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { useAppStore } from "@/stores/useAppStore";
+import { migratePersistedAppState, useAppStore } from "@/stores/useAppStore";
 import { useLogsStore } from "@/stores/useLogsStore";
 import { useUpdateStore } from "@/stores/useUpdateStore";
 import { selectSettings, useSettingsStore } from "@/stores/useSettingsStore";
@@ -83,6 +83,57 @@ describe("useAppStore", () => {
 
     expect(useAppStore.getState().strategiesRarityFilter).toEqual([]);
     expect(useAppStore.getState().strategiesServiceFilter).toEqual([]);
+  });
+});
+
+describe("migratePersistedAppState", () => {
+  it("сбрасывает удалённую секцию about на general", () => {
+    const migrated = migratePersistedAppState({
+      settingsSection: "about" as never,
+    });
+
+    expect(migrated.settingsSection).toBe("general");
+  });
+
+  it("оставляет валидную секцию без изменений", () => {
+    const migrated = migratePersistedAppState({ settingsSection: "updates" });
+
+    expect(migrated.settingsSection).toBe("updates");
+  });
+
+  it("не сбрасывает остальные поля при миграции", () => {
+    const migrated = migratePersistedAppState({
+      settingsSection: "about" as never,
+      sidebarCollapsed: true,
+      activePage: "monitor",
+      strategiesViewMode: "list",
+      strategiesSortMode: "name",
+      strategiesRarityFilter: ["epic"],
+      strategiesServiceFilter: ["discord"],
+    });
+
+    expect(migrated).toEqual({
+      settingsSection: "general",
+      sidebarCollapsed: true,
+      activePage: "monitor",
+      strategiesViewMode: "list",
+      strategiesSortMode: "name",
+      strategiesRarityFilter: ["epic"],
+      strategiesServiceFilter: ["discord"],
+    });
+  });
+
+  it("переживает пустое и отсутствующее состояние", () => {
+    expect(migratePersistedAppState(undefined)).toEqual({});
+    expect(migratePersistedAppState({})).toEqual({});
+  });
+
+  it("сбрасывает значение не строкового типа", () => {
+    const migrated = migratePersistedAppState({
+      settingsSection: 42 as never,
+    });
+
+    expect(migrated.settingsSection).toBe("general");
   });
 });
 

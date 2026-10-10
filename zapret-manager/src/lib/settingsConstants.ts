@@ -1,7 +1,6 @@
 import {
   Activity,
   Gamepad2,
-  Info,
   Layers,
   RefreshCw,
   Settings,
@@ -19,17 +18,10 @@ export interface AboutLink {
   readonly url: string;
 }
 
-/**
- * Ссылки в разделе «О приложении».
- *
- * Репозиторий приложения не публикуется, поэтому ссылки на исходный код, документацию
- * и баг-репорты не выводились бы: они вели бы в никуда. Раздел показывает только
- * upstream-проект zapret, откуда взяты стратегии и на который реально можно перейти.
- */
 export const ABOUT_LINKS: readonly AboutLink[] = [
   {
     id: "upstream",
-    labelKey: "settings.about.upstream",
+    labelKey: "about.upstream",
     url: "https://github.com/Flowseal/zapret-discord-youtube",
   },
 ];
@@ -50,8 +42,11 @@ export const SETTINGS_SECTIONS = [
   "vpn",
   "updates",
   "advanced",
-  "about",
 ] as const satisfies readonly SettingsSection[];
+
+export function isSettingsSection(value: string): value is SettingsSection {
+  return (SETTINGS_SECTIONS as readonly string[]).includes(value);
+}
 
 export const SETTINGS_SECTION_ICONS = {
   general: SlidersHorizontal,
@@ -61,5 +56,4 @@ export const SETTINGS_SECTION_ICONS = {
   vpn: Shield,
   updates: RefreshCw,
   advanced: Activity,
-  about: Info,
 } as const satisfies Record<SettingsSection, LucideIcon>;

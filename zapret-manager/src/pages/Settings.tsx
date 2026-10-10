@@ -1,4 +1,3 @@
-import AboutSection from "@/components/settings/AboutSection";
 import AdvancedSection from "@/components/settings/AdvancedSection";
 import AppearanceSection from "@/components/settings/AppearanceSection";
 import GeneralSection from "@/components/settings/GeneralSection";
@@ -69,7 +68,5 @@ function renderSection(section: SettingsSection) {
       return <UpdatesSection />;
     case "advanced":
       return <AdvancedSection />;
-    case "about":
-      return <AboutSection />;
   }
 }

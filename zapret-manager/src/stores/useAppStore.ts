@@ -2,7 +2,11 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 import { ROUTES, type AppPage } from "@/lib/constants";
+import { isSettingsSection } from "@/lib/settingsConstants";
 import type { Rarity, SettingsSection, SortMode, ViewMode } from "@/types";
+
+const DEFAULT_SETTINGS_SECTION: SettingsSection = "general";
+const APP_STORE_VERSION = 2;
 
 export interface AppStoreState {
   activePage: AppPage;
@@ -39,12 +43,28 @@ function toggleIn<T>(list: T[], value: T): T[] {
     : [...list, value];
 }
 
+export function migratePersistedAppState(
+  state: Partial<PersistedAppState> | undefined
+): Partial<PersistedAppState> {
+  const section = state?.settingsSection;
+
+  if (section === undefined) {
+    return state ?? {};
+  }
+
+  if (typeof section !== "string" || !isSettingsSection(section)) {
+    return { ...state, settingsSection: DEFAULT_SETTINGS_SECTION };
+  }
+
+  return state ?? {};
+}
+
 export const useAppStore = create<AppStoreState>()(
   persist(
     (set) => ({
       activePage: ROUTES.dashboard,
       sidebarCollapsed: false,
-      settingsSection: "general",
+      settingsSection: DEFAULT_SETTINGS_SECTION,
       setActivePage: (page) => set({ activePage: page }),
       toggleSidebar: () =>
         set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
@@ -78,6 +98,7 @@ export const useAppStore = create<AppStoreState>()(
     }),
     {
       name: "zapret-manager:app",
+      version: APP_STORE_VERSION,
       partialize: (state): PersistedAppState => ({
         activePage: state.activePage,
         sidebarCollapsed: state.sidebarCollapsed,
@@ -87,6 +108,10 @@ export const useAppStore = create<AppStoreState>()(
         strategiesRarityFilter: state.strategiesRarityFilter,
         strategiesServiceFilter: state.strategiesServiceFilter,
       }),
+      migrate: (persisted) =>
+        migratePersistedAppState(
+          persisted as Partial<PersistedAppState> | undefined
+        ),
     }
   )
 );

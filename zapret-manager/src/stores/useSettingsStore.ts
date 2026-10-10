@@ -74,7 +74,6 @@ function resetSection(settings: AppSettings, section: SettingsSection): void {
       settings.strategyUpdates = structuredClone(DEFAULT_STRATEGY_UPDATES);
       break;
     case "advanced":
-    case "about":
       break;
   }
 }

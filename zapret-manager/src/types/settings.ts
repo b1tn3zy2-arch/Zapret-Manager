@@ -125,8 +125,7 @@ export type SettingsSection =
   | "outlast"
   | "vpn"
   | "updates"
-  | "advanced"
-  | "about";
+  | "advanced";
 
 export type SaveState = "idle" | "saving" | "saved" | "error";
 
