@@ -11,7 +11,9 @@ test.describe("Меню трея", () => {
     await expect(
       page.getByRole("button", { name: "Запустить последнюю стратегию" })
     ).toBeVisible();
-    await expect(page.getByRole("button", { name: "Остановить" })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Остановить" })
+    ).toBeVisible();
     await expect(page.getByRole("button", { name: "Главная" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Стратегии" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Логи" })).toBeVisible();

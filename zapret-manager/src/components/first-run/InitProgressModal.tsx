@@ -49,7 +49,7 @@ function InitProgressModal({
           aria-valuemax={100}
           aria-valuenow={percent}
           aria-label={t("settings.resources.progressAriaLabel")}
-          className="h-2 w-full overflow-hidden rounded-full bg-white/10"
+          className="bg-glass-hover h-2 w-full overflow-hidden rounded-full"
         >
           <motion.div
             className="bg-accent-primary h-full rounded-full"

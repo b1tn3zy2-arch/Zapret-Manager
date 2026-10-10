@@ -7,16 +7,16 @@ export interface CollectionStatsProps {
 }
 
 const DOT_CLASSES = {
-  common: "bg-white/40",
+  common: "bg-text-tertiary",
   rare: "bg-sky-400",
   epic: "bg-purple-400",
-  legendary: "bg-amber-400",
+  legendary: "bg-accent-warning",
 } as const;
 
 function CollectionStats({ summary }: CollectionStatsProps) {
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <span className="text-text-secondary inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs font-medium">
+      <span className="text-text-secondary border-glass-border bg-glass-bg inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium">
         Всего
         <span className="text-text-primary tabular-nums">{summary.total}</span>
       </span>
@@ -24,7 +24,7 @@ function CollectionStats({ summary }: CollectionStatsProps) {
       {RARITY_ORDER.map((rarity) => (
         <span
           key={rarity}
-          className="text-text-tertiary inline-flex items-center gap-1.5 rounded-full border border-white/10 px-2.5 py-1 text-xs"
+          className="text-text-tertiary border-glass-border inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs"
         >
           <span
             aria-hidden="true"

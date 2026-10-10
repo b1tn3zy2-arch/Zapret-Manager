@@ -164,7 +164,7 @@ function StrategyGameCardImpl({
                 {strategy.services.map((service) => (
                   <span
                     key={service}
-                    className="text-text-secondary rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px]"
+                    className="text-text-secondary border-glass-border bg-glass-bg rounded-full border px-2 py-0.5 text-[10px]"
                   >
                     {capitalizeService(service)}
                   </span>

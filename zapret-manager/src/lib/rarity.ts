@@ -253,8 +253,8 @@ export function getRarityColor(rarity: Rarity): RarityPalette {
       return {
         border: "rgba(255, 200, 0, 0.8)",
         glow: "rgba(255, 200, 0, 0.32)",
-        text: "text-amber-400",
-        dot: "bg-amber-400",
+        text: "text-accent-warning",
+        dot: "bg-accent-warning",
         solid: "#fbbf24",
       };
     default:

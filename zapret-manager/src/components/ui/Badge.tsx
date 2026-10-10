@@ -16,10 +16,10 @@ export interface BadgeProps {
 
 const VARIANT_CLASSES = {
   success: "bg-green-500/10 text-green-400 border-green-500/20",
-  warning: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-  error: "bg-red-500/10 text-red-400 border-red-500/20",
+  warning: "bg-accent-warning/10 text-accent-warning border-accent-warning/20",
+  error: "bg-accent-danger/10 text-accent-danger border-accent-danger/20",
   info: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-  neutral: "bg-white/5 text-text-secondary border-white/10",
+  neutral: "bg-glass-bg text-text-secondary border-glass-border",
   accent: "bg-accent-primary/10 text-accent-primary border-accent-primary/20",
 } as const satisfies Record<BadgeVariant, string>;
 

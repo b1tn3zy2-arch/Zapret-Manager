@@ -26,12 +26,11 @@ const VARIANT_BLOOM: Partial<Record<ControlVariant, "primary" | "danger">> = {
 };
 
 const VARIANT_CLASSES = {
-  primary:
-    "bg-accent-primary text-bg-primary hover:bg-accent-primary/90 shadow-[0_0_16px_rgba(0,255,136,0.25)]",
+  primary: "bg-accent-primary text-on-accent hover:bg-accent-primary/90",
   secondary:
-    "bg-white/5 text-text-primary border border-white/10 hover:bg-white/10 hover:border-white/15",
+    "bg-glass-bg text-text-primary border border-glass-border hover:bg-glass-hover hover:border-glass-border",
   ghost:
-    "bg-transparent text-text-secondary hover:bg-white/5 hover:text-text-primary",
+    "bg-transparent text-text-secondary hover:bg-glass-hover hover:text-text-primary",
   danger:
     "bg-accent-danger/10 text-accent-danger border border-accent-danger/30 hover:bg-accent-danger/20",
 } as const satisfies Record<ControlVariant, string>;

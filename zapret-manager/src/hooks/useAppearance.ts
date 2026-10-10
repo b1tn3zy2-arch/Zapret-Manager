@@ -4,7 +4,7 @@ import { DENSITY_SCALE } from "@/lib/settingsConstants";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import type { DensityMode, ThemeMode } from "@/types";
 
-function resolveTheme(theme: ThemeMode): "dark" | "light" {
+export function resolveTheme(theme: ThemeMode): "dark" | "light" {
   if (theme !== "auto") {
     return theme;
   }
@@ -48,6 +48,21 @@ export function useAppearance(): void {
 
   useEffect(() => {
     applyTheme(theme);
+
+    if (theme !== "auto") {
+      return;
+    }
+
+    const media = window.matchMedia("(prefers-color-scheme: light)");
+    const listener = (): void => {
+      applyTheme("auto");
+    };
+
+    media.addEventListener("change", listener);
+
+    return () => {
+      media.removeEventListener("change", listener);
+    };
   }, [theme]);
 
   useEffect(() => {

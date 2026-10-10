@@ -134,7 +134,7 @@ export default function StrategyCard({
           {strategy.techniques.map((technique) => (
             <span
               key={technique}
-              className="text-text-secondary rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-xs"
+              className="text-text-secondary border-glass-border bg-glass-bg rounded-full border px-2 py-0.5 text-xs"
             >
               {TECHNIQUE_LABELS[technique] ?? technique}
             </span>
@@ -164,7 +164,7 @@ export default function StrategyCard({
         <p className="text-accent-danger text-xs">{strategy.error}</p>
       ) : null}
 
-      <div className="mt-auto flex items-center justify-between gap-3 border-t border-white/5 pt-3">
+      <div className="border-glass-border mt-auto flex items-center justify-between gap-3 border-t pt-3">
         <div className="text-text-tertiary flex flex-col gap-0.5 text-xs">
           <span>{formatFileSize(strategy.size)}</span>
           <span>{modified}</span>

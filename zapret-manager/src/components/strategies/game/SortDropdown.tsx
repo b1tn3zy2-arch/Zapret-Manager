@@ -74,7 +74,7 @@ function SortDropdown({ value, onChange }: SortDropdownProps) {
       {open ? (
         <ul
           role="listbox"
-          className="bg-bg-secondary absolute right-0 z-30 mt-1 w-40 overflow-hidden rounded-lg border border-white/10 py-1 shadow-xl"
+          className="bg-bg-secondary border-glass-border absolute right-0 z-30 mt-1 w-40 overflow-hidden rounded-lg border py-1 shadow-xl"
         >
           {OPTIONS.map((option) => {
             const isActive = option.value === value;
@@ -90,7 +90,7 @@ function SortDropdown({ value, onChange }: SortDropdownProps) {
                     setOpen(false);
                   }}
                   className={cn(
-                    "block w-full px-3 py-1.5 text-left text-xs hover:bg-white/5",
+                    "hover:bg-glass-hover block w-full px-3 py-1.5 text-left text-xs",
                     "transition-colors duration-150 focus-visible:outline-none",
                     isActive ? "text-accent-primary" : "text-text-secondary"
                   )}

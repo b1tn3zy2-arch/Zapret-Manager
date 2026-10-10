@@ -22,7 +22,7 @@ export default function EmptyState({
 }: EmptyStateProps) {
   return (
     <Card className="flex flex-col items-center gap-3 py-12 text-center">
-      <div className="text-text-tertiary flex size-16 items-center justify-center rounded-full bg-white/5">
+      <div className="text-text-tertiary bg-glass-bg flex size-16 items-center justify-center rounded-full">
         {icon}
       </div>
 

@@ -22,7 +22,7 @@ function ViewModeToggle({ mode, onChange }: ViewModeToggleProps) {
     <div
       role="group"
       aria-label="Режим отображения стратегий"
-      className="flex items-center gap-1 rounded-lg border border-white/10 bg-white/5 p-0.5"
+      className="border-glass-border bg-glass-bg flex items-center gap-1 rounded-lg border p-0.5"
     >
       {OPTIONS.map(({ value, label, icon: Icon }) => {
         const isActive = mode === value;
@@ -40,8 +40,8 @@ function ViewModeToggle({ mode, onChange }: ViewModeToggleProps) {
               "transition-colors duration-200 ease-out focus-visible:outline-none",
               "focus-visible:ring-accent-primary focus-visible:ring-1",
               isActive
-                ? "bg-accent-primary text-bg-primary"
-                : "text-text-secondary hover:bg-white/5"
+                ? "bg-accent-primary text-on-accent"
+                : "text-text-secondary hover:bg-glass-hover"
             )}
           >
             <Icon aria-hidden="true" className="size-3.5" />

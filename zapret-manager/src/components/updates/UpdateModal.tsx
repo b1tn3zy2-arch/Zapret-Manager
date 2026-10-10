@@ -14,9 +14,9 @@ const ChangelogRenderer = lazy(
 function ChangelogFallback() {
   return (
     <div className="flex flex-col gap-2">
-      <div className="h-4 w-3/4 animate-pulse rounded bg-white/5" />
-      <div className="h-4 w-full animate-pulse rounded bg-white/5" />
-      <div className="h-4 w-2/3 animate-pulse rounded bg-white/5" />
+      <div className="bg-glass-bg h-4 w-3/4 animate-pulse rounded" />
+      <div className="bg-glass-bg h-4 w-full animate-pulse rounded" />
+      <div className="bg-glass-bg h-4 w-2/3 animate-pulse rounded" />
     </div>
   );
 }

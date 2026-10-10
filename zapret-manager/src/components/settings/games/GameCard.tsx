@@ -60,7 +60,7 @@ const GameIcon = memo(function GameIcon({
         "flex size-9 shrink-0 items-center justify-center rounded-lg",
         active
           ? "bg-accent-primary/15 text-accent-primary"
-          : "text-text-tertiary bg-white/5"
+          : "text-text-tertiary bg-glass-bg"
       )}
     >
       <Icon className="size-5" strokeWidth={2} />
@@ -118,7 +118,7 @@ function GameCardImpl({
               "{name}",
               game.name
             )}
-            className="text-text-tertiary hover:text-accent-danger shrink-0 rounded-md p-1.5 transition-colors hover:bg-white/5"
+            className="text-text-tertiary hover:text-accent-danger hover:bg-glass-hover shrink-0 rounded-md p-1.5 transition-colors"
           >
             <Trash2 aria-hidden="true" className="size-4" strokeWidth={2} />
           </button>
@@ -128,7 +128,7 @@ function GameCardImpl({
           type="button"
           onClick={onToggleExpand}
           aria-label={t("settings.games.toggleEditor")}
-          className="text-text-tertiary hover:text-text-primary shrink-0 rounded-md p-1.5 transition-colors hover:bg-white/5"
+          className="text-text-tertiary hover:text-text-primary hover:bg-glass-hover shrink-0 rounded-md p-1.5 transition-colors"
         >
           <motion.span
             aria-hidden="true"

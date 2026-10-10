@@ -30,7 +30,7 @@ function LogRowImpl({ entry, query, isEven, onCopy }: LogRowProps) {
         backgroundColor: isEven ? "transparent" : "rgba(255, 255, 255, 0.02)",
       }}
       className={cn(
-        "log-row text-text-secondary hover:bg-white/5 focus-visible:bg-white/10",
+        "log-row text-text-secondary hover:bg-glass-hover focus-visible:bg-glass-hover",
         "flex w-full cursor-pointer items-center gap-2 px-3 text-left",
         "font-mono text-xs whitespace-nowrap focus-visible:outline-none"
       )}

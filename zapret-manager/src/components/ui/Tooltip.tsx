@@ -144,7 +144,7 @@ export default function Tooltip({
             style={positionStyle}
             className={cn(
               "pointer-events-none fixed z-1000 max-w-xs rounded-lg",
-              "bg-bg-secondary border border-white/10 px-2.5 py-1.5",
+              "bg-bg-secondary border-glass-border border px-2.5 py-1.5",
               "text-text-primary text-xs shadow-[0_4px_12px_rgba(0,0,0,0.4)]",
               className
             )}

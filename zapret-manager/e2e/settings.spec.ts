@@ -6,6 +6,29 @@ const LANGUAGE_TRIGGER_RU = "Язык интерфейса";
 const LANGUAGE_TRIGGER_EN = "Interface language";
 
 test.describe("Настройки", () => {
+  test("переключает светлую тему мгновенно", async ({ page }) => {
+    const collector = await bootstrap(page);
+    await page.goto("/");
+    await sidebar(page, "Настройки").click();
+    await settingsNav(page)
+      .getByRole("button", { name: "Внешний вид", exact: true })
+      .click();
+
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+
+    await page.getByRole("button", { name: "Тема" }).click();
+    await page.getByRole("option", { name: "Светлая", exact: true }).click();
+
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+
+    await page.getByRole("button", { name: "Тема" }).click();
+    await page.getByRole("option", { name: "Тёмная", exact: true }).click();
+
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+
+    expect(collector.errors).toEqual([]);
+  });
+
   test("переключает секции без ошибок", async ({ page }) => {
     const collector = await bootstrap(page);
     await page.goto("/");

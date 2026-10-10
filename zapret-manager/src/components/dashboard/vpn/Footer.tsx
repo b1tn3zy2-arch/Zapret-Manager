@@ -11,7 +11,7 @@ export default function VpnFooter({ status }: VpnFooterProps) {
   const running = status?.running === true;
 
   return (
-    <div className="text-text-tertiary grid grid-cols-3 items-center gap-3 border-t border-white/5 pt-3 text-center font-mono text-[11px]">
+    <div className="text-text-tertiary border-glass-border grid grid-cols-3 items-center gap-3 border-t pt-3 text-center font-mono text-[11px]">
       <span>
         {t("dashboard.vpn.uptime")}:{" "}
         {running ? formatUptime(status?.uptimeSec ?? null) : "—"}

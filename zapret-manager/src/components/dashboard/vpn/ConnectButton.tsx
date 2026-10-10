@@ -69,7 +69,7 @@ export default function ConnectButton({
             ? "border-accent-success bg-accent-success/10"
             : isBusy
               ? "border-accent-warning"
-              : "border-white/15"
+              : "border-glass-border"
         )}
       >
         <Power

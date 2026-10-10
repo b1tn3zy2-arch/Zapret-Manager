@@ -14,5 +14,5 @@ export function getScanlineBackground(alpha: number): string {
     return "none";
   }
 
-  return `repeating-linear-gradient(0deg, transparent 0 2px, rgb(255 255 255 / ${alpha}) 2px 3px)`;
+  return `repeating-linear-gradient(0deg, transparent 0 2px, rgb(var(--color-text-primary-rgb) / ${alpha}) 2px 3px)`;
 }

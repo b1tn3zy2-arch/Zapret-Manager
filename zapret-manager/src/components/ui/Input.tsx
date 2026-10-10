@@ -26,8 +26,8 @@ export interface InputProps extends Omit<
 }
 
 const FIELD_CLASSES = {
-  default: "bg-transparent border-b border-white/10 px-0 rounded-none",
-  filled: "bg-white/5 border border-white/10 px-3 rounded-lg",
+  default: "bg-transparent border-b border-glass-border px-0 rounded-none",
+  filled: "bg-glass-bg border border-glass-border px-3 rounded-lg",
 } as const satisfies Record<InputVariant, string>;
 
 const SIZE_CLASSES = {

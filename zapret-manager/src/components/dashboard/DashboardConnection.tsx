@@ -65,7 +65,7 @@ function DashboardConnection() {
 
       <div className="flex items-center gap-3">
         {info === null ? (
-          <div className="size-8 shrink-0 rounded-full border border-white/10 bg-white/5" />
+          <div className="border-glass-border bg-glass-bg size-8 shrink-0 rounded-full border" />
         ) : (
           <CountryFlag
             countryCode={info.countryCode}

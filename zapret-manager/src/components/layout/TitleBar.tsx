@@ -18,7 +18,7 @@ import { useAppStore } from "@/stores/useAppStore";
 import ModeBadge from "./ModeBadge";
 
 const CONTROL_BUTTON_CLASS =
-  "flex size-8 shrink-0 items-center justify-center text-text-secondary transition-colors duration-200 ease-out hover:bg-white/5 hover:text-text-primary";
+  "flex size-8 shrink-0 items-center justify-center text-text-secondary transition-colors duration-200 ease-out hover:bg-glass-hover hover:text-text-primary";
 
 export interface TitleBarProps {
   isFullscreen: boolean;
@@ -79,7 +79,7 @@ export default function TitleBar({
   return (
     <header
       data-tauri-drag-region
-      className="flex shrink-0 items-center justify-between border-b border-white/5"
+      className="border-glass-border flex shrink-0 items-center justify-between border-b"
       style={{ height: "var(--titlebar-height)" }}
     >
       <div data-tauri-drag-region className="flex items-center gap-2 pr-2 pl-3">

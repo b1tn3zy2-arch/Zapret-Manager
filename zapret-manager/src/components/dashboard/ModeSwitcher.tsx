@@ -39,7 +39,7 @@ export default function ModeSwitcher({
         role="radiogroup"
         aria-label={t("dashboard.modeSwitcher.ariaLabel")}
         className={cn(
-          "relative flex h-12 items-center border-white/10 bg-white/5",
+          "border-glass-border bg-glass-bg relative flex h-12 items-center",
           "w-[clamp(200px,20vw,280px)] rounded-full border p-1"
         )}
       >
@@ -82,7 +82,7 @@ export default function ModeSwitcher({
                 "rounded-full text-xs font-medium transition-colors",
                 "duration-200 disabled:cursor-not-allowed disabled:opacity-50",
                 active
-                  ? "text-bg-primary"
+                  ? "text-on-accent"
                   : "text-text-tertiary hover:text-text-secondary"
               )}
             >

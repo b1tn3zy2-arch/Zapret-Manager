@@ -35,7 +35,7 @@ function PingSparkline({
     return (
       <div
         style={{ width, height }}
-        className="flex items-center justify-center rounded border border-dashed border-white/5"
+        className="border-glass-border flex items-center justify-center rounded border border-dashed"
       >
         <span className="text-text-tertiary text-[10px]">нет данных</span>
       </div>

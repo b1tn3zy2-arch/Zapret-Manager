@@ -30,7 +30,7 @@ function HighlightTextImpl({ text, query }: HighlightTextProps) {
         return (
           <mark
             key={index}
-            className="rounded-sm bg-amber-400/30 px-px text-amber-200"
+            className="bg-accent-warning/30 text-accent-warning rounded-sm px-px"
           >
             {part}
           </mark>

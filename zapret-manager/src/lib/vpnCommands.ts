@@ -42,9 +42,7 @@ export interface VpnSourceResult {
   servers: SubscriptionServer[];
 }
 
-export async function importVpnSource(
-  text: string
-): Promise<VpnSourceResult> {
+export async function importVpnSource(text: string): Promise<VpnSourceResult> {
   return secureInvoke<VpnSourceResult>("import_vpn_source", { text });
 }
 

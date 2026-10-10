@@ -69,8 +69,8 @@ function NavButtonImpl({
         className={cn(
           "group relative flex h-11 w-full items-center gap-3 rounded-md",
           "transition-colors duration-200 ease-out",
-          "hover:bg-white/5",
-          active && "bg-white/10",
+          "hover:bg-glass-hover",
+          active && "bg-glass-hover",
           collapsed ? "justify-center" : "px-3"
         )}
       >
@@ -134,7 +134,7 @@ function StatusIndicator({ status, collapsed }: StatusIndicatorProps) {
       aria-label={`Статус подключения: ${CONNECTION_LABELS[status]}`}
       className={cn(
         "flex w-full items-center gap-2.5 rounded-md px-3 py-2",
-        "transition-colors duration-200 ease-out hover:bg-white/5",
+        "hover:bg-glass-hover transition-colors duration-200 ease-out",
         collapsed && "justify-center px-0"
       )}
     >
@@ -187,7 +187,7 @@ export default function Sidebar() {
       animate={{ width }}
       initial={false}
       transition={prefersReducedMotion ? { duration: 0 } : SIDEBAR_TRANSITION}
-      className="bg-bg-secondary/40 flex shrink-0 flex-col overflow-visible border-r border-white/6"
+      className="bg-bg-secondary/40 border-glass-border flex shrink-0 flex-col overflow-visible border-r"
     >
       <div
         className={cn(
@@ -201,7 +201,7 @@ export default function Sidebar() {
           onClick={toggleSidebar}
           aria-label={collapsed ? "Развернуть меню" : "Свернуть меню"}
           aria-expanded={!collapsed}
-          className="text-text-secondary hover:text-text-primary flex size-7 items-center justify-center rounded-md transition-colors duration-200 ease-out hover:bg-white/5"
+          className="text-text-secondary hover:text-text-primary hover:bg-glass-hover flex size-7 items-center justify-center rounded-md transition-colors duration-200 ease-out"
         >
           {collapsed ? (
             <ChevronRight

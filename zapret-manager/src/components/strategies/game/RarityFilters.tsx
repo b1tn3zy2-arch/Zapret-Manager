@@ -17,7 +17,7 @@ const ACTIVE_RARITY =
 const ACTIVE_SERVICE =
   "border-accent-secondary bg-accent-secondary/10 text-accent-secondary rounded-full border px-2.5 py-1 text-xs font-medium transition-colors";
 const IDLE =
-  "border-white/10 text-text-tertiary hover:text-text-secondary hover:bg-white/5 rounded-full border px-2.5 py-1 text-xs transition-colors";
+  "border-glass-border text-text-tertiary hover:text-text-secondary hover:bg-glass-hover rounded-full border px-2.5 py-1 text-xs transition-colors";
 
 function RarityFilters({
   summary,

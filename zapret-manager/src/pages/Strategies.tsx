@@ -223,7 +223,7 @@ export default function Strategies() {
           {Array.from({ length: 8 }, (_, index) => (
             <div
               key={index}
-              className="h-[400px] animate-pulse rounded-xl border border-white/10 bg-white/[0.03]"
+              className="border-glass-border bg-glass-bg h-[400px] animate-pulse rounded-xl border"
             />
           ))}
         </div>

@@ -16,9 +16,9 @@ const PROSE_CLASSES = [
   "[&_h3]:text-text-primary [&_h3]:text-sm [&_h3]:font-semibold",
   "[&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5",
   "[&_li]:marker:text-text-tertiary",
-  "[&_blockquote]:border-white/10 [&_blockquote]:text-text-tertiary [&_blockquote]:border-l-2 [&_blockquote]:pl-3",
+  "[&_blockquote]:border-glass-border [&_blockquote]:text-text-tertiary [&_blockquote]:border-l-2 [&_blockquote]:pl-3",
   "[&_pre]:bg-bg-secondary [&_pre]:overflow-x-auto [&_pre]:rounded-md [&_pre]:p-3",
-  "[&_table]:w-full [&_td]:border-white/10 [&_td]:border [&_td]:p-1 [&_th]:border-white/10 [&_th]:border [&_th]:p-1",
+  "[&_table]:w-full [&_td]:border-glass-border [&_td]:border [&_td]:p-1 [&_th]:border-glass-border [&_th]:border [&_th]:p-1",
 ].join(" ");
 
 function ChangelogRenderer({ markdown }: ChangelogRendererProps) {

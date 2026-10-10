@@ -12,7 +12,7 @@ export default function EmptyState({ disabled, onAddLink }: EmptyStateProps) {
   const { t } = useI18n();
 
   return (
-    <div className="flex flex-col items-center gap-3 rounded-xl border-2 border-dashed border-white/10 bg-white/[0.02] px-6 py-10 text-center">
+    <div className="border-glass-border bg-glass-bg flex flex-col items-center gap-3 rounded-xl border-2 border-dashed px-6 py-10 text-center">
       <span
         aria-hidden="true"
         className="text-accent-primary bg-accent-primary/10 flex size-14 items-center justify-center rounded-full"

@@ -42,7 +42,7 @@ function SectionContainer({
         ) : null}
       </div>
 
-      <div className="divide-y divide-white/5">{children}</div>
+      <div className="divide-glass-border divide-y">{children}</div>
     </Card>
   );
 }

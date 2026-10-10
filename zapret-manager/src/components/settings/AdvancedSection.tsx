@@ -61,7 +61,7 @@ function ReportText({ report }: { report: ConfigCheckReport }) {
         </Text>
       ) : null}
       {report.duplicates.length > 0 ? (
-        <Text variant="caption" size="sm" className="text-amber-400">
+        <Text variant="caption" size="sm" className="text-accent-warning">
           Дубликаты: {report.duplicates.slice(0, 8).join(", ")}
         </Text>
       ) : null}

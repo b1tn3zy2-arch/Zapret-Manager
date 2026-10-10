@@ -39,8 +39,8 @@ function SettingsNav({ active, onChange, t }: SettingsNavProps) {
               "flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-left text-sm",
               "transition-colors duration-200 ease-out",
               selected
-                ? "text-text-primary bg-white/10"
-                : "text-text-secondary hover:text-text-primary hover:bg-white/5"
+                ? "text-text-primary bg-glass-hover"
+                : "text-text-secondary hover:text-text-primary hover:bg-glass-hover"
             )}
           >
             <Icon

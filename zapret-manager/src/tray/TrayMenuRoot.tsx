@@ -50,7 +50,7 @@ function MenuRow({ label, icon: Icon, action }: MenuRowProps) {
       className={cn(
         "group flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left",
         "text-text-secondary hover:text-text-primary text-[13px]",
-        "transition-colors duration-100 hover:bg-white/10"
+        "hover:bg-glass-hover transition-colors duration-100"
       )}
     >
       <Icon
@@ -85,16 +85,18 @@ export default function TrayMenuRoot() {
         .catch(() => undefined);
     };
 
-    void appWindow.onFocusChanged((event) => {
-      if (event.payload) {
-        refresh();
-        return;
-      }
+    void appWindow
+      .onFocusChanged((event) => {
+        if (event.payload) {
+          refresh();
+          return;
+        }
 
-      void invoke("tray_menu_hide").catch(() => undefined);
-    }).then((stop) => {
-      unlisten = stop;
-    });
+        void invoke("tray_menu_hide").catch(() => undefined);
+      })
+      .then((stop) => {
+        unlisten = stop;
+      });
 
     const onKeyDown = (event: KeyboardEvent): void => {
       if (event.key === "Escape") {
@@ -147,7 +149,11 @@ export default function TrayMenuRoot() {
           <Separator />
 
           <MenuRow label={t("dashboard.tray.run")} icon={Play} action="run" />
-          <MenuRow label={t("dashboard.tray.stop")} icon={Square} action="stop" />
+          <MenuRow
+            label={t("dashboard.tray.stop")}
+            icon={Square}
+            action="stop"
+          />
 
           <Separator />
 
@@ -182,7 +188,11 @@ export default function TrayMenuRoot() {
 
           <Separator />
 
-          <MenuRow label={t("dashboard.tray.quit")} icon={LogOut} action="quit" />
+          <MenuRow
+            label={t("dashboard.tray.quit")}
+            icon={LogOut}
+            action="quit"
+          />
         </motion.div>
       </AnimatePresence>
     </div>

@@ -46,7 +46,7 @@ export default function ServerList({
             onClick={onRefreshSubscription}
             disabled={isRefreshing}
             aria-label={t("dashboard.vpn.refreshSubscription")}
-            className="text-text-tertiary hover:text-text-primary rounded-md p-1.5 transition-colors hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-50"
+            className="text-text-tertiary hover:text-text-primary hover:bg-glass-hover rounded-md p-1.5 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
           >
             <RefreshCw aria-hidden="true" className="size-4" strokeWidth={2} />
           </button>
@@ -56,7 +56,7 @@ export default function ServerList({
             onClick={onRefreshPings}
             disabled={isRefreshing}
             aria-label={t("dashboard.vpn.refreshPingsAria")}
-            className="text-text-tertiary hover:text-text-primary rounded-md p-1.5 transition-colors hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-50"
+            className="text-text-tertiary hover:text-text-primary hover:bg-glass-hover rounded-md p-1.5 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
           >
             <RefreshCw
               aria-hidden="true"

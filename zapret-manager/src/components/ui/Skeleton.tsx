@@ -40,7 +40,7 @@ export default function Skeleton({
       aria-hidden="true"
       style={sizeStyle}
       className={cn(
-        "animate-shimmer shrink-0 bg-gradient-to-r from-white/5 via-white/10 to-white/5 bg-[length:200%_100%]",
+        "animate-shimmer from-glass-bg via-glass-hover to-glass-bg shrink-0 bg-gradient-to-r bg-[length:200%_100%]",
         SHAPE_CLASSES[variant],
         variant === "rect" && width === undefined && "w-full",
         className

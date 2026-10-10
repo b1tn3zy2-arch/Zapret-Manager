@@ -16,7 +16,7 @@ const PALETTE = {
   connecting: {
     ring: "rgba(251, 191, 36, 0.45)",
     core: "rgba(251, 191, 36, 0.16)",
-    text: "text-amber-400",
+    text: "text-accent-warning",
     Icon: ShieldCheck,
   },
   disconnected: {

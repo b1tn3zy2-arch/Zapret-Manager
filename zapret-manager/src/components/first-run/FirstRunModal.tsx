@@ -81,7 +81,7 @@ function FirstRunModal({ open, report, onStart }: FirstRunModalProps) {
 
 function Entry({ icon, label }: { icon: ReactNode; label: string }) {
   return (
-    <li className="flex items-center gap-3 rounded-lg border border-white/5 bg-white/5 px-3 py-2">
+    <li className="border-glass-border bg-glass-bg flex items-center gap-3 rounded-lg border px-3 py-2">
       <span className="text-accent-primary shrink-0">{icon}</span>
       <span className="text-text-primary text-sm">{label}</span>
       <Check

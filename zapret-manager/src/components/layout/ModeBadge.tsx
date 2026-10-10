@@ -29,7 +29,7 @@ function ModeBadge({ onClick }: ModeBadgeProps) {
         "text-[11px] font-semibold tracking-wide transition-colors",
         tone === "vpn" && "bg-accent-secondary/15 text-accent-secondary",
         tone === "dpi" && "bg-accent-primary/15 text-accent-primary",
-        tone === "off" && "text-text-tertiary bg-white/5"
+        tone === "off" && "text-text-tertiary bg-glass-bg"
       )}
     >
       <Lock

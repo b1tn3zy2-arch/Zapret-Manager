@@ -16,7 +16,7 @@ export interface GlassPanelProps extends HTMLAttributes<HTMLDivElement> {
 const VARIANT_CLASSES = {
   default: "bg-glass-bg border border-glass-border",
   interactive:
-    "bg-glass-bg border border-glass-border hover:bg-glass-hover hover:border-white/15",
+    "bg-glass-bg border border-glass-border hover:bg-glass-hover hover:border-glass-border",
   outlined: "bg-transparent border border-glass-border",
 } as const satisfies Record<GlassPanelVariant, string>;
 

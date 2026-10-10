@@ -143,7 +143,7 @@ export default function Logs() {
         shownCount={logs.length}
       />
 
-      <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-white/10 bg-black/20">
+      <div className="border-glass-border bg-glass-bg relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border">
         {totalCount === 0 ? (
           <LogsEmptyState variant="empty" />
         ) : logs.length === 0 ? (

@@ -65,8 +65,8 @@ function FilterChip({
         "transition-colors duration-200 ease-out focus-visible:outline-none",
         "focus-visible:ring-accent-primary focus-visible:ring-1",
         active
-          ? "text-text-primary border-white/20 bg-white/10"
-          : "text-text-tertiary hover:text-text-secondary border-white/5 hover:bg-white/5"
+          ? "text-text-primary border-glass-border bg-glass-hover"
+          : "text-text-tertiary hover:text-text-secondary border-glass-border hover:bg-glass-hover"
       )}
     >
       {accent !== undefined ? (
@@ -74,7 +74,7 @@ function FilterChip({
           aria-hidden="true"
           className={cn(
             "size-1.5 rounded-full",
-            active ? accent : "bg-white/20"
+            active ? accent : "bg-text-tertiary"
           )}
         />
       ) : null}
@@ -124,7 +124,7 @@ function LogFilters({
   }, [debouncedSearch, committedSearch, onChange]);
 
   return (
-    <div className="bg-bg-secondary/85 sticky top-0 z-10 flex flex-col gap-2.5 border-b border-white/10 px-1 py-3 backdrop-blur-md">
+    <div className="bg-bg-secondary/85 border-glass-border sticky top-0 z-10 flex flex-col gap-2.5 border-b px-1 py-3 backdrop-blur-md">
       <div className="flex flex-wrap items-center gap-3">
         <Input
           variant="filled"
@@ -148,7 +148,7 @@ function LogFilters({
                 event.target.value === "" ? undefined : event.target.value,
             });
           }}
-          className="text-text-secondary focus-visible:border-accent-primary h-8 rounded-lg border border-white/10 bg-transparent px-2 text-xs outline-none hover:border-white/20"
+          className="text-text-secondary focus-visible:border-accent-primary border-glass-border hover:border-glass-border h-8 rounded-lg border bg-transparent px-2 text-xs outline-none"
         >
           <option value="">Все стратегии</option>
           {strategyOptions.map((option) => (
@@ -207,7 +207,7 @@ function LogFilters({
           />
         ))}
 
-        <span aria-hidden="true" className="mx-1 h-4 w-px bg-white/10" />
+        <span aria-hidden="true" className="bg-glass-hover mx-1 h-4 w-px" />
 
         {LOG_SOURCES.map((source: LogSource) => (
           <FilterChip

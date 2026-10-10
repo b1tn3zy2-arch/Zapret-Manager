@@ -14,7 +14,7 @@ export interface LogsToastProps {
 const TONE_CLASSES = {
   success: "border-accent-primary/40 text-accent-primary",
   error: "border-accent-danger/40 text-accent-danger",
-  info: "border-white/15 text-text-primary",
+  info: "border-glass-border text-text-primary",
 } as const satisfies Record<ToastTone, string>;
 
 const TONE_ICONS = {

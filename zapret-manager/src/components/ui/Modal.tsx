@@ -156,7 +156,7 @@ export default function Modal({
             style={{
               backdropFilter: `blur(${MODAL_BACKDROP_BLUR_PX}px) saturate(${MODAL_BACKDROP_SATURATE})`,
             }}
-            className="absolute inset-0 bg-black/60"
+            className="bg-bg-primary/60 absolute inset-0"
           />
 
           <motion.div
@@ -173,7 +173,7 @@ export default function Modal({
             transition={PANEL_TRANSITION}
             className={cn(
               "relative flex max-h-[85vh] w-full flex-col gap-4 overflow-y-auto",
-              "bg-bg-secondary/95 rounded-2xl border border-white/10 p-6",
+              "bg-bg-secondary/95 border-glass-border rounded-2xl border p-6",
               "shadow-[0_20px_60px_rgba(0,0,0,0.5)] backdrop-blur-xl outline-none",
               WIDTH_CLASSES[size],
               className
@@ -207,7 +207,7 @@ export default function Modal({
                   className={cn(
                     "inline-flex size-8 shrink-0 items-center justify-center rounded-lg",
                     "text-text-secondary transition-colors duration-200 ease-out",
-                    "hover:text-text-primary hover:bg-white/5"
+                    "hover:text-text-primary hover:bg-glass-hover"
                   )}
                 >
                   <X aria-hidden="true" className="size-4" strokeWidth={2} />
@@ -236,7 +236,7 @@ export default function Modal({
             </div>
 
             {footer !== undefined ? (
-              <div className="flex justify-end gap-2 border-t border-white/5 pt-4">
+              <div className="border-glass-border flex justify-end gap-2 border-t pt-4">
                 {footer}
               </div>
             ) : null}

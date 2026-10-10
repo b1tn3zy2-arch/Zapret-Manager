@@ -14,7 +14,7 @@ import type {
 
 const THEME_OPTIONS = [
   { value: "dark", label: "Тёмная" },
-  { value: "light", label: "Светлая · Скоро", disabled: true },
+  { value: "light", label: "Светлая" },
   { value: "auto", label: "Как в системе" },
 ] as const satisfies readonly {
   value: ThemeMode;

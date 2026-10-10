@@ -25,10 +25,10 @@ function ServerCardImpl({ server, isActive, ping, onSelect }: ServerCardProps) {
       role="listitem"
       className={cn(
         "flex items-center gap-3 rounded-lg border p-3 transition-colors",
-        "duration-200 hover:bg-white/5",
+        "hover:bg-glass-hover duration-200",
         isActive
-          ? "border-accent-primary bg-white/5"
-          : "border-white/10 bg-white/5"
+          ? "border-accent-primary bg-glass-bg"
+          : "border-glass-border bg-glass-bg"
       )}
     >
       <button
@@ -45,7 +45,7 @@ function ServerCardImpl({ server, isActive, ping, onSelect }: ServerCardProps) {
         {country === null ? (
           <span
             aria-hidden="true"
-            className="text-text-tertiary flex size-8 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/5"
+            className="text-text-tertiary border-glass-border bg-glass-bg flex size-8 shrink-0 items-center justify-center rounded-full border"
           >
             <Globe className="size-4" strokeWidth={2} />
           </span>

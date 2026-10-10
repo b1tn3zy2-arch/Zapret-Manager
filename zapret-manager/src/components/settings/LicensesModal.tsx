@@ -98,7 +98,7 @@ function LicensesModal({ open, onClose }: LicensesModalProps) {
         {LICENSES.map((entry) => (
           <div
             key={entry.id}
-            className="flex items-center gap-3 rounded-lg border border-white/5 bg-white/5 px-3 py-2"
+            className="border-glass-border bg-glass-bg flex items-center gap-3 rounded-lg border px-3 py-2"
           >
             <button
               type="button"
@@ -148,7 +148,7 @@ function LicensesModal({ open, onClose }: LicensesModalProps) {
               </Button>
             </div>
 
-            <pre className="text-text-secondary max-h-64 scrollbar-thin overflow-auto rounded-lg border border-white/10 bg-black/30 p-3 font-mono text-xs whitespace-pre-wrap">
+            <pre className="text-text-secondary border-glass-border bg-glass-bg max-h-64 scrollbar-thin overflow-auto rounded-lg border p-3 font-mono text-xs whitespace-pre-wrap">
               {active.file === undefined ? t("licenses.remoteOnly") : text}
             </pre>
           </div>

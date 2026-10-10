@@ -15,14 +15,14 @@ interface StatRowProps {
 
 function statColor(value: number): string {
   if (value < 40) {
-    return "#ff3b5c";
+    return "var(--color-accent-danger)";
   }
 
   if (value <= 70) {
-    return "#fbbf24";
+    return "var(--color-accent-warning)";
   }
 
-  return "#00ff88";
+  return "var(--color-accent-primary)";
 }
 
 function StatRow({ icon: Icon, label, value, compact, delay }: StatRowProps) {
@@ -38,7 +38,7 @@ function StatRow({ icon: Icon, label, value, compact, delay }: StatRowProps) {
         </span>
       ) : null}
 
-      <span className="h-1 min-w-0 flex-1 overflow-hidden rounded-full bg-white/10">
+      <span className="bg-glass-hover h-1 min-w-0 flex-1 overflow-hidden rounded-full">
         <motion.span
           className="block h-full rounded-full"
           style={{ backgroundColor: color }}

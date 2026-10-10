@@ -52,7 +52,7 @@ export default function Toggle({
         "disabled:cursor-not-allowed disabled:opacity-50",
         metrics.track,
         metrics.pad,
-        checked ? "bg-accent-primary" : "bg-white/10",
+        checked ? "bg-accent-primary" : "bg-glass-hover",
         className
       )}
     >
@@ -60,7 +60,10 @@ export default function Toggle({
         aria-hidden="true"
         animate={{ x: checked ? "100%" : 0 }}
         transition={{ duration: 0.2, ease: "easeOut" }}
-        className={cn("block rounded-full bg-white shadow-sm", metrics.thumb)}
+        className={cn(
+          "ring-glass-border block rounded-full bg-white shadow-sm ring-1",
+          metrics.thumb
+        )}
       />
     </button>
   );

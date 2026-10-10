@@ -164,7 +164,7 @@ function UpdatesSection() {
                     settings.ignoredVersions.filter((item) => item !== version)
                   );
                 }}
-                className="text-text-secondary hover:text-text-primary flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs transition-colors"
+                className="text-text-secondary hover:text-text-primary border-glass-border bg-glass-bg flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs transition-colors"
               >
                 {version}
                 <X aria-hidden="true" className="size-3" />

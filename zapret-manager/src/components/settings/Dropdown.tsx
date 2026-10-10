@@ -173,7 +173,7 @@ function Dropdown<T extends string>({
           }}
           className={cn(
             "fixed z-50 overflow-hidden rounded-lg",
-            "bg-bg-tertiary/95 border border-white/10 py-1 shadow-2xl backdrop-blur-xl"
+            "bg-bg-tertiary/95 border-glass-border border py-1 shadow-2xl backdrop-blur-xl"
           )}
         >
           {options.map((option, index) => (
@@ -193,7 +193,7 @@ function Dropdown<T extends string>({
                   "flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm",
                   "transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-40",
                   index === activeIndex && !option.disabled
-                    ? "text-text-primary bg-white/10"
+                    ? "text-text-primary bg-glass-hover"
                     : "text-text-secondary"
                 )}
               >
@@ -229,8 +229,8 @@ function Dropdown<T extends string>({
         onClick={toggle}
         className={cn(
           "inline-flex min-w-[180px] items-center justify-between gap-2 rounded-lg",
-          "text-text-primary border border-white/10 bg-white/5 px-3 py-2 text-sm",
-          "transition-colors duration-200 hover:bg-white/10",
+          "text-text-primary border-glass-border bg-glass-bg border px-3 py-2 text-sm",
+          "hover:bg-glass-hover transition-colors duration-200",
           "disabled:cursor-not-allowed disabled:opacity-50"
         )}
       >

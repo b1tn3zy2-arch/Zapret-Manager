@@ -212,14 +212,14 @@ export const LOG_LEVEL_CLASSES = {
   debug: "text-text-tertiary",
   info: "text-text-primary",
   success: "text-accent-primary",
-  warn: "text-amber-400",
-  error: "text-red-400",
+  warn: "text-accent-warning",
+  error: "text-accent-danger",
 } as const satisfies Record<LogLevel, string>;
 
 export const LOG_LEVEL_DOT_CLASSES = {
   debug: "bg-text-tertiary",
   info: "bg-text-primary",
   success: "bg-accent-primary",
-  warn: "bg-amber-400",
-  error: "bg-red-400",
+  warn: "bg-accent-warning",
+  error: "bg-accent-danger",
 } as const satisfies Record<LogLevel, string>;
