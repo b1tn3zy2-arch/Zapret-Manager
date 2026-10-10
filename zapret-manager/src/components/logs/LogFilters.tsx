@@ -1,17 +1,23 @@
 import { useEffect, useState } from "react";
 import { Download, Search, Trash2, X } from "lucide-react";
 
-import { useDebounce } from "@/hooks/useDebounce";
-import { Badge, Button, Input, Toggle } from "@/components/ui";
+import Dropdown from "@/components/settings/Dropdown";
 import {
-  LOG_LEVEL_DOT_CLASSES,
-  LOG_LEVEL_LABELS,
+  Badge,
+  Button,
+  FilterChip,
+  Input,
+  Toggle,
+  type FilterChipVariant,
+} from "@/components/ui";
+import { useDebounce } from "@/hooks/useDebounce";
+import {
   LOG_LEVELS,
+  LOG_LEVEL_LABELS,
   LOG_SOURCES,
   LOG_SOURCE_LABELS,
   SEARCH_DEBOUNCE_MS,
 } from "@/lib/constants";
-import { cn } from "@/lib/utils";
 import type {
   LevelCounts,
   SourceCounts,
@@ -40,49 +46,13 @@ export interface LogFiltersProps {
   shownCount: number;
 }
 
-interface FilterChipProps {
-  label: string;
-  count: number;
-  active: boolean;
-  accent?: string;
-  onToggle: () => void;
-}
-
-function FilterChip({
-  label,
-  count,
-  active,
-  accent,
-  onToggle,
-}: FilterChipProps) {
-  return (
-    <button
-      type="button"
-      aria-pressed={active}
-      onClick={onToggle}
-      className={cn(
-        "flex h-7 items-center gap-1.5 rounded-md border px-2 text-xs",
-        "transition-colors duration-200 ease-out focus-visible:outline-none",
-        "focus-visible:ring-accent-primary focus-visible:ring-1",
-        active
-          ? "text-text-primary border-glass-border bg-glass-hover"
-          : "text-text-tertiary hover:text-text-secondary border-glass-border hover:bg-glass-hover"
-      )}
-    >
-      {accent !== undefined ? (
-        <span
-          aria-hidden="true"
-          className={cn(
-            "size-1.5 rounded-full",
-            active ? accent : "bg-text-tertiary"
-          )}
-        />
-      ) : null}
-      {label}
-      <span className="text-text-tertiary tabular-nums">{count}</span>
-    </button>
-  );
-}
+const LEVEL_VARIANTS = {
+  debug: "debug",
+  info: "info",
+  success: "success",
+  warn: "warn",
+  error: "error",
+} as const satisfies Record<LogLevel, FilterChipVariant>;
 
 function toggleIn<T>(list: T[] | undefined, value: T): T[] | undefined {
   const current = list ?? [];
@@ -123,6 +93,8 @@ function LogFilters({
     onChange({ search: trimmed === "" ? undefined : trimmed });
   }, [debouncedSearch, committedSearch, onChange]);
 
+  const strategyValue = filter.strategyId ?? "";
+
   return (
     <div className="bg-bg-secondary/85 border-glass-border sticky top-0 z-10 flex flex-col gap-2.5 border-b px-1 py-3 backdrop-blur-md">
       <div className="flex flex-wrap items-center gap-3">
@@ -139,24 +111,20 @@ function LogFilters({
           }}
         />
 
-        <select
-          aria-label="Фильтр по стратегии"
-          value={filter.strategyId ?? ""}
-          onChange={(event) => {
-            onChange({
-              strategyId:
-                event.target.value === "" ? undefined : event.target.value,
-            });
+        <Dropdown
+          label="Фильтр по стратегии"
+          value={strategyValue}
+          options={[
+            { value: "", label: "Все стратегии" },
+            ...strategyOptions.map((option) => ({
+              value: option.id,
+              label: option.name,
+            })),
+          ]}
+          onChange={(value) => {
+            onChange({ strategyId: value === "" ? undefined : value });
           }}
-          className="text-text-secondary focus-visible:border-accent-primary border-glass-border hover:border-glass-border h-8 rounded-lg border bg-transparent px-2 text-xs outline-none"
-        >
-          <option value="">Все стратегии</option>
-          {strategyOptions.map((option) => (
-            <option key={option.id} value={option.id}>
-              {option.name}
-            </option>
-          ))}
-        </select>
+        />
 
         <div className="ml-auto flex flex-wrap items-center gap-3">
           <span className="flex items-center gap-2">
@@ -197,10 +165,10 @@ function LogFilters({
             key={level}
             label={LOG_LEVEL_LABELS[level]}
             count={levelCounts[level]}
+            variant={LEVEL_VARIANTS[level]}
             active={
               filter.levels === undefined || filter.levels.includes(level)
             }
-            accent={LOG_LEVEL_DOT_CLASSES[level]}
             onToggle={() => {
               onChange({ levels: toggleIn(filter.levels, level) });
             }}
@@ -214,6 +182,7 @@ function LogFilters({
             key={source}
             label={LOG_SOURCE_LABELS[source]}
             count={sourceCounts[source]}
+            variant="neutral"
             active={
               filter.sources === undefined || filter.sources.includes(source)
             }

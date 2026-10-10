@@ -6,6 +6,7 @@ import LogList, { type LogListHandle } from "@/components/logs/LogList";
 import LogsEmptyState from "@/components/logs/LogsEmptyState";
 import LogsToast, { type ToastTone } from "@/components/logs/LogsToast";
 import ScrollToBottomButton from "@/components/logs/ScrollToBottomButton";
+import { Heading, Text } from "@/components/ui";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
 import { COPY_TOAST_DURATION_MS } from "@/lib/constants";
 import { formatLogLine } from "@/lib/format";
@@ -113,12 +114,10 @@ export default function Logs() {
   return (
     <section className="flex min-h-0 flex-1 flex-col gap-3">
       <div className="flex flex-col gap-1">
-        <h1 className="text-text-primary text-3xl font-bold tracking-tight">
-          Логи
-        </h1>
-        <p className="text-text-secondary text-sm">
+        <Heading level={1}>Логи</Heading>
+        <Text variant="body" size="sm" className="text-text-secondary">
           Логи работы стратегий в реальном времени
-        </p>
+        </Text>
       </div>
 
       <LogFilters

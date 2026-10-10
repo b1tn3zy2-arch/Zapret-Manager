@@ -27,7 +27,7 @@ function LogRowImpl({ entry, query, isEven, onCopy }: LogRowProps) {
       }}
       style={{
         height: LOG_ROW_HEIGHT,
-        backgroundColor: isEven ? "transparent" : "rgba(255, 255, 255, 0.02)",
+        backgroundColor: isEven ? "transparent" : "var(--color-glass-bg)",
       }}
       className={cn(
         "log-row text-text-secondary hover:bg-glass-hover focus-visible:bg-glass-hover",

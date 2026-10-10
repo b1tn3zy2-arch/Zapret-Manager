@@ -4,6 +4,8 @@ export { Button } from "./Button";
 export type { ButtonProps } from "./Button";
 export { Card } from "./Card";
 export type { CardProps } from "./Card";
+export { default as FilterChip } from "./FilterChip";
+export type { FilterChipProps, FilterChipVariant } from "./FilterChip";
 export { default as Heading } from "./Heading";
 export type { HeadingProps } from "./Heading";
 export { Input } from "./Input";
