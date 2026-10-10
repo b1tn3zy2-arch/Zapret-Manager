@@ -6,6 +6,7 @@ export * from "./monitor";
 export * from "./resources";
 export * from "./settings";
 export * from "./strategy";
+export * from "./strategy-config";
 export * from "./tray";
 export * from "./update";
 export * from "./vpn";

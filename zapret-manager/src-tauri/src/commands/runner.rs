@@ -15,7 +15,8 @@ use crate::process_manager::{ProcessManager, RunningProcess};
 use crate::security::paths::{validate_strategy_file, validate_strategy_id};
 use crate::security::rate_limit::check_run_strategy;
 use crate::security::sanitize::escape_for_cmd;
-use crate::winapi_helpers::{is_pid_alive, shell_execute_runas};
+use crate::strategy::runner::{cleanup_games, prepare_run, resolve_winws_path, GameRequest};
+use crate::winapi_helpers::{args_to_command_line, is_pid_alive, shell_execute_runas};
 
 pub const EVENT_STRATEGY_STARTED: &str = "strategy-started";
 pub const EVENT_STRATEGY_STOPPED: &str = "strategy-stopped";
@@ -170,6 +171,116 @@ pub async fn run_strategy(
     })
 }
 
+fn games_summary(games: &crate::strategy::games_hostlist::GamesPayload) -> String {
+    let target = games
+        .hostlist
+        .as_ref()
+        .map(|path| path.display().to_string())
+        .unwrap_or_default();
+
+    format!(
+        "Игры: домены {}, IP {} → {}",
+        games.domains_count, games.ips_count, target
+    )
+}
+
+#[tauri::command]
+pub async fn run_strategy_native(
+    app: AppHandle,
+    state: State<'_, ProcessManager>,
+    scan: State<'_, ScanState>,
+    strategy_id: String,
+    path: String,
+    games: Vec<GameRequest>,
+) -> AppResult<RunResult> {
+    validate_strategy_id(&strategy_id)?;
+    check_run_strategy(&strategy_id)?;
+
+    if state.contains(&strategy_id) {
+        return Err(AppError::custom("Стратегия уже запущена"));
+    }
+
+    let allowed_root = scan.root();
+    let bat_path = validate_strategy_file(Path::new(&path), allowed_root.as_deref())?;
+    let working_dir = bat_path.parent().map(Path::to_path_buf);
+
+    let content = tokio::fs::read_to_string(&bat_path)
+        .await
+        .map_err(AppError::Io)?;
+
+    let dir = ensure_log_dir().await?;
+    let started_at = now_millis();
+    let log_path = dir.join(format!("{strategy_id}_{started_at}.log"));
+
+    ensure_empty_log(&log_path).await?;
+
+    let prepared = prepare_run(&bat_path, &content, &games, &log_path)?;
+    let fallback_dir = working_dir.as_deref().unwrap_or_else(|| Path::new("."));
+    let winws_path = resolve_winws_path(&prepared.config, fallback_dir);
+
+    if !winws_path.is_file() {
+        return Err(AppError::custom(format!(
+            "winws.exe не найден: {}",
+            winws_path.display()
+        )));
+    }
+
+    let command_line = args_to_command_line(&prepared.arguments);
+
+    tracing::info!(
+        "Запуск winws.exe напрямую для стратегии {strategy_id}: {}",
+        prepared.config.source_filename
+    );
+
+    let launched = tokio::task::spawn_blocking({
+        let program = winws_path.to_string_lossy().to_string();
+        let arguments = command_line.clone();
+        move || shell_execute_runas(&program, &arguments, working_dir.as_deref())
+    })
+    .await
+    .map_err(|error| AppError::custom(error.to_string()))?;
+
+    let (handle, pid) = launched?;
+
+    let mut startup_lines: Vec<crate::commands::log_reader::LogLine> = vec![strategy_line(
+        &strategy_id,
+        "success",
+        format!(
+            "Встроенный движок: winws.exe запущен напрямую (PID {pid}), групп фильтров {}",
+            prepared.config.filter_groups_count()
+        ),
+    )];
+
+    if prepared.games.domains_count > 0 || prepared.games.ips_count > 0 {
+        startup_lines.push(strategy_line(
+            &strategy_id,
+            "info",
+            games_summary(&prepared.games),
+        ));
+    }
+
+    let _ = app.emit(EVENT_STRATEGY_LOG, startup_lines);
+
+    state.insert(
+        strategy_id.clone(),
+        RunningProcess {
+            pid,
+            log_path: log_path.clone(),
+            started_at,
+            handle,
+        },
+    );
+
+    spawn_log_reader(app.clone(), strategy_id.clone(), log_path.clone());
+
+    let _ = app.emit(EVENT_STRATEGY_STARTED, &strategy_id);
+
+    Ok(RunResult {
+        pid,
+        log_path: log_path.to_string_lossy().to_string(),
+    })
+}
+
 #[tauri::command]
 pub async fn stop_strategy(
     app: AppHandle,
@@ -181,6 +292,7 @@ pub async fn stop_strategy(
     state.terminate(&strategy_id);
 
     let killed = spawn_blocking_kill().await?;
+    cleanup_games();
 
     let message = if killed > 0 {
         format!(
@@ -280,6 +392,8 @@ pub async fn kill_winws_for_shutdown() -> usize {
 }
 
 pub async fn cleanup_orphans(app: &AppHandle, manager: &ProcessManager) {
+    cleanup_games();
+
     let stale = manager.ids();
 
     if !stale.is_empty() {

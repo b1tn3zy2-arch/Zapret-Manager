@@ -2,13 +2,14 @@ import { invoke } from "@tauri-apps/api/core";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { enabledGames } from "@/lib/gameUtils";
 import { useGamesInjector } from "@/hooks/useGamesInjector";
 import { useLogsStore } from "@/stores/useLogsStore";
 import { useStrategiesStore } from "@/stores/useStrategiesStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import { useVpnStore } from "@/stores/useVpnStore";
 import { toErrorMessage } from "@/lib/utils";
-import type { LogLevel } from "@/types";
+import type { GameSettings, LogLevel } from "@/types";
 
 interface RunResult {
   pid: number;
@@ -30,6 +31,12 @@ interface IncomingLogLine {
   strategyId: string;
 }
 
+interface NativeGamePayload {
+  name: string;
+  domains: string[];
+  ips: string[];
+}
+
 const UAC_CANCELLED_MARKER = "отменён";
 
 export interface UseStrategyRunnerResult {
@@ -39,6 +46,22 @@ export interface UseStrategyRunnerResult {
   run: (strategyId: string, path: string) => Promise<void>;
   stop: (strategyId: string, path: string) => Promise<void>;
   checkStatus: (strategyId: string) => Promise<ProcessStatus | null>;
+}
+
+function toNativeGames(games: GameSettings[]): NativeGamePayload[] {
+  return enabledGames(games).map((game) => ({
+    name: game.name,
+    domains: game.domains,
+    ips: game.ipRanges,
+  }));
+}
+
+function hasNativeConfig(strategyId: string): boolean {
+  const strategy = useStrategiesStore
+    .getState()
+    .strategies.find((item) => item.id === strategyId);
+
+  return (strategy?.config?.groups.length ?? 0) > 0;
 }
 
 export function useStrategyRunner(): UseStrategyRunnerResult {
@@ -52,6 +75,9 @@ export function useStrategyRunner(): UseStrategyRunnerResult {
   const addLogs = useLogsStore((state) => state.addLogs);
   const addLog = useLogsStore((state) => state.addLog);
   const games = useSettingsStore((state) => state.settings.games);
+  const engine = useSettingsStore(
+    (state) => state.settings.advanced.strategyEngine
+  );
   const hasEnabledGames = games.some((game) => game.enabled);
   const autoRestore = games.some((game) => game.enabled && game.autoRestore);
   const setLastStrategyId = useSettingsStore(
@@ -111,6 +137,41 @@ export function useStrategyRunner(): UseStrategyRunnerResult {
     };
   }, [addLogs, setPid, setStatus]);
 
+  const launch = useCallback(
+    async (strategyId: string, path: string): Promise<RunResult> => {
+      const native = engine === "native" && hasNativeConfig(strategyId);
+
+      if (native) {
+        return invoke<RunResult>("run_strategy_native", {
+          strategyId,
+          path,
+          games: toNativeGames(games),
+        });
+      }
+
+      if (engine === "native") {
+        addLog({
+          level: "warn",
+          source: "strategy",
+          message:
+            "Конфиг стратегии не распознан — запускаю legacy .bat через cmd.exe",
+          strategyId,
+        });
+      }
+
+      if (hasEnabledGames) {
+        const summary = await injectAll(path);
+
+        if (summary === null) {
+          throw new Error("Инъекция домен игр не удалась");
+        }
+      }
+
+      return invoke<RunResult>("run_strategy", { strategyId, path });
+    },
+    [addLog, engine, games, hasEnabledGames, injectAll]
+  );
+
   const run = useCallback(
     async (strategyId: string, path: string) => {
       if (busy.current) {
@@ -136,20 +197,7 @@ export function useStrategyRunner(): UseStrategyRunnerResult {
           });
         }
 
-        if (hasEnabledGames) {
-          const summary = await injectAll(path);
-
-          if (summary === null) {
-            setStatus(strategyId, "idle");
-
-            return;
-          }
-        }
-
-        const result = await invoke<RunResult>("run_strategy", {
-          strategyId,
-          path,
-        });
+        const result = await launch(strategyId, path);
 
         setStatus(strategyId, "running");
         setPid(strategyId, result.pid);
@@ -179,15 +227,7 @@ export function useStrategyRunner(): UseStrategyRunnerResult {
         setIsStarting(false);
       }
     },
-    [
-      addLog,
-      hasEnabledGames,
-      injectAll,
-      setLastStrategyId,
-      setPid,
-      setStatus,
-      setStrategyError,
-    ]
+    [addLog, launch, setLastStrategyId, setPid, setStatus, setStrategyError]
   );
 
   const stop = useCallback(
@@ -212,7 +252,7 @@ export function useStrategyRunner(): UseStrategyRunnerResult {
           strategyId,
         });
 
-        if (hasEnabledGames && autoRestore) {
+        if (engine === "legacy" && hasEnabledGames && autoRestore) {
           await restore(path);
         }
       } catch (caught) {
@@ -229,7 +269,7 @@ export function useStrategyRunner(): UseStrategyRunnerResult {
         setIsStopping(false);
       }
     },
-    [addLog, autoRestore, hasEnabledGames, restore, setPid, setStatus]
+    [addLog, autoRestore, engine, hasEnabledGames, restore, setPid, setStatus]
   );
 
   const checkStatus = useCallback(

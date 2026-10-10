@@ -1,3 +1,5 @@
+import type { StrategyConfig } from "./strategy-config";
+
 export type ServiceType = "discord" | "youtube" | "outlast-trials" | "general";
 
 export type StrategyStatus =
@@ -52,6 +54,7 @@ export interface Strategy {
   version?: string | undefined;
   size: number;
   modifiedAt?: number | undefined;
+  config?: StrategyConfig | null | undefined;
 }
 
 export type StrategyInput = Omit<

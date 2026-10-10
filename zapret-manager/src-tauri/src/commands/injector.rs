@@ -276,3 +276,43 @@ pub async fn extract_config_paths(strategy_path: String) -> AppResult<Vec<String
         .map(|target| target.path)
         .collect())
 }
+
+pub fn migrate_legacy_inject(lists_dir: &Path) -> usize {
+    let Ok(entries) = std::fs::read_dir(lists_dir) else {
+        return 0;
+    };
+
+    let mut cleaned = 0usize;
+
+    for entry in entries.flatten() {
+        let path = entry.path();
+        let name = path
+            .file_name()
+            .map(|value| value.to_string_lossy().to_string())
+            .unwrap_or_default();
+
+        if !name.to_ascii_lowercase().ends_with(".txt") || name.contains(".bak") {
+            continue;
+        }
+
+        let Ok(content) = std::fs::read_to_string(&path) else {
+            continue;
+        };
+
+        let stripped = remove_marker_section(&content);
+
+        if stripped == content {
+            continue;
+        }
+
+        if std::fs::write(&path, stripped).is_ok() {
+            cleaned += 1;
+            tracing::info!(
+                "Миграция инъекций: очищена старая секция в {}",
+                path.display()
+            );
+        }
+    }
+
+    cleaned
+}

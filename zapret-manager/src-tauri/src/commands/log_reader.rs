@@ -1,12 +1,12 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use serde::Serialize;
-use tauri::{AppHandle, Emitter};
-use tokio::io::{AsyncBufReadExt, BufReader};
-use tokio::task::JoinHandle;
+use tauri::{AppHandle, Emitter, Manager};
+use tokio::io::{AsyncReadExt, AsyncSeekExt};
 
 use crate::commands::winws::now_millis;
-use crate::constants::{LOG_READ_INTERVAL_MS, MAX_LOG_LINES_PER_EVENT};
+use crate::constants::{LOG_READ_INTERVAL_MS, LOG_TAIL_IDLE_EXIT_TICKS, MAX_LOG_LINES_PER_EVENT};
+use crate::process_manager::ProcessManager;
 
 pub const EVENT_STRATEGY_LOG: &str = "strategy-log";
 
@@ -74,78 +74,148 @@ pub fn strategy_line(strategy_id: &str, level: &str, message: String) -> LogLine
     }
 }
 
+pub fn split_complete_lines(buffer: &mut String, chunk: &str) -> Vec<String> {
+    buffer.push_str(chunk);
+
+    let mut lines: Vec<String> = Vec::new();
+
+    while let Some(index) = buffer.find('\n') {
+        let line = buffer[..index].trim_end_matches('\r').to_string();
+        buffer.drain(..=index);
+
+        if !line.trim().is_empty() {
+            lines.push(line);
+        }
+    }
+
+    lines
+}
+
+async fn read_new_lines(
+    path: &Path,
+    position: &mut u64,
+    partial: &mut String,
+) -> Option<Vec<String>> {
+    let mut file = tokio::fs::File::open(path).await.ok()?;
+
+    file.seek(std::io::SeekFrom::Start(*position)).await.ok()?;
+
+    let mut bytes: Vec<u8> = Vec::new();
+    file.read_to_end(&mut bytes).await.ok()?;
+
+    *position += bytes.len() as u64;
+    let chunk = String::from_utf8_lossy(&bytes).to_string();
+
+    Some(split_complete_lines(partial, &chunk))
+}
+
+fn to_log_lines(strategy_id: &str, messages: Vec<String>) -> Vec<LogLine> {
+    messages
+        .into_iter()
+        .map(|message| LogLine {
+            timestamp: now_millis(),
+            level: detect_level(&message).to_string(),
+            source: "strategy".to_string(),
+            message,
+            strategy_id: strategy_id.to_string(),
+        })
+        .collect()
+}
+
+fn emit_batch(app: &AppHandle, lines: Vec<LogLine>) {
+    if lines.is_empty() {
+        return;
+    }
+
+    for chunk in lines.chunks(MAX_LOG_LINES_PER_EVENT) {
+        let _ = app.emit(EVENT_STRATEGY_LOG, chunk);
+    }
+}
+
 pub fn spawn_log_reader(
     app: AppHandle,
     strategy_id: String,
     log_path: PathBuf,
-) -> JoinHandle<()> {
-    tokio::spawn(async move {
-        let file = match tokio::fs::File::open(&log_path).await {
-            Ok(value) => value,
-            Err(error) => {
-                tracing::warn!(
-                    "Не удалось открыть лог {}: {error}",
-                    log_path.display()
-                );
-                return;
-            }
-        };
-
-        let (sender, mut receiver) = tokio::sync::mpsc::channel::<LogLine>(512);
-        let reader_id = strategy_id.clone();
-
-        let reader = tokio::spawn(async move {
-            let mut lines = BufReader::new(file).lines();
-
-            while let Ok(Some(line)) = lines.next_line().await {
-                let trimmed = line.trim_end().to_string();
-                if trimmed.trim().is_empty() {
-                    continue;
-                }
-
-                let entry = LogLine {
-                    timestamp: now_millis(),
-                    level: detect_level(&trimmed).to_string(),
-                    source: "strategy".to_string(),
-                    message: trimmed,
-                    strategy_id: reader_id.clone(),
-                };
-
-                if sender.send(entry).await.is_err() {
-                    break;
-                }
-            }
-        });
-
-        let mut pending: Vec<LogLine> = Vec::new();
-        let mut interval =
-            tokio::time::interval(std::time::Duration::from_millis(LOG_READ_INTERVAL_MS));
+) -> tauri::async_runtime::JoinHandle<()> {
+    tauri::async_runtime::spawn(async move {
+        let mut position: u64 = 0;
+        let mut partial = String::new();
+        let mut idle_ticks: usize = 0;
+        let interval = std::time::Duration::from_millis(LOG_READ_INTERVAL_MS);
 
         loop {
-            tokio::select! {
-                entry = receiver.recv() => {
-                    match entry {
-                        Some(line) => pending.push(line),
-                        None => break,
-                    }
-                }
-                _ = interval.tick() => {
-                    while !pending.is_empty() {
-                        let take = MAX_LOG_LINES_PER_EVENT.min(pending.len());
-                        let batch: Vec<LogLine> = pending.drain(..take).collect();
+            let fresh = read_new_lines(&log_path, &mut position, &mut partial).await;
 
-                        if app.emit(EVENT_STRATEGY_LOG, &batch).is_err() {
-                            return;
-                        }
-                    }
+            match fresh {
+                Some(messages) if !messages.is_empty() => {
+                    idle_ticks = 0;
+                    emit_batch(&app, to_log_lines(&strategy_id, messages));
+                }
+                Some(_) => {
+                    idle_ticks += 1;
+                }
+                None => {
+                    idle_ticks += 1;
                 }
             }
-        }
 
-        if !pending.is_empty() {
-            let _ = app.emit(EVENT_STRATEGY_LOG, &pending);
-        }
+            let tracked = app
+                .state::<ProcessManager>()
+                .contains(&strategy_id);
 
-        reader.abort();
+            if !tracked && idle_ticks >= LOG_TAIL_IDLE_EXIT_TICKS {
+                break;
+            }
+
+            tokio::time::sleep(interval).await;
+        }
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_split_complete_lines_basic() {
+        let mut buffer = String::new();
+        let lines = split_complete_lines(&mut buffer, "one\ntwo\n");
+
+        assert_eq!(lines, vec!["one", "two"]);
+        assert!(buffer.is_empty());
+    }
+
+    #[test]
+    fn test_split_complete_lines_keeps_partial() {
+        let mut buffer = String::new();
+        let lines = split_complete_lines(&mut buffer, "one\ntw");
+
+        assert_eq!(lines, vec!["one"]);
+        assert_eq!(buffer, "tw");
+    }
+
+    #[test]
+    fn test_split_complete_lines_across_chunks() {
+        let mut buffer = String::new();
+        split_complete_lines(&mut buffer, "hel");
+        let lines = split_complete_lines(&mut buffer, "lo\nworld\n");
+
+        assert_eq!(lines, vec!["hello", "world"]);
+    }
+
+    #[test]
+    fn test_split_complete_lines_strips_cr() {
+        let mut buffer = String::new();
+        let lines = split_complete_lines(&mut buffer, "one\r\ntwo\r\n");
+
+        assert_eq!(lines, vec!["one", "two"]);
+    }
+
+    #[test]
+    fn test_split_complete_lines_skips_empty() {
+        let mut buffer = String::new();
+        let lines = split_complete_lines(&mut buffer, "one\n\n  \ntwo\n");
+
+        assert_eq!(lines, vec!["one", "two"]);
+    }
 }

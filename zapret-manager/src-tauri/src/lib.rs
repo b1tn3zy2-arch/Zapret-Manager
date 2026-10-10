@@ -6,6 +6,7 @@ mod error;
 mod logger;
 mod process_manager;
 pub mod security;
+mod strategy;
 pub mod tray;
 mod tray_menu;
 mod window_behavior;
@@ -40,6 +41,7 @@ pub fn run() {
             commands::scanner::scan_strategies,
             commands::scanner::get_default_strategies_path,
             commands::runner::run_strategy,
+            commands::runner::run_strategy_native,
             commands::runner::stop_strategy,
             commands::runner::check_strategy_status,
             commands::runner::list_running_processes,
@@ -127,14 +129,28 @@ commands::resources_commands::read_license_text,
 
             let resources_handle = handle.clone();
             tauri::async_runtime::spawn(async move {
-                match commands::resources_commands::init_resources(resources_handle).await {
-                    Ok(report) => tracing::info!(
-                        "Ресурсы готовы: версия {}, стратегий {}, первый запуск {}, распаковано {} байт",
-                        report.resources_version,
-                        report.strategies_count,
-                        report.first_run,
-                        report.extracted_bytes
-                    ),
+                match commands::resources_commands::init_resources(resources_handle.clone()).await {
+                    Ok(report) => {
+                        tracing::info!(
+                            "Ресурсы готовы: версия {}, стратегий {}, первый запуск {}, распаковано {} байт",
+                            report.resources_version,
+                            report.strategies_count,
+                            report.first_run,
+                            report.extracted_bytes
+                        );
+
+                        if let Ok(root) = resources_handle.path().app_data_dir() {
+                            let cleaned = commands::injector::migrate_legacy_inject(
+                                &root.join("strategies").join("lists"),
+                            );
+
+                            if cleaned > 0 {
+                                tracing::info!(
+                                    "Одноразовая миграция инъекций: очищено файлов {cleaned}"
+                                );
+                            }
+                        }
+                    }
                     Err(error) => tracing::warn!("Ресурсы не инициализированы: {error}"),
                 }
             });

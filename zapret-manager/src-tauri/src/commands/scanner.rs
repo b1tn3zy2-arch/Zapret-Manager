@@ -8,6 +8,7 @@ use tokio::task::JoinSet;
 use crate::commands::parser::{analyze, deduplicate_names, is_excluded};
 use crate::constants::{MAX_CONCURRENT_READS, MAX_FILE_SIZE_FOR_PARSE};
 use crate::error::{AppError, AppResult};
+use crate::strategy::config::StrategyConfig;
 
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -24,6 +25,7 @@ pub struct StrategyInfo {
     pub version: Option<String>,
     pub size: u64,
     pub modified_at: Option<u64>,
+    pub config: Option<StrategyConfig>,
 }
 
 pub(super) struct ScanError {

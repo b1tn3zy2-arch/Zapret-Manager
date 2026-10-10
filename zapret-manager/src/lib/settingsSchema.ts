@@ -152,6 +152,9 @@ const advancedSchema = z.object({
     .default(DEFAULT_ADVANCED.strategyStopTimeoutSec),
   winwsExtraArgs: z.array(z.string()).default(DEFAULT_ADVANCED.winwsExtraArgs),
   disableUpdateCheck: z.boolean().default(DEFAULT_ADVANCED.disableUpdateCheck),
+  strategyEngine: z
+    .enum(["native", "legacy"])
+    .default(DEFAULT_ADVANCED.strategyEngine),
 });
 
 const appSettingsSchema = z.object({

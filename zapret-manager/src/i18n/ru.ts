@@ -223,6 +223,13 @@ export const ru = {
       disableUpdate: "Отключить проверку обновлений",
       disableUpdateHint:
         "Приложение перестанет проверять новые релизы стратегий",
+      engine: {
+        title: "Движок стратегий",
+        description:
+          "Встроенный движок запускает winws.exe напрямую без .bat и cmd.exe. Legacy запускает .bat как раньше",
+        native: "Встроенный",
+        legacy: "Legacy .bat",
+      },
       verify: "Проверить конфиги",
       verifyTitle: "Проверка конфигов",
       danger: "Опасная зона",
@@ -269,6 +276,15 @@ export const ru = {
       welcomeEngine: "Движок winws.exe и WinDivert",
       welcomeConfigs: "Списки доменов и шаблоны",
       welcomeVersion: "Ресурсы версии {version}",
+    },
+  },
+  strategies: {
+    engine: {
+      native: "Native",
+      legacy: ".bat",
+      configMissing: "Не распознано",
+      configMissingHint:
+        "Конфиг стратегии не распознан — запуск пойдёт через legacy .bat",
     },
   },
   dashboard: {

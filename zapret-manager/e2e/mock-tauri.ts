@@ -44,6 +44,19 @@ export async function mockTauri(
             version: null,
             size: 2048,
             modifiedAt: 1_700_000_000_000,
+            config: {
+              sourceFilename: `strategy-${index}.bat`,
+              winwsPath: `${strategiesFolder}\\bin\\winws.exe`,
+              wfTcp: "80,443",
+              wfUdp: "443",
+              groups: [
+                {
+                  args: ["--filter-tcp=80,443", "--dpi-desync=fake"],
+                  usesGeneralHostlist: true,
+                  usesAllIpset: false,
+                },
+              ],
+            },
           })),
         init_resources: () => ({
           ok: true,
@@ -115,6 +128,26 @@ export async function mockTauri(
               event: { id: 1, event: "strategy-log", windowLabel: "main" },
               id: 1,
               payload: [
+                { level: "info", message: "Запуск стратегии" },
+                { level: "info", message: "zapret поднят на порту 7911" },
+                { level: "warning", message: "Инъекция недоступна" },
+              ],
+            });
+          }
+
+          return { pid: 4242, logPath: "C:\\temp\\log.txt" };
+        },
+        run_strategy_native: () => {
+          for (const handler of listeners.values()) {
+            handler({
+              event: { id: 1, event: "strategy-log", windowLabel: "main" },
+              id: 1,
+              payload: [
+                {
+                  level: "success",
+                  message:
+                    "Встроенный движок: winws.exe запущен напрямую (PID 4242), групп фильтров 1",
+                },
                 { level: "info", message: "Запуск стратегии" },
                 { level: "info", message: "zapret поднят на порту 7911" },
                 { level: "warning", message: "Инъекция недоступна" },

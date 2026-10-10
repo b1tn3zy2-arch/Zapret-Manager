@@ -65,6 +65,7 @@ export const DEFAULT_ADVANCED: AdvancedSettings = {
   strategyStopTimeoutSec: 10,
   winwsExtraArgs: [],
   disableUpdateCheck: false,
+  strategyEngine: "native",
 };
 
 export const DEFAULT_LOG_BUFFER_SIZE = 10_000;

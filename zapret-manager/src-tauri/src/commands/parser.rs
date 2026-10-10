@@ -185,6 +185,22 @@ pub(crate) fn analyze(
     };
 
     let base = strip_bat_extension(&filename);
+    let working_dir = path
+        .parent()
+        .map(Path::to_path_buf)
+        .unwrap_or_else(|| PathBuf::from("."));
+
+    let config = match crate::strategy::parser::parse_bat(
+        &content,
+        &filename,
+        &working_dir,
+    ) {
+        Ok(value) => Some(value),
+        Err(error) => {
+            tracing::debug!("Конфиг не распознан для {filename}: {error}");
+            None
+        }
+    };
 
     StrategyInfo {
         id: build_id(&path),
@@ -199,6 +215,7 @@ pub(crate) fn analyze(
         version: extract_version(&content),
         size,
         modified_at,
+        config,
     }
 }
 

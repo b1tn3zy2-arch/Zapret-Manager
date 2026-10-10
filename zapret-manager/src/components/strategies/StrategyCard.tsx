@@ -1,5 +1,6 @@
 import { Gamepad2, Play, RefreshCw, Square } from "lucide-react";
 
+import EngineBadge from "@/components/strategies/EngineBadge";
 import { Badge, Button, Card, Spinner, Tooltip } from "@/components/ui";
 import {
   capitalizeService,
@@ -148,6 +149,8 @@ export default function StrategyCard({
             {capitalizeService(service)}
           </Badge>
         ))}
+
+        <EngineBadge strategy={strategy} />
 
         {outlastEnabled ? (
           <Tooltip content="Домены Outlast Trials будут добавлены в конфиги при запуске">

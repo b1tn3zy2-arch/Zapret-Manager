@@ -47,6 +47,8 @@ export interface VpnSettings {
   lastConnectedAt: number | null;
 }
 
+export type StrategyEngine = "native" | "legacy";
+
 export interface AdvancedSettings {
   loggingLevel: LogLevel;
   logRetentionDays: number;
@@ -54,6 +56,7 @@ export interface AdvancedSettings {
   strategyStopTimeoutSec: number;
   winwsExtraArgs: string[];
   disableUpdateCheck: boolean;
+  strategyEngine: StrategyEngine;
 }
 
 export interface GeneralSettings {

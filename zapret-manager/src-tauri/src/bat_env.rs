@@ -65,6 +65,54 @@ fn is_dp0_marker(chars: &[char], index: usize) -> bool {
         .eq_ignore_ascii_case("~dp0")
 }
 
+fn batch_modifier(
+    chars: &[char],
+    index: usize,
+    script_dir: &Path,
+) -> Option<(usize, String)> {
+    if chars.get(index + 1) != Some(&'~') {
+        return None;
+    }
+
+    let mut cursor = index + 2;
+    let mut letters = String::new();
+
+    while let Some(character) = chars.get(cursor) {
+        if character.is_ascii_alphabetic() {
+            letters.push(*character);
+            cursor += 1;
+        } else {
+            break;
+        }
+    }
+
+    if letters.is_empty() {
+        return None;
+    }
+
+    let argument = chars.get(cursor)?;
+
+    if !argument.is_ascii_digit() && *argument != '*' {
+        return None;
+    }
+
+    cursor += 1;
+
+    let consumed = cursor - index;
+    let lowered = letters.to_ascii_lowercase();
+
+    if lowered.contains('n') && !lowered.contains('d') && !lowered.contains('f') {
+        let stem = script_dir
+            .file_name()
+            .map(|value| value.to_string_lossy().to_string())
+            .unwrap_or_else(|| "strategy".to_string());
+
+        return Some((consumed, stem));
+    }
+
+    Some((consumed, dp0_value(script_dir)))
+}
+
 fn expand_once(value: &str, vars: &HashMap<String, String>, script_dir: &Path) -> String {
     let mut result = String::with_capacity(value.len());
     let chars: Vec<char> = value.chars().collect();
@@ -80,6 +128,12 @@ fn expand_once(value: &str, vars: &HashMap<String, String>, script_dir: &Path) -
         if is_dp0_marker(&chars, index) {
             result.push_str(&dp0_value(script_dir));
             index += 5;
+            continue;
+        }
+
+        if let Some((consumed, replacement)) = batch_modifier(&chars, index, script_dir) {
+            result.push_str(&replacement);
+            index += consumed;
             continue;
         }
 

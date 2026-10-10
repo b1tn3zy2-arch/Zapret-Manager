@@ -14,6 +14,10 @@ pub const MAX_LOG_LINES_PER_EVENT: usize = 50;
 
 pub const WINWS_PROCESS_NAME: &str = "winws.exe";
 
+pub const GAME_FILTER_DEFAULT_PORT: &str = "12";
+
+pub const LOG_TAIL_IDLE_EXIT_TICKS: usize = 20;
+
 pub const EXCLUDED_FILENAMES: &[&str] = &["service.bat"];
 
 pub static SERVICE_KEYWORDS: LazyLock<Vec<(&str, Vec<&str>)>> = LazyLock::new(|| {

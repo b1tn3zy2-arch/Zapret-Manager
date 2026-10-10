@@ -222,6 +222,13 @@ export const en: Dictionary = {
       extraArgsHint: "Each argument is passed to winws as is",
       disableUpdate: "Disable update checks",
       disableUpdateHint: "The app will stop looking for new strategy releases",
+      engine: {
+        title: "Strategy engine",
+        description:
+          "The built-in engine runs winws.exe directly without .bat or cmd.exe. Legacy runs .bat as before",
+        native: "Built-in",
+        legacy: "Legacy .bat",
+      },
       verify: "Check configuration files",
       verifyTitle: "Configuration check",
       danger: "Danger zone",
@@ -268,6 +275,15 @@ export const en: Dictionary = {
       welcomeEngine: "winws.exe engine and WinDivert",
       welcomeConfigs: "Domain lists and templates",
       welcomeVersion: "Resources {version}",
+    },
+  },
+  strategies: {
+    engine: {
+      native: "Native",
+      legacy: ".bat",
+      configMissing: "Not parsed",
+      configMissingHint:
+        "Strategy config was not parsed — it will run through legacy .bat",
     },
   },
   dashboard: {

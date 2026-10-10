@@ -15,7 +15,7 @@ import {
   MIN_LOG_RETENTION_DAYS,
 } from "@/lib/settingsSchema";
 import { verifyConfigs } from "@/hooks/useSystemInfo";
-import { toErrorMessage } from "@/lib/utils";
+import { cn, toErrorMessage } from "@/lib/utils";
 import { useLogsStore } from "@/stores/useLogsStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import type { ConfigCheckReport, LogLevel } from "@/types";
@@ -104,6 +104,46 @@ function AdvancedSection() {
       title={t("settings.advanced.title")}
       description={t("settings.advanced.description")}
     >
+      <SettingRow
+        label={t("settings.advanced.engine.title")}
+        description={t("settings.advanced.engine.description")}
+        control={
+          <div
+            role="radiogroup"
+            aria-label={t("settings.advanced.engine.title")}
+            className="flex items-center gap-2"
+          >
+            {(["native", "legacy"] as const).map((value) => {
+              const active = advanced.strategyEngine === value;
+
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  role="radio"
+                  aria-checked={active}
+                  onClick={() => {
+                    updateAdvanced({ strategyEngine: value });
+                  }}
+                  className={cn(
+                    "rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+                    active
+                      ? "border-accent-primary/40 bg-accent-primary/10 text-accent-primary"
+                      : "border-glass-border text-text-secondary hover:text-text-primary"
+                  )}
+                >
+                  {t(
+                    value === "native"
+                      ? "settings.advanced.engine.native"
+                      : "settings.advanced.engine.legacy"
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        }
+      />
+
       <SettingRow
         label={t("settings.advanced.loggingLevel")}
         control={

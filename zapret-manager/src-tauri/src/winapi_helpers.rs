@@ -193,6 +193,44 @@ pub fn is_pid_alive(pid: u32) -> bool {
     ok != 0 && code == STILL_ACTIVE_CODE
 }
 
+fn quote_arg(arg: &str) -> String {
+    if !arg.contains([' ', '\t', '"']) {
+        return arg.to_string();
+    }
+
+    let mut result = String::from("\"");
+    let mut backslashes = 0usize;
+
+    for character in arg.chars() {
+        match character {
+            '\\' => {
+                backslashes += 1;
+                result.push('\\');
+            }
+            '"' => {
+                result.push_str(&"\\".repeat(backslashes + 1));
+                result.push('"');
+                backslashes = 0;
+            }
+            _ => {
+                backslashes = 0;
+                result.push(character);
+            }
+        }
+    }
+
+    result.push_str(&"\\".repeat(backslashes));
+    result.push('"');
+    result
+}
+
+pub fn args_to_command_line(args: &[String]) -> String {
+    args.iter()
+        .map(|arg| quote_arg(arg))
+        .collect::<Vec<String>>()
+        .join(" ")
+}
+
 pub fn count_tcp_connections() -> u32 {
     let mut size: DWORD = 0;
 
@@ -287,5 +325,48 @@ mod tests {
         let first = count_tcp_connections();
         let second = count_tcp_connections();
         assert!(second.abs_diff(first) < 1_000);
+    }
+
+    #[test]
+    fn test_args_to_command_line_simple() {
+        let args = vec![
+            "--wf-tcp=80,443".to_string(),
+            "--dpi-desync=fake".to_string(),
+        ];
+
+        assert_eq!(
+            args_to_command_line(&args),
+            "--wf-tcp=80,443 --dpi-desync=fake"
+        );
+    }
+
+    #[test]
+    fn test_args_to_command_line_quotes_spaces() {
+        let args = vec![r"--hostlist=C:\My Dir\list.txt".to_string()];
+
+        assert_eq!(
+            args_to_command_line(&args),
+            r#""--hostlist=C:\My Dir\list.txt""#
+        );
+    }
+
+    #[test]
+    fn test_args_to_command_line_doubles_trailing_backslashes() {
+        let args = vec![r"C:\dir with space\".to_string()];
+
+        assert_eq!(
+            args_to_command_line(&args),
+            r#""C:\dir with space\\""#
+        );
+    }
+
+    #[test]
+    fn test_quote_arg_escapes_inner_quotes() {
+        let args = vec![r#"say "hi" now"#.to_string()];
+
+        assert_eq!(
+            args_to_command_line(&args),
+            r#""say \"hi\" now""#
+        );
     }
 }

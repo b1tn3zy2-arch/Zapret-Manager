@@ -10,6 +10,9 @@ use std::os::windows::process::CommandExt;
 
 const CREATE_NO_WINDOW: u32 = 0x0800_0000;
 
+#[cfg(test)]
+pub(crate) static WINWS_TEST_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
+
 pub fn now_millis() -> u64 {
     SystemTime::now()
         .duration_since(UNIX_EPOCH)
@@ -74,6 +77,10 @@ mod tests {
 
     #[test]
     fn test_kill_without_processes_is_noop() {
+        let _guard = WINWS_TEST_LOCK
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner());
+
         if find_winws_pids().is_empty() {
             assert_eq!(kill_winws_by_name(), 0);
         }

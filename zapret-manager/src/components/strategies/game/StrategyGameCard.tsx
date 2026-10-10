@@ -7,6 +7,7 @@ import PlayOverlay from "@/components/strategies/game/PlayOverlay";
 import RarityBadge from "@/components/strategies/game/RarityBadge";
 import RarityParticles from "@/components/strategies/game/RarityParticles";
 import StrategyCardBack from "@/components/strategies/game/StrategyCardBack";
+import EngineBadge from "@/components/strategies/EngineBadge";
 import { useBloom } from "@/hooks/useBloom";
 import { useCardTilt } from "@/hooks/useCardTilt";
 import { useChromatic } from "@/hooks/useChromatic";
@@ -187,6 +188,7 @@ function StrategyGameCardImpl({
                   </span>
                 ))}
                 {outlastEnabled ? <OutlastBadge /> : null}
+                <EngineBadge strategy={strategy} />
               </span>
             </span>
           </motion.span>
