@@ -3,11 +3,7 @@ import { Lock, Zap } from "lucide-react";
 
 import { useI18n } from "@/i18n";
 import { usePrefersReducedMotion } from "@/hooks/useDeviceTier";
-import {
-  ANIMATION,
-  MODE_SWITCH_THUMB_MS,
-  type DashboardMode,
-} from "@/lib/constants";
+import { ANIMATION, type DashboardMode } from "@/lib/constants";
 import { SWITCH_STEP_LABELS } from "@/lib/vpnConstants";
 import { cn } from "@/lib/utils";
 import type { SwitchStep } from "@/types";
@@ -41,10 +37,7 @@ export default function ModeSwitcher({
 
   const thumbTransition = reducedMotion
     ? { duration: 0 }
-    : {
-        duration: MODE_SWITCH_THUMB_MS / 1000,
-        ease: ANIMATION.easeOutExpo,
-      };
+    : { type: "spring" as const, stiffness: 380, damping: 32, mass: 0.7 };
 
   return (
     <div className="flex flex-col items-center gap-2">
@@ -56,23 +49,19 @@ export default function ModeSwitcher({
           "w-[clamp(200px,20vw,280px)] rounded-full border p-1"
         )}
       >
-        {isVpn ? (
-          <motion.span
-            key="vpn-thumb"
-            aria-hidden="true"
-            layoutId="mode-thumb"
-            transition={thumbTransition}
-            className="bg-accent-secondary absolute top-1 right-1 bottom-1 w-[calc(50%-4px)] rounded-full shadow-[0_0_16px_rgb(var(--color-accent-secondary-rgb)/0.4)]"
-          />
-        ) : (
-          <motion.span
-            key="dpi-thumb"
-            aria-hidden="true"
-            layoutId="mode-thumb"
-            transition={thumbTransition}
-            className="bg-accent-primary absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] rounded-full shadow-[0_0_16px_rgb(var(--color-accent-primary-rgb)/0.4)]"
-          />
-        )}
+        <motion.span
+          aria-hidden="true"
+          initial={false}
+          animate={{ x: isVpn ? "100%" : "0%" }}
+          transition={thumbTransition}
+          className={cn(
+            "absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] rounded-full",
+            "transition-[background-color,box-shadow] duration-200",
+            isVpn
+              ? "bg-accent-secondary shadow-[0_0_16px_rgb(var(--color-accent-secondary-rgb)/0.45)]"
+              : "bg-accent-primary shadow-[0_0_16px_rgb(var(--color-accent-primary-rgb)/0.45)]"
+          )}
+        />
 
         {(["dpi", "vpn"] as const).map((value) => {
           const active = value === mode;

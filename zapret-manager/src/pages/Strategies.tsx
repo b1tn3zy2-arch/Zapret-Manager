@@ -13,10 +13,11 @@ import { useCardDealAnimation } from "@/hooks/useCardDealAnimation";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useDeviceTier, usePrefersReducedMotion } from "@/hooks/useDeviceTier";
 import { useFolderPicker } from "@/hooks/useFolderPicker";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useProcessWatcher } from "@/hooks/useProcessWatcher";
 import { useStrategies } from "@/hooks/useStrategies";
 import { useStrategyRunner } from "@/hooks/useStrategyRunner";
-import { CARD_TILT_CARD_LIMIT, SEARCH_DEBOUNCE_MS } from "@/lib/constants";
+import { SEARCH_DEBOUNCE_MS } from "@/lib/constants";
 import { formatCount } from "@/lib/format";
 import { useAppStore } from "@/stores/useAppStore";
 import { useCollectionStats, useFilteredCards } from "@/stores/selectors";
@@ -49,6 +50,7 @@ export default function Strategies() {
   const summary = useCollectionStats();
   const tier = useDeviceTier();
   const reducedMotion = usePrefersReducedMotion();
+  const canHover = useMediaQuery("(hover: hover)");
   const { containerVariants, cardVariants } =
     useCardDealAnimation(reducedMotion);
 
@@ -95,8 +97,7 @@ export default function Strategies() {
   }, [folder, pickFolder]);
 
   const showSkeletons = isLoading && strategies.length === 0;
-  const tiltDisabled =
-    reducedMotion || tier === "low" || cards.length > CARD_TILT_CARD_LIMIT;
+  const tiltDisabled = reducedMotion || tier === "low" || !canHover;
   const particlesDisabled = reducedMotion || tier !== "high";
 
   const services = Array.from(

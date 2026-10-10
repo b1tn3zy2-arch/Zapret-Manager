@@ -93,8 +93,6 @@ function StrategyGameCardImpl({
         setIsHovered(true);
       }}
       onMouseLeave={handleCardLeave}
-      whileHover={motionDisabled ? { scale: 1 } : { scale: 1.03, zIndex: 10 }}
-      transition={{ duration: 0.2, ease: "easeOut" }}
       className={cn(
         "strategy-card relative [perspective:1000px]",
         isRunning && !motionDisabled && "card-running-pulse"
@@ -102,131 +100,147 @@ function StrategyGameCardImpl({
       style={{ width: "100%", aspectRatio: String(CARD_ASPECT_RATIO) }}
     >
       <motion.div
-        className="relative h-full w-full [transform-style:preserve-3d]"
-        animate={{ rotateY: flipped ? 180 : 0 }}
-        transition={motionDisabled ? INSTANT_TRANSITION : FLIP_TRANSITION}
+        {...(motionDisabled
+          ? {}
+          : {
+              whileHover: {
+                scale: 1.03,
+                zIndex: 10,
+                boxShadow: "0 20px 40px rgba(0, 0, 0, 0.35)",
+              },
+              whileTap: { scale: 0.99 },
+            })}
+        transition={{ duration: 0.2, ease: "easeOut" }}
+        style={{
+          rotateX,
+          rotateY,
+          transformStyle: "preserve-3d",
+          willChange: isInteractive ? "transform" : "auto",
+        }}
+        className="relative h-full w-full rounded-xl"
       >
-        <button
-          type="button"
-          onClick={onFlip}
-          aria-label={`Подробнее о стратегии ${strategy.name}`}
-          aria-expanded={flipped}
-          style={{
-            borderColor: palette.border,
-            boxShadow:
-              bloom.boxShadow === ""
-                ? undefined
-                : isRunning
-                  ? bloom.boxShadowHover
-                  : bloom.boxShadow,
-          }}
-          className={cn(
-            "bg-bg-secondary/80 absolute inset-0 flex flex-col gap-3 rounded-xl border p-4 text-left",
-            "focus-visible:ring-accent-primary outline-none backface-hidden focus-visible:ring-1",
-            "group transition-[box-shadow] duration-200 ease-out"
-          )}
+        <motion.div
+          className="relative h-full w-full [transform-style:preserve-3d]"
+          animate={{ rotateY: flipped ? 180 : 0 }}
+          transition={motionDisabled ? INSTANT_TRANSITION : FLIP_TRANSITION}
         >
-          {chromatic.isEnabled ? (
+          <button
+            type="button"
+            onClick={onFlip}
+            aria-label={`Подробнее о стратегии ${strategy.name}`}
+            aria-expanded={flipped}
+            style={{
+              borderColor: palette.border,
+              boxShadow:
+                bloom.boxShadow === ""
+                  ? undefined
+                  : isRunning
+                    ? bloom.boxShadowHover
+                    : bloom.boxShadow,
+            }}
+            className={cn(
+              "bg-bg-secondary/80 absolute inset-0 flex flex-col gap-3 rounded-xl border p-4 text-left",
+              "focus-visible:ring-accent-primary outline-none backface-hidden focus-visible:ring-1",
+              "group transition-[box-shadow] duration-200 ease-out"
+            )}
+          >
+            {chromatic.isEnabled ? (
+              <motion.span
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 rounded-xl opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+                style={{
+                  boxShadow: `inset 0 0 0 1px ${palette.border}`,
+                  filter: chromatic.filter,
+                }}
+              />
+            ) : null}
             <motion.span
               aria-hidden="true"
-              className="pointer-events-none absolute inset-0 rounded-xl opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+              className="pointer-events-none absolute inset-0 rounded-xl"
               style={{
-                boxShadow: `inset 0 0 0 1px ${palette.border}`,
-                filter: chromatic.filter,
+                background: glow,
+                willChange: "background",
               }}
             />
-          ) : null}
-          <motion.span
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 rounded-xl"
-            style={{
-              background: glow,
-              willChange: "background",
-            }}
-          />
 
-          <motion.span
-            className="absolute inset-0 rounded-xl"
-            style={{
-              rotateX,
-              rotateY,
-              transformStyle: "preserve-3d",
-              willChange: isInteractive ? "transform" : "auto",
-            }}
+            <motion.span
+              className="absolute inset-0 rounded-xl"
+              style={{ transformStyle: "preserve-3d" }}
+            >
+              <span className="flex h-full flex-col gap-3 p-4">
+                <span className="flex items-start justify-between gap-2">
+                  <RarityBadge rarity={rarity} compact />
+                  {isRunning ? (
+                    <span className="text-accent-primary border-accent-primary/40 bg-accent-primary/10 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium">
+                      <span className="bg-accent-primary inline-block size-1.5 animate-pulse rounded-full" />
+                      Запущена
+                    </span>
+                  ) : null}
+                </span>
+
+                <span className="flex flex-col gap-1">
+                  <span className="text-text-primary line-clamp-3 text-lg leading-tight font-bold">
+                    {strategy.name}
+                  </span>
+                  <span className="text-text-tertiary truncate font-mono text-[10px]">
+                    {strategy.filename}
+                  </span>
+                </span>
+
+                <span className="block">
+                  <CardStatsBars stats={stats} />
+                </span>
+
+                <span className="mt-auto flex flex-wrap gap-1">
+                  {strategy.services.map((service) => (
+                    <span
+                      key={service}
+                      className="text-text-secondary border-glass-border bg-glass-bg rounded-full border px-2 py-0.5 text-[10px]"
+                    >
+                      {capitalizeService(service)}
+                    </span>
+                  ))}
+                  {outlastEnabled ? <OutlastBadge /> : null}
+                  <EngineBadge strategy={strategy} />
+                </span>
+              </span>
+            </motion.span>
+
+            <RarityParticles
+              rarity={rarity}
+              color={palette.solid}
+              disabled={particlesDisabled}
+            />
+          </button>
+
+          <AnimatePresence>
+            {showOverlay ? (
+              <PlayOverlay
+                key="play-overlay"
+                isRunning={isRunning}
+                isBusy={isBusy}
+                motionDisabled={motionDisabled}
+                onRun={onRun}
+                onStop={onStop}
+              />
+            ) : null}
+          </AnimatePresence>
+
+          <div
+            className="bg-bg-secondary/95 absolute inset-0 flex [transform:rotateY(180deg)] flex-col rounded-xl border p-0 [backface-visibility:hidden]"
+            style={{ borderColor: palette.border }}
           >
-            <span className="flex h-full flex-col gap-3 p-4">
-              <span className="flex items-start justify-between gap-2">
-                <RarityBadge rarity={rarity} compact />
-                {isRunning ? (
-                  <span className="text-accent-primary border-accent-primary/40 bg-accent-primary/10 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium">
-                    <span className="bg-accent-primary inline-block size-1.5 animate-pulse rounded-full" />
-                    Запущена
-                  </span>
-                ) : null}
-              </span>
-
-              <span className="flex flex-col gap-1">
-                <span className="text-text-primary line-clamp-3 text-lg leading-tight font-bold">
-                  {strategy.name}
-                </span>
-                <span className="text-text-tertiary truncate font-mono text-[10px]">
-                  {strategy.filename}
-                </span>
-              </span>
-
-              <span className="block">
-                <CardStatsBars stats={stats} />
-              </span>
-
-              <span className="mt-auto flex flex-wrap gap-1">
-                {strategy.services.map((service) => (
-                  <span
-                    key={service}
-                    className="text-text-secondary border-glass-border bg-glass-bg rounded-full border px-2 py-0.5 text-[10px]"
-                  >
-                    {capitalizeService(service)}
-                  </span>
-                ))}
-                {outlastEnabled ? <OutlastBadge /> : null}
-                <EngineBadge strategy={strategy} />
-              </span>
-            </span>
-          </motion.span>
-
-          <RarityParticles
-            rarity={rarity}
-            color={palette.solid}
-            disabled={particlesDisabled}
-          />
-        </button>
-
-        <AnimatePresence>
-          {showOverlay ? (
-            <PlayOverlay
-              key="play-overlay"
+            <StrategyCardBack
+              strategy={strategy}
               isRunning={isRunning}
               isBusy={isBusy}
-              motionDisabled={motionDisabled}
               onRun={onRun}
               onStop={onStop}
+              onOpenFolder={onOpenFolder}
+              onClose={onFlip}
             />
-          ) : null}
-        </AnimatePresence>
-
-        <div
-          className="bg-bg-secondary/95 absolute inset-0 flex [transform:rotateY(180deg)] flex-col rounded-xl border p-0 [backface-visibility:hidden]"
-          style={{ borderColor: palette.border }}
-        >
-          <StrategyCardBack
-            strategy={strategy}
-            isRunning={isRunning}
-            isBusy={isBusy}
-            onRun={onRun}
-            onStop={onStop}
-            onOpenFolder={onOpenFolder}
-            onClose={onFlip}
-          />
-        </div>
+          </div>
+        </motion.div>
       </motion.div>
     </motion.div>
   );

@@ -140,6 +140,39 @@ fn test_resolve_winws_path_falls_back_to_bin_dir() {
 }
 
 #[test]
+fn test_generated_args_have_no_extended_prefix_when_available() {
+    let Some(appdata) = std::env::var_os("APPDATA") else {
+        return;
+    };
+
+    let dir = PathBuf::from(appdata)
+        .join("com.zapretmanager.app")
+        .join("strategies");
+    let bat = dir.join("general-07-alt.bat");
+
+    if !bat.is_file() {
+        return;
+    }
+
+    let validated =
+        crate::security::paths::validate_strategy_file(&bat, Some(&dir)).expect("validate");
+    let content = fs::read_to_string(&validated).expect("прочитать");
+    let log = std::env::temp_dir().join("zapret-prefix-check.log");
+    let prepared = prepare_run(&validated, &content, &[], &log).expect("prepare");
+
+    assert!(!prepared.config.winws_path.contains(r"\\?\"));
+
+    for arg in &prepared.arguments {
+        assert!(
+            !arg.contains(r"\\?\"),
+            "аргумент содержит extended-префикс: {arg}"
+        );
+    }
+
+    cleanup(&games_dir());
+}
+
+#[test]
 fn test_ensure_user_lists_creates_missing_files() {
     let dir = temp_dir("user-lists");
 

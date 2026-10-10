@@ -54,7 +54,7 @@ export default function PlayOverlay({
         whileTap={motionDisabled ? { scale: 1 } : { scale: 0.95 }}
         transition={{ duration: ANIMATION.fast, ease: "easeOut" }}
         className={cn(
-          "pointer-events-auto flex size-14 items-center justify-center rounded-full",
+          "pointer-events-auto flex size-16 items-center justify-center rounded-full",
           "text-on-accent shadow-lg transition-colors duration-200",
           "disabled:cursor-not-allowed disabled:opacity-60",
           isRunning ? "bg-accent-danger" : "bg-accent-primary"

@@ -88,6 +88,20 @@ pub fn safe_filename(name: &str) -> AppResult<String> {
     Ok(trimmed.to_string())
 }
 
+pub fn strip_extended_prefix(path: PathBuf) -> PathBuf {
+    let raw = path.to_string_lossy();
+
+    if let Some(rest) = raw.strip_prefix(r"\\?\UNC\") {
+        return PathBuf::from(format!(r"\\{rest}"));
+    }
+
+    if let Some(rest) = raw.strip_prefix(r"\\?\") {
+        return PathBuf::from(rest);
+    }
+
+    path
+}
+
 pub fn validate_strategy_file(path: &Path, allowed_root: Option<&Path>) -> AppResult<PathBuf> {
     let extension = path
         .extension()
@@ -112,7 +126,7 @@ pub fn validate_strategy_file(path: &Path, allowed_root: Option<&Path>) -> AppRe
         return Err(security_denied("strategy-file", "путь не является файлом"));
     }
 
-    Ok(real)
+    Ok(strip_extended_prefix(real))
 }
 
 fn normalize(path: &Path) -> PathBuf {

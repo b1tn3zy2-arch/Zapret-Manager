@@ -148,12 +148,10 @@ export const CARD_ASPECT_RATIO = 0.68;
 export const CARD_FLIP_DURATION_MS = 600;
 export const CARD_DEAL_DURATION_MS = 400;
 export const CARD_DEAL_STAGGER_MS = 50;
-export const CARD_TILT_CARD_LIMIT = 12;
 export const CARD_TILT_SPRING = { stiffness: 200, damping: 20 } as const;
 
 export const DASHBOARD_STAGGER_MS = 50;
 export const DASHBOARD_ITEM_DURATION_MS = 400;
-export const MODE_SWITCH_THUMB_MS = 250;
 export const COUNT_UP_DURATION_MS = 400;
 export const MONITOR_COUNT_UP_DURATION_MS = 300;
 

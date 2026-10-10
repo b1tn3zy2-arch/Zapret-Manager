@@ -1,6 +1,8 @@
 use std::path::{Path, PathBuf};
 
-use crate::security::paths::{safe_filename, safe_path, validate_strategy_id};
+use crate::security::paths::{
+    safe_filename, safe_path, strip_extended_prefix, validate_strategy_id,
+};
 use crate::security::rate_limit::RateLimiter;
 use crate::security::sanitize::{
     escape_for_cmd, sanitize_log_message, validate_domain, validate_ip, validate_ip_range,
@@ -206,4 +208,25 @@ fn max_file_size_rejects_directory() {
     let sandbox = Sandbox::new("dir");
 
     assert!(ensure_size(&sandbox.root, MAX_TEXT_FILE_BYTES, "config").is_err());
+}
+
+#[test]
+fn strip_extended_prefix_removes_dos_prefix() {
+    let stripped = strip_extended_prefix(PathBuf::from(r"\\?\C:\zapret\bin\winws.exe"));
+
+    assert_eq!(stripped, PathBuf::from(r"C:\zapret\bin\winws.exe"));
+}
+
+#[test]
+fn strip_extended_prefix_restores_unc() {
+    let stripped = strip_extended_prefix(PathBuf::from(r"\\?\UNC\server\share\file.bat"));
+
+    assert_eq!(stripped, PathBuf::from(r"\\server\share\file.bat"));
+}
+
+#[test]
+fn strip_extended_prefix_keeps_plain_path() {
+    let plain = PathBuf::from(r"C:\zapret\general.bat");
+
+    assert_eq!(strip_extended_prefix(plain.clone()), plain);
 }
