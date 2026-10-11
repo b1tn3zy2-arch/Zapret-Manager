@@ -1,121 +1,148 @@
-import { useCallback, useState } from "react";
-import { RotateCcw } from "lucide-react";
-import { open, save } from "@tauri-apps/plugin-dialog";
-import { readTextFile } from "@tauri-apps/plugin-fs";
+import { useCallback, useMemo, useState } from "react";
+import { invoke } from "@tauri-apps/api/core";
+import { open } from "@tauri-apps/plugin-dialog";
+import { FolderPlus, Image, Pencil, Plus, Trash2 } from "lucide-react";
 
-import AddGameButton from "@/components/settings/games/AddGameButton";
-import GameCard from "@/components/settings/games/GameCard";
+import AddGameDialog from "@/components/settings/games/AddGameDialog";
+import GameBypassSettings from "@/components/settings/games/GameBypassSettings";
+import GameContextMenu, {
+  type GameContextMenuItem,
+} from "@/components/settings/games/GameContextMenu";
+import GameFoldersDialog from "@/components/settings/games/GameFoldersDialog";
+import GameLaunchPrompt from "@/components/settings/games/GameLaunchPrompt";
+import GameScanIndicator from "@/components/settings/games/GameScanIndicator";
+import InstalledGamesGrid from "@/components/settings/games/InstalledGamesGrid";
 import { Button, Heading, Text } from "@/components/ui";
 import { useI18n } from "@/i18n";
-import { useGameLibrary } from "@/hooks/useGameLibrary";
+import { useDeviceTier, usePrefersReducedMotion } from "@/hooks/useDeviceTier";
+import { useGameLauncher } from "@/hooks/useGameLauncher";
+import { useInstalledGames } from "@/hooks/useInstalledGames";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { isBypassEnabled } from "@/lib/installedGames";
 import { useLogsStore } from "@/stores/useLogsStore";
-import { parseGameFile, writeGameFile } from "@/lib/gameFile";
-import { MAX_GAMES } from "@/lib/settingsLimits";
-import { toErrorMessage } from "@/lib/utils";
-import type { GameSettings } from "@/types";
+import { useSettingsStore } from "@/stores/useSettingsStore";
+import type { InstalledGame } from "@/types";
 
-function safeFileName(name: string): string {
-  const slug = name
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-
-  return `${slug === "" ? "game" : slug}.game.json`;
+interface ContextState {
+  game: InstalledGame;
+  x: number;
+  y: number;
 }
 
 export default function Games() {
   const { t } = useI18n();
-  const [expandedId, setExpandedId] = useState<string | null>(null);
-  const { games, updateGame, addGame, removeGame, resetGames } =
-    useGameLibrary();
+  const {
+    games,
+    folders,
+    scanStatus,
+    progress,
+    addManualGame,
+    removeGame,
+    updateGame,
+    addFolder,
+    removeFolder,
+  } = useInstalledGames();
+  const { launchingId, prompt, toast, launch, confirmPrompt, dismissPrompt } =
+    useGameLauncher();
+  const bypassGames = useSettingsStore((state) => state.settings.games);
   const addLog = useLogsStore((state) => state.addLog);
+  const tier = useDeviceTier();
+  const reducedMotion = usePrefersReducedMotion();
+  const canHover = useMediaQuery("(hover: hover)");
+  const [addOpen, setAddOpen] = useState(false);
+  const [foldersOpen, setFoldersOpen] = useState(false);
+  const [context, setContext] = useState<ContextState | null>(null);
+  const [focusId, setFocusId] = useState<string | null>(null);
+  const motionDisabled = reducedMotion || tier === "low" || !canHover;
+  const scanning = scanStatus === "scanning";
 
-  const handleExport = useCallback(
-    (game: GameSettings): void => {
-      void (async () => {
-        try {
-          const path = await save({
-            defaultPath: safeFileName(game.name),
-            filters: [
-              { name: t("settings.games.fileDialog"), extensions: ["json"] },
-            ],
-          });
-
-          if (typeof path !== "string" || path === "") {
-            return;
-          }
-
-          await writeGameFile(path, game);
-          addLog({
-            level: "success",
-            source: "user",
-            message: t("settings.games.exported", { name: game.name }),
-          });
-        } catch (caught) {
-          addLog({
-            level: "error",
-            source: "user",
-            message: t("settings.games.exportFailed", {
-              error: toErrorMessage(caught),
-            }),
-          });
-        }
-      })();
-    },
-    [addLog, t]
+  const bypassByGameId = useMemo(
+    () =>
+      Object.fromEntries(
+        games.map((game) => [game.id, isBypassEnabled(game, bypassGames)])
+      ),
+    [bypassGames, games]
   );
 
-  const handleImport = useCallback(
-    (game: GameSettings): void => {
-      void (async () => {
-        try {
-          const path = await open({
-            multiple: false,
-            directory: false,
-            filters: [
-              { name: t("settings.games.fileDialog"), extensions: ["json"] },
-            ],
-          });
+  const pickCover = useCallback(
+    async (game: InstalledGame): Promise<void> => {
+      const selected = await open({
+        multiple: false,
+        directory: false,
+        filters: [
+          { name: "cover", extensions: ["jpg", "jpeg", "png", "webp"] },
+        ],
+      });
 
-          if (typeof path !== "string" || path === "") {
-            return;
-          }
+      if (typeof selected !== "string") {
+        return;
+      }
 
-          const parsed = parseGameFile(await readTextFile(path));
+      try {
+        const cover = await invoke<string>("import_game_cover", {
+          sourcePath: selected,
+        });
 
-          if (parsed === null) {
-            addLog({
-              level: "error",
-              source: "user",
-              message: t("settings.games.importInvalid"),
-            });
-            return;
-          }
-
-          updateGame(game.id, {
-            domains: parsed.domains,
-            ipRanges: parsed.ipRanges,
-            ports: parsed.ports,
-          });
-          addLog({
-            level: "success",
-            source: "user",
-            message: t("settings.games.imported", { name: game.name }),
-          });
-        } catch (caught) {
-          addLog({
-            level: "error",
-            source: "user",
-            message: t("settings.games.importFailed", {
-              error: toErrorMessage(caught),
-            }),
-          });
-        }
-      })();
+        updateGame(game.id, { coverUrl: cover });
+        addLog({
+          level: "success",
+          source: "user",
+          message: t("settings.games.installed.cover.ready"),
+        });
+      } catch (caught) {
+        addLog({
+          level: "error",
+          source: "user",
+          message: t("settings.games.installed.cover.pickFailed", {
+            error: caught instanceof Error ? caught.message : String(caught),
+          }),
+        });
+      }
     },
-    [addLog, updateGame, t]
+    [addLog, t, updateGame]
   );
+
+  const contextItems = useMemo<GameContextMenuItem[]>(() => {
+    if (context === null) {
+      return [];
+    }
+
+    return [
+      {
+        key: "folder",
+        label: t("settings.games.installed.context.openFolder"),
+        icon: FolderPlus,
+        onSelect: () => {
+          void invoke("open_folder", { path: context.game.installPath });
+        },
+      },
+      {
+        key: "configure",
+        label: t("settings.games.installed.context.configure"),
+        icon: Pencil,
+        onSelect: () => {
+          setFocusId(context.game.gameSettingsId ?? null);
+        },
+      },
+      {
+        key: "cover",
+        label: t("settings.games.installed.context.changeCover"),
+        icon: Image,
+        onSelect: () => {
+          void pickCover(context.game);
+        },
+      },
+      {
+        key: "remove",
+        label: t("settings.games.installed.context.remove"),
+        icon: Trash2,
+        danger: true,
+        onSelect: () => {
+          removeGame(context.game.id);
+        },
+      },
+    ];
+  }, [context, pickCover, removeGame, t]);
 
   return (
     <section className="flex flex-col gap-6 pb-8">
@@ -126,72 +153,123 @@ export default function Games() {
         </Text>
       </header>
 
-      <div className="flex flex-col gap-3">
-        {games.length === 0 ? (
-          <Text variant="body" size="sm" className="text-text-tertiary">
-            {t("settings.games.empty")}
-          </Text>
-        ) : null}
-
-        {games.map((game) => (
-          <GameCard
-            key={game.id}
-            game={game}
-            expanded={expandedId === game.id}
-            onToggleExpand={() => {
-              setExpandedId((current) =>
-                current === game.id ? null : game.id
-              );
-            }}
-            onToggleEnabled={(value) => {
-              updateGame(game.id, { enabled: value });
-            }}
-            onChange={(patch) => {
-              updateGame(game.id, patch);
-            }}
-            onDelete={() => {
-              removeGame(game.id);
-              setExpandedId((current) =>
-                current === game.id ? null : current
-              );
-            }}
-            onImport={() => {
-              handleImport(game);
-            }}
-            onExport={() => {
-              handleExport(game);
-            }}
-          />
-        ))}
-
-        <AddGameButton
-          disabled={games.length >= MAX_GAMES}
-          onClick={() => {
-            const created = addGame();
-
-            setExpandedId(created?.id ?? null);
-          }}
+      <div className="flex flex-wrap items-center gap-3">
+        <GameScanIndicator
+          scanning={scanning}
+          found={games.length}
+          progress={progress}
         />
-
+        <Button
+          size="sm"
+          variant="secondary"
+          icon={<Plus aria-hidden="true" className="size-4" />}
+          onClick={() => {
+            setAddOpen(true);
+          }}
+        >
+          {t("settings.games.installed.add.action")}
+        </Button>
         <Button
           size="sm"
           variant="ghost"
-          onClick={resetGames}
-          icon={
-            <RotateCcw
-              aria-hidden="true"
-              className="size-3.5"
-              strokeWidth={2}
-            />
-          }
+          icon={<FolderPlus aria-hidden="true" className="size-4" />}
+          onClick={() => {
+            setFoldersOpen(true);
+          }}
         >
-          {t("settings.games.reset")}
+          {t("settings.games.installed.folders.add")}
         </Button>
-
-        <Text variant="caption" size="sm" className="text-text-tertiary">
-          {t("settings.games.hint")}
-        </Text>
+        {toast === null ? null : (
+          <span role="status" className="text-text-secondary text-sm">
+            {toast}
+          </span>
+        )}
       </div>
+
+      {games.length === 0 ? (
+        <Text variant="body" size="sm" className="text-text-tertiary">
+          {t("settings.games.installed.empty.title")} —{" "}
+          {t("settings.games.installed.empty.body")}
+        </Text>
+      ) : (
+        <div
+          onContextMenu={(event) => {
+            const card = (event.target as HTMLElement).closest(
+              "[data-game-id]"
+            );
+
+            if (card === null) {
+              return;
+            }
+
+            const game = games.find(
+              (item) => item.id === card.getAttribute("data-game-id")
+            );
+
+            if (game !== undefined) {
+              event.preventDefault();
+              setContext({ game, x: event.clientX, y: event.clientY });
+            }
+          }}
+        >
+          <InstalledGamesGrid
+            games={games}
+            bypassByGameId={bypassByGameId}
+            launchingId={launchingId}
+            motionDisabled={motionDisabled}
+            onLaunch={(game) => {
+              void launch(game);
+            }}
+            onOpenMenu={(game) => {
+              setContext({ game, x: 0, y: 0 });
+            }}
+          />
+        </div>
+      )}
+
+      <GameBypassSettings
+        focusId={focusId}
+        onFocusHandled={() => {
+          setFocusId(null);
+        }}
+      />
+
+      <AddGameDialog
+        open={addOpen}
+        bypassOptions={bypassGames}
+        onClose={() => {
+          setAddOpen(false);
+        }}
+        onAdd={(game) => {
+          addManualGame(game);
+        }}
+      />
+      <GameFoldersDialog
+        open={foldersOpen}
+        folders={folders}
+        scanning={scanning}
+        onClose={() => {
+          setFoldersOpen(false);
+        }}
+        onAdd={addFolder}
+        onRemove={removeFolder}
+      />
+      <GameLaunchPrompt
+        prompt={prompt}
+        onConfirm={() => {
+          void confirmPrompt();
+        }}
+        onCancel={dismissPrompt}
+      />
+      <GameContextMenu
+        open={context !== null}
+        x={context?.x ?? 0}
+        y={context?.y ?? 0}
+        items={contextItems}
+        onClose={() => {
+          setContext(null);
+        }}
+      />
     </section>
   );
 }

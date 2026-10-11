@@ -159,6 +159,20 @@ export const MONITOR_COUNT_UP_DURATION_MS = 300;
 export const RESOURCE_PROGRESS_EVENT = "resource-progress";
 export const STRATEGIES_SUBDIR = "strategies";
 
+export const GAME_SCAN_EVENT = "game-scan-progress";
+export const GAME_SCAN_START_DELAY_MS = 3000;
+export const GAME_LAUNCH_HIDE_DELAY_MS = 500;
+export const GAME_CARD_TILT_MAX = 12;
+export const GAME_CARD_HOVER_SCALE = 1.04;
+export const GAME_CARD_MIN_WIDTH_PX = 180;
+export const GAME_CARD_MAX_WIDTH_PX = 240;
+export const GAME_CARD_LIFT_SHADOW =
+  "0 24px 48px rgb(0 0 0 / 0.45), 0 0 0 1px rgb(var(--color-accent-primary-rgb) / 0.25)";
+export const GAME_OVERLAY_SCRIM =
+  "rgb(0 0 0 / 0.62) 0%, rgb(0 0 0 / 0.28) 45%, transparent 78%";
+export const GAME_COVER_ASPECT = "3 / 4";
+export const GAME_LAUNCH_TOAST_MS = 2500;
+
 export const RECENT_LOGS_COUNT = 5;
 
 export const SPARKLINE_WIDTH = 120;

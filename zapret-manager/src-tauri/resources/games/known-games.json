@@ -1,0 +1,628 @@
+[
+  {
+    "appid": "945360",
+    "name": "Among Us",
+    "cover": "945360.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "among us"
+    ]
+  },
+  {
+    "appid": "1172470",
+    "name": "Apex Legends™",
+    "cover": "1172470.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "apex legends"
+    ]
+  },
+  {
+    "appid": "346110",
+    "name": "ARK: Survival Evolved",
+    "cover": "346110.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "ark: survival evolved"
+    ]
+  },
+  {
+    "appid": "1086940",
+    "name": "Baldur's Gate 3",
+    "cover": "1086940.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "baldur's gate 3"
+    ]
+  },
+  {
+    "appid": "2358720",
+    "name": "Black Myth: Wukong",
+    "cover": "2358720.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "black myth: wukong"
+    ]
+  },
+  {
+    "appid": "291550",
+    "name": "Brawlhalla",
+    "cover": "291550.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "brawlhalla"
+    ]
+  },
+  {
+    "appid": "949230",
+    "name": "Cities: Skylines II",
+    "cover": "949230.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "cities: skylines ii"
+    ]
+  },
+  {
+    "appid": "440900",
+    "name": "Conan Exiles Enhanced",
+    "cover": "440900.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "conan exiles enhanced"
+    ]
+  },
+  {
+    "appid": "870780",
+    "name": "CONTROL Ultimate Edition",
+    "cover": "870780.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "control ultimate edition"
+    ]
+  },
+  {
+    "appid": "730",
+    "name": "Counter-Strike 2",
+    "cover": "730.jpg",
+    "domainSettingsId": "counter-strike-2",
+    "anticheat": "none",
+    "aliases": [
+      "counter-strike 2",
+      "cs2",
+      "csgo",
+      "cs go"
+    ]
+  },
+  {
+    "appid": "1091500",
+    "name": "Cyberpunk 2077",
+    "cover": "1091500.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "cyberpunk 2077"
+    ]
+  },
+  {
+    "appid": "221100",
+    "name": "DayZ",
+    "cover": "221100.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "dayz"
+    ]
+  },
+  {
+    "appid": "548430",
+    "name": "Deep Rock Galactic",
+    "cover": "548430.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "deep rock galactic"
+    ]
+  },
+  {
+    "appid": "1085660",
+    "name": "Destiny 2",
+    "cover": "1085660.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "destiny 2"
+    ]
+  },
+  {
+    "appid": "2344520",
+    "name": "Diablo IV",
+    "cover": "2344520.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "diablo iv"
+    ]
+  },
+  {
+    "appid": "3017860",
+    "name": "DOOM: The Dark Ages",
+    "cover": "3017860.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "doom: the dark ages"
+    ]
+  },
+  {
+    "appid": "570",
+    "name": "Dota 2",
+    "cover": "570.jpg",
+    "domainSettingsId": "dota-2",
+    "anticheat": "none",
+    "aliases": [
+      "dota 2",
+      "dota",
+      "дота"
+    ]
+  },
+  {
+    "appid": "534380",
+    "name": "Dying Light 2 Stay Human: Reloaded Edition",
+    "cover": "534380.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "dying light 2 stay human: reloaded edition"
+    ]
+  },
+  {
+    "appid": "1245620",
+    "name": "ELDEN RING",
+    "cover": "1245620.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "elden ring"
+    ]
+  },
+  {
+    "appid": "2622380",
+    "name": "ELDEN RING NIGHTREIGN",
+    "cover": "2622380.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "elden ring nightreign"
+    ]
+  },
+  {
+    "appid": "427520",
+    "name": "Factorio",
+    "cover": "427520.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "factorio"
+    ]
+  },
+  {
+    "appid": "377160",
+    "name": "Fallout 4",
+    "cover": "377160.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "fallout 4"
+    ]
+  },
+  {
+    "appid": "4000",
+    "name": "Garry's Mod",
+    "cover": "4000.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "garry's mod"
+    ]
+  },
+  {
+    "appid": "2322010",
+    "name": "God of War Ragnarok",
+    "cover": "2322010.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "god of war ragnarok"
+    ]
+  },
+  {
+    "appid": "3240220",
+    "name": "Grand Theft Auto V Enhanced",
+    "cover": "3240220.jpg",
+    "domainSettingsId": "gta-online",
+    "anticheat": "none",
+    "aliases": [
+      "grand theft auto v enhanced",
+      "gta 5",
+      "gta v",
+      "gtav",
+      "gta online"
+    ]
+  },
+  {
+    "appid": "271590",
+    "name": "Grand Theft Auto V Legacy",
+    "cover": "271590.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "grand theft auto v legacy"
+    ]
+  },
+  {
+    "appid": "1145360",
+    "name": "Hades",
+    "cover": "1145360.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "hades"
+    ]
+  },
+  {
+    "appid": "1145350",
+    "name": "Hades II",
+    "cover": "1145350.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "hades ii"
+    ]
+  },
+  {
+    "appid": "220",
+    "name": "Half-Life 2",
+    "cover": "220.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "half-life 2"
+    ]
+  },
+  {
+    "appid": "553850",
+    "name": "HELLDIVERS™ 2",
+    "cover": "553850.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "helldivers 2"
+    ]
+  },
+  {
+    "appid": "367520",
+    "name": "Hollow Knight",
+    "cover": "367520.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "hollow knight"
+    ]
+  },
+  {
+    "appid": "1030300",
+    "name": "Hollow Knight: Silksong",
+    "cover": "1030300.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "hollow knight: silksong"
+    ]
+  },
+  {
+    "appid": "1966720",
+    "name": "Lethal Company",
+    "cover": "1966720.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "lethal company"
+    ]
+  },
+  {
+    "appid": "2552100",
+    "name": "License to Breed",
+    "cover": "2552100.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "license to breed"
+    ]
+  },
+  {
+    "appid": "2651280",
+    "name": "Marvel's Spider-Man 2",
+    "cover": "2651280.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "marvel's spider-man 2"
+    ]
+  },
+  {
+    "appid": "582010",
+    "name": "Monster Hunter: World",
+    "cover": "582010.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "monster hunter: world"
+    ]
+  },
+  {
+    "appid": "1203220",
+    "name": "NARAKA: BLADEPOINT",
+    "cover": "1203220.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "naraka: bladepoint"
+    ]
+  },
+  {
+    "appid": "633230",
+    "name": "NARUTO TO BORUTO: SHINOBI STRIKER",
+    "cover": "633230.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "naruto to boruto: shinobi striker"
+    ]
+  },
+  {
+    "appid": "275850",
+    "name": "No Man's Sky",
+    "cover": "275850.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "no man's sky"
+    ]
+  },
+  {
+    "appid": "1623730",
+    "name": "Palworld",
+    "cover": "1623730.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "palworld"
+    ]
+  },
+  {
+    "appid": "2694490",
+    "name": "Path of Exile 2",
+    "cover": "2694490.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "path of exile 2"
+    ]
+  },
+  {
+    "appid": "1272080",
+    "name": "PAYDAY 3",
+    "cover": "1272080.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "payday 3"
+    ]
+  },
+  {
+    "appid": "2832320",
+    "name": "PC Tycoon 2",
+    "cover": "2832320.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "pc tycoon 2"
+    ]
+  },
+  {
+    "appid": "400",
+    "name": "Portal",
+    "cover": "400.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "portal"
+    ]
+  },
+  {
+    "appid": "620",
+    "name": "Portal 2",
+    "cover": "620.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "portal 2"
+    ]
+  },
+  {
+    "appid": "1320490",
+    "name": "Princess Farmer",
+    "cover": "1320490.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "princess farmer"
+    ]
+  },
+  {
+    "appid": "578080",
+    "name": "PUBG: BATTLEGROUNDS",
+    "cover": "578080.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "pubg: battlegrounds"
+    ]
+  },
+  {
+    "appid": "1174180",
+    "name": "Red Dead Redemption 2",
+    "cover": "1174180.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "red dead redemption 2"
+    ]
+  },
+  {
+    "appid": "2050650",
+    "name": "Resident Evil 4",
+    "cover": "2050650.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "resident evil 4"
+    ]
+  },
+  {
+    "appid": "294100",
+    "name": "RimWorld",
+    "cover": "294100.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "rimworld"
+    ]
+  },
+  {
+    "appid": "252950",
+    "name": "Rocket League®",
+    "cover": "252950.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "rocket league"
+    ]
+  },
+  {
+    "appid": "252490",
+    "name": "Rust",
+    "cover": "252490.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "rust"
+    ]
+  },
+  {
+    "appid": "1643320",
+    "name": "S.T.A.L.K.E.R. 2: Heart of Chornobyl",
+    "cover": "1643320.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "s.t.a.l.k.e.r. 2: heart of chornobyl"
+    ]
+  },
+  {
+    "appid": "814380",
+    "name": "Sekiro: Shadows Die Twice - GOTY Edition",
+    "cover": "814380.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "sekiro: shadows die twice - goty edition"
+    ]
+  },
+  {
+    "appid": "418530",
+    "name": "Spelunky 2",
+    "cover": "418530.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "spelunky 2"
+    ]
+  },
+  {
+    "appid": "413150",
+    "name": "Stardew Valley",
+    "cover": "413150.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "stardew valley"
+    ]
+  },
+  {
+    "appid": "1364780",
+    "name": "Street Fighter™ 6",
+    "cover": "1364780.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "street fighter 6"
+    ]
+  },
+  {
+    "appid": "1778820",
+    "name": "TEKKEN 8",
+    "cover": "1778820.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "tekken 8"
+    ]
+  },
+  {
+    "appid": "105600",
+    "name": "Terraria",
+    "cover": "105600.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "terraria"
+    ]
+  },
+  {
+    "appid": "489830",
+    "name": "The Elder Scrolls V: Skyrim Special Edition",
+    "cover": "489830.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "the elder scrolls v: skyrim special edition"
+    ]
+  },
+  {
+    "appid": "270490",
+    "name": "The Forest of Doom (Standalone)",
+    "cover": "270490.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "the forest of doom (standalone)"
+    ]
+  },
+  {
+    "appid": "1304930",
+    "name": "The Outlast Trials",
+    "cover": "1304930.jpg",
+    "domainSettingsId": "outlast-trials",
+    "anticheat": "none",
+    "aliases": [
+      "the outlast trials",
+      "outlast trials"
+    ]
+  },
+  {
+    "appid": "945550",
+    "name": "Tiger Striker",
+    "cover": "945550.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "tiger striker"
+    ]
+  },
+  {
+    "appid": "7000",
+    "name": "Tomb Raider: Legend",
+    "cover": "7000.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "tomb raider: legend"
+    ]
+  },
+  {
+    "appid": "1604030",
+    "name": "V Rising",
+    "cover": "1604030.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "v rising"
+    ]
+  },
+  {
+    "appid": "892970",
+    "name": "Valheim",
+    "cover": "892970.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "valheim"
+    ]
+  },
+  {
+    "appid": "230410",
+    "name": "Warframe",
+    "cover": "230410.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "warframe"
+    ]
+  },
+  {
+    "appid": "1241950",
+    "name": "Warzone 2100",
+    "cover": "1241950.jpg",
+    "anticheat": "none",
+    "aliases": [
+      "warzone 2100"
+    ]
+  }
+]

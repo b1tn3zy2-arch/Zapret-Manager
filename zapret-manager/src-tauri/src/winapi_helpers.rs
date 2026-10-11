@@ -20,6 +20,7 @@ use crate::error::{AppError, AppResult};
 const ERROR_CANCELLED: DWORD = 1223;
 const STILL_ACTIVE_CODE: DWORD = 259;
 const SW_HIDE_VALUE: i32 = 0;
+const SW_SHOW_NORMAL_VALUE: i32 = 1;
 const SEE_MASK_NOCLOSEPROCESS_VALUE: DWORD = 0x0000_0040;
 const SEE_MASK_NOASYNC_VALUE: DWORD = 0x0000_0100;
 const ERROR_SUCCESS_CODE: DWORD = 0;
@@ -170,6 +171,62 @@ pub fn shell_execute_runas(
     }
 
     Ok((OwnedProcessHandle::from_raw(raw), pid))
+}
+
+pub fn shell_execute_normal(
+    program: &str,
+    arguments: &str,
+    working_dir: Option<&Path>,
+) -> AppResult<u32> {
+    let file = wide(program);
+    let params = wide(arguments);
+    let directory = working_dir.map(|path| {
+        std::ffi::OsStr::new(path)
+            .encode_wide()
+            .chain(std::iter::once(0))
+            .collect::<Vec<u16>>()
+    });
+
+    let mut info: winapi::um::shellapi::SHELLEXECUTEINFOW = unsafe {
+        std::mem::zeroed()
+    };
+
+    info.cbSize =
+        std::mem::size_of::<winapi::um::shellapi::SHELLEXECUTEINFOW>() as u32;
+    info.fMask = SEE_MASK_NOCLOSEPROCESS_VALUE;
+    info.lpVerb = std::ptr::null();
+    info.lpFile = file.as_ptr();
+    info.lpParameters = params.as_ptr();
+    info.lpDirectory = directory
+        .as_ref()
+        .map(|value| value.as_ptr())
+        .unwrap_or(std::ptr::null());
+    info.nShow = SW_SHOW_NORMAL_VALUE;
+
+    let ok = unsafe { ShellExecuteExW(&mut info) };
+
+    if ok == 0 {
+        let code = unsafe { GetLastError() };
+
+        return Err(AppError::custom(format!(
+            "Не удалось запустить: {}",
+            os_error_message(code)
+        )));
+    }
+
+    let pid = unsafe { GetProcessId(info.hProcess) };
+
+    unsafe {
+        CloseHandle(info.hProcess);
+    }
+
+    if pid == 0 {
+        return Err(AppError::custom(
+            "Не удалось получить PID запущенного процесса",
+        ));
+    }
+
+    Ok(pid)
 }
 
 pub fn is_pid_alive(pid: u32) -> bool {

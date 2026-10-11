@@ -5,6 +5,7 @@ const ROOT = process.cwd();
 
 const ALLOWED_HOSTS = new Set([
   "api.github.com",
+  "cdn.cloudflare.steamstatic.com",
   "github.com",
   "objects.githubusercontent.com",
   "raw.githubusercontent.com",

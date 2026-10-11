@@ -14,6 +14,7 @@ import { useAppearance } from "@/hooks/useAppearance";
 import { useAutoUpdateCheck } from "@/hooks/useAutoUpdateCheck";
 import { useAutoVpnConnect } from "@/hooks/useAutoVpnConnect";
 import { useSettingsSync } from "@/hooks/useSettingsSync";
+import { useInstalledGamesStartup } from "@/hooks/useInstalledGames";
 import { useStartupMetrics } from "@/hooks/useStartupMetrics";
 import { useStrategies } from "@/hooks/useStrategies";
 import { useTray } from "@/hooks/useTray";
@@ -72,6 +73,7 @@ export default function App() {
   useTrayNotifications();
   useTray();
   useStartupMetrics();
+  useInstalledGamesStartup();
   const CurrentPage = PAGE_COMPONENTS[activePage];
 
   const { isInitializing, progress, report, error: resourceError } = resources;

@@ -1,3 +1,14 @@
+pub mod game_covers;
+pub mod game_heuristics;
+pub mod game_known;
+pub mod game_launcher;
+pub mod game_model;
+pub mod game_registry;
+pub mod game_scanner;
+pub mod game_scanner_vdf;
+pub mod game_sources_registry;
+pub mod game_sources_stores;
+pub mod game_sources_system;
 pub mod injector;
 pub mod injector_backup;
 pub mod injector_core;
