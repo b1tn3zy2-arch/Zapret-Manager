@@ -5,6 +5,10 @@ import { AlertCircle, Check, Info, TriangleAlert, X } from "lucide-react";
 
 import { useI18n } from "@/i18n";
 import { NOTIFY_EVENT } from "@/lib/constants";
+import {
+  playNotificationSound,
+  unlockNotificationSound,
+} from "@/lib/notifySound";
 import { parseNotify } from "@/lib/notifyProtocol";
 import { cn } from "@/lib/utils";
 import {
@@ -48,10 +52,10 @@ function ToastCard({ toast }: { toast: AppToast }) {
       layout
       role="status"
       aria-live="polite"
-      initial={{ opacity: 0, x: 32, scale: 0.96 }}
-      animate={{ opacity: 1, x: 0, scale: 1 }}
-      exit={{ opacity: 0, x: 32, scale: 0.96 }}
-      transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+      initial={{ opacity: 0, x: 48, scale: 0.9, filter: "blur(6px)" }}
+      animate={{ opacity: 1, x: 0, scale: 1, filter: "blur(0px)" }}
+      exit={{ opacity: 0, x: 48, scale: 0.94, filter: "blur(4px)" }}
+      transition={{ type: "spring", stiffness: 380, damping: 32, mass: 0.9 }}
       className={cn(
         "bg-bg-secondary/95 pointer-events-auto flex w-[320px] items-start gap-2.5",
         "rounded-xl border p-3 shadow-2xl backdrop-blur-xl",
@@ -93,6 +97,20 @@ export default function NotificationToaster() {
   const toasts = useToastsStore((state) => state.toasts);
 
   useEffect(() => {
+    const unlock = (): void => {
+      unlockNotificationSound();
+    };
+
+    window.addEventListener("pointerdown", unlock, { once: true });
+    window.addEventListener("keydown", unlock, { once: true });
+
+    return () => {
+      window.removeEventListener("pointerdown", unlock);
+      window.removeEventListener("keydown", unlock);
+    };
+  }, []);
+
+  useEffect(() => {
     const subscription = listen<string>(NOTIFY_EVENT, (event) => {
       const parsed = parseNotify(event.payload);
 
@@ -100,6 +118,7 @@ export default function NotificationToaster() {
         return;
       }
 
+      playNotificationSound(parsed.kind);
       useToastsStore.getState().push(parsed.kind, parsed.title, parsed.body);
     });
 
@@ -112,7 +131,7 @@ export default function NotificationToaster() {
 
   return (
     <div className="pointer-events-none fixed top-[calc(var(--titlebar-height)+12px)] right-4 z-[100] flex flex-col gap-2">
-      <AnimatePresence initial={false}>
+      <AnimatePresence initial={false} mode="popLayout">
         {toasts.map((toast) => (
           <ToastCard key={toast.id} toast={toast} />
         ))}

@@ -53,7 +53,6 @@ function NavButtonImpl({
           "group relative flex h-11 w-full items-center gap-3 rounded-lg",
           "transition-colors duration-200 ease-out",
           "hover:bg-glass-hover",
-          active && !collapsed && "bg-glass-hover",
           collapsed ? "justify-center" : "px-3"
         )}
       >

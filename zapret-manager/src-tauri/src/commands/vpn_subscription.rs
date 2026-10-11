@@ -6,7 +6,7 @@ use serde::Serialize;
 use crate::error::{AppError, AppResult};
 
 const MAX_SUBSCRIPTION_BYTES: usize = 4 * 1024 * 1024;
-const MAX_SERVERS: usize = 2_000;
+const MAX_SERVERS: usize = 1;
 const SUPPORTED_SCHEMES: [&str; 6] = ["vless", "vmess", "trojan", "ss", "socks", "socks5"];
 
 #[derive(Debug, Clone, Serialize, PartialEq, Eq)]

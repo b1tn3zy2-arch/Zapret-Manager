@@ -1,6 +1,7 @@
-import { translateKey } from "@/i18n/core";
+﻿import { translateKey } from "@/i18n/core";
 import { invoke } from "@tauri-apps/api/core";
 
+import { launchStrategy } from "@/lib/strategyLaunch";
 import { toErrorMessage } from "@/lib/utils";
 import { useLogsStore } from "@/stores/useLogsStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
@@ -80,10 +81,7 @@ async function startStrategy(target: Strategy): Promise<void> {
   useStrategiesStore.getState().setStatus(target.id, "starting");
 
   try {
-    const result = await invoke<{ pid: number }>("run_strategy", {
-      strategyId: target.id,
-      path: target.path,
-    });
+    const result = await launchStrategy(target.id, target.path);
     const store = useStrategiesStore.getState();
 
     store.setStatus(target.id, "running");

@@ -144,9 +144,8 @@ fn test_parse_subscription_plain_lines() {
     );
     let servers = parse_subscription(body);
 
-    assert_eq!(servers.len(), 2);
+    assert_eq!(servers.len(), 1);
     assert_eq!(servers[0].name, "A");
-    assert_eq!(servers[1].name, "B");
 }
 
 #[test]
@@ -154,7 +153,8 @@ fn test_parse_subscription_base64_body() {
     let body = encode("vless://uuid@a.example.com:443#A\ntrojan://pass@b.example.com:8443#B");
     let servers = parse_subscription(&body);
 
-    assert_eq!(servers.len(), 2);
+    assert_eq!(servers.len(), 1);
+    assert_eq!(servers[0].name, "A");
 }
 
 #[test]

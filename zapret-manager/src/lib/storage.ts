@@ -6,7 +6,7 @@ import {
   writeTextFile,
 } from "@tauri-apps/plugin-fs";
 
-import { SETTINGS_FILE_NAME } from "@/lib/defaults";
+import { DEFAULT_GAMES, SETTINGS_FILE_NAME } from "@/lib/defaults";
 import { getDefaultGames } from "@/lib/defaultGames";
 import { validateSettings } from "@/lib/settingsSchema";
 import type {
@@ -18,7 +18,6 @@ import type {
   StrategyUpdateSettings,
   VpnSettings,
 } from "@/types";
-
 async function resolveSettingsPath(): Promise<string> {
   const root = await appDataDir();
   return `${root}\\${SETTINGS_FILE_NAME}`;
@@ -50,12 +49,57 @@ function stringList(value: unknown): string[] {
     : [];
 }
 
+function unionStrings(
+  base: readonly string[] = [],
+  extra: readonly string[] = []
+): string[] {
+  const seen = new Set<string>();
+  const result: string[] = [];
+
+  for (const value of [...base, ...extra]) {
+    const key = value.trim();
+
+    if (key === "" || seen.has(key)) {
+      continue;
+    }
+
+    seen.add(key);
+    result.push(key);
+  }
+
+  return result;
+}
+
+function unionPorts(
+  base: readonly number[] = [],
+  extra: readonly number[] = []
+): number[] {
+  return [...new Set([...base, ...extra])].sort((left, right) => left - right);
+}
+
+export function mergeBuiltinDefaults(game: GameSettings): GameSettings {
+  const builtin = DEFAULT_GAMES.find((item) => item.id === game.id);
+
+  if (builtin === undefined) {
+    return game;
+  }
+
+  return {
+    ...game,
+    domains: unionStrings(game.domains, builtin.domains),
+    ipRanges: unionStrings(game.ipRanges, builtin.ipRanges),
+    ports: unionPorts(game.ports, builtin.ports),
+  };
+}
+
 function gameList(value: unknown): GameSettings[] | undefined {
   if (!Array.isArray(value)) {
     return undefined;
   }
 
-  return value.filter(isRecord).map((item) => section<GameSettings>(item));
+  return value
+    .filter(isRecord)
+    .map((item) => mergeBuiltinDefaults(section<GameSettings>(item)));
 }
 
 function parseSections(parsed: Record<string, unknown>): AppSettings {
