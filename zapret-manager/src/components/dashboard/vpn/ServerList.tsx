@@ -42,34 +42,36 @@ export default function ServerList({
           </Badge>
         </div>
 
-        <button
-          type="button"
-          onClick={() => {
-            onRefreshSubscription();
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => {
+              onRefreshSubscription();
 
-            if (servers.length > 0) {
-              onRefreshPings();
-            }
-          }}
-          disabled={isRefreshing}
-          aria-label={t("dashboard.vpn.refreshAll")}
-          className="text-text-tertiary hover:text-text-primary hover:bg-glass-hover rounded-md p-1.5 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          <RefreshCw
-            aria-hidden="true"
-            className={isRefreshing ? "size-4 animate-spin" : "size-4"}
-            strokeWidth={2}
-          />
-        </button>
-        <button
-          type="button"
-          onClick={onClearSubscription}
-          disabled={isRefreshing}
-          aria-label={t("dashboard.vpn.clearSubscription")}
-          className="text-text-tertiary hover:text-accent-danger hover:bg-glass-hover rounded-md p-1.5 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          <Trash2 aria-hidden="true" className="size-4" strokeWidth={2} />
-        </button>
+              if (servers.length > 0) {
+                onRefreshPings();
+              }
+            }}
+            disabled={isRefreshing}
+            aria-label={t("dashboard.vpn.refreshAll")}
+            className="text-text-tertiary hover:text-text-primary hover:bg-glass-hover rounded-md p-1.5 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <RefreshCw
+              aria-hidden="true"
+              className={isRefreshing ? "size-4 animate-spin" : "size-4"}
+              strokeWidth={2}
+            />
+          </button>
+          <button
+            type="button"
+            onClick={onClearSubscription}
+            disabled={isRefreshing}
+            aria-label={t("dashboard.vpn.clearSubscription")}
+            className="text-text-tertiary hover:text-accent-danger hover:bg-glass-hover rounded-md p-1.5 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <Trash2 aria-hidden="true" className="size-4" strokeWidth={2} />
+          </button>
+        </div>
       </div>
 
       {servers.length === 0 ? (

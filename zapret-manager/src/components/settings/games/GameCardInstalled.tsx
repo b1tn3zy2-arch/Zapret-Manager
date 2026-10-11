@@ -1,6 +1,6 @@
 import { memo, useState } from "react";
 import { motion } from "framer-motion";
-import { Square, X } from "lucide-react";
+import { X } from "lucide-react";
 
 import { GameCoverImage } from "@/components/settings/games/GameCoverImage";
 import GamePlayOverlay from "@/components/settings/games/GamePlayOverlay";
@@ -80,7 +80,7 @@ function GameCardInstalled({
         transition={{ duration: ANIMATION.normal, ease: ANIMATION.easeOutExpo }}
         className={cn(
           "bg-bg-secondary relative size-full overflow-hidden rounded-xl border",
-          "border-glass-border"
+          running ? "border-accent-primary/40" : "border-glass-border"
         )}
       >
         <div
@@ -129,26 +129,6 @@ function GameCardInstalled({
                 : formatRelativeTime(game.lastLaunchedAt)}
             </p>
           </div>
-          {running && onClose !== undefined ? (
-            <button
-              type="button"
-              aria-label={t("settings.games.installed.closeGame")}
-              onClick={(event) => {
-                event.stopPropagation();
-                onClose();
-              }}
-              className={cn(
-                "bg-accent-danger/90 text-on-accent rounded-md p-1 transition-colors",
-                "hover:bg-accent-danger"
-              )}
-            >
-              <Square
-                aria-hidden="true"
-                className="size-4"
-                fill="currentColor"
-              />
-            </button>
-          ) : null}
           {onRemove === undefined ? null : (
             <button
               type="button"
@@ -169,9 +149,12 @@ function GameCardInstalled({
         <GamePlayOverlay
           visible={hovered}
           busy={busy}
-          label={launchLabel}
+          label={
+            running ? t("settings.games.installed.closeGame") : launchLabel
+          }
+          mode={running ? "stop" : "play"}
           motionDisabled={motionDisabled}
-          onLaunch={onLaunch}
+          onLaunch={running && onClose !== undefined ? onClose : onLaunch}
         />
       </motion.div>
     </div>

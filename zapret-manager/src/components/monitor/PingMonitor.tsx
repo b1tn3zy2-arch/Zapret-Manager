@@ -1,30 +1,17 @@
 import { useI18n } from "@/i18n";
-import { useMemo } from "react";
-import { motion } from "framer-motion";
 
+import PingSparkline from "@/components/dashboard/PingSparkline";
 import { GlassPanel } from "@/components/shared/GlassPanel";
-import { useMotionPreference } from "@/hooks/useMotionPreference";
 import { usePing } from "@/hooks/usePing";
 import {
-  CHART_PULSE_PERIOD_MS,
   MONITOR_PING_HISTORY_SIZE,
   PING_HOSTS,
   PING_INTERVAL_MS,
 } from "@/lib/constants";
-import {
-  buildSparklineFill,
-  buildSparklinePath,
-  formatPing,
-  getPingColor,
-  lastLatency,
-  lastSparklinePoint,
-} from "@/lib/pingUtils";
+import { formatPing, getPingColor, lastLatency } from "@/lib/pingUtils";
 import type { PingHistory } from "@/hooks/usePing";
 import type { Translate } from "@/i18n/types";
 import type { PingPoint } from "@/lib/pingUtils";
-
-const SPARK_WIDTH = 120;
-const SPARK_HEIGHT = 28;
 
 function pluralMeasurements(count: number, t: Translate): string {
   if (count === 1) {
@@ -46,21 +33,8 @@ interface PingCardProps {
 
 function PingCard({ label, points, title }: PingCardProps) {
   const { t } = useI18n();
-  const { reduced: reducedMotion } = useMotionPreference();
   const latency = lastLatency(points);
   const color = getPingColor(latency);
-  const line = useMemo(
-    () => buildSparklinePath(points, SPARK_WIDTH, SPARK_HEIGHT),
-    [points]
-  );
-  const fill = useMemo(
-    () => buildSparklineFill(points, SPARK_WIDTH, SPARK_HEIGHT),
-    [points]
-  );
-  const endpoint = useMemo(
-    () => lastSparklinePoint(points, SPARK_WIDTH, SPARK_HEIGHT),
-    [points]
-  );
 
   return (
     <GlassPanel padding="md" className="flex flex-col gap-2" title={title}>
@@ -71,45 +45,11 @@ function PingCard({ label, points, title }: PingCardProps) {
         </span>
       </div>
 
-      <svg
-        viewBox={`0 0 ${SPARK_WIDTH} ${SPARK_HEIGHT}`}
-        preserveAspectRatio="none"
-        role="img"
-        aria-label={t("monitor.ping.aria", { label })}
-        className="h-7 w-full"
-      >
-        <path d={fill} fill={color} opacity={0.16} />
-        <path
-          d={line}
-          fill="none"
-          stroke={color}
-          strokeWidth={1.4}
-          strokeLinejoin="round"
-        />
-
-        {endpoint !== null ? (
-          <motion.circle
-            cx={endpoint.x}
-            cy={endpoint.y}
-            r={2.2}
-            fill={color}
-            {...(reducedMotion
-              ? {}
-              : {
-                  animate: {
-                    scale: [1, 1.5, 1],
-                    opacity: [1, 0.6, 1],
-                  },
-                  transition: {
-                    duration: CHART_PULSE_PERIOD_MS / 1000,
-                    repeat: Infinity,
-                    ease: "easeInOut" as const,
-                  },
-                })}
-            style={{ transformBox: "fill-box", transformOrigin: "center" }}
-          />
-        ) : null}
-      </svg>
+      <PingSparkline
+        points={points}
+        height={28}
+        capacity={MONITOR_PING_HISTORY_SIZE}
+      />
 
       <span className="text-text-tertiary text-[10px]">
         {points.length === 0

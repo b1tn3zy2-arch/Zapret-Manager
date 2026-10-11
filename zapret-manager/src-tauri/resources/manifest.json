@@ -1,7 +1,8 @@
 {
   "version": "1.10.3",
-  "generatedAt": 1791272059639,
+  "generatedAt": 1791748269599,
   "files": {
+    "games/known-games.json": "sha256:bb1dee9a2fc2c8a01dc2ba9dccc045c33e8c44df6839b05a6001f83704040232",
     "zapret/LICENSE-zapret.txt": "sha256:e4d78ab9e3c9997c4d367cd1677a3091f96b7346cf39838daa764a6445c29cfb",
     "zapret/README-zapret.md": "sha256:2b97c31909e77960cf8a59846ecd6bcc024dbbf2b8fd591fba6288c89e349e51",
     "zapret/general-00-baseline.bat": "sha256:2c0723be1d3539a70392607b9cf2ef590efcceec8e6139b1a0d2984ea1da1947",
@@ -26,13 +27,13 @@
     "zapret/general-19-faketls-auto-alt.bat": "sha256:4fc5455a0154472dbe361f0190f7b28f661804cdc1d332424b57b128cceb78be",
     "zapret/general-20-faketls-auto-alt2.bat": "sha256:b750f47c34faf4350a8bb71e8c5004f815c01a2d1d4094aa789d8a91e339ecc2",
     "zapret/general-21-faketls-auto-alt3.bat": "sha256:825af3f087d29cd7c8b8653d03a578f21197c9e64bb8b20725608fc7fa19d50e",
-    "zapret/lists/ipset-all.txt": "sha256:a8ebbb68f074225b7a989e6228a12290260541b1dd614aafc906bad206cdf818",
-    "zapret/lists/ipset-exclude.txt": "sha256:96c03954012765ce4ab03b9c30f29ab1ca1b698c6752224d03828e6d182eb0fc",
-    "zapret/lists/list-exclude.txt": "sha256:c5eaabb284d9e5c11340454c0d11776f8b62f519e4d71e41254f757de7bbc0d0",
-    "zapret/lists/list-general.txt": "sha256:9ff3ae9e4bf0edbcf8fecb1bba7aac951aace2036cdb732ec3ef65dfc6db443b",
-    "zapret/lists/list-google.txt": "sha256:4104b8f5119f76a3642e3176987bbcf817d98daa4899a7ecf9ee2c254958e33b",
+    "zapret/lists/ipset-all.txt": "sha256:5ee845ffa47ef97a505fca2ee6148498c4ca8ad503b7075565aa39298171c417",
+    "zapret/lists/ipset-exclude.txt": "sha256:36159ca57996843462cccef23b576cb461dfaa8738e2ab01807db5a6c1746725",
+    "zapret/lists/list-exclude.txt": "sha256:30a67f4af8eb7abe709db84235e1d97924d851bf4380b676a109dbe408d446e9",
+    "zapret/lists/list-general.txt": "sha256:5905f9f91e53142f2a5b964ce31bd01c458f2ab6f7fda0ad71b45e2919407a93",
+    "zapret/lists/list-google.txt": "sha256:a21df8b813593e5cb4f5fd95ca2a34a05fc44ab7dde19735e859e96ad5780301",
     "zapret/outlast/default-domains.txt": "sha256:483a5e9f2606a5e4398801819d5e8ee02fb62be7e5fa4b61d82089f40ecafa0b",
     "zapret/service.bat": "sha256:3a4a22f8e8d6f337e22f17d0dd5bec38a99ba268843643f6400851fc41f823b3",
-    "zapret/utils/targets.txt": "sha256:c27af6e8ba0a91e772b5b4a8da5f4cde6903b6eb6ab3a5a02b13afe7695d0f31"
+    "zapret/utils/targets.txt": "sha256:506d1e77c1b2f6553d76b0d16a22b748b77e81eadd4f70ab155c6bed060329c4"
   }
 }

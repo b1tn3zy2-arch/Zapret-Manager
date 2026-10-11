@@ -21,6 +21,11 @@ function game(
   return { createdAt: seed.createdAt ?? 0, ...seed };
 }
 
+const GAME_LIFT_PORTS: readonly number[] = Array.from(
+  { length: 54 },
+  (_, index) => 7777 + index
+);
+
 export const BUILTIN_GAMES: readonly GameSettings[] = [
   game({
     id: "outlast-trials",
@@ -41,8 +46,18 @@ export const BUILTIN_GAMES: readonly GameSettings[] = [
     ],
     ipRanges: [],
     ports: [
-      27015, 27016, 27017, 27018, 27019, 27020, 27031, 27036, 3478, 4379, 4380,
-      7777, 7780, 7781, 7790, 7800,
+      27015,
+      27016,
+      27017,
+      27018,
+      27019,
+      27020,
+      27031,
+      27036,
+      3478,
+      4379,
+      4380,
+      ...GAME_LIFT_PORTS,
     ],
     autoRestore: true,
     createBackup: true,

@@ -154,3 +154,23 @@ fn test_any_protocol_flag_for_quic_groups() {
     assert!(!needs_any_protocol(&already));
     assert!(!needs_any_protocol(&tcp));
 }
+
+#[test]
+fn test_game_ports_extend_wf_udp_filter() {
+    let ports: Vec<u16> = vec![7780, 7795];
+    let fake = Path::new(r"C:\zapret\bin\stun.bin");
+    let options = BuildOptions {
+        games_udp_ports: Some(&ports),
+        games_udp_fake: Some(fake),
+        ..BuildOptions::default()
+    };
+    let args = config().build_args(&options);
+    let wf_udp = args
+        .iter()
+        .find(|arg| arg.starts_with("--wf-udp="))
+        .cloned()
+        .unwrap_or_default();
+
+    assert_eq!(wf_udp, "--wf-udp=443,12,7780,7795");
+    assert!(args.iter().any(|arg| arg == "--filter-udp=7780,7795"));
+}

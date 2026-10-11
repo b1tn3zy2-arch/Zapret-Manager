@@ -45,18 +45,19 @@ function NavButtonImpl({
           event.preventDefault();
         }}
         onClick={onSelect}
-        aria-current={active ? "page" : undefined}
         aria-label={label}
+        aria-current={active ? "page" : undefined}
+        data-focus-quiet="true"
         whileTap={{ scale: 0.98 }}
         className={cn(
           "group relative flex h-11 w-full items-center gap-3 rounded-lg",
           "transition-colors duration-200 ease-out",
           "hover:bg-glass-hover",
-          active && (collapsed ? "bg-accent-primary/12" : "bg-glass-hover"),
+          active && !collapsed && "bg-glass-hover",
           collapsed ? "justify-center" : "px-3"
         )}
       >
-        {active && !collapsed ? (
+        {active ? (
           <motion.span
             layoutId={ACTIVE_INDICATOR_ID}
             transition={SIDEBAR_TRANSITION}
@@ -159,6 +160,7 @@ function Sidebar() {
           onClick={toggleSidebar}
           aria-label={collapsed ? t("sidebar.expand") : t("sidebar.collapse")}
           aria-expanded={!collapsed}
+          data-focus-quiet="true"
           className="text-text-secondary hover:text-text-primary hover:bg-glass-hover flex size-7 items-center justify-center rounded-md transition-colors duration-200 ease-out"
         >
           {collapsed ? (

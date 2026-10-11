@@ -5,7 +5,7 @@ use tokio::net::TcpStream;
 
 use crate::error::{AppError, AppResult};
 
-const PING_TIMEOUT: Duration = Duration::from_secs(3);
+const PING_TIMEOUT: Duration = Duration::from_secs(2);
 const HTTP_TIMEOUT: Duration = Duration::from_secs(5);
 const PING_PORT: u16 = 443;
 

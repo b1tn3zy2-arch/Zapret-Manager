@@ -36,12 +36,23 @@ pub struct BuildOptions<'a> {
 impl StrategyConfig {
     pub fn build_args(&self, options: &BuildOptions<'_>) -> Vec<String> {
         let mut args: Vec<String> = Vec::new();
+        let game_ports = options
+            .games_udp_ports
+            .map(|ports| {
+                ports
+                    .iter()
+                    .map(u16::to_string)
+                    .collect::<Vec<String>>()
+                    .join(",")
+            })
+            .filter(|list| !list.is_empty());
+        let wf_udp = merge_port_lists(self.wf_udp.as_deref(), game_ports.as_deref());
 
         if let Some(value) = &self.wf_tcp {
             args.push(format!("--wf-tcp={value}"));
         }
 
-        if let Some(value) = &self.wf_udp {
+        if let Some(value) = &wf_udp {
             args.push(format!("--wf-udp={value}"));
         }
 
@@ -126,5 +137,22 @@ pub fn needs_any_protocol(args: &[String]) -> bool {
     joined.contains("--filter-udp=")
         && joined.contains("--dpi-desync=")
         && !joined.contains("--dpi-desync-any-protocol")
+}
+
+pub fn merge_port_lists(base: Option<&str>, extra: Option<&str>) -> Option<String> {
+    match (base, extra) {
+        (None, None) => None,
+        (Some(base), None) => Some(base.to_string()),
+        (None, Some(extra)) => Some(extra.to_string()),
+        (Some(base), Some(extra)) => {
+            if base.is_empty() {
+                Some(extra.to_string())
+            } else if extra.is_empty() {
+                Some(base.to_string())
+            } else {
+                Some(format!("{base},{extra}"))
+            }
+        }
+    }
 }
 

@@ -131,26 +131,24 @@ export function GameCoverImage({ game, className, alt }: GameCoverImageProps) {
       <span
         className={cn("relative block size-full overflow-hidden", className)}
       >
-        <span className="from-bg-secondary via-bg-secondary/60 to-bg-primary absolute inset-0 bg-gradient-to-b" />
+        <img
+          aria-hidden="true"
+          alt=""
+          src={source.src}
+          className="absolute inset-0 size-full scale-150 object-cover opacity-70 blur-2xl"
+        />
+        <span className="from-bg-primary/30 via-bg-primary/35 to-bg-primary/70 absolute inset-0 bg-gradient-to-b" />
         <img
           alt={alt}
           src={source.src}
           loading="lazy"
           decoding="async"
           style={
-            small && size !== null
-              ? {
-                  width: size.width * 2,
-                  height: size.height * 2,
-                  imageRendering: "pixelated",
-                }
-              : undefined
+            small && size !== null ? { imageRendering: "pixelated" } : undefined
           }
           className={cn(
-            "absolute inset-0 m-auto drop-shadow-[0_8px_20px_rgba(0,0,0,0.55)]",
-            small
-              ? "max-h-[42%] max-w-[42%] object-contain"
-              : "size-full object-contain p-[16%]"
+            "relative z-10 size-full object-contain drop-shadow-[0_10px_28px_rgba(0,0,0,0.6)]",
+            small ? "p-[26%]" : "p-[10%]"
           )}
         />
       </span>

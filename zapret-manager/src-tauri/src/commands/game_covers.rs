@@ -66,6 +66,19 @@ pub async fn game_steam_cover(app: AppHandle, name: String) -> AppResult<Option<
         return Ok(None);
     }
 
+    let known = super::game_known::load_known_games(&app);
+    let entry = known.by_name(&term).or_else(|| known.by_name(&name));
+
+    if let Some(entry) = entry {
+        if let Some(cover) = entry.cover.as_deref() {
+            if let Some(data) = read_cover(&app, cover)? {
+                return Ok(Some(data));
+            }
+        }
+
+        return load_appid_cover(&app, &entry.appid).await;
+    }
+
     let key = sha_name(Path::new(&format!("steam:{}", normalize_name(&term))));
     let index = covers_dir(&app)?.join(format!("{key}.index"));
 

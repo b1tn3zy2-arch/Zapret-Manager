@@ -1,5 +1,5 @@
 import type { ComponentType } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, MotionConfig, motion } from "framer-motion";
 import { lazy, Suspense, useEffect, useState } from "react";
 
 import FirstRunModal from "@/components/first-run/FirstRunModal";
@@ -94,72 +94,74 @@ export default function App() {
   }, []);
 
   return (
-    <Layout>
-      <AnimatePresence mode="wait" initial={false}>
-        <motion.div
-          key={activePage}
-          initial={{ opacity: 0, x: 12 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -12 }}
-          transition={PAGE_TRANSITION}
-          className="flex min-h-0 flex-1 flex-col gap-6"
-        >
-          <Suspense fallback={<PageSkeleton />}>
-            <CurrentPage />
-          </Suspense>
-        </motion.div>
-      </AnimatePresence>
+    <MotionConfig reducedMotion="never">
+      <Layout>
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={activePage}
+            initial={{ opacity: 0, x: 12 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -12 }}
+            transition={PAGE_TRANSITION}
+            className="flex min-h-0 flex-1 flex-col gap-6"
+          >
+            <Suspense fallback={<PageSkeleton />}>
+              <CurrentPage />
+            </Suspense>
+          </motion.div>
+        </AnimatePresence>
 
-      <UpdateModal
-        onDownload={() => {
-          void download();
-        }}
-        onInstall={() => {
-          void install();
-        }}
-        onCancel={() => {
-          void cancel();
-        }}
-        onDismiss={dismiss}
-        onIgnore={() => {
-          const info = useUpdateStore.getState().info;
+        <UpdateModal
+          onDownload={() => {
+            void download();
+          }}
+          onInstall={() => {
+            void install();
+          }}
+          onCancel={() => {
+            void cancel();
+          }}
+          onDismiss={dismiss}
+          onIgnore={() => {
+            const info = useUpdateStore.getState().info;
 
-          if (info !== null) {
-            void ignoreVersion(info.latestVersion);
-          }
-        }}
-        onClose={closeModal}
-        onRetry={() => {
-          void check();
-        }}
-      />
+            if (info !== null) {
+              void ignoreVersion(info.latestVersion);
+            }
+          }}
+          onClose={closeModal}
+          onRetry={() => {
+            void check();
+          }}
+        />
 
-      <InitProgressModal
-        open={isInitializing}
-        progress={progress}
-        extractedBytes={report?.extractedBytes ?? 0}
-      />
+        <InitProgressModal
+          open={isInitializing}
+          progress={progress}
+          extractedBytes={report?.extractedBytes ?? 0}
+        />
 
-      <FirstRunModal
-        open={showWelcome}
-        report={report}
-        onStart={() => {
-          setWelcomeDismissed(true);
-        }}
-      />
+        <FirstRunModal
+          open={showWelcome}
+          report={report}
+          onStart={() => {
+            setWelcomeDismissed(true);
+          }}
+        />
 
-      {resourceError !== null ? (
-        <div className="fixed bottom-4 left-1/2 z-40 -translate-x-1/2">
-          <Text variant="caption" size="sm" className="text-accent-danger">
-            {resourceError}
-          </Text>
-        </div>
-      ) : null}
+        {resourceError !== null ? (
+          <div className="fixed bottom-4 left-1/2 z-40 -translate-x-1/2">
+            <Text variant="caption" size="sm" className="text-accent-danger">
+              {resourceError}
+            </Text>
+          </div>
+        ) : null}
 
-      {import.meta.env.DEV && import.meta.env.VITE_PERF_MONITOR === "1" ? (
-        <PerfMonitor />
-      ) : null}
-      <NotificationToaster />
-    </Layout>
+        {import.meta.env.DEV && import.meta.env.VITE_PERF_MONITOR === "1" ? (
+          <PerfMonitor />
+        ) : null}
+        <NotificationToaster />
+      </Layout>
+    </MotionConfig>
   );
 }

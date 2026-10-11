@@ -174,8 +174,6 @@ export const GAME_LAUNCH_CHECK_MS = 2000;
 
 export const RECENT_LOGS_COUNT = 5;
 
-export const SPARKLINE_WIDTH = 120;
-
 export const SPARKLINE_HEIGHT = 32;
 
 export const LOG_ROW_HEIGHT = 32;

@@ -120,16 +120,6 @@ export function buildSparklineFill(
     .join(" ");
 }
 
-export function lastSparklinePoint(
-  points: PingPoint[],
-  width: number,
-  height: number
-): SmoothPathPoint | null {
-  const projected = project(points, width, height);
-
-  return projected[projected.length - 1] ?? null;
-}
-
 export function lastLatency(points: PingPoint[]): number | null {
   for (let index = points.length - 1; index >= 0; index -= 1) {
     const point = points[index];

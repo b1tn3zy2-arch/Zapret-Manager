@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Play } from "lucide-react";
+import { Play, Square } from "lucide-react";
 
 import { ANIMATION, GAME_OVERLAY_SCRIM } from "@/lib/constants";
 import { cn } from "@/lib/utils";
@@ -9,6 +9,7 @@ export interface GamePlayOverlayProps {
   busy: boolean;
   label: string;
   motionDisabled: boolean;
+  mode?: "play" | "stop";
   onLaunch: () => void;
 }
 
@@ -17,8 +18,11 @@ export default function GamePlayOverlay({
   busy,
   label,
   motionDisabled,
+  mode = "play",
   onLaunch,
 }: GamePlayOverlayProps) {
+  const isStop = mode === "stop";
+  const Icon = isStop ? Square : Play;
   return (
     <span
       aria-hidden={!visible}
@@ -51,14 +55,16 @@ export default function GamePlayOverlay({
         transition={{ duration: ANIMATION.fast, ease: "easeOut" }}
         className={cn(
           "pointer-events-auto relative flex size-[72px] items-center justify-center rounded-full",
-          "bg-accent-primary/85 text-on-accent border-2 border-white/20 backdrop-blur-md",
-          "shadow-[0_0_40px_rgb(var(--color-accent-primary-rgb)/0.45)]",
+          "text-on-accent border-2 border-white/20 backdrop-blur-md",
+          isStop
+            ? "bg-accent-danger/90 shadow-[0_0_40px_rgb(var(--color-accent-danger-rgb)/0.45)]"
+            : "bg-accent-primary/85 shadow-[0_0_40px_rgb(var(--color-accent-primary-rgb)/0.45)]",
           "disabled:cursor-not-allowed disabled:opacity-60"
         )}
       >
-        <Play
+        <Icon
           aria-hidden="true"
-          className="size-8 translate-x-0.5"
+          className={isStop ? "size-7" : "size-8 translate-x-0.5"}
           strokeWidth={2.5}
           fill="currentColor"
         />
