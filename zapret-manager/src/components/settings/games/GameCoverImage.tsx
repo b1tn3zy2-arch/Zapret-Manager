@@ -58,7 +58,7 @@ export function GameCoverImage({ game, className, alt }: GameCoverImageProps) {
     return () => {
       active = false;
     };
-  }, [game.appid, game.coverUrl, game.id]);
+  }, [game.appid, game.coverUrl, game.executablePath, game.id]);
 
   if (source === null) {
     return <CoverFallback name={game.name} className={className} />;
