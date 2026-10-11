@@ -48,6 +48,26 @@ fn test_executable_priority_prefers_unreal_shipping_binary() {
 }
 
 #[test]
+fn test_launch_target_prefers_protected_launcher() {
+    let root = temp_root("zapret-launch-target");
+    let game = root.join("Game");
+
+    fs::create_dir_all(&game).unwrap_or_else(|error| panic!("{error}"));
+    write_marker(&game);
+    write_large_exe(&game.join("Game-Win64-Shipping.exe"));
+    fs::write(game.join("start_protected_game.exe"), b"stub")
+        .unwrap_or_else(|error| panic!("{error}"));
+
+    let target = launch_target(&game, "Game");
+    let _ = fs::remove_dir_all(&root);
+
+    assert_eq!(
+        target.file_name().and_then(|value| value.to_str()),
+        Some("start_protected_game.exe")
+    );
+}
+
+#[test]
 fn test_steam_game_reads_manifest_and_finds_executable() {
     let root = temp_root("zapret-steam-scan");
     let steamapps = root.join("steamapps");

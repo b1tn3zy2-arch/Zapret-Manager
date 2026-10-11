@@ -143,6 +143,17 @@ export function useGameLauncher(): UseGameLauncherResult {
       return true;
     }
 
+    await run(target.id, target.path).catch(() => undefined);
+
+    const retry = await checkStatus(target.id).catch(() => null);
+
+    if (retry?.running === true) {
+      useStrategiesStore.getState().setStatus(target.id, "running");
+      useStrategiesStore.getState().setPid(target.id, retry.winwsPids[0] ?? 0);
+
+      return true;
+    }
+
     addLog({
       level: "error",
       source: "user",

@@ -111,7 +111,7 @@ fn steam_game(steamapps: &Path, manifest_path: &Path) -> Option<InstalledGame> {
         return None;
     }
 
-    let executable = pick_executable(&install_path, &name)?;
+    let executable = launch_target(&install_path, &name);
     let mut game = to_game(
         GamePlatform::Steam,
         GameSource::Steam,
@@ -193,6 +193,17 @@ pub fn scan_store_folder(
             Some(to_game(platform, source, &install_path, &executable))
         })
         .collect()
+}
+
+pub fn launch_target(folder: &Path, name_hint: &str) -> PathBuf {
+    let protected = folder.join("start_protected_game.exe");
+
+    if protected.is_file() {
+        return protected;
+    }
+
+    pick_executable(folder, name_hint)
+        .unwrap_or_else(|| folder.to_path_buf())
 }
 
 pub fn pick_executable(folder: &Path, name_hint: &str) -> Option<PathBuf> {
