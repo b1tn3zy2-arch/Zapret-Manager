@@ -46,6 +46,11 @@ pub fn is_game_running(pid: u32) -> AppResult<bool> {
     Ok(is_pid_alive(pid))
 }
 
+#[tauri::command]
+pub fn close_game(pid: u32) -> AppResult<bool> {
+    Ok(crate::winapi_helpers::terminate_pid(pid))
+}
+
 fn resolve_working_dir(working_dir: Option<&str>, executable: &Path) -> PathBuf {
     working_dir
         .map(|value| PathBuf::from(value.trim()))

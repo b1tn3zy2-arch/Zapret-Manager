@@ -829,6 +829,7 @@ export const en = {
     badge: "Strategy update available: {version}",
     titleAvailable: "Strategy update available",
     titleInstalled: "Update installed",
+    titleUpToDate: "You have the latest version",
     titleFailed: "Could not update strategies",
     done: "Done",
     hide: "Hide",

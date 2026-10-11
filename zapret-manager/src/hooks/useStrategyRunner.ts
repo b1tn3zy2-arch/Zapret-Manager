@@ -37,6 +37,7 @@ interface NativeGamePayload {
   name: string;
   domains: string[];
   ips: string[];
+  ports: number[];
 }
 
 const UAC_CANCELLED_MARKER = "отменён";
@@ -55,6 +56,7 @@ function toNativeGames(games: GameSettings[]): NativeGamePayload[] {
     name: game.name,
     domains: game.domains,
     ips: game.ipRanges,
+    ports: game.ports,
   }));
 }
 
@@ -204,6 +206,22 @@ export function useStrategyRunner(): UseStrategyRunnerResult {
         setPid(strategyId, result.pid);
         setLastStrategyId(strategyId);
         void recordStrategyScore(strategyId);
+
+        const general = useSettingsStore.getState().settings.general;
+
+        if (general.showNotifications && general.showNotificationsOnStart) {
+          const active = useStrategiesStore
+            .getState()
+            .strategies.find((item) => item.id === strategyId);
+
+          void invoke("show_notification", {
+            title: translateKey("log.strategyStartedTitle"),
+            body: translateKey("log.strategyStartedBody", {
+              name: active?.name ?? "",
+            }),
+            kind: "success",
+          }).catch(() => undefined);
+        }
         addLog({
           level: "info",
           source: "strategy",

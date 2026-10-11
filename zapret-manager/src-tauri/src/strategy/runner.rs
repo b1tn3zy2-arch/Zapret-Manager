@@ -20,6 +20,7 @@ const USER_LIST_FILES: &[(&str, &str)] = &[
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct GameRequest {
+    pub ports: Vec<u16>,
     pub name: String,
     pub domains: Vec<String>,
     pub ips: Vec<String>,
@@ -32,16 +33,18 @@ pub struct PreparedRun {
     pub games: GamesPayload,
 }
 
-fn flatten_games(games: &[GameRequest]) -> (Vec<String>, Vec<String>) {
+fn flatten_games(games: &[GameRequest]) -> (Vec<String>, Vec<String>, Vec<u16>) {
     let mut domains: Vec<String> = Vec::new();
     let mut ips: Vec<String> = Vec::new();
+    let mut ports: Vec<u16> = Vec::new();
 
     for game in games {
         domains.extend(game.domains.iter().cloned());
         ips.extend(game.ips.iter().cloned());
+        ports.extend(game.ports.iter().copied());
     }
 
-    (domains, ips)
+    (domains, ips, ports)
 }
 
 pub fn ensure_user_lists(working_dir: &Path) -> AppResult<()> {
@@ -77,7 +80,7 @@ pub fn prepare_run(
     ensure_user_lists(working_dir)?;
 
     let config = parser::parse_bat(content, &filename, working_dir)?;
-    let (domains, ips) = flatten_games(games);
+    let (domains, ips, ports) = flatten_games(games);
 
     if !games.is_empty() {
         let names: Vec<&str> = games.iter().map(|game| game.name.as_str()).collect();
@@ -88,12 +91,15 @@ pub fn prepare_run(
         &games_hostlist::games_dir(),
         &domains,
         &ips,
+        &ports,
     )?;
 
     let options = BuildOptions {
         log_path: Some(log_path),
         games_hostlist: games_payload.hostlist.as_deref(),
         games_hostlist_exclude: games_payload.exclude.as_deref(),
+        games_udp_ports: Some(games_payload.udp_ports.as_slice()),
+        games_udp_fake: games_payload.udp_fake.as_deref(),
         games_ipset: games_payload.ipset.as_deref(),
         extra_args: &[],
     };

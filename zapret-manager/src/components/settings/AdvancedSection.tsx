@@ -18,19 +18,6 @@ import { useLogsStore } from "@/stores/useLogsStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import type { ConfigCheckReport } from "@/types";
 
-function clampRetention(value: string): number {
-  const parsed = Number.parseInt(value, 10);
-
-  if (Number.isNaN(parsed)) {
-    return MIN_LOG_RETENTION_DAYS;
-  }
-
-  return Math.min(
-    Math.max(parsed, MIN_LOG_RETENTION_DAYS),
-    MAX_LOG_RETENTION_DAYS
-  );
-}
-
 function ReportText({ report }: { report: ConfigCheckReport }) {
   const { t } = useI18n();
   const problems =
@@ -154,14 +141,18 @@ function AdvancedSection() {
         control={
           <Input
             variant="filled"
-            type="number"
-            min={MIN_LOG_RETENTION_DAYS}
-            max={MAX_LOG_RETENTION_DAYS}
+            inputMode="numeric"
             value={String(advanced.logRetentionDays)}
             aria-label={t("settings.advanced.logRetention")}
+            className="w-24"
             onChange={(event) => {
+              const digits = event.target.value.replace(/D/g, "");
+
               updateAdvanced({
-                logRetentionDays: clampRetention(event.target.value),
+                logRetentionDays:
+                  digits === ""
+                    ? MIN_LOG_RETENTION_DAYS
+                    : Math.min(Number(digits), MAX_LOG_RETENTION_DAYS),
               });
             }}
           />
@@ -172,18 +163,14 @@ function AdvancedSection() {
         <EditableList
           items={advanced.winwsExtraArgs}
           onChange={(winwsExtraArgs) => {
-            updateAdvanced({
-              winwsExtraArgs: winwsExtraArgs.filter(
-                (item) => item.trim() !== ""
-              ),
-            });
+            updateAdvanced({ winwsExtraArgs });
           }}
           label={t("settings.advanced.extraArgs")}
           placeholder="--dpi-desync=fake"
           addLabel={t("settings.advanced.addArgument")}
           emptyMessage={t("settings.advanced.noArgs")}
           validate={(value) =>
-            value.trim() === "" || value.startsWith(" ")
+            value !== "" && value.startsWith(" ")
               ? t("settings.advanced.leadingSpace")
               : null
           }

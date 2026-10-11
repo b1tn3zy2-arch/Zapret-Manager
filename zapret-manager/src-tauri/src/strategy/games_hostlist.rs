@@ -20,6 +20,8 @@ pub const GAMES_ENTRY_LIMIT: usize = 2000;
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct GamesPayload {
     pub exclude: Option<PathBuf>,
+    pub udp_ports: Vec<u16>,
+    pub udp_fake: Option<PathBuf>,
     pub hostlist: Option<PathBuf>,
     pub ipset: Option<PathBuf>,
     pub domains_count: usize,
@@ -119,6 +121,7 @@ pub fn generate(
     dir: &Path,
     domains: &[String],
     ips: &[String],
+    ports: &[u16],
 ) -> AppResult<GamesPayload> {
     let unique_domains =
         collect_unique(&valid_domains(domains), normalize_domain, GAMES_ENTRY_LIMIT);
@@ -160,13 +163,44 @@ pub fn generate(
         )?)
     };
 
+    let udp_ports: Vec<u16> = {
+        let mut unique: Vec<u16> = ports
+            .iter()
+            .copied()
+            .filter(|value| *value > 0 && *value != 80 && *value != 443)
+            .collect();
+
+        unique.sort_unstable();
+        unique.dedup();
+        unique.truncate(24);
+        unique
+    };
+
+    let udp_fake = if udp_ports.is_empty() {
+        None
+    } else {
+        resolve_udp_fake(dir)
+    };
+
     Ok(GamesPayload {
         exclude,
+        udp_ports,
+        udp_fake,
         hostlist,
         ipset,
         domains_count: unique_domains.len(),
         ips_count: unique_ips.len(),
     })
+}
+
+fn resolve_udp_fake(dir: &Path) -> Option<PathBuf> {
+    let candidates = [
+        dir.join("bin").join("stun.bin"),
+        dir.join("stun.bin"),
+        dir.parent()?.join("bin").join("stun.bin"),
+    ];
+
+    candidates.into_iter().find(|path| path.is_file())
 }
 
 pub fn cleanup(dir: &Path) {
@@ -183,3 +217,6 @@ pub fn cleanup(dir: &Path) {
         }
     }
 }
+
+#[cfg(test)]
+pub static GAMES_TEST_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());

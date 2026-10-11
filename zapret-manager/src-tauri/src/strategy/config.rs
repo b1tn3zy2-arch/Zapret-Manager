@@ -27,6 +27,8 @@ pub struct BuildOptions<'a> {
     pub log_path: Option<&'a Path>,
     pub games_hostlist: Option<&'a Path>,
     pub games_hostlist_exclude: Option<&'a Path>,
+    pub games_udp_ports: Option<&'a [u16]>,
+    pub games_udp_fake: Option<&'a Path>,
     pub games_ipset: Option<&'a Path>,
     pub extra_args: &'a [String],
 }
@@ -72,6 +74,22 @@ impl StrategyConfig {
                 if let Some(path) = options.games_ipset {
                     args.push(format!("--ipset={}", path.display()));
                 }
+            }
+        }
+
+        if let (Some(ports), Some(fake)) = (options.games_udp_ports, options.games_udp_fake) {
+            let list = ports
+                .iter()
+                .map(|value| value.to_string())
+                .collect::<Vec<String>>()
+                .join(",");
+
+            if !list.is_empty() {
+                args.push("--new".to_string());
+                args.push(format!("--filter-udp={list}"));
+                args.push("--dpi-desync=fake".to_string());
+                args.push("--dpi-desync-repeats=3".to_string());
+                args.push(format!("--dpi-desync-fake-unknown-udp={}", fake.display()));
             }
         }
 

@@ -831,6 +831,7 @@ export const ru = {
     badge: "Доступно обновление стратегий до {version}",
     titleAvailable: "Доступно обновление стратегий",
     titleInstalled: "Обновление установлено",
+    titleUpToDate: "Установлена актуальная версия",
     titleFailed: "Не удалось обновить стратегии",
     done: "Готово",
     hide: "Скрыть",

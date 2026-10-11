@@ -13,6 +13,9 @@ fn temp_dir(name: &str) -> PathBuf {
 
 #[test]
 fn test_normalize_domain() {
+    let _guard = crate::strategy::games_hostlist::GAMES_TEST_LOCK
+        .lock()
+        .unwrap_or_else(|error| error.into_inner());
     assert_eq!(
         normalize_domain("  Example.COM.  ").as_deref(),
         Some("example.com")
@@ -23,14 +26,20 @@ fn test_normalize_domain() {
 
 #[test]
 fn test_normalize_ip() {
+    let _guard = crate::strategy::games_hostlist::GAMES_TEST_LOCK
+        .lock()
+        .unwrap_or_else(|error| error.into_inner());
     assert_eq!(normalize_ip(" 10.0.0.0/8 ").as_deref(), Some("10.0.0.0/8"));
     assert_eq!(normalize_ip(" "), None);
 }
 
 #[test]
 fn test_generate_empty_returns_none() {
+    let _guard = crate::strategy::games_hostlist::GAMES_TEST_LOCK
+        .lock()
+        .unwrap_or_else(|error| error.into_inner());
     let dir = temp_dir("empty");
-    let payload = generate(&dir, &[], &[]).expect("generate");
+    let payload = generate(&dir, &[], &[], &[]).expect("generate");
 
     assert_eq!(payload.hostlist, None);
     assert_eq!(payload.ipset, None);
@@ -40,6 +49,9 @@ fn test_generate_empty_returns_none() {
 
 #[test]
 fn test_generate_single_domain_deduplicates() {
+    let _guard = crate::strategy::games_hostlist::GAMES_TEST_LOCK
+        .lock()
+        .unwrap_or_else(|error| error.into_inner());
     let dir = temp_dir("single");
     let domains = vec![
         "SteamCommunity.com".to_string(),
@@ -47,7 +59,7 @@ fn test_generate_single_domain_deduplicates() {
         "steamcommunity.com".to_string(),
     ];
 
-    let payload = generate(&dir, &domains, &[]).expect("generate");
+    let payload = generate(&dir, &domains, &[], &[]).expect("generate");
 
     assert_eq!(payload.domains_count, 1);
     assert_eq!(payload.ipset, None);
@@ -62,6 +74,9 @@ fn test_generate_single_domain_deduplicates() {
 
 #[test]
 fn test_generate_multiple_sources_deduplicates() {
+    let _guard = crate::strategy::games_hostlist::GAMES_TEST_LOCK
+        .lock()
+        .unwrap_or_else(|error| error.into_inner());
     let dir = temp_dir("multi");
     let domains = vec![
         "a.com".to_string(),
@@ -71,7 +86,7 @@ fn test_generate_multiple_sources_deduplicates() {
     ];
     let ips = vec!["10.0.0.0/8".to_string(), "10.0.0.0/8".to_string()];
 
-    let payload = generate(&dir, &domains, &ips).expect("generate");
+    let payload = generate(&dir, &domains, &ips, &[]).expect("generate");
 
     assert_eq!(payload.domains_count, 3);
     assert_eq!(payload.ips_count, 1);
@@ -87,11 +102,14 @@ fn test_generate_multiple_sources_deduplicates() {
 
 #[test]
 fn test_generate_skips_invalid_entries() {
+    let _guard = crate::strategy::games_hostlist::GAMES_TEST_LOCK
+        .lock()
+        .unwrap_or_else(|error| error.into_inner());
     let dir = temp_dir("invalid");
     let domains = vec!["valid.com".to_string(), "bad domain".to_string()];
     let ips = vec!["10.0.0.0/8".to_string(), "999.1.1.1".to_string()];
 
-    let payload = generate(&dir, &domains, &ips).expect("generate");
+    let payload = generate(&dir, &domains, &ips, &[]).expect("generate");
 
     assert_eq!(payload.domains_count, 1);
     assert_eq!(payload.ips_count, 1);
@@ -101,8 +119,11 @@ fn test_generate_skips_invalid_entries() {
 
 #[test]
 fn test_cleanup_removes_generated_files() {
+    let _guard = crate::strategy::games_hostlist::GAMES_TEST_LOCK
+        .lock()
+        .unwrap_or_else(|error| error.into_inner());
     let dir = temp_dir("cleanup");
-    generate(&dir, &["a.com".to_string()], &["10.0.0.0/8".to_string()])
+    generate(&dir, &["a.com".to_string()], &["10.0.0.0/8".to_string()], &[])
         .expect("generate");
 
     assert!(dir.join(GAMES_HOSTLIST_NAME).exists());
@@ -118,6 +139,9 @@ fn test_cleanup_removes_generated_files() {
 
 #[test]
 fn test_cleanup_missing_files_is_noop() {
+    let _guard = crate::strategy::games_hostlist::GAMES_TEST_LOCK
+        .lock()
+        .unwrap_or_else(|error| error.into_inner());
     let dir = temp_dir("cleanup-missing");
     fs::create_dir_all(&dir).expect("создать папку");
 
@@ -128,11 +152,14 @@ fn test_cleanup_missing_files_is_noop() {
 
 #[test]
 fn test_generate_writes_anticheat_exclude_list() {
+    let _guard = crate::strategy::games_hostlist::GAMES_TEST_LOCK
+        .lock()
+        .unwrap_or_else(|error| error.into_inner());
     let dir = std::env::temp_dir().join("zapret-games-exclude-test");
 
     let _ = std::fs::remove_dir_all(&dir);
 
-    let payload = generate(&dir, &["outlasttrials.com".to_string()], &[]).unwrap();
+    let payload = generate(&dir, &["outlasttrials.com".to_string()], &[], &[]).unwrap();
     let exclude = payload.exclude.clone().unwrap_or_default();
     let content = std::fs::read_to_string(&exclude).unwrap_or_default();
 

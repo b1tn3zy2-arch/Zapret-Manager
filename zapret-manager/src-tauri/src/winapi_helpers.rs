@@ -229,6 +229,26 @@ pub fn shell_execute_normal(
     Ok(pid)
 }
 
+pub fn terminate_pid(pid: u32) -> bool {
+    const PROCESS_TERMINATE: DWORD = 0x0001;
+
+    if pid == 0 {
+        return false;
+    }
+
+    let handle = unsafe { OpenProcess(PROCESS_TERMINATE, 0, pid as DWORD) };
+
+    if handle.is_null() {
+        return false;
+    }
+
+    let ok = unsafe { TerminateProcess(handle, 0) };
+
+    unsafe { CloseHandle(handle) };
+
+    ok != 0
+}
+
 pub fn is_pid_alive(pid: u32) -> bool {
     if pid == 0 {
         return false;

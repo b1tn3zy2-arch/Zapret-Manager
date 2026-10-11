@@ -33,11 +33,15 @@ fn game() -> GameRequest {
             "steamcommunity.com".to_string(),
         ],
         ips: Vec::new(),
+        ports: vec![7780],
     }
 }
 
 #[test]
 fn test_prepare_run_builds_args_with_log() {
+    let _guard = crate::strategy::games_hostlist::GAMES_TEST_LOCK
+        .lock()
+        .unwrap_or_else(|error| error.into_inner());
     let dir = temp_dir("basic");
     let bat = dir.join("general.bat");
     fs::write(&bat, SAMPLE_BAT).expect("записать bat");
@@ -58,6 +62,9 @@ fn test_prepare_run_builds_args_with_log() {
 
 #[test]
 fn test_prepare_run_with_games_adds_hostlist() {
+    let _guard = crate::strategy::games_hostlist::GAMES_TEST_LOCK
+        .lock()
+        .unwrap_or_else(|error| error.into_inner());
     let dir = temp_dir("games");
     let bat = dir.join("general.bat");
     fs::write(&bat, SAMPLE_BAT).expect("записать bat");
@@ -84,6 +91,9 @@ fn test_prepare_run_with_games_adds_hostlist() {
 
 #[test]
 fn test_prepare_run_without_games_has_no_games_args() {
+    let _guard = crate::strategy::games_hostlist::GAMES_TEST_LOCK
+        .lock()
+        .unwrap_or_else(|error| error.into_inner());
     let dir = temp_dir("no-games");
     let bat = dir.join("general.bat");
     fs::write(&bat, SAMPLE_BAT).expect("записать bat");
@@ -102,6 +112,9 @@ fn test_prepare_run_without_games_has_no_games_args() {
 
 #[test]
 fn test_resolve_winws_path_uses_configured_existing_file() {
+    let _guard = crate::strategy::games_hostlist::GAMES_TEST_LOCK
+        .lock()
+        .unwrap_or_else(|error| error.into_inner());
     let dir = temp_dir("winws-configured");
     let winws = dir.join("winws.exe");
     fs::write(&winws, b"stub").expect("записать winws.exe");
@@ -121,6 +134,9 @@ fn test_resolve_winws_path_uses_configured_existing_file() {
 
 #[test]
 fn test_resolve_winws_path_falls_back_to_bin_dir() {
+    let _guard = crate::strategy::games_hostlist::GAMES_TEST_LOCK
+        .lock()
+        .unwrap_or_else(|error| error.into_inner());
     let dir = temp_dir("winws-fallback");
 
     let config = StrategyConfig {
@@ -141,6 +157,9 @@ fn test_resolve_winws_path_falls_back_to_bin_dir() {
 
 #[test]
 fn test_generated_args_have_no_extended_prefix_when_available() {
+    let _guard = crate::strategy::games_hostlist::GAMES_TEST_LOCK
+        .lock()
+        .unwrap_or_else(|error| error.into_inner());
     let Some(appdata) = std::env::var_os("APPDATA") else {
         return;
     };
@@ -174,6 +193,9 @@ fn test_generated_args_have_no_extended_prefix_when_available() {
 
 #[test]
 fn test_ensure_user_lists_creates_missing_files() {
+    let _guard = crate::strategy::games_hostlist::GAMES_TEST_LOCK
+        .lock()
+        .unwrap_or_else(|error| error.into_inner());
     let dir = temp_dir("user-lists");
 
     ensure_user_lists(&dir).expect("создать списки");
@@ -193,6 +215,9 @@ fn test_ensure_user_lists_creates_missing_files() {
 
 #[test]
 fn test_ensure_user_lists_does_not_overwrite() {
+    let _guard = crate::strategy::games_hostlist::GAMES_TEST_LOCK
+        .lock()
+        .unwrap_or_else(|error| error.into_inner());
     let dir = temp_dir("user-lists-keep");
     let lists = dir.join("lists");
     fs::create_dir_all(&lists).expect("создать lists");
@@ -210,6 +235,9 @@ fn test_ensure_user_lists_does_not_overwrite() {
 
 #[test]
 fn test_winws_dry_run_all_real_strategies_when_available() {
+    let _guard = crate::strategy::games_hostlist::GAMES_TEST_LOCK
+        .lock()
+        .unwrap_or_else(|error| error.into_inner());
     let Some(appdata) = std::env::var_os("APPDATA") else {
         return;
     };

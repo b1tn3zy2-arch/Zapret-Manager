@@ -28,7 +28,6 @@ const THEME_OPTIONS = [
 const DENSITY_OPTIONS = [
   { value: "compact", labelKey: "settings.appearance.values.compact" },
   { value: "normal", labelKey: "settings.appearance.values.normal" },
-  { value: "comfy", labelKey: "settings.appearance.values.comfy" },
 ] as const satisfies readonly {
   value: DensityMode;
   labelKey: TranslationKey;

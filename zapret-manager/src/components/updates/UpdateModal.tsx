@@ -57,7 +57,9 @@ function UpdateModal({
     ? t("updates.titleInstalled")
     : status === "error"
       ? t("updates.titleFailed")
-      : t("updates.titleAvailable");
+      : info?.available === true
+        ? t("updates.titleAvailable")
+        : t("updates.titleUpToDate");
 
   const footer = isReady ? (
     <Button variant="primary" onClick={onClose}>
