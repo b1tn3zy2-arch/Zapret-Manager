@@ -20,12 +20,13 @@ export default function GamePlayOverlay({
   onLaunch,
 }: GamePlayOverlayProps) {
   return (
-    <motion.span
-      initial={motionDisabled ? false : { opacity: 0 }}
-      animate={{ opacity: visible ? 1 : 0 }}
-      transition={{ duration: ANIMATION.fast, ease: "easeOut" }}
+    <span
       aria-hidden={!visible}
-      className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center rounded-xl"
+      className={cn(
+        "pointer-events-none absolute inset-0 z-20 flex items-center justify-center rounded-xl",
+        "transition-opacity duration-100",
+        visible ? "opacity-100" : "opacity-0"
+      )}
     >
       <span
         className="absolute inset-0 rounded-xl backdrop-blur-md"
@@ -42,6 +43,8 @@ export default function GamePlayOverlay({
           event.stopPropagation();
           onLaunch();
         }}
+        initial={motionDisabled ? false : { scale: 0.82, opacity: 0.6 }}
+        animate={{ scale: visible ? 1 : 0.82, opacity: visible ? 1 : 0.6 }}
         {...(motionDisabled
           ? {}
           : { whileHover: { scale: 1.08 }, whileTap: { scale: 0.95 } })}
@@ -60,6 +63,6 @@ export default function GamePlayOverlay({
           fill="currentColor"
         />
       </motion.button>
-    </motion.span>
+    </span>
   );
 }

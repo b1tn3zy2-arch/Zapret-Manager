@@ -1,7 +1,5 @@
 import { useState } from "react";
 
-import { useMediaQuery } from "@/hooks/useMediaQuery";
-
 export type DeviceTier = "low" | "mid" | "high";
 
 interface NavigatorWithMemory extends Navigator {
@@ -57,8 +55,4 @@ export function useDeviceTier(): DeviceTier {
   const [tier] = useState<DeviceTier>(() => getDeviceTier());
 
   return tier;
-}
-
-export function usePrefersReducedMotion(): boolean {
-  return useMediaQuery("(prefers-reduced-motion: reduce)");
 }

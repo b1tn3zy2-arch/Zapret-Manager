@@ -20,6 +20,8 @@ pub struct KnownGame {
     #[serde(default)]
     pub anticheat: Option<String>,
     #[serde(default)]
+    pub bypass_mode: Option<String>,
+    #[serde(default)]
     pub aliases: Vec<String>,
 }
 

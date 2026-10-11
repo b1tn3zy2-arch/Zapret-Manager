@@ -142,6 +142,7 @@ pub fn enrich(known: &KnownGames, games: &mut [InstalledGame]) {
             game.cover_url = entry.cover.clone();
             game.game_settings_id = entry.domain_settings_id.clone();
             game.anticheat = Some(anticheat_of(entry).as_str().to_string());
+            game.bypass_mode = entry.bypass_mode.clone();
             game.name = entry.name.clone();
         }
     }

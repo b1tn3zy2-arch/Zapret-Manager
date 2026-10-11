@@ -72,6 +72,7 @@ pub struct InstalledGame {
     pub cover_url: Option<String>,
     pub game_settings_id: Option<String>,
     pub anticheat: Option<String>,
+    pub bypass_mode: Option<String>,
     pub last_launched_at: Option<u64>,
     pub launch_count: u64,
 }
@@ -97,6 +98,7 @@ impl InstalledGame {
             cover_url: None,
             game_settings_id: None,
             anticheat: None,
+            bypass_mode: None,
             last_launched_at: None,
             launch_count: 0,
         }

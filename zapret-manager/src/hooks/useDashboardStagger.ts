@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import type { Variants } from "framer-motion";
 
-import { usePrefersReducedMotion } from "@/hooks/useDeviceTier";
+import { useMotionPreference } from "@/hooks/useMotionPreference";
 import {
   ANIMATION,
   DASHBOARD_ITEM_DURATION_MS,
@@ -14,7 +14,7 @@ export interface DashboardStaggerVariants {
 }
 
 export function useDashboardStagger(): DashboardStaggerVariants {
-  const reducedMotion = usePrefersReducedMotion();
+  const { reduced: reducedMotion } = useMotionPreference();
 
   return useMemo(() => {
     if (reducedMotion) {

@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import { motion } from "framer-motion";
 
 import { GlassPanel } from "@/components/shared/GlassPanel";
-import { usePrefersReducedMotion } from "@/hooks/useDeviceTier";
+import { useMotionPreference } from "@/hooks/useMotionPreference";
 import { usePing } from "@/hooks/usePing";
 import {
   CHART_PULSE_PERIOD_MS,
@@ -45,7 +45,7 @@ interface PingCardProps {
 
 function PingCard({ label, points, title }: PingCardProps) {
   const { t } = useI18n();
-  const reducedMotion = usePrefersReducedMotion();
+  const { reduced: reducedMotion } = useMotionPreference();
   const latency = lastLatency(points);
   const color = getPingColor(latency);
   const line = useMemo(

@@ -2,7 +2,7 @@ import { translateKey } from "@/i18n/core";
 import { useEffect, useRef, useState } from "react";
 import type { RefObject } from "react";
 
-import { usePrefersReducedMotion } from "@/hooks/useDeviceTier";
+import { useMotionPreference } from "@/hooks/useMotionPreference";
 import {
   CHART_PULSE_PERIOD_MS,
   CHART_SMOOTH_TENSION,
@@ -142,7 +142,7 @@ export function useTrafficCanvas({
   const valueRef = useRef(0);
   const [currentValue, setCurrentValue] = useState(0);
   const scale = useDpiScale();
-  const reducedMotion = usePrefersReducedMotion();
+  const { reduced: reducedMotion } = useMotionPreference();
 
   useEffect(() => {
     const canvas = canvasRef.current;

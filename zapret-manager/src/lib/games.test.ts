@@ -19,7 +19,6 @@ function custom(patch: Partial<GameSettings> = {}): GameSettings {
     name: "Моя игра",
     icon: "Gamepad2",
     enabled: false,
-    priority: false,
     builtin: false,
     domains: ["example.com"],
     ipRanges: [],
@@ -36,7 +35,6 @@ describe("встроенные игры", () => {
     const outlast = BUILTIN_GAMES.find((game) => game.id === "outlast-trials");
 
     expect(outlast).toBeDefined();
-    expect(outlast?.priority).toBe(true);
     expect(outlast?.builtin).toBe(true);
   });
 

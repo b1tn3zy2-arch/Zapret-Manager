@@ -127,7 +127,8 @@
     "anticheat": "none",
     "aliases": [
       "destiny 2"
-    ]
+    ],
+    "bypassMode": "vpn"
   },
   {
     "appid": "2344520",
@@ -234,7 +235,8 @@
       "gta v",
       "gtav",
       "gta online"
-    ]
+    ],
+    "bypassMode": "vpn"
   },
   {
     "appid": "271590",
@@ -486,7 +488,8 @@
     "anticheat": "none",
     "aliases": [
       "s.t.a.l.k.e.r. 2: heart of chornobyl"
-    ]
+    ],
+    "bypassMode": "vpn"
   },
   {
     "appid": "814380",
@@ -569,7 +572,8 @@
     "aliases": [
       "the outlast trials",
       "outlast trials"
-    ]
+    ],
+    "bypassMode": "vpn"
   },
   {
     "appid": "945550",
@@ -623,6 +627,18 @@
     "anticheat": "none",
     "aliases": [
       "warzone 2100"
+    ],
+    "bypassMode": "vpn"
+  },
+  {
+    "appid": "1063730",
+    "name": "Escape from Tarkov",
+    "bypassMode": "vpn",
+    "anticheat": "battleye",
+    "aliases": [
+      "tarkov",
+      "eft",
+      "escape from tarkov"
     ]
   }
 ]

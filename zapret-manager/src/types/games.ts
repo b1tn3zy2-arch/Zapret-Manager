@@ -3,7 +3,6 @@ export interface GameSettings {
   name: string;
   icon: string;
   enabled: boolean;
-  priority: boolean;
   builtin: boolean;
   domains: string[];
   ipRanges: string[];

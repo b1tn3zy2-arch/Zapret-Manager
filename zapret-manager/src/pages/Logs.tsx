@@ -137,7 +137,10 @@ export default function Logs() {
         </Text>
       </motion.div>
 
-      <motion.div variants={itemVariants}>
+      <motion.div
+        variants={itemVariants}
+        className="border-glass-border bg-glass-bg rounded-xl border p-3"
+      >
         <LogFilters
           filter={filter}
           onChange={setFilter}

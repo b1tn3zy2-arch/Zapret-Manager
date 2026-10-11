@@ -74,9 +74,9 @@ fn registry_game(entry: super::game_registry::UninstallEntry) -> Option<Installe
         return None;
     }
 
-    let executable = collect_candidates(&folder, 2).into_iter().find(|path| {
-        super::game_heuristics::is_game_candidate(&folder, path)
-    })?;
+    let executable = collect_candidates(&folder, 2)
+        .into_iter()
+        .find(|_| super::game_heuristics::is_game_candidate(&folder))?;
     let mut game = to_game(GamePlatform::Unknown, GameSource::Registry, &folder, &executable);
 
     game.name = entry.display_name;

@@ -215,25 +215,9 @@ fn file_name(path: &Path) -> String {
         .to_string()
 }
 
-pub fn is_game_candidate(folder: &Path, executable: &Path) -> bool {
-    if has_game_markers(folder) {
-        return true;
-    }
-
-    let folder_name = folder
-        .file_name()
-        .and_then(|value| value.to_str())
-        .unwrap_or_default()
-        .to_ascii_lowercase();
-    let stem = executable
-        .file_stem()
-        .and_then(|value| value.to_str())
-        .unwrap_or_default()
-        .to_ascii_lowercase();
-
-    !stem.is_empty() && stem == folder_name
+pub fn is_game_candidate(folder: &Path) -> bool {
+    has_game_markers(folder)
 }
-
 
 fn source_priority(source: GameSource) -> u8 {
     match source {

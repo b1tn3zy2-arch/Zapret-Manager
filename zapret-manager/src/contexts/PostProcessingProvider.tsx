@@ -5,7 +5,8 @@ import {
   type DeviceQualityTier,
   type PostProcessingContextValue,
 } from "@/contexts/postProcessing";
-import { useDeviceTier, usePrefersReducedMotion } from "@/hooks/useDeviceTier";
+import { useDeviceTier } from "@/hooks/useDeviceTier";
+import { useMotionPreference } from "@/hooks/useMotionPreference";
 import { QUALITY_DECORATION_ALLOWED } from "@/lib/postProcessingTokens";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import type { PostProcessingQuality } from "@/types/appearance";
@@ -30,7 +31,7 @@ function PostProcessingProvider({ children }: { children: ReactNode }) {
     (state) => state.settings.appearance.postProcessing
   );
   const deviceTier = useDeviceTier();
-  const isReducedMotion = usePrefersReducedMotion();
+  const { reduced: isReducedMotion } = useMotionPreference();
 
   const value = useMemo<PostProcessingContextValue>(() => {
     const globalQuality = resolveQuality(settings.globalQuality, deviceTier);

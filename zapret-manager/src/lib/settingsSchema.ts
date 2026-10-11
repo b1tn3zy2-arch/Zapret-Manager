@@ -59,7 +59,6 @@ const gameSchema = z.object({
   name: z.string().min(1).max(64),
   icon: z.string().min(1).max(32),
   enabled: z.boolean(),
-  priority: z.boolean(),
   builtin: z.boolean(),
   domains: z.array(z.string().max(253)).max(MAX_INJECTED_ENTRIES),
   ipRanges: z.array(z.string().max(64)).max(MAX_INJECTED_ENTRIES),
@@ -190,7 +189,6 @@ function migrateLegacyOutlast(
     name: "Outlast Trials",
     icon: "Gamepad2",
     enabled: source.enabled === true,
-    priority: true,
     builtin: true,
     domains: Array.isArray(source.domains) ? (source.domains as string[]) : [],
     ipRanges: Array.isArray(source.ipRanges)

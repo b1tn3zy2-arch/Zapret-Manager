@@ -14,13 +14,13 @@ import GameScanIndicator from "@/components/settings/games/GameScanIndicator";
 import InstalledGamesGrid from "@/components/settings/games/InstalledGamesGrid";
 import { Button, Heading, Text } from "@/components/ui";
 import { useI18n } from "@/i18n";
-import { useDeviceTier, usePrefersReducedMotion } from "@/hooks/useDeviceTier";
 import { useGameLauncher } from "@/hooks/useGameLauncher";
 import { useInstalledGames } from "@/hooks/useInstalledGames";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { isBypassEnabled } from "@/lib/installedGames";
 import { useLogsStore } from "@/stores/useLogsStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
+import { useVpnStore } from "@/stores/useVpnStore";
 import type { InstalledGame } from "@/types";
 
 interface ContextState {
@@ -46,14 +46,16 @@ export default function Games() {
     useGameLauncher();
   const bypassGames = useSettingsStore((state) => state.settings.games);
   const addLog = useLogsStore((state) => state.addLog);
-  const tier = useDeviceTier();
-  const reducedMotion = usePrefersReducedMotion();
+  const animationsOn = useSettingsStore(
+    (state) => state.settings.appearance.animations
+  );
   const canHover = useMediaQuery("(hover: hover)");
+  const killSwitchActive = useVpnStore((state) => state.killSwitchActive);
   const [addOpen, setAddOpen] = useState(false);
   const [foldersOpen, setFoldersOpen] = useState(false);
   const [context, setContext] = useState<ContextState | null>(null);
   const [focusId, setFocusId] = useState<string | null>(null);
-  const motionDisabled = reducedMotion || tier === "low" || !canHover;
+  const motionDisabled = !animationsOn || !canHover;
   const scanning = scanStatus === "scanning";
 
   const bypassByGameId = useMemo(
@@ -256,6 +258,7 @@ export default function Games() {
       />
       <GameLaunchPrompt
         prompt={prompt}
+        killSwitchActive={killSwitchActive}
         onConfirm={() => {
           void confirmPrompt();
         }}

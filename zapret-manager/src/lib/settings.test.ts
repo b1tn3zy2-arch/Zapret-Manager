@@ -88,7 +88,6 @@ describe("validateSettings", () => {
 
     expect(outlast).toBeDefined();
     expect(outlast?.enabled).toBe(true);
-    expect(outlast?.priority).toBe(true);
     expect(outlast?.builtin).toBe(true);
     expect(outlast?.domains).toEqual(["outlasttrials.com"]);
     expect(outlast?.ipRanges).toEqual(["203.0.113.0/24"]);
@@ -105,7 +104,6 @@ describe("validateSettings", () => {
           name: "Моя игра",
           icon: "Gamepad2",
           enabled: false,
-          priority: false,
           builtin: false,
           domains: ["example.com"],
           ipRanges: [],

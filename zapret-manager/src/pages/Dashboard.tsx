@@ -6,7 +6,7 @@ import DpiMode from "@/components/dashboard/DpiMode";
 import ModeSwitcher from "@/components/dashboard/ModeSwitcher";
 import VpnMode from "@/components/dashboard/VpnMode";
 import { Heading, Text } from "@/components/ui";
-import { usePrefersReducedMotion } from "@/hooks/useDeviceTier";
+import { useMotionPreference } from "@/hooks/useMotionPreference";
 import {
   ANIMATION,
   MODE_CROSSFADE_MS,
@@ -22,7 +22,7 @@ export default function Dashboard() {
   const setDashboardMode = useAppStore((state) => state.setDashboardMode);
   const switchStep = useVpnStore((state) => state.switchStep);
   const isSwitching = useVpnStore((state) => state.isSwitching);
-  const reducedMotion = usePrefersReducedMotion();
+  const { reduced: reducedMotion } = useMotionPreference();
 
   const handleModeChange = useCallback(
     (next: DashboardMode): void => {
@@ -45,19 +45,23 @@ export default function Dashboard() {
           ease: ANIMATION.easeOutExpo,
         }}
       >
-        <div className="flex flex-col gap-2">
-          <Heading level={1}>{getGreeting()}</Heading>
-          <Text variant="body" size="lg" className="text-text-secondary">
-            {t("dashboard.subtitle")}
-          </Text>
-        </div>
+        <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-4">
+          <div className="flex min-w-0 flex-col gap-2">
+            <Heading level={1}>{getGreeting()}</Heading>
+            <Text variant="body" size="lg" className="text-text-secondary">
+              {t("dashboard.subtitle")}
+            </Text>
+          </div>
 
-        <ModeSwitcher
-          mode={mode}
-          switchStep={switchStep}
-          isSwitching={isSwitching}
-          onChange={handleModeChange}
-        />
+          <div className="shrink-0">
+            <ModeSwitcher
+              mode={mode}
+              switchStep={switchStep}
+              isSwitching={isSwitching}
+              onChange={handleModeChange}
+            />
+          </div>
+        </div>
       </motion.header>
 
       <AnimatePresence mode="wait" initial={false}>

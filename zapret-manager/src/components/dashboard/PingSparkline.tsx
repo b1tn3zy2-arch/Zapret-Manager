@@ -1,7 +1,7 @@
 import { useId, useMemo } from "react";
 import { motion } from "framer-motion";
 
-import { usePrefersReducedMotion } from "@/hooks/useDeviceTier";
+import { useMotionPreference } from "@/hooks/useMotionPreference";
 import { useI18n } from "@/i18n";
 import {
   CHART_PULSE_PERIOD_MS,
@@ -32,7 +32,7 @@ function PingSparkline({
 }: PingSparklineProps) {
   const { t } = useI18n();
   const gradientId = useId();
-  const reducedMotion = usePrefersReducedMotion();
+  const { reduced: reducedMotion } = useMotionPreference();
 
   const { line, fill, color, endpoint } = useMemo(() => {
     const last = points[points.length - 1];

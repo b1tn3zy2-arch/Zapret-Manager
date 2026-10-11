@@ -89,6 +89,7 @@ fn test_anticheat_of_defaults_to_none() {
         cover: None,
         domain_settings_id: None,
         anticheat: None,
+        bypass_mode: None,
         aliases: Vec::new(),
     }), Anticheat::None);
     assert_eq!(
@@ -98,8 +99,39 @@ fn test_anticheat_of_defaults_to_none() {
             cover: None,
             domain_settings_id: None,
             anticheat: None,
+            bypass_mode: None,
             aliases: Vec::new(),
         })),
         Anticheat::BattlEye
     );
+}
+#[test]
+fn test_bundled_known_games_and_covers_exist() {
+    let resources = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("resources");
+    let known = known_games_at(&resources);
+
+    assert!(known.len() >= 50, "expected at least 50 known games");
+
+    let entries: Vec<KnownGame> = readdir::<KnownGame>(&resources);
+
+    for entry in entries {
+        let cover = entry.cover.clone().unwrap_or_default();
+
+        if cover.is_empty() {
+            continue;
+        }
+
+        assert!(
+            resolve_cover_file(&resources, &cover).is_some(),
+            "missing cover file for {} ({cover})",
+            entry.name
+        );
+    }
+}
+
+fn readdir<T: serde::de::DeserializeOwned>(resources: &Path) -> Vec<T> {
+    let raw = std::fs::read_to_string(resources.join(KNOWN_GAMES_RELATIVE))
+        .unwrap_or_default();
+
+    serde_json::from_str(&raw).unwrap_or_default()
 }

@@ -2,7 +2,6 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
-import GameBadge from "@/components/settings/games/GameBadge";
 import AddGameButton from "@/components/settings/games/AddGameButton";
 import GameCard from "@/components/settings/games/GameCard";
 import type { GameSettings } from "@/types";
@@ -13,7 +12,6 @@ function game(patch: Partial<GameSettings> = {}): GameSettings {
     name: "Outlast Trials",
     icon: "Gamepad2",
     enabled: false,
-    priority: true,
     builtin: true,
     domains: ["outlasttrials.com", "steampowered.com"],
     ipRanges: [],
@@ -33,20 +31,6 @@ const handlers = {
   onImport: vi.fn(),
   onExport: vi.fn(),
 };
-
-describe("GameBadge", () => {
-  it("показывает бейдж только для приоритетной игры", () => {
-    render(<GameBadge priority />);
-
-    expect(screen.getByText("Приоритет")).toBeTruthy();
-  });
-
-  it("ничего не рисует для обычной игры", () => {
-    const { container } = render(<GameBadge priority={false} />);
-
-    expect(container.textContent).toBe("");
-  });
-});
 
 describe("AddGameButton", () => {
   it("вызывает обработчик", async () => {
@@ -76,7 +60,6 @@ describe("GameCard", () => {
 
     expect(screen.getByText("Outlast Trials")).toBeTruthy();
     expect(screen.getByText("2 домена · 0 IP · 1 порт")).toBeTruthy();
-    expect(screen.getByText("Приоритет")).toBeTruthy();
   });
 
   it("не показывает удаление для встроенной игры", () => {
@@ -93,7 +76,6 @@ describe("GameCard", () => {
         game={game({
           id: "my-game",
           name: "Моя игра",
-          priority: false,
           builtin: false,
         })}
         expanded={false}

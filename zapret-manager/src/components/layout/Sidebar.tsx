@@ -1,9 +1,10 @@
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, type LucideIcon } from "lucide-react";
 import { memo, useMemo } from "react";
 
 import UpdateBadge from "@/components/updates/UpdateBadge";
 import { useAdaptiveSidebar } from "@/hooks/useAdaptiveSidebar";
+import { useMotionPreference } from "@/hooks/useMotionPreference";
 import { useBloom } from "@/hooks/useBloom";
 import { useI18n } from "@/i18n";
 import {
@@ -163,7 +164,7 @@ function StatusIndicator({ status, collapsed }: StatusIndicatorProps) {
 }
 
 export default function Sidebar() {
-  const prefersReducedMotion = useReducedMotion();
+  const { reduced: prefersReducedMotion } = useMotionPreference();
   const { t } = useI18n();
   const activePage = useAppStore((state) => state.activePage);
   const { isCollapsed: collapsed, toggle: toggleSidebar } =

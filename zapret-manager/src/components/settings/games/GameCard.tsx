@@ -13,7 +13,6 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-import GameBadge from "@/components/settings/games/GameBadge";
 import GameEditor from "@/components/settings/games/GameEditor";
 import { Toggle } from "@/components/ui";
 import { GlassPanel } from "@/components/shared/GlassPanel";
@@ -95,7 +94,6 @@ function GameCardImpl({
             <span className="text-text-primary truncate text-sm font-semibold">
               {game.name}
             </span>
-            <GameBadge priority={game.priority} />
           </span>
 
           <span className="text-text-tertiary font-mono text-[11px]">

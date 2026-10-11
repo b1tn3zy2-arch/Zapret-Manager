@@ -82,57 +82,46 @@ export default function DpiMode() {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="flex flex-col gap-6"
+      className="dashboard-layout"
     >
-      <div className="dashboard-grid">
-        <div
-          className="dashboard-lead flex flex-col"
-          style={{ gap: "var(--space-md)" }}
-        >
-          <motion.div variants={itemVariants}>
-            <DashboardHero
-              status={connectionStatus}
-              strategyName={strategyName}
-              vpnLabel={activeVpnConfig?.name ?? null}
-              uptime={uptime}
-              isConnecting={isBusy}
-              onConnect={handleConnect}
-              onDisconnect={handleDisconnect}
-            />
-          </motion.div>
+      <motion.div variants={itemVariants} className="dashboard-lead">
+        <DashboardHero
+          status={connectionStatus}
+          strategyName={strategyName}
+          vpnLabel={activeVpnConfig?.name ?? null}
+          uptime={uptime}
+          isConnecting={isBusy}
+          onConnect={handleConnect}
+          onDisconnect={handleDisconnect}
+        />
+      </motion.div>
 
-          <motion.div variants={itemVariants}>
-            <DashboardStats uptime={uptime} />
-          </motion.div>
-        </div>
+      <motion.div variants={itemVariants} className="dashboard-lead">
+        <DashboardStats uptime={uptime} />
+      </motion.div>
 
-        <div className="flex flex-col" style={{ gap: "var(--space-md)" }}>
-          <motion.div variants={itemVariants}>
-            <DashboardConnection />
-          </motion.div>
+      <motion.div variants={itemVariants}>
+        <DashboardConnection />
+      </motion.div>
 
-          <motion.div variants={itemVariants}>
-            <DashboardPing />
-          </motion.div>
-        </div>
-      </div>
+      <motion.div variants={itemVariants}>
+        <DashboardPing />
+      </motion.div>
 
-      <div className="dashboard-grid">
-        <motion.div variants={itemVariants} className="grid">
-          <DashboardQuickActions
-            lastStrategy={lastStrategy}
-            isActive={activeStrategy !== undefined}
-            isBusy={isBusy || vpnConnected}
-            onRun={handleConnect}
-            onStop={handleDisconnect}
-            onOpenVpnSettings={handleOpenVpnSettings}
-          />
-        </motion.div>
+      <motion.div variants={itemVariants} className="grid">
+        <DashboardQuickActions
+          lastStrategy={lastStrategy}
+          isActive={activeStrategy !== undefined}
+          isBusy={isBusy || vpnConnected}
+          onRun={handleConnect}
+          onStop={handleDisconnect}
+          onOpenVpnSettings={handleOpenVpnSettings}
+        />
+      </motion.div>
 
-        <motion.div variants={itemVariants} className="grid">
-          <DashboardRecentLogs onOpenAllLogs={handleOpenAllLogs} />
-        </motion.div>
-      </div>
+      <motion.div variants={itemVariants} className="grid">
+        <DashboardRecentLogs onOpenAllLogs={handleOpenAllLogs} />
+      </motion.div>
     </motion.div>
   );
 }

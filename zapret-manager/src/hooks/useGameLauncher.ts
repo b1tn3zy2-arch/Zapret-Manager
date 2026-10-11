@@ -2,19 +2,22 @@ import { invoke } from "@tauri-apps/api/core";
 import { useCallback, useState } from "react";
 
 import { translateKey } from "@/i18n/core";
+import { useStrategyRunner } from "@/hooks/useStrategyRunner";
 import {
+  GAME_LAUNCH_CHECK_MS,
   GAME_LAUNCH_HIDE_DELAY_MS,
   GAME_LAUNCH_TOAST_MS,
 } from "@/lib/constants";
 import { gameBypass, usesAnticheat } from "@/lib/installedGames";
-import { useStrategyRunner } from "@/hooks/useStrategyRunner";
 import { useInstalledGamesStore } from "@/stores/useInstalledGamesStore";
 import { useLogsStore } from "@/stores/useLogsStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import { useStrategiesStore } from "@/stores/useStrategiesStore";
-import type { InstalledGame, Strategy } from "@/types";
+import { useVpnStore } from "@/stores/useVpnStore";
+import type { InstalledGame, LogEntry, Strategy, VpnStatus } from "@/types";
 
-export type LaunchPromptKind = "anticheat" | "bypass" | "noStrategy";
+export type LaunchPromptKind =
+  "anticheat" | "bypass" | "noStrategy" | "vpn" | "noVpn";
 
 export interface LaunchPrompt {
   kind: LaunchPromptKind;
@@ -34,7 +37,7 @@ export function useGameLauncher(): UseGameLauncherResult {
   const [launchingId, setLaunchingId] = useState<string | null>(null);
   const [prompt, setPrompt] = useState<LaunchPrompt | null>(null);
   const [toast, setToast] = useState<string | null>(null);
-  const { run } = useStrategyRunner();
+  const { run, checkStatus } = useStrategyRunner();
   const addLog = useLogsStore((state) => state.addLog);
   const strategies = useStrategiesStore((state) => state.strategies);
   const lastStrategyId = useSettingsStore(
@@ -57,17 +60,9 @@ export function useGameLauncher(): UseGameLauncherResult {
           source: "user",
           message: translateKey("log.gameLaunched", { name: game.name, pid }),
         });
-        const store = useInstalledGamesStore.getState();
-        const stored = store.games.find((item) => item.id === game.id);
-
-        if (stored !== undefined) {
-          store.updateGame(game.id, {
-            lastLaunchedAt: Date.now(),
-            launchCount: stored.launchCount + 1,
-          });
-        }
-
         setToast(translateKey("settings.games.installed.launch.active"));
+        recordLaunch(game.id);
+        verifyBypass(game, addLog);
 
         window.setTimeout(() => {
           void invoke("hide_main_window").catch(() => undefined);
@@ -100,7 +95,7 @@ export function useGameLauncher(): UseGameLauncherResult {
 
     const target = pickStrategy(strategies, lastStrategyId);
 
-    if (!target) {
+    if (target === undefined) {
       setPrompt({ kind: "noStrategy", game: null });
 
       return false;
@@ -114,12 +109,137 @@ export function useGameLauncher(): UseGameLauncherResult {
 
     try {
       await run(target.id, target.path);
+    } catch (caught) {
+      addLog({
+        level: "error",
+        source: "user",
+        message: translateKey(
+          "settings.games.installed.launch.strategyFailed",
+          {
+            error: caught instanceof Error ? caught.message : String(caught),
+          }
+        ),
+      });
 
-      return true;
-    } catch {
       return false;
     }
-  }, [addLog, lastStrategyId, run, strategies]);
+
+    const storeRunning = useStrategiesStore
+      .getState()
+      .strategies.some(
+        (item) => item.id === target.id && item.status === "running"
+      );
+
+    if (storeRunning) {
+      return true;
+    }
+
+    const status = await checkStatus(target.id).catch(() => null);
+
+    if (status?.running === true) {
+      useStrategiesStore.getState().setStatus(target.id, "running");
+      useStrategiesStore.getState().setPid(target.id, status.winwsPids[0] ?? 0);
+
+      return true;
+    }
+
+    addLog({
+      level: "error",
+      source: "user",
+      message: translateKey("settings.games.installed.launch.strategyFailed", {
+        error: translateKey(
+          "settings.games.installed.launch.strategyNotRunning"
+        ),
+      }),
+    });
+
+    return false;
+  }, [addLog, checkStatus, lastStrategyId, run, strategies]);
+
+  const ensureVpn = useCallback(async (): Promise<boolean> => {
+    const store = useVpnStore.getState();
+
+    if (store.status.state === "connected") {
+      return true;
+    }
+
+    if (store.activeConfigId === null) {
+      setPrompt({ kind: "noVpn", game: null });
+
+      return false;
+    }
+
+    addLog({
+      level: "info",
+      source: "vpn",
+      message: translateKey("settings.games.installed.launch.vpnStarting"),
+    });
+
+    await invoke("connect_vpn_server", {
+      configId: store.activeConfigId,
+    }).catch(() => undefined);
+    await invoke<VpnStatus>("get_vpn_status")
+      .then((status) => {
+        useVpnStore.getState().setStatus(status);
+      })
+      .catch(() => undefined);
+
+    return useVpnStore.getState().status.state === "connected";
+  }, [addLog]);
+
+  const prepare = useCallback(
+    async (game: InstalledGame): Promise<boolean> => {
+      const vpn = useVpnStore.getState();
+
+      if (game.bypassMode === "vpn") {
+        if (vpn.status.state === "connected") {
+          return true;
+        }
+
+        if (vpn.activeConfigId === null) {
+          setPrompt({ kind: "noVpn", game });
+
+          return false;
+        }
+
+        setPrompt({ kind: "vpn", game });
+
+        return false;
+      }
+
+      if (vpn.killSwitchActive && vpn.status.state === "connected") {
+        addLog({
+          level: "warn",
+          source: "vpn",
+          message: translateKey(
+            "settings.games.installed.launch.killSwitchWarning"
+          ),
+        });
+      }
+
+      return ensureStrategy();
+    },
+    [addLog, ensureStrategy]
+  );
+
+  const start = useCallback(
+    async (game: InstalledGame): Promise<void> => {
+      if (!(await prepare(game))) {
+        return;
+      }
+
+      const bypass = gameBypass(game, gamesSettings);
+
+      if (bypass !== undefined && !bypass.enabled) {
+        setPrompt({ kind: "bypass", game });
+
+        return;
+      }
+
+      await finishLaunch(game);
+    },
+    [finishLaunch, gamesSettings, prepare]
+  );
 
   const launch = useCallback(
     async (game: InstalledGame) => {
@@ -140,23 +260,9 @@ export function useGameLauncher(): UseGameLauncherResult {
         return;
       }
 
-      if (!(await ensureStrategy())) {
-        setLaunchingId(null);
-
-        return;
-      }
-
-      const bypass = gameBypass(game, gamesSettings);
-
-      if (bypass !== undefined && !bypass.enabled) {
-        setPrompt({ kind: "bypass", game });
-
-        return;
-      }
-
-      await finishLaunch(game);
+      await start(game);
     },
-    [ensureStrategy, finishLaunch, gamesSettings, launchingId]
+    [launchingId, start]
   );
 
   const confirmPrompt = useCallback(async () => {
@@ -167,12 +273,6 @@ export function useGameLauncher(): UseGameLauncherResult {
     const { kind, game } = prompt;
 
     setPrompt(null);
-
-    if (kind === "noStrategy") {
-      setLaunchingId(null);
-
-      return;
-    }
 
     if (game === null) {
       setLaunchingId(null);
@@ -186,16 +286,22 @@ export function useGameLauncher(): UseGameLauncherResult {
       if (bypass !== undefined) {
         updateGameSettings(bypass.id, { enabled: true });
       }
-    }
 
-    if (!(await ensureStrategy())) {
-      setLaunchingId(null);
+      await start(game);
 
       return;
     }
 
-    await finishLaunch(game);
-  }, [ensureStrategy, finishLaunch, gamesSettings, prompt, updateGameSettings]);
+    if (kind === "vpn") {
+      if (await ensureVpn()) {
+        await start(game);
+      }
+
+      return;
+    }
+
+    await start(game);
+  }, [ensureVpn, gamesSettings, prompt, start, updateGameSettings]);
 
   const dismissPrompt = useCallback(() => {
     setPrompt(null);
@@ -203,6 +309,47 @@ export function useGameLauncher(): UseGameLauncherResult {
   }, []);
 
   return { launchingId, prompt, toast, launch, confirmPrompt, dismissPrompt };
+}
+
+function recordLaunch(id: string): void {
+  const store = useInstalledGamesStore.getState();
+  const game = store.games.find((item) => item.id === id);
+
+  if (game === undefined) {
+    return;
+  }
+
+  store.updateGame(id, {
+    lastLaunchedAt: Date.now(),
+    launchCount: game.launchCount + 1,
+  });
+}
+
+type AddLog = (entry: Pick<LogEntry, "level" | "source" | "message">) => void;
+
+function verifyBypass(game: InstalledGame, addLog: AddLog): void {
+  window.setTimeout(() => {
+    const vpnConnected = useVpnStore.getState().status.state === "connected";
+    const strategyRunning = useStrategiesStore
+      .getState()
+      .strategies.some((item) => item.status === "running");
+    const ok =
+      game.bypassMode === "vpn"
+        ? vpnConnected
+        : strategyRunning || vpnConnected;
+
+    if (ok) {
+      return;
+    }
+
+    addLog({
+      level: "warn",
+      source: "user",
+      message: translateKey("settings.games.installed.launch.bypassLost", {
+        name: game.name,
+      }),
+    });
+  }, GAME_LAUNCH_CHECK_MS);
 }
 
 export function pickStrategy(

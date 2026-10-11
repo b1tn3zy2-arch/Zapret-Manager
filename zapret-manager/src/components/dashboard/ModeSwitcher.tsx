@@ -2,7 +2,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Lock, Zap } from "lucide-react";
 
 import { useI18n } from "@/i18n";
-import { usePrefersReducedMotion } from "@/hooks/useDeviceTier";
+import { useMotionPreference } from "@/hooks/useMotionPreference";
 import { ANIMATION, type DashboardMode } from "@/lib/constants";
 import { SWITCH_STEP_LABELS } from "@/lib/vpnConstants";
 import { cn } from "@/lib/utils";
@@ -24,7 +24,7 @@ export default function ModeSwitcher({
   onChange,
 }: ModeSwitcherProps) {
   const { t } = useI18n();
-  const reducedMotion = usePrefersReducedMotion();
+  const { reduced: reducedMotion } = useMotionPreference();
   const isVpn = mode === "vpn";
 
   const caption = isSwitching
@@ -40,13 +40,13 @@ export default function ModeSwitcher({
     : { type: "spring" as const, stiffness: 380, damping: 32, mass: 0.7 };
 
   return (
-    <div className="flex flex-col items-center gap-2">
+    <div className="flex flex-col items-end gap-2">
       <div
         role="radiogroup"
         aria-label={t("dashboard.modeSwitcher.ariaLabel")}
         className={cn(
           "border-glass-border bg-glass-bg relative flex h-12 items-center",
-          "w-[clamp(200px,20vw,280px)] rounded-full border p-1"
+          "w-[clamp(190px,18vw,260px)] rounded-full border p-1"
         )}
       >
         <motion.span
@@ -108,7 +108,7 @@ export default function ModeSwitcher({
         })}
       </div>
 
-      <div className="relative flex min-h-4 items-center justify-center">
+      <div className="flex min-h-4 items-center justify-end">
         <AnimatePresence initial={false}>
           <motion.p
             key={caption}
@@ -117,7 +117,7 @@ export default function ModeSwitcher({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: reducedMotion ? 0 : ANIMATION.fast }}
-            className="text-text-tertiary absolute text-center text-xs"
+            className="text-text-tertiary text-right text-xs"
           >
             {caption}
           </motion.p>

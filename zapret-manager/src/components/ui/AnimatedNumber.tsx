@@ -1,6 +1,6 @@
 import { useSpring, useTransform, motion } from "framer-motion";
 
-import { usePrefersReducedMotion } from "@/hooks/useDeviceTier";
+import { useMotionPreference } from "@/hooks/useMotionPreference";
 import { COUNT_UP_DURATION_MS } from "@/lib/constants";
 
 export interface AnimatedNumberProps {
@@ -20,7 +20,7 @@ export default function AnimatedNumber({
   format = defaultFormat,
   className,
 }: AnimatedNumberProps) {
-  const reducedMotion = usePrefersReducedMotion();
+  const { reduced: reducedMotion } = useMotionPreference();
   const spring = useSpring(value, {
     duration: duration / 1000,
     bounce: 0,

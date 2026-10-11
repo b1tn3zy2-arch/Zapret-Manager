@@ -44,7 +44,6 @@ export function useGameLibrary(): UseGameLibraryResult {
         name,
         icon: seed?.icon ?? "Gamepad2",
         enabled: seed?.enabled ?? false,
-        priority: false,
         builtin: false,
         domains: seed?.domains ?? [],
         ipRanges: seed?.ipRanges ?? [],

@@ -395,8 +395,6 @@ export const en = {
       empty: "Game list is empty",
       add: "Add game",
       reset: "Reset game list",
-      priority: "Priority",
-      priorityHint: "Designed with this game in mind",
       enableFor: "Injection for {name}",
       deleteNamed: "Delete game {name}",
       toggleEditor: "Show game settings",
@@ -465,7 +463,13 @@ export const en = {
           starting: "Launching {name}…",
           active: "Bypass is active, launching the game",
           failed: "Could not launch the game",
+          vpnStarting: "Connecting VPN before launching the game…",
+          killSwitchWarning:
+            "Heads up: VPN kill switch can block the game — Outlast Trials and other online games often break with it",
+          bypassLost: "Bypass stopped working after launching {name}",
           strategyStarting: "Starting the bypass strategy…",
+          strategyFailed: "The strategy did not start: {error}",
+          strategyNotRunning: "bypass process was not found",
           count: "Launches: {count}",
         },
         prompt: {
@@ -478,6 +482,14 @@ export const en = {
           noStrategyTitle: "No strategy",
           noStrategyBody:
             "No bypass strategy is selected. Open the Strategies section, start any strategy, then launch the game again.",
+          vpnTitle: "VPN required",
+          vpnBody:
+            "{name} cannot be reached through DPI bypass: the service is region-blocked or uses anti-cheat. Connect VPN and launch the game?",
+          vpnKillSwitchBody:
+            "{name} requires a VPN. Note: an enabled kill switch may block the game — turn it off in VPN settings.",
+          noVpnTitle: "No VPN config",
+          noVpnBody:
+            "{name} needs a real VPN: DPI bypass does not help. Add a config in Settings → VPN or launch the game without a bypass.",
           confirm: "Launch",
           cancel: "Cancel",
         },

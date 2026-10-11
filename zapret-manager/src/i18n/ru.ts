@@ -395,8 +395,6 @@ export const ru = {
       empty: "Список игр пуст",
       add: "Добавить игру",
       reset: "Сбросить список игр",
-      priority: "Приоритет",
-      priorityHint: "Разработан с учётом этой игры",
       enableFor: "Инъекция для {name}",
       deleteNamed: "Удалить игру {name}",
       toggleEditor: "Показать настройки игры",
@@ -465,7 +463,13 @@ export const ru = {
           starting: "Запуск {name}…",
           active: "Обход активен, игра запускается",
           failed: "Не удалось запустить игру",
+          vpnStarting: "Подключаю VPN перед запуском игры…",
+          killSwitchWarning:
+            "Внимание: kill switch VPN может блокировать игру — Outlast Trials и другие онлайн-игры с античитом often ломаются",
+          bypassLost: "Обход перестал работать после запуска {name}",
           strategyStarting: "Запускаю стратегию обхода…",
+          strategyFailed: "Стратегия не запустилась: {error}",
+          strategyNotRunning: "процесс обхода не найден",
           count: "Запусков: {count}",
         },
         prompt: {
@@ -478,6 +482,14 @@ export const ru = {
           noStrategyTitle: "Нет стратегии",
           noStrategyBody:
             "Не выбрана стратегия обхода. Откройте раздел Стратегии, запустите любую стратегию и повторите запуск игры.",
+          vpnTitle: "Нужен VPN",
+          vpnBody:
+            "{name} недоступна через DPI-обход: сервис заблокирован для региона или использует античит. Подключить VPN и запустить игру?",
+          vpnKillSwitchBody:
+            "{name} требует VPN. Внимание: включённый kill switch может блокировать игру — его лучше выключить в настройках VPN.",
+          noVpnTitle: "Нет VPN-конфига",
+          noVpnBody:
+            "Для {name} нужен настоящий VPN: DPI-обход не помогает. Добавьте конфиг в разделе Настройки → VPN или запустите игру без обхода.",
           confirm: "Запустить",
           cancel: "Отмена",
         },

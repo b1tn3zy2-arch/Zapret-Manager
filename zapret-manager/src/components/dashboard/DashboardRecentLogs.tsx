@@ -4,7 +4,7 @@ import { ArrowRight, ScrollText } from "lucide-react";
 
 import { Button, Text } from "@/components/ui";
 import { GlassPanel } from "@/components/shared/GlassPanel";
-import { usePrefersReducedMotion } from "@/hooks/useDeviceTier";
+import { useMotionPreference } from "@/hooks/useMotionPreference";
 import { useI18n } from "@/i18n";
 import {
   ANIMATION,
@@ -63,7 +63,7 @@ function RecentRow({ entry, index, reducedMotion }: RecentRowProps) {
 function DashboardRecentLogs({ onOpenAllLogs }: DashboardRecentLogsProps) {
   const { t } = useI18n();
   const logs = useLogsStore((state) => state.logs);
-  const reducedMotion = usePrefersReducedMotion();
+  const { reduced: reducedMotion } = useMotionPreference();
   const recent = logs.slice(-RECENT_LOGS_COUNT).reverse();
 
   return (

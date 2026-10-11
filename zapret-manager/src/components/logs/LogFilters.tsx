@@ -114,7 +114,7 @@ function LogFilters({
   const strategyValue = filter.strategyId ?? "";
 
   return (
-    <div className="bg-bg-secondary/85 border-glass-border sticky top-0 z-10 flex flex-col gap-2.5 border-b px-1 py-3 backdrop-blur-md">
+    <div className="flex flex-col gap-2.5">
       <div className="flex flex-wrap items-center gap-3">
         <Input
           variant="filled"

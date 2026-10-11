@@ -11,7 +11,8 @@ import EmptyState from "@/components/strategies/EmptyState";
 import { Badge, Button, Heading, Input, Spinner, Text } from "@/components/ui";
 import { useCardDealAnimation } from "@/hooks/useCardDealAnimation";
 import { useDebounce } from "@/hooks/useDebounce";
-import { useDeviceTier, usePrefersReducedMotion } from "@/hooks/useDeviceTier";
+import { useDeviceTier } from "@/hooks/useDeviceTier";
+import { useMotionPreference } from "@/hooks/useMotionPreference";
 import { useFolderPicker } from "@/hooks/useFolderPicker";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useProcessWatcher } from "@/hooks/useProcessWatcher";
@@ -66,7 +67,7 @@ export default function Strategies() {
   const cards = useFilteredCards(debouncedSearch);
   const summary = useCollectionStats();
   const tier = useDeviceTier();
-  const reducedMotion = usePrefersReducedMotion();
+  const { reduced: reducedMotion } = useMotionPreference();
   const canHover = useMediaQuery("(hover: hover)");
   const { containerVariants, cardVariants } =
     useCardDealAnimation(reducedMotion);
