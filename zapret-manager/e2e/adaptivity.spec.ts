@@ -1,4 +1,4 @@
-﻿import { expect, test } from "@playwright/test";
+﻿import { expect, test, type Page } from "@playwright/test";
 
 import { mockTauri } from "./mock-tauri";
 
@@ -11,7 +11,7 @@ const PAGES: [string, string][] = [
   ["Игры", "games"],
 ];
 
-function navButton(page: import("@playwright/test").Page, name: string) {
+function navButton(page: Page, name: string) {
   return page
     .getByRole("navigation", { name: "Основная навигация" })
     .getByRole("button", { name, exact: true });
