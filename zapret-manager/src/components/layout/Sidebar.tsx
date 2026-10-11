@@ -35,7 +35,7 @@ function NavButtonImpl({
   onSelect,
   showUpdateBadge = false,
 }: NavButtonProps) {
-  const bloom = useBloom("primary", "subtle");
+  const bloom = useBloom("primary", -1);
 
   return (
     <li className="relative">

@@ -6,7 +6,7 @@ import { useI18n } from "@/i18n";
 import { CONNECTION_LABELS } from "@/lib/constants";
 import type { ConnectionStatus } from "@/lib/constants";
 import { ANIMATION } from "@/lib/constants";
-import type { BloomColor, EffectIntensity } from "@/types/appearance";
+import type { BloomColor } from "@/types/appearance";
 
 const PALETTE = {
   connected: {
@@ -47,29 +47,14 @@ const PALETTE = {
 const ACTIVE_STATUSES: ConnectionStatus[] = ["connected", "connecting", "vpn"];
 
 const BLOOM_BY_STATUS = {
-  connected: {
-    color: "primary" as BloomColor,
-    intensity: "strong" as EffectIntensity,
-  },
-  connecting: {
-    color: "warning" as BloomColor,
-    intensity: "normal" as EffectIntensity,
-  },
-  disconnected: {
-    color: "neutral" as BloomColor,
-    intensity: "subtle" as EffectIntensity,
-  },
-  vpn: {
-    color: "secondary" as BloomColor,
-    intensity: "strong" as EffectIntensity,
-  },
-  error: {
-    color: "danger" as BloomColor,
-    intensity: "normal" as EffectIntensity,
-  },
+  connected: { color: "primary" as BloomColor, delta: 0 },
+  connecting: { color: "warning" as BloomColor, delta: -1 },
+  disconnected: { color: "neutral" as BloomColor, delta: -2 },
+  vpn: { color: "secondary" as BloomColor, delta: 0 },
+  error: { color: "danger" as BloomColor, delta: -1 },
 } as const satisfies Record<
   ConnectionStatus,
-  { color: BloomColor; intensity: EffectIntensity }
+  { color: BloomColor; delta: number }
 >;
 
 export interface StatusOrbProps {
@@ -83,7 +68,7 @@ function StatusOrb({ status, size }: StatusOrbProps) {
   const isActive = ACTIVE_STATUSES.includes(status);
   const { Icon } = palette;
   const bloomProfile = BLOOM_BY_STATUS[status];
-  const bloom = useBloom(bloomProfile.color, bloomProfile.intensity);
+  const bloom = useBloom(bloomProfile.color, bloomProfile.delta);
   const diameter = size ?? undefined;
 
   return (

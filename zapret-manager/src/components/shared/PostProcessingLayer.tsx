@@ -2,6 +2,7 @@ import { useMemo } from "react";
 
 import AnimatedGrain from "@/components/shared/AnimatedGrain";
 import { usePostProcessing } from "@/contexts/postProcessing";
+import { getChromaticOverlay } from "@/lib/chromatic";
 import { GRAIN_OPACITY, SCANLINE_OPACITY } from "@/lib/postProcessingTokens";
 import {
   getScanlineBackground,
@@ -11,20 +12,40 @@ import {
 import { POST_PROCESSING_LAYER_Z } from "@/lib/constants";
 
 function PostProcessingLayer() {
-  const { vignette, settings, decorationsAllowed } = usePostProcessing();
+  const {
+    vignette,
+    intensity,
+    settings,
+    decorationsAllowed,
+    chromaticAberration,
+    globalQuality,
+  } = usePostProcessing();
+
+  const qualityScale = globalQuality === "high" ? 1 : 0.75;
+  const chromaticIntensity = intensity === "off" ? "normal" : intensity;
 
   const grainOpacity = useMemo(
-    () => (decorationsAllowed && settings.filmGrain ? GRAIN_OPACITY.normal : 0),
-    [decorationsAllowed, settings.filmGrain]
+    () =>
+      decorationsAllowed && settings.filmGrain
+        ? GRAIN_OPACITY.normal * qualityScale
+        : 0,
+    [decorationsAllowed, qualityScale, settings.filmGrain]
   );
 
   const scanlineOpacity = useMemo(
     () =>
-      decorationsAllowed && settings.scanlines ? SCANLINE_OPACITY.normal : 0,
-    [decorationsAllowed, settings.scanlines]
+      decorationsAllowed && settings.scanlines
+        ? SCANLINE_OPACITY.normal * qualityScale
+        : 0,
+    [decorationsAllowed, qualityScale, settings.scanlines]
   );
 
-  if (vignette === "off" && grainOpacity === 0 && scanlineOpacity === 0) {
+  if (
+    vignette === "off" &&
+    grainOpacity === 0 &&
+    scanlineOpacity === 0 &&
+    !chromaticAberration
+  ) {
     return null;
   }
 
@@ -38,6 +59,13 @@ function PostProcessingLayer() {
         <div
           className="absolute inset-0"
           style={{ background: getVignetteGradient(vignette) }}
+        />
+      ) : null}
+
+      {chromaticAberration ? (
+        <div
+          className="absolute inset-0"
+          style={getChromaticOverlay(chromaticIntensity)}
         />
       ) : null}
 

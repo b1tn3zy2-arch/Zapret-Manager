@@ -2,6 +2,8 @@ import { motion } from "framer-motion";
 
 import StrategyCard from "@/components/strategies/StrategyCard";
 import { StrategyGameCardItem } from "@/components/strategies/game/StrategyGameCard";
+import { usePostProcessing } from "@/contexts/postProcessing";
+import { MOTION_BLUR_MAX_PX } from "@/lib/postProcessingTokens";
 import type { Strategy, StrategyCard as Card, ViewMode } from "@/types";
 
 export interface StrategyCollectionProps {
@@ -29,6 +31,9 @@ function StrategyCollection({
   onStop,
   onOpenFolder,
 }: StrategyCollectionProps) {
+  const { motionBlur, intensity } = usePostProcessing();
+  const blurPx = motionBlur ? MOTION_BLUR_MAX_PX[intensity] * 2 : 0;
+
   if (cards.length === 0) {
     return null;
   }
@@ -53,8 +58,17 @@ function StrategyCollection({
       {cards.map((card, index) => (
         <motion.div
           key={card.strategy.id}
-          initial={motionDisabled ? false : { opacity: 0, y: 24, scale: 0.97 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
+          initial={
+            motionDisabled
+              ? false
+              : {
+                  opacity: 0,
+                  y: 24,
+                  scale: 0.97,
+                  filter: `blur(${blurPx}px)`,
+                }
+          }
+          animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
           transition={{
             duration: 0.45,
             delay: motionDisabled ? 0 : Math.min(index * 0.04, 0.5),

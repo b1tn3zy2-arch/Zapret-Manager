@@ -91,14 +91,35 @@ export const MOTION_BLUR_MAX_PX: Record<EffectIntensity, number> = {
 
 export const SCANLINE_OPACITY: Record<EffectIntensity, number> = {
   off: 0,
-  subtle: 0.03,
-  normal: 0.05,
-  strong: 0.08,
+  subtle: 0.04,
+  normal: 0.06,
+  strong: 0.09,
 };
 
 export const GRAIN_OPACITY: Record<EffectIntensity, number> = {
   off: 0,
-  subtle: 0.03,
-  normal: 0.05,
-  strong: 0.08,
+  subtle: 0.04,
+  normal: 0.07,
+  strong: 0.1,
 };
+
+const INTENSITY_ORDER: readonly EffectIntensity[] = [
+  "off",
+  "subtle",
+  "normal",
+  "strong",
+];
+
+export function shiftIntensity(
+  base: EffectIntensity,
+  delta: number
+): EffectIntensity {
+  if (base === "off" || delta === 0) {
+    return base;
+  }
+
+  const index = INTENSITY_ORDER.indexOf(base);
+  const next = Math.min(Math.max(index + delta, 1), INTENSITY_ORDER.length - 1);
+
+  return INTENSITY_ORDER[next] ?? base;
+}

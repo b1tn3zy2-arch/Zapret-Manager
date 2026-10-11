@@ -1,11 +1,13 @@
 import { motion } from "framer-motion";
 
 import GameCardInstalled from "@/components/settings/games/GameCardInstalled";
+import { usePostProcessing } from "@/contexts/postProcessing";
 import { useI18n } from "@/i18n";
 import {
   GAME_CARD_MAX_WIDTH_PX,
   GAME_CARD_MIN_WIDTH_PX,
 } from "@/lib/constants";
+import { MOTION_BLUR_MAX_PX } from "@/lib/postProcessingTokens";
 import { PLATFORM_LABEL_KEYS } from "@/lib/installedGames";
 import type { InstalledGame } from "@/types";
 
@@ -31,6 +33,8 @@ export default function InstalledGamesGrid({
   runningGameIds,
 }: InstalledGamesGridProps) {
   const { t } = useI18n();
+  const { motionBlur, intensity } = usePostProcessing();
+  const blurPx = motionBlur ? MOTION_BLUR_MAX_PX[intensity] * 2 : 0;
 
   return (
     <div
@@ -43,8 +47,12 @@ export default function InstalledGamesGrid({
       {games.map((game, index) => (
         <motion.div
           key={game.id}
-          initial={motionDisabled ? false : { opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={
+            motionDisabled
+              ? false
+              : { opacity: 0, y: 16, filter: `blur(${blurPx}px)` }
+          }
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
           transition={{
             duration: 0.3,
             delay: motionDisabled ? 0 : Math.min(index * 0.03, 0.3),

@@ -6,8 +6,9 @@ import {
   getBloomShadowHover,
   getTextGlow,
 } from "@/lib/bloom";
+import { shiftIntensity } from "@/lib/postProcessingTokens";
 import { usePostProcessing } from "@/contexts/postProcessing";
-import type { BloomColor, EffectIntensity } from "@/types/appearance";
+import type { BloomColor } from "@/types/appearance";
 
 export interface BloomStyles {
   boxShadow: string;
@@ -23,12 +24,9 @@ const EMPTY: BloomStyles = {
   textShadow: "",
 };
 
-export function useBloom(
-  color: BloomColor,
-  intensityOverride?: EffectIntensity
-): BloomStyles {
+export function useBloom(color: BloomColor, delta = 0): BloomStyles {
   const { bloom, globalQuality } = usePostProcessing();
-  const intensity = intensityOverride ?? bloom;
+  const intensity = shiftIntensity(bloom, delta);
 
   return useMemo(() => {
     if (intensity === "off") {

@@ -47,7 +47,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(function Card(
   ref
 ) {
   const interactive = variant === "interactive" && onClick !== undefined;
-  const bloom = useBloom("primary", "subtle");
+  const bloom = useBloom("primary", -1);
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {

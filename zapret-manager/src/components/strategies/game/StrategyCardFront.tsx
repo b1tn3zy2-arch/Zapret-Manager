@@ -52,8 +52,8 @@ export default function StrategyCardFront({
   const palette = getRarityColor(rarity);
   const outlastEnabled = useSettingsStore(selectHasEnabledGame);
   const bloomColor = rarity === "legendary" ? "primary" : "secondary";
-  const bloomIntensity = rarity === "legendary" ? "strong" : "subtle";
-  const bloom = useBloom(bloomColor, bloomIntensity);
+  const bloomDelta = rarity === "legendary" ? 1 : -1;
+  const bloom = useBloom(bloomColor, bloomDelta);
   const chromatic = useChromatic(!motionDisabled);
   const showOverlay = isHovered || isRunning;
   const [pointerGlow, setPointerGlow] = useState("transparent");

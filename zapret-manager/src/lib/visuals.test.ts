@@ -5,7 +5,7 @@ import {
   computeGlowPosition,
   computeTilt,
 } from "@/lib/cardTilt";
-import { getChromaticFilter } from "@/lib/chromatic";
+import { getChromaticFilter, getChromaticOverlay } from "@/lib/chromatic";
 import {
   countryCodeToFlagSrc,
   getGreeting,
@@ -14,6 +14,7 @@ import {
   toCountryCode,
 } from "@/lib/geo";
 import { getBloomFilter, getBloomShadow } from "@/lib/bloom";
+import { shiftIntensity } from "@/lib/postProcessingTokens";
 import { getBreakpoint } from "@/lib/breakpoints";
 
 describe("computeTilt", () => {
@@ -75,6 +76,31 @@ describe("getChromaticFilter", () => {
 
     expect(off).toBe("");
     expect(strong).not.toBe("");
+  });
+});
+
+describe("getChromaticOverlay", () => {
+  it("returns empty overlay when off", () => {
+    expect(getChromaticOverlay("off")).toEqual({});
+  });
+
+  it("builds inset fringes for active intensity", () => {
+    const overlay = getChromaticOverlay("strong");
+
+    expect(String(overlay.boxShadow)).toContain("inset");
+    expect(overlay.mixBlendMode).toBe("screen");
+  });
+});
+
+describe("shiftIntensity", () => {
+  it("keeps off always off", () => {
+    expect(shiftIntensity("off", 1)).toBe("off");
+  });
+
+  it("shifts and clamps between levels", () => {
+    expect(shiftIntensity("normal", -1)).toBe("subtle");
+    expect(shiftIntensity("strong", 1)).toBe("strong");
+    expect(shiftIntensity("subtle", -2)).toBe("subtle");
   });
 });
 

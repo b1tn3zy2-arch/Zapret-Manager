@@ -51,7 +51,7 @@ export default function Badge({
   children,
 }: BadgeProps) {
   const bloomColor = pulse ? (BLOOM_VARIANTS[variant] ?? "primary") : undefined;
-  const bloom = useBloom(bloomColor ?? "primary", "subtle");
+  const bloom = useBloom(bloomColor ?? "primary", -1);
   const glow = bloomColor !== undefined && bloom.textShadow !== "";
 
   return (
