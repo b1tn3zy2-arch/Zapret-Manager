@@ -31,6 +31,7 @@ function Dropdown<T extends string>({
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const [rect, setRect] = useState<DOMRect | null>(null);
+  const [placement, setPlacement] = useState<"down" | "up">("down");
   const triggerRef = useRef<HTMLButtonElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const listId = useId();
@@ -46,7 +47,14 @@ function Dropdown<T extends string>({
     const trigger = triggerRef.current;
 
     if (trigger !== null) {
-      setRect(trigger.getBoundingClientRect());
+      const bounds = trigger.getBoundingClientRect();
+      const estimated = Math.min(options.length * 36 + 12, 280);
+      const spaceBelow = window.innerHeight - bounds.bottom;
+
+      setRect(bounds);
+      setPlacement(
+        spaceBelow < estimated + 12 && bounds.top > spaceBelow ? "up" : "down"
+      );
     }
 
     setOpen((current) => !current);
@@ -160,19 +168,27 @@ function Dropdown<T extends string>({
           id={listId}
           role="listbox"
           aria-label={label}
-          initial={{ opacity: 0, y: -4 }}
+          initial={{ opacity: 0, y: placement === "up" ? 4 : -4 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -4 }}
+          exit={{ opacity: 0, y: placement === "up" ? 4 : -4 }}
           transition={{ duration: 0.12 }}
           style={{
-            top: rect.bottom + 4,
+            top: placement === "up" ? undefined : rect.bottom + 4,
+            bottom:
+              placement === "up"
+                ? window.innerHeight - rect.top + 4
+                : undefined,
             left: align === "right" ? undefined : rect.left,
             right:
               align === "right" ? window.innerWidth - rect.right : undefined,
             minWidth: Math.max(rect.width, 180),
+            maxHeight:
+              placement === "up"
+                ? Math.max(140, rect.top - 12)
+                : Math.max(140, window.innerHeight - rect.bottom - 12),
           }}
           className={cn(
-            "fixed z-50 overflow-hidden rounded-lg",
+            "fixed z-50 overflow-x-hidden overflow-y-auto rounded-lg",
             "bg-bg-tertiary/95 border-glass-border border py-1 shadow-2xl backdrop-blur-xl"
           )}
         >

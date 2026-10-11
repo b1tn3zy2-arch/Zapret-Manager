@@ -7,6 +7,8 @@ import { MONITOR_INTERVAL_MS } from "@/lib/constants";
 import {
   CHART_PULSE_PERIOD_MS,
   CHART_SMOOTH_TENSION,
+  EWMA_ALPHA,
+  MONITOR_BUFFER_SIZE,
   MONITOR_LABEL_REFRESH_MS,
   TRAFFIC_AXIS_COLOR,
   TRAFFIC_GRID_COLOR_DARK,
@@ -15,7 +17,7 @@ import {
   TRAFFIC_GRID_VERTICAL_LIGHT,
 } from "@/lib/constants";
 import { buildAreaPath, buildSmoothPath } from "@/lib/smoothPath";
-import { applyEWMA, computeMax, pickSeries } from "@/lib/trafficUtils";
+import { computeMax } from "@/lib/trafficUtils";
 import type { TrafficKey, TrafficPoint } from "@/types";
 
 import { useDpiScale } from "./useDpiChange";
@@ -175,84 +177,92 @@ export function useTrafficCanvas({
     observer.observe(canvas);
     resize();
 
-    const display: number[] = [];
-    let lastLength = 0;
-    let lastArrival = performance.now();
-    let averageDelta = MONITOR_INTERVAL_MS;
+    const smoothing = new Map<number, number>();
+    let frozenElapsed = 0;
 
     const render = (): void => {
-      const raw = pickSeries(buffer.current, dataKey);
-      const values = applyEWMA(raw);
-      const last = values[values.length - 1] ?? 0;
+      const points = buffer.current;
+      const count = points.length;
+      const headMs = count > 0 ? (points[count - 1]?.timestamp ?? 0) : 0;
+      const elapsed = paused
+        ? frozenElapsed
+        : Math.min(
+            Math.max(Date.now() - headMs, 0),
+            MONITOR_INTERVAL_MS * MONITOR_BUFFER_SIZE
+          );
 
-      if (values.length !== lastLength) {
-        if (
-          values.length < display.length ||
-          values.length > display.length + 1
-        ) {
-          display.length = 0;
+      if (!paused) {
+        frozenElapsed = elapsed;
+      }
 
-          for (const value of values) {
-            display.push(value);
+      if (smoothing.size > MONITOR_BUFFER_SIZE * 3) {
+        const oldest = points[0]?.timestamp ?? 0;
+
+        for (const key of smoothing.keys()) {
+          if (key < oldest) {
+            smoothing.delete(key);
           }
-        } else {
-          display.push(values[values.length - 1] ?? 0);
+        }
+      }
+
+      const smoothed: number[] = [];
+      let previous = 0;
+
+      for (let index = 0; index < count; index += 1) {
+        const point = points[index];
+
+        if (point === undefined) {
+          continue;
         }
 
-        const nowArrival = performance.now();
+        const cached = smoothing.get(point.timestamp);
 
-        averageDelta =
-          averageDelta * 0.75 +
-          Math.min(Math.max(nowArrival - lastArrival, 16), 200) * 0.25;
-        lastLength = values.length;
-        lastArrival = nowArrival;
+        if (cached === undefined) {
+          const target = point[dataKey];
+
+          previous =
+            smoothed.length === 0
+              ? target
+              : previous * (1 - EWMA_ALPHA) + target * EWMA_ALPHA;
+          smoothing.set(point.timestamp, previous);
+        } else {
+          previous = cached;
+        }
+
+        smoothed.push(previous);
       }
 
-      const now = performance.now();
-      const progress = Math.min((now - lastArrival) / averageDelta, 1);
-
-      for (let index = 0; index < values.length; index += 1) {
-        const current = display[index] ?? 0;
-
-        display[index] = current + ((values[index] ?? 0) - current) * 0.3;
-      }
-
-      const smoothed = values.map((value, index) => display[index] ?? value);
-
-      valueRef.current = last;
+      valueRef.current = smoothed[smoothed.length - 1] ?? 0;
       maxRef.current = computeMax(smoothed, maxRef.current);
 
       const scaleValue = maxRef.current || 1;
-      const step = raw.length > 1 ? width / (raw.length - 1) : width;
+      const step = width / (MONITOR_BUFFER_SIZE - 1);
       const toY = (value: number): number =>
         height - (Math.min(value, scaleValue) / scaleValue) * height;
+      const chart = smoothed
+        .map((value, index) => {
+          const age = headMs - (points[index]?.timestamp ?? headMs);
+
+          return {
+            x: width - ((age + elapsed) / MONITOR_INTERVAL_MS) * step,
+            y: toY(value),
+          };
+        })
+        .filter((point) => point.x > -step);
 
       context.clearRect(0, 0, width, height);
       drawGrid(context, width, height);
       drawFrame(context, width, height, scaleValue);
 
-      if (smoothed.length < 2) {
+      if (chart.length < 2) {
         frame = window.requestAnimationFrame(render);
         return;
       }
 
-      const shift = progress * step;
-      const points = smoothed.map((value, index) => ({
-        x: index * step - shift,
-        y: toY(value),
-      }));
-
-      points.push({
-        x: width,
-        y: toY(smoothed[smoothed.length - 1] ?? 0),
-      });
-
       const areaPath = new Path2D(
-        buildAreaPath(points, height, CHART_SMOOTH_TENSION)
+        buildAreaPath(chart, height, CHART_SMOOTH_TENSION)
       );
-      const linePath = new Path2D(
-        buildSmoothPath(points, CHART_SMOOTH_TENSION)
-      );
+      const linePath = new Path2D(buildSmoothPath(chart, CHART_SMOOTH_TENSION));
 
       const fill = context.createLinearGradient(0, 0, 0, height);
       fill.addColorStop(0, withAlpha(color, 0.32));
@@ -270,7 +280,7 @@ export function useTrafficCanvas({
       context.stroke(linePath);
       context.shadowBlur = 0;
 
-      const lastPoint = points[points.length - 1];
+      const lastPoint = chart[chart.length - 1];
 
       if (lastPoint !== undefined) {
         drawEndpoint(

@@ -10,14 +10,19 @@ export interface GameCoverImageProps {
   alt: string;
 }
 
+interface CoverSource {
+  src: string;
+  kind: "cover" | "icon";
+}
+
 interface CoverFallbackProps {
   name: string;
   className?: string | undefined;
 }
 
 export function GameCoverImage({ game, className, alt }: GameCoverImageProps) {
-  const [covers, setCovers] = useState<Record<string, string>>({});
-  const source = covers[game.id] ?? null;
+  const [sources, setSources] = useState<Record<string, CoverSource>>({});
+  const source = sources[game.id] ?? null;
 
   useEffect(() => {
     let active = true;
@@ -32,10 +37,10 @@ export function GameCoverImage({ game, className, alt }: GameCoverImageProps) {
         }
 
         if (value !== null) {
-          setCovers((previous) =>
-            previous[game.id] === value
+          setSources((previous) =>
+            previous[game.id]?.src === value
               ? previous
-              : { ...previous, [game.id]: value }
+              : { ...previous, [game.id]: { src: value, kind: "cover" } }
           );
 
           return;
@@ -46,10 +51,10 @@ export function GameCoverImage({ game, className, alt }: GameCoverImageProps) {
         }).catch(() => null);
 
         if (active && icon !== null) {
-          setCovers((previous) =>
-            previous[game.id] === icon
+          setSources((previous) =>
+            previous[game.id]?.src === icon
               ? previous
-              : { ...previous, [game.id]: icon }
+              : { ...previous, [game.id]: { src: icon, kind: "icon" } }
           );
         }
       })
@@ -64,10 +69,33 @@ export function GameCoverImage({ game, className, alt }: GameCoverImageProps) {
     return <CoverFallback name={game.name} className={className} />;
   }
 
+  if (source.kind === "icon") {
+    return (
+      <span
+        className={cn("relative block size-full overflow-hidden", className)}
+      >
+        <img
+          aria-hidden="true"
+          alt=""
+          src={source.src}
+          className="absolute inset-0 size-full scale-125 object-cover opacity-40 blur-2xl"
+        />
+        <span className="from-bg-secondary/70 via-bg-primary/40 to-bg-primary/85 absolute inset-0 bg-gradient-to-b" />
+        <img
+          alt={alt}
+          src={source.src}
+          loading="lazy"
+          decoding="async"
+          className="relative z-10 size-full object-contain p-[20%] drop-shadow-[0_10px_24px_rgba(0,0,0,0.55)]"
+        />
+      </span>
+    );
+  }
+
   return (
     <img
       alt={alt}
-      src={source}
+      src={source.src}
       loading="lazy"
       decoding="async"
       className={cn("size-full object-cover", className)}

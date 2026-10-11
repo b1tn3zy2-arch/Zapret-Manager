@@ -103,7 +103,7 @@ export const MONITOR_LABEL_REFRESH_MS = 1000;
 export const MONITOR_STALL_THRESHOLD_MS = 2000;
 export const MONITOR_BUFFER_SIZE = 120;
 
-export const PING_INTERVAL_MS = 5000;
+export const PING_INTERVAL_MS = 2000;
 export const PING_HISTORY_SIZE = 30;
 
 export const PROCESS_CHECK_INTERVAL_MS = 5000;

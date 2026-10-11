@@ -144,11 +144,15 @@ function StatusOrb({ status, size }: StatusOrbProps) {
         className={`absolute inset-5 rounded-full ${palette.text} flex items-center justify-center`}
         style={{ background: palette.core, willChange: "transform" }}
         animate={
-          status === "connecting" ? { scale: [1, 1.06, 1] } : { scale: 1 }
+          isActive
+            ? {
+                scale: status === "connecting" ? [1, 1.06, 1] : [1, 1.035, 1],
+              }
+            : { scale: 1 }
         }
         transition={{
-          duration: 1.6,
-          repeat: status === "connecting" ? Infinity : 0,
+          duration: status === "connecting" ? 1.6 : 2.6,
+          repeat: isActive ? Infinity : 0,
           ease: "easeInOut",
         }}
       >

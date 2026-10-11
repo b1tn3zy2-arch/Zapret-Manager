@@ -139,23 +139,27 @@ function AdvancedSection() {
       <SettingRow
         label={t("settings.advanced.logRetention")}
         control={
-          <Input
-            variant="filled"
-            inputMode="numeric"
-            value={String(advanced.logRetentionDays)}
-            aria-label={t("settings.advanced.logRetention")}
-            className="w-24"
-            onChange={(event) => {
-              const digits = event.target.value.replace(/D/g, "");
+          <div className="w-20">
+            <Input
+              variant="filled"
+              size="sm"
+              inputMode="numeric"
+              maxLength={4}
+              value={String(advanced.logRetentionDays)}
+              aria-label={t("settings.advanced.logRetention")}
+              className="text-center"
+              onChange={(event) => {
+                const digits = event.target.value.replace(/\D/g, "");
 
-              updateAdvanced({
-                logRetentionDays:
-                  digits === ""
-                    ? MIN_LOG_RETENTION_DAYS
-                    : Math.min(Number(digits), MAX_LOG_RETENTION_DAYS),
-              });
-            }}
-          />
+                updateAdvanced({
+                  logRetentionDays:
+                    digits === ""
+                      ? MIN_LOG_RETENTION_DAYS
+                      : Math.min(Number(digits), MAX_LOG_RETENTION_DAYS),
+                });
+              }}
+            />
+          </div>
         }
       />
 
