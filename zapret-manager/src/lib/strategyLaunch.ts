@@ -2,9 +2,9 @@
 
 import { translateKey } from "@/i18n/core";
 import { enabledGames } from "@/lib/gameUtils";
+import { toErrorMessage } from "@/lib/utils";
 import { useLogsStore } from "@/stores/useLogsStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
-import { useStrategiesStore } from "@/stores/useStrategiesStore";
 import type { GameSettings, InjectionReport } from "@/types";
 
 export interface NativeGamePayload {
@@ -30,40 +30,51 @@ export function toNativeGames(
   }));
 }
 
-function hasNativeConfig(strategyId: string): boolean {
-  const strategy = useStrategiesStore
-    .getState()
-    .strategies.find((item) => item.id === strategyId);
-
-  return (strategy?.config?.groups.length ?? 0) > 0;
+function isConfigParseError(message: string): boolean {
+  return (
+    message.includes("группы фильтров") ||
+    message.includes("команда запуска winws") ||
+    message.includes("winws.exe не найден")
+  );
 }
 
 export async function launchStrategy(
   strategyId: string,
   path: string
 ): Promise<StrategyRunResult> {
+  const store = useSettingsStore.getState();
+
+  if (!store.loaded) {
+    await store.loadFromFile();
+  }
+
   const settings = useSettingsStore.getState().settings;
   const engine = settings.advanced.strategyEngine;
-  const games = enabledGames(settings.games);
-
-  if (engine === "native" && hasNativeConfig(strategyId)) {
-    return invoke<StrategyRunResult>("run_strategy_native", {
-      strategyId,
-      path,
-      games: toNativeGames(settings.games),
-    });
-  }
 
   if (engine === "native") {
-    useLogsStore.getState().addLog({
-      level: "warn",
-      source: "strategy",
-      message: translateKey("log.nativeFallback"),
-      strategyId,
-    });
+    try {
+      return await invoke<StrategyRunResult>("run_strategy_native", {
+        strategyId,
+        path,
+        games: toNativeGames(settings.games),
+      });
+    } catch (caught) {
+      const message = toErrorMessage(caught);
+
+      if (!isConfigParseError(message)) {
+        throw caught;
+      }
+
+      useLogsStore.getState().addLog({
+        level: "warn",
+        source: "strategy",
+        message: translateKey("log.nativeFallback"),
+        strategyId,
+      });
+    }
   }
 
-  for (const game of games) {
+  for (const game of enabledGames(settings.games)) {
     await invoke<InjectionReport>("inject_outlast", {
       strategyPath: path,
       domains: game.domains,
