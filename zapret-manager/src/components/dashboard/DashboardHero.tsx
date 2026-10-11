@@ -60,6 +60,7 @@ function DashboardHero({
       variant="outlined"
       padding="lg"
       className="flex min-h-[200px] items-center gap-8"
+      style={{ backgroundColor: "#000000" }}
     >
       <StatusOrb status={status} />
 

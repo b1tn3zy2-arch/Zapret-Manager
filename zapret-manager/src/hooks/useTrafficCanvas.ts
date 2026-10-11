@@ -178,6 +178,7 @@ export function useTrafficCanvas({
     const display: number[] = [];
     let lastLength = 0;
     let lastArrival = performance.now();
+    let averageDelta = MONITOR_INTERVAL_MS;
 
     const render = (): void => {
       const raw = pickSeries(buffer.current, dataKey);
@@ -198,20 +199,22 @@ export function useTrafficCanvas({
           display.push(values[values.length - 1] ?? 0);
         }
 
+        const nowArrival = performance.now();
+
+        averageDelta =
+          averageDelta * 0.75 +
+          Math.min(Math.max(nowArrival - lastArrival, 16), 200) * 0.25;
         lastLength = values.length;
-        lastArrival = performance.now();
+        lastArrival = nowArrival;
       }
 
       const now = performance.now();
-      const progress = Math.min(
-        Math.max((now - lastArrival) / MONITOR_INTERVAL_MS, 0),
-        1
-      );
+      const progress = Math.min((now - lastArrival) / averageDelta, 1);
 
       for (let index = 0; index < values.length; index += 1) {
         const current = display[index] ?? 0;
 
-        display[index] = current + ((values[index] ?? 0) - current) * 0.35;
+        display[index] = current + ((values[index] ?? 0) - current) * 0.3;
       }
 
       const smoothed = values.map((value, index) => display[index] ?? value);

@@ -96,6 +96,7 @@ export default function VpnMode() {
         variant="outlined"
         padding="lg"
         className="flex flex-col items-center gap-5"
+        style={{ backgroundColor: "#000000" }}
       >
         <ConnectButton
           connected={connected}
