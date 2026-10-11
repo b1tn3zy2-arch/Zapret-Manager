@@ -68,7 +68,7 @@ export const BLOOM_INTENSITY: Record<EffectIntensity, BloomProfile> = {
 export const VIGNETTE_GRADIENTS: Record<EffectIntensity, string> = {
   off: "radial-gradient(ellipse at center, transparent 100%, transparent 100%)",
   subtle:
-    "radial-gradient(ellipse 120% 120% at center, transparent 45%, rgb(0 0 0 / 0.18) 82%, rgb(0 0 0 / 0.32) 100%)",
+    "radial-gradient(ellipse 120% 120% at center, transparent 42%, rgb(0 0 0 / 0.26) 80%, rgb(0 0 0 / 0.44) 100%)",
   normal:
     "radial-gradient(ellipse 110% 110% at center, transparent 40%, rgb(0 0 0 / 0.3) 80%, rgb(0 0 0 / 0.5) 100%)",
   strong:
@@ -91,14 +91,14 @@ export const MOTION_BLUR_MAX_PX: Record<EffectIntensity, number> = {
 
 export const SCANLINE_OPACITY: Record<EffectIntensity, number> = {
   off: 0,
-  subtle: 0.012,
-  normal: 0.02,
-  strong: 0.032,
+  subtle: 0.03,
+  normal: 0.05,
+  strong: 0.08,
 };
 
 export const GRAIN_OPACITY: Record<EffectIntensity, number> = {
   off: 0,
-  subtle: 0.015,
-  normal: 0.025,
-  strong: 0.04,
+  subtle: 0.03,
+  normal: 0.05,
+  strong: 0.08,
 };

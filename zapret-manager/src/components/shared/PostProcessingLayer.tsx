@@ -20,7 +20,7 @@ function PostProcessingLayer() {
 
   const scanlineOpacity = useMemo(
     () =>
-      decorationsAllowed && settings.scanlines ? SCANLINE_OPACITY.subtle : 0,
+      decorationsAllowed && settings.scanlines ? SCANLINE_OPACITY.normal : 0,
     [decorationsAllowed, settings.scanlines]
   );
 
