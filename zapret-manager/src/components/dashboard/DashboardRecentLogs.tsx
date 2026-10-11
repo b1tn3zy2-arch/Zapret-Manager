@@ -5,6 +5,7 @@ import { ArrowRight, ScrollText } from "lucide-react";
 import { Button, Text } from "@/components/ui";
 import { GlassPanel } from "@/components/shared/GlassPanel";
 import { usePrefersReducedMotion } from "@/hooks/useDeviceTier";
+import { useI18n } from "@/i18n";
 import {
   ANIMATION,
   LOG_LEVEL_CLASSES,
@@ -60,6 +61,7 @@ function RecentRow({ entry, index, reducedMotion }: RecentRowProps) {
 }
 
 function DashboardRecentLogs({ onOpenAllLogs }: DashboardRecentLogsProps) {
+  const { t } = useI18n();
   const logs = useLogsStore((state) => state.logs);
   const reducedMotion = usePrefersReducedMotion();
   const recent = logs.slice(-RECENT_LOGS_COUNT).reverse();
@@ -68,7 +70,7 @@ function DashboardRecentLogs({ onOpenAllLogs }: DashboardRecentLogsProps) {
     <GlassPanel padding="lg" className="flex flex-col gap-4">
       <div className="flex items-center justify-between gap-3">
         <h3 className="text-text-primary text-base font-semibold">
-          Последние события
+          {t("dashboard.recentLogs.title")}
         </h3>
 
         <Button
@@ -77,7 +79,7 @@ function DashboardRecentLogs({ onOpenAllLogs }: DashboardRecentLogsProps) {
           onClick={onOpenAllLogs}
           iconRight={<ArrowRight aria-hidden="true" className="size-3.5" />}
         >
-          Все логи
+          {t("dashboard.recentLogs.openAll")}
         </Button>
       </div>
 
@@ -89,7 +91,7 @@ function DashboardRecentLogs({ onOpenAllLogs }: DashboardRecentLogsProps) {
             strokeWidth={1.75}
           />
           <Text variant="body" size="sm">
-            Логов пока нет. Запустите стратегию — здесь появятся события.
+            {t("dashboard.recentLogs.empty")}
           </Text>
         </div>
       ) : (

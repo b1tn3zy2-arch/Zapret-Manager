@@ -1,3 +1,5 @@
+import { useI18n } from "@/i18n";
+import type { TranslationKey } from "@/i18n/types";
 import { useEffect, useState } from "react";
 import { Download, Search, Trash2, X } from "lucide-react";
 
@@ -63,6 +65,21 @@ function toggleIn<T>(list: T[] | undefined, value: T): T[] | undefined {
   return next.length === 0 ? undefined : next;
 }
 
+function entriesCountKey(count: number): TranslationKey {
+  const mod10 = count % 10;
+  const mod100 = count % 100;
+
+  if (mod10 === 1 && mod100 !== 11) {
+    return "logs.countOne";
+  }
+
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) {
+    return "logs.countFew";
+  }
+
+  return "logs.countMany";
+}
+
 function LogFilters({
   filter,
   onChange,
@@ -79,6 +96,7 @@ function LogFilters({
   totalCount,
   shownCount,
 }: LogFiltersProps) {
+  const { t } = useI18n();
   const [searchDraft, setSearchDraft] = useState(filter.search ?? "");
   const debouncedSearch = useDebounce(searchDraft, SEARCH_DEBOUNCE_MS);
   const committedSearch = filter.search ?? "";
@@ -103,8 +121,8 @@ function LogFilters({
           size="sm"
           className="w-full max-w-xs"
           icon={<Search className="size-3.5" />}
-          placeholder="Поиск по тексту лога"
-          aria-label="Поиск по тексту лога"
+          placeholder={t("logs.searchPlaceholder")}
+          aria-label={t("logs.searchPlaceholder")}
           value={searchDraft}
           onChange={(event) => {
             setSearchDraft(event.target.value);
@@ -112,10 +130,10 @@ function LogFilters({
         />
 
         <Dropdown
-          label="Фильтр по стратегии"
+          label={t("logs.filterStrategy")}
           value={strategyValue}
           options={[
-            { value: "", label: "Все стратегии" },
+            { value: "", label: t("logs.allStrategies") },
             ...strategyOptions.map((option) => ({
               value: option.id,
               label: option.name,
@@ -128,12 +146,14 @@ function LogFilters({
 
         <div className="ml-auto flex flex-wrap items-center gap-3">
           <span className="flex items-center gap-2">
-            <span className="text-text-secondary text-xs">Автоскролл</span>
+            <span className="text-text-secondary text-xs">
+              {t("logs.autoScroll")}
+            </span>
             <Toggle
               size="sm"
               checked={autoScroll}
               onChange={onAutoScrollChange}
-              label="Автоскролл"
+              label={t("logs.autoScroll")}
             />
           </span>
 
@@ -144,7 +164,7 @@ function LogFilters({
             disabled={!canExport}
             icon={<Download className="size-3.5" />}
           >
-            Экспорт
+            {t("logs.export")}
           </Button>
 
           <Button
@@ -154,7 +174,7 @@ function LogFilters({
             disabled={totalCount === 0}
             icon={<Trash2 className="size-3.5" />}
           >
-            Очистить
+            {t("logs.clear")}
           </Button>
         </div>
       </div>
@@ -163,7 +183,7 @@ function LogFilters({
         {LOG_LEVELS.map((level: LogLevel) => (
           <FilterChip
             key={level}
-            label={LOG_LEVEL_LABELS[level]}
+            label={t(LOG_LEVEL_LABELS[level])}
             count={levelCounts[level]}
             variant={LEVEL_VARIANTS[level]}
             active={
@@ -180,7 +200,7 @@ function LogFilters({
         {LOG_SOURCES.map((source: LogSource) => (
           <FilterChip
             key={source}
-            label={LOG_SOURCE_LABELS[source]}
+            label={t(LOG_SOURCE_LABELS[source])}
             count={sourceCounts[source]}
             variant="neutral"
             active={
@@ -200,14 +220,14 @@ function LogFilters({
               className="text-text-tertiary hover:text-text-primary flex items-center gap-1 text-xs transition-colors"
             >
               <X className="size-3" />
-              Сбросить фильтры
+              {t("logs.resetFilters")}
             </button>
           ) : null}
 
           <Badge variant="neutral">
             {shownCount === totalCount
-              ? `${totalCount} записей`
-              : `${shownCount} из ${totalCount}`}
+              ? t(entriesCountKey(totalCount), { count: totalCount })
+              : t("logs.countShown", { shown: shownCount, total: totalCount })}
           </Badge>
         </div>
       </div>

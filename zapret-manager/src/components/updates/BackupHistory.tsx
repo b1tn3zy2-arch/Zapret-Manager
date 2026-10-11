@@ -1,4 +1,5 @@
 ﻿import { useCallback, useEffect, useState } from "react";
+import { useI18n } from "@/i18n";
 import { History, RotateCcw } from "lucide-react";
 
 import { Button } from "@/components/ui";
@@ -8,6 +9,7 @@ import { formatVersion } from "@/lib/updateUtils";
 import type { UpdateBackupInfo } from "@/types";
 
 function BackupHistory() {
+  const { t } = useI18n();
   const { loadBackups, rollback } = useUpdater();
   const [backups, setBackups] = useState<UpdateBackupInfo[]>([]);
   const [isBusy, setIsBusy] = useState(false);
@@ -22,9 +24,7 @@ function BackupHistory() {
 
   if (backups.length === 0) {
     return (
-      <p className="text-text-tertiary text-xs">
-        Бэкапов пока нет. Они появляются автоматически перед каждым обновлением.
-      </p>
+      <p className="text-text-tertiary text-xs">{t("updates.backupEmpty")}</p>
     );
   }
 
@@ -61,7 +61,7 @@ function BackupHistory() {
             }}
             icon={<RotateCcw aria-hidden="true" className="size-3.5" />}
           >
-            Вернуть
+            {t("updates.revert")}
           </Button>
         </div>
       ))}

@@ -3,6 +3,7 @@ import {
   TRAFFIC_MAX_HEADROOM,
   TRAFFIC_MIN_SCALE,
 } from "@/lib/constants";
+import { currentLanguage } from "@/lib/format";
 import type { TrafficKey, TrafficPoint } from "@/types";
 
 const KB = 1024;
@@ -10,48 +11,64 @@ const MB = KB * 1024;
 const GB = MB * 1024;
 const TB = GB * 1024;
 
+const BYTE_UNITS = {
+  ru: ["Б", "КБ", "МБ", "ГБ", "ТБ"],
+  en: ["B", "KB", "MB", "GB", "TB"],
+} as const;
+
+const COUNT_UNITS = {
+  ru: ["тыс.", "млн", "млрд"],
+  en: ["K", "M", "B"],
+} as const;
+
+const SPEED_SUFFIX = { ru: "/с", en: "/s" } as const;
+
 function trim(value: string): string {
   return value.replace(/\.?0+$/, "");
 }
 
 export function formatBytes(bytes: number): string {
+  const units = BYTE_UNITS[currentLanguage()];
+
   if (bytes < KB) {
-    return `${Math.round(bytes)} Б`;
+    return `${Math.round(bytes)} ${units[0]}`;
   }
 
   if (bytes < MB) {
-    return `${trim((bytes / KB).toFixed(1))} КБ`;
+    return `${trim((bytes / KB).toFixed(1))} ${units[1]}`;
   }
 
   if (bytes < GB) {
-    return `${trim((bytes / MB).toFixed(1))} МБ`;
+    return `${trim((bytes / MB).toFixed(1))} ${units[2]}`;
   }
 
   if (bytes < TB) {
-    return `${trim((bytes / GB).toFixed(2))} ГБ`;
+    return `${trim((bytes / GB).toFixed(2))} ${units[3]}`;
   }
 
-  return `${trim((bytes / TB).toFixed(2))} ТБ`;
+  return `${trim((bytes / TB).toFixed(2))} ${units[4]}`;
 }
 
 export function formatCount(value: number): string {
+  const units = COUNT_UNITS[currentLanguage()];
+
   if (value < KB) {
     return String(Math.round(value));
   }
 
   if (value < MB) {
-    return `${trim((value / KB).toFixed(1))} тыс.`;
+    return `${trim((value / KB).toFixed(1))} ${units[0]}`;
   }
 
   if (value < GB) {
-    return `${trim((value / MB).toFixed(2))} млн`;
+    return `${trim((value / MB).toFixed(2))} ${units[1]}`;
   }
 
-  return `${trim((value / GB).toFixed(2))} млрд`;
+  return `${trim((value / GB).toFixed(2))} ${units[2]}`;
 }
 
 export function formatSpeed(bytesPerSecond: number): string {
-  return `${formatBytes(bytesPerSecond)}/с`;
+  return `${formatBytes(bytesPerSecond)}${SPEED_SUFFIX[currentLanguage()]}`;
 }
 
 export function applyEWMA(

@@ -1,3 +1,4 @@
+import { translateKey } from "@/i18n/core";
 import { invoke } from "@tauri-apps/api/core";
 
 import { toErrorMessage } from "@/lib/utils";
@@ -12,7 +13,7 @@ export async function runLastStrategy(): Promise<void> {
   const lastId = useSettingsStore.getState().settings.lastStrategyId;
 
   if (lastId === null) {
-    addWarn("Из трея: последняя стратегия не выбрана");
+    addWarn(translateKey("log.trayNoLast"));
 
     return;
   }
@@ -20,7 +21,7 @@ export async function runLastStrategy(): Promise<void> {
   const target = findStrategy(lastId);
 
   if (target === undefined) {
-    addWarn("Из трея: стратегия из настроек больше не найдена");
+    addWarn(translateKey("log.trayStrategyMissing"));
 
     return;
   }
@@ -32,7 +33,7 @@ export async function stopRunningStrategy(): Promise<void> {
   const running = findRunning();
 
   if (running === undefined) {
-    addWarn("Из трея: активной стратегии нет");
+    addWarn(translateKey("log.trayNoActive"));
 
     return;
   }
@@ -50,14 +51,14 @@ export async function stopRunningStrategy(): Promise<void> {
     useLogsStore.getState().addLog({
       level: "info",
       source: "strategy",
-      message: `Остановлено из трея, процессов winws.exe: ${killed}`,
+      message: translateKey("log.trayStopped", { count: killed }),
       strategyId: running.id,
     });
 
     if (shouldNotifyOnStop(showOnStop, true) && notifyEnabled) {
       await notify(
-        "Стратегия остановлена",
-        `${running.name} больше не работает`,
+        translateKey("log.strategyStoppedTitle"),
+        translateKey("log.strategyStoppedBody", { name: running.name }),
         "info"
       );
     }
@@ -65,7 +66,9 @@ export async function stopRunningStrategy(): Promise<void> {
     useLogsStore.getState().addLog({
       level: "error",
       source: "strategy",
-      message: `Не удалось остановить из трея: ${toErrorMessage(caught)}`,
+      message: translateKey("log.trayStopFailed", {
+        error: toErrorMessage(caught),
+      }),
       strategyId: running.id,
     });
   }
@@ -89,12 +92,16 @@ async function startStrategy(target: Strategy): Promise<void> {
     useLogsStore.getState().addLog({
       level: "success",
       source: "strategy",
-      message: `Запущено из трея, PID ${result.pid}`,
+      message: translateKey("log.trayStarted", { pid: result.pid }),
       strategyId: target.id,
     });
 
     if (shouldNotifyOnStart(showOnStart, false) && notifyEnabled) {
-      await notify("Стратегия запущена", `${target.name} работает`, "success");
+      await notify(
+        translateKey("log.strategyStartedTitle"),
+        translateKey("log.strategyStartedBody", { name: target.name }),
+        "success"
+      );
     }
   } catch (caught) {
     const message = toErrorMessage(caught);
@@ -104,12 +111,12 @@ async function startStrategy(target: Strategy): Promise<void> {
     useLogsStore.getState().addLog({
       level: "error",
       source: "strategy",
-      message: `Не удалось запустить из трея: ${message}`,
+      message: translateKey("log.trayStartFailed", { error: message }),
       strategyId: target.id,
     });
 
     if (notifyEnabled) {
-      await notify("Ошибка запуска", message, "error");
+      await notify(translateKey("log.launchErrorTitle"), message, "error");
     }
   }
 }

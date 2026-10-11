@@ -1,3 +1,4 @@
+import { translateKey } from "@/i18n/core";
 import { secureInvoke, secureInvokeValidated } from "@/lib/secureInvoke";
 import { validateFilePath, validateVersion } from "@/lib/sanitize";
 import { StrategyInfoSchema, UpdateInfoSchema } from "@/types/ipcSchemas";
@@ -13,7 +14,9 @@ export async function scanStrategies(folder: string): Promise<Strategy[]> {
   const check = validateFilePath(folder);
 
   if (!check.valid) {
-    throw new Error(check.message ?? "Недопустимая папка стратегий");
+    throw new Error(
+      check.message ?? translateKey("validation.invalidStrategiesFolder")
+    );
   }
 
   return secureInvokeValidated("scan_strategies", StrategyInfoSchema.array(), {
@@ -40,7 +43,9 @@ export async function downloadArchive(
   const versionCheck = validateVersion(version);
 
   if (!versionCheck.valid) {
-    throw new Error(versionCheck.message ?? "Недопустимая версия");
+    throw new Error(
+      versionCheck.message ?? translateKey("validation.invalidVersion")
+    );
   }
 
   return secureInvoke<string>("download_update", { url, version });
@@ -77,7 +82,9 @@ export async function restoreBackup(
   const check = validateFilePath(backupPath);
 
   if (!check.valid) {
-    throw new Error(check.message ?? "Некорректный путь к бэкапу");
+    throw new Error(
+      check.message ?? translateKey("validation.invalidBackupPath")
+    );
   }
 
   return secureInvoke<number>("restore_from_backup", {
@@ -93,7 +100,9 @@ export async function markVersion(
   const versionCheck = validateVersion(version);
 
   if (!versionCheck.valid) {
-    throw new Error(versionCheck.message ?? "Некорректная версия");
+    throw new Error(
+      versionCheck.message ?? translateKey("validation.invalidVersion")
+    );
   }
 
   return secureInvoke<boolean>("set_current_version", {

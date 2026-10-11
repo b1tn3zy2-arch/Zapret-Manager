@@ -2,6 +2,8 @@ import { motion } from "framer-motion";
 import { Lock, ShieldCheck, TriangleAlert, WifiOff } from "lucide-react";
 
 import { useBloom } from "@/hooks/useBloom";
+import { useI18n } from "@/i18n";
+import { CONNECTION_LABELS } from "@/lib/constants";
 import type { ConnectionStatus } from "@/lib/constants";
 import { ANIMATION } from "@/lib/constants";
 import type { BloomColor, EffectIntensity } from "@/types/appearance";
@@ -76,6 +78,7 @@ export interface StatusOrbProps {
 }
 
 function StatusOrb({ status, size }: StatusOrbProps) {
+  const { t } = useI18n();
   const palette = PALETTE[status];
   const isActive = ACTIVE_STATUSES.includes(status);
   const { Icon } = palette;
@@ -92,7 +95,9 @@ function StatusOrb({ status, size }: StatusOrbProps) {
         boxShadow: isActive && bloom.filter !== "" ? bloom.filter : undefined,
       }}
       role="img"
-      aria-label={`Состояние защиты: ${status}`}
+      aria-label={t("dashboard.orb.aria", {
+        status: t(CONNECTION_LABELS[status]),
+      })}
     >
       {isActive && bloom.boxShadow !== "" ? (
         <span

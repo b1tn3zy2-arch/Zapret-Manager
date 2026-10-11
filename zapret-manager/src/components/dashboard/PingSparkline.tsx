@@ -2,6 +2,7 @@ import { useId, useMemo } from "react";
 import { motion } from "framer-motion";
 
 import { usePrefersReducedMotion } from "@/hooks/useDeviceTier";
+import { useI18n } from "@/i18n";
 import {
   CHART_PULSE_PERIOD_MS,
   SPARKLINE_HEIGHT,
@@ -29,6 +30,7 @@ function PingSparkline({
   width = SPARKLINE_WIDTH,
   height = SPARKLINE_HEIGHT,
 }: PingSparklineProps) {
+  const { t } = useI18n();
   const gradientId = useId();
   const reducedMotion = usePrefersReducedMotion();
 
@@ -49,7 +51,9 @@ function PingSparkline({
         style={{ width, height }}
         className="border-glass-border flex items-center justify-center rounded border border-dashed"
       >
-        <span className="text-text-tertiary text-[10px]">нет данных</span>
+        <span className="text-text-tertiary text-[10px]">
+          {t("common.noData")}
+        </span>
       </div>
     );
   }

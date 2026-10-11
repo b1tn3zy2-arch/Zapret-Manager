@@ -1,4 +1,5 @@
 import { CHART_SMOOTH_TENSION } from "@/lib/constants";
+import { currentLanguage } from "@/lib/format";
 import { buildSmoothPath, type SmoothPathPoint } from "@/lib/smoothPath";
 
 export interface PingPoint {
@@ -28,7 +29,9 @@ export function getPingColor(latencyMs: number | null): string {
 }
 
 export function formatPing(latencyMs: number | null): string {
-  return latencyMs === null ? "—" : `${latencyMs} мс`;
+  const suffix = currentLanguage() === "ru" ? "мс" : "ms";
+
+  return latencyMs === null ? "—" : `${latencyMs} ${suffix}`;
 }
 
 function segments(points: PingPoint[]): PingPoint[][] {

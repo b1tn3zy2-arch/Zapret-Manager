@@ -10,7 +10,9 @@ export function isValidDomain(value: string): string | null {
     return null;
   }
 
-  return DOMAIN_PATTERN.test(trimmed) ? null : "не похоже на домен";
+  return DOMAIN_PATTERN.test(trimmed)
+    ? null
+    : translateKey("validation.domainLooksWrong");
 }
 
 export function isValidIpRange(value: string): string | null {
@@ -23,7 +25,7 @@ export function isValidIpRange(value: string): string | null {
   const [address, prefix, ...rest] = trimmed.split("/");
 
   if (rest.length > 0 || address === undefined || prefix === undefined) {
-    return "ожидается CIDR, например 203.0.113.0/24";
+    return translateKey("validation.cidrExpected");
   }
 
   const bits = Number.parseInt(prefix, 10);
@@ -35,8 +37,9 @@ export function isValidIpRange(value: string): string | null {
     !IPV4_PATTERN.test(address) ||
     address.split(".").some((octet) => Number.parseInt(octet, 10) > 255)
   ) {
-    return "ожидается CIDR, например 203.0.113.0/24";
+    return translateKey("validation.cidrExpected");
   }
 
   return null;
 }
+import { translateKey } from "@/i18n/core";

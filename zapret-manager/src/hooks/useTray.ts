@@ -1,3 +1,4 @@
+import { translateKey } from "@/i18n/core";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
@@ -66,7 +67,9 @@ export function useTray(): UseTrayResult {
       addLog({
         level: "warn",
         source: "system",
-        message: `Трей не обновлён: ${toErrorMessage(caught)}`,
+        message: translateKey("log.trayUpdateFailed", {
+          error: toErrorMessage(caught),
+        }),
       });
     }
   }, [addLog, payload.strategyName, payload.trayState, payload.vpnName]);

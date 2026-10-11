@@ -1,13 +1,16 @@
+import { translateKey } from "@/i18n/core";
 import { save } from "@tauri-apps/plugin-dialog";
 import { invoke } from "@tauri-apps/api/core";
 
 import { formatLogLine } from "@/lib/format";
 import type { LogEntry } from "@/types";
 
-const TEXT_FILTERS = [
-  { name: "Текстовый файл", extensions: ["txt"] },
-  { name: "Лог-файл", extensions: ["log"] },
-];
+function textFilters(): { name: string; extensions: string[] }[] {
+  return [
+    { name: translateKey("exportLogs.textFile"), extensions: ["txt"] },
+    { name: translateKey("exportLogs.logFile"), extensions: ["log"] },
+  ];
+}
 
 export type ExportOutcome =
   { status: "cancelled" } | { status: "written"; path: string; bytes: number };
@@ -33,9 +36,9 @@ export async function exportLogsToFile(
   }
 
   const target = await save({
-    title: "Экспорт логов",
+    title: translateKey("exportLogs.title"),
     defaultPath: buildExportFileName(new Date()),
-    filters: TEXT_FILTERS,
+    filters: textFilters(),
   });
 
   if (target === null || target === "") {

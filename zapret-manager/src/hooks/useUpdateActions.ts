@@ -1,3 +1,4 @@
+import { translateKey } from "@/i18n/core";
 import { useCallback, useEffect, useRef } from "react";
 
 import { toErrorMessage } from "@/lib/utils";
@@ -72,8 +73,11 @@ export function useUpdateActions(): UpdateTransferActions {
         level: info.available ? "info" : "success",
         source: "system",
         message: info.available
-          ? `Доступно обновление стратегий: ${info.currentVersion} → ${info.latestVersion}`
-          : `Обновлений нет, установленная версия ${info.latestVersion}`,
+          ? translateKey("log.updateAvailable", {
+              from: info.currentVersion,
+              to: info.latestVersion,
+            })
+          : translateKey("log.updateUpToDate", { version: info.latestVersion }),
       });
     } catch (caught) {
       if (!mountedRef.current) {
@@ -84,7 +88,9 @@ export function useUpdateActions(): UpdateTransferActions {
       addLog({
         level: "error",
         source: "system",
-        message: `Проверка обновлений не удалась: ${toErrorMessage(caught)}`,
+        message: translateKey("log.updateCheckFailed", {
+          error: toErrorMessage(caught),
+        }),
       });
     }
   }, [addLog]);
@@ -113,7 +119,7 @@ export function useUpdateActions(): UpdateTransferActions {
       addLog({
         level: "success",
         source: "system",
-        message: `Архив обновления скачан: ${info.assetName}`,
+        message: translateKey("log.updateDownloaded", { name: info.assetName }),
       });
     } catch (caught) {
       if (!mountedRef.current) {
@@ -124,7 +130,9 @@ export function useUpdateActions(): UpdateTransferActions {
       addLog({
         level: "error",
         source: "system",
-        message: `Скачивание не удалось: ${toErrorMessage(caught)}`,
+        message: translateKey("log.updateDownloadFailed", {
+          error: toErrorMessage(caught),
+        }),
       });
     }
   }, [addLog]);
@@ -176,12 +184,17 @@ export function useUpdateActions(): UpdateTransferActions {
         level: "success",
         source: "system",
         message:
-          `Обновление установлено: ${report.version}, файлов ${report.files}` +
+          translateKey("log.updateInstalled", {
+            version: report.version,
+            count: report.files,
+          }) +
           (report.preservedEntries > 0
-            ? `, сохранено ваших записей: ${report.preservedEntries}`
+            ? translateKey("log.updatePreserved", {
+                count: report.preservedEntries,
+              })
             : "") +
           (report.checkUpdatesDisabled
-            ? ". Штатная проверка обновлений zapret отключена"
+            ? translateKey("log.updateZapretOff")
             : ""),
       });
     } catch (caught) {
@@ -193,7 +206,9 @@ export function useUpdateActions(): UpdateTransferActions {
       addLog({
         level: "error",
         source: "system",
-        message: `Установка не удалась: ${toErrorMessage(caught)}`,
+        message: translateKey("log.updateInstallFailed", {
+          error: toErrorMessage(caught),
+        }),
       });
     }
   }, [addLog]);
@@ -207,7 +222,7 @@ export function useUpdateActions(): UpdateTransferActions {
       addLog({
         level: "error",
         source: "system",
-        message: `Отмена скачивания не удалась: ${message}`,
+        message: translateKey("log.updateCancelFailed", { error: message }),
       });
     }
   }, [addLog]);

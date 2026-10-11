@@ -1,3 +1,4 @@
+import { useI18n } from "@/i18n";
 import { motion } from "framer-motion";
 
 import { formatBytes } from "@/lib/trafficUtils";
@@ -9,6 +10,7 @@ export interface UpdateProgressBarProps {
 }
 
 function UpdateProgressBar({ progress }: UpdateProgressBarProps) {
+  const { t } = useI18n();
   const percent = Math.max(0, Math.min(100, progress.percent));
 
   return (
@@ -16,7 +18,7 @@ function UpdateProgressBar({ progress }: UpdateProgressBarProps) {
       <div
         className="bg-bg-secondary border-glass-border relative h-2 w-full overflow-hidden rounded-full border"
         role="progressbar"
-        aria-label="Скачивание обновления"
+        aria-label={t("updates.progressAria")}
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={Math.round(percent)}
@@ -31,7 +33,9 @@ function UpdateProgressBar({ progress }: UpdateProgressBarProps) {
       <div className="text-text-tertiary flex flex-wrap items-center justify-between gap-2 text-xs">
         <span className="tabular-nums">
           {formatBytes(progress.downloaded)}
-          {progress.total > 0 ? ` из ${formatBytes(progress.total)}` : ""}
+          {progress.total > 0
+            ? t("updates.progressOf", { total: formatBytes(progress.total) })
+            : ""}
         </span>
         <span className="tabular-nums">
           {formatBytes(progress.speed)}/с · {formatEta(progress.eta)}

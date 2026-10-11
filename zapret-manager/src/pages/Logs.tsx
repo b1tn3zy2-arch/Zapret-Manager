@@ -1,3 +1,4 @@
+import { useI18n } from "@/i18n";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 
@@ -35,6 +36,7 @@ interface ToastState {
 const EMPTY_TOAST: ToastState = { message: null, tone: "info" };
 
 export default function Logs() {
+  const { t } = useI18n();
   const logs = useFilteredLogs();
   const totalCount = useLogsCount();
   const levelCounts = useLogLevelCounts();
@@ -76,13 +78,13 @@ export default function Logs() {
     (entry: LogEntry) => {
       void copy(formatLogLine(entry))
         .then(() => {
-          showToast("Строка скопирована", "success");
+          showToast(t("logs.toast.copied"), "success");
         })
         .catch(() => {
-          showToast("Не удалось скопировать строку", "error");
+          showToast(t("logs.toast.copyFailed"), "error");
         });
     },
-    [copy, showToast]
+    [copy, showToast, t]
   );
 
   const handleExport = useCallback(() => {
@@ -92,12 +94,18 @@ export default function Logs() {
           return;
         }
 
-        showToast(`Экспортировано ${outcome.bytes} байт`, "success");
+        showToast(
+          t("logs.toast.exported", { bytes: outcome.bytes }),
+          "success"
+        );
       })
       .catch((caught: unknown) => {
-        showToast(`Ошибка экспорта: ${String(caught)}`, "error");
+        showToast(
+          t("logs.toast.exportFailed", { error: String(caught) }),
+          "error"
+        );
       });
-  }, [logs, showToast]);
+  }, [logs, showToast, t]);
 
   const [confirmOpen, setConfirmOpen] = useState(false);
 
@@ -105,8 +113,8 @@ export default function Logs() {
     clearLogs();
     resetFilter();
     setConfirmOpen(false);
-    showToast("Логи очищены", "info");
-  }, [clearLogs, resetFilter, showToast]);
+    showToast(t("logs.toast.cleared"), "info");
+  }, [clearLogs, resetFilter, showToast, t]);
 
   const handleScrollToBottom = useCallback(() => {
     setAutoScroll(true);
@@ -123,9 +131,9 @@ export default function Logs() {
       className="flex min-h-0 flex-1 flex-col gap-3"
     >
       <motion.div variants={itemVariants} className="flex flex-col gap-1">
-        <Heading level={1}>Логи</Heading>
+        <Heading level={1}>{t("logs.title")}</Heading>
         <Text variant="body" size="sm" className="text-text-secondary">
-          Логи работы стратегий в реальном времени
+          {t("logs.subtitle")}
         </Text>
       </motion.div>
 

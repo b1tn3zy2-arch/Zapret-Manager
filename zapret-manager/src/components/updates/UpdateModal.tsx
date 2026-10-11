@@ -3,6 +3,7 @@ import { CheckCircle2, Download, RotateCcw } from "lucide-react";
 
 import UpdateProgressBar from "@/components/updates/UpdateProgress";
 import { Badge, Button, Modal } from "@/components/ui";
+import { useI18n } from "@/i18n";
 import { formatBytes } from "@/lib/trafficUtils";
 import { formatReleaseDate, formatVersion } from "@/lib/updateUtils";
 import { useUpdateStore } from "@/stores/useUpdateStore";
@@ -40,6 +41,7 @@ function UpdateModal({
   onClose,
   onRetry,
 }: UpdateModalProps) {
+  const { t } = useI18n();
   const isOpen = useUpdateStore((state) => state.isModalOpen);
   const status = useUpdateStore((state) => state.status);
   const info = useUpdateStore((state) => state.info);
@@ -52,19 +54,19 @@ function UpdateModal({
   const isDownloaded = status === "downloaded";
 
   const title = isReady
-    ? "Обновление установлено"
+    ? t("updates.titleInstalled")
     : status === "error"
-      ? "Не удалось обновить стратегии"
-      : "Доступно обновление стратегий";
+      ? t("updates.titleFailed")
+      : t("updates.titleAvailable");
 
   const footer = isReady ? (
     <Button variant="primary" onClick={onClose}>
-      Готово
+      {t("updates.done")}
     </Button>
   ) : isBusy ? (
     <>
       <Button variant="ghost" onClick={onDismiss}>
-        Скрыть
+        {t("updates.hide")}
       </Button>
       {status === "downloading" ? (
         <Button
@@ -72,21 +74,21 @@ function UpdateModal({
           onClick={onCancel}
           icon={<RotateCcw size={14} />}
         >
-          Отменить
+          {t("updates.cancel")}
         </Button>
       ) : null}
     </>
   ) : (
     <>
       <Button variant="ghost" onClick={onDismiss}>
-        Позже
+        {t("updates.later")}
       </Button>
       <Button variant="ghost" onClick={onIgnore}>
-        Игнорировать
+        {t("updates.ignore")}
       </Button>
       {status === "error" ? (
         <Button variant="primary" onClick={onRetry}>
-          Повторить
+          {t("updates.retry")}
         </Button>
       ) : (
         <Button
@@ -94,7 +96,7 @@ function UpdateModal({
           onClick={isDownloaded ? onInstall : onDownload}
           icon={<Download size={14} />}
         >
-          {isDownloaded ? "Установить" : "Скачать"}
+          {isDownloaded ? t("updates.install") : t("updates.download")}
         </Button>
       )}
     </>
@@ -110,7 +112,7 @@ function UpdateModal({
       footer={footer}
     >
       {info === null ? (
-        <p className="text-text-secondary text-sm">Идёт проверка обновлений…</p>
+        <p className="text-text-secondary text-sm">{t("updates.checking")}</p>
       ) : (
         <div className="flex flex-col gap-4">
           <div className="flex flex-wrap items-center gap-3">
@@ -124,7 +126,7 @@ function UpdateModal({
               {formatVersion(info.latestVersion)}
             </span>
             {info.ignored ? (
-              <Badge variant="neutral">Игнорируется</Badge>
+              <Badge variant="neutral">{t("updates.ignoredBadge")}</Badge>
             ) : null}
             {info.size > 0 ? (
               <span className="text-text-tertiary ml-auto text-xs">
@@ -132,7 +134,7 @@ function UpdateModal({
               </span>
             ) : (
               <span className="text-accent-danger ml-auto text-xs">
-                В релизе нет архива .zip — обновление вручную
+                {t("updates.noZip")}
               </span>
             )}
           </div>
@@ -143,13 +145,11 @@ function UpdateModal({
                 aria-hidden="true"
                 className="text-accent-primary size-4"
               />
-              Файлов обновлено: {report.files}
+              {t("updates.filesUpdated", { count: report.files })}
               {report.preservedEntries > 0
-                ? `, ваших записей сохранено: ${report.preservedEntries}`
+                ? ` ${t("updates.preserved", { count: report.preservedEntries })}`
                 : ""}
-              {report.checkUpdatesDisabled
-                ? ". Штатная проверка обновлений zapret отключена"
-                : ""}
+              {report.checkUpdatesDisabled ? t("updates.zapretUpdaterOff") : ""}
             </div>
           ) : null}
 
@@ -157,7 +157,7 @@ function UpdateModal({
             <p className="text-accent-danger text-sm">
               {error !== null && error !== ""
                 ? error
-                : "Неизвестная ошибка — подробности в логах"}
+                : t("updates.unknownError")}
             </p>
           ) : null}
 
@@ -167,14 +167,13 @@ function UpdateModal({
 
           {isDownloaded ? (
             <p className="text-text-secondary text-sm">
-              Архив скачан и готов к установке. Перед заменой файлов будет
-              создан бэкап.
+              {t("updates.downloadedHint")}
             </p>
           ) : null}
 
           {status === "installing" ? (
             <p className="text-text-secondary text-sm">
-              Бэкап создаётся, файлы заменяются…
+              {t("updates.installingHint")}
             </p>
           ) : null}
 

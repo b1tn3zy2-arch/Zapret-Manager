@@ -1,3 +1,4 @@
+import { useI18n } from "@/i18n";
 import { motion } from "framer-motion";
 import { Activity, Globe, Zap } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -66,25 +67,26 @@ export interface CardStatsBarsProps {
 }
 
 function CardStatsBars({ stats, compact = false }: CardStatsBarsProps) {
+  const { t } = useI18n();
   return (
     <div className={cn("flex flex-col gap-1.5", compact && "gap-1")}>
       <StatRow
         icon={Zap}
-        label="Скорость"
+        label={t("strategies.stats.speed")}
         value={stats.speed}
         compact={compact}
         delay={0}
       />
       <StatRow
         icon={Activity}
-        label="Стабильность"
+        label={t("strategies.stats.stability")}
         value={stats.stability}
         compact={compact}
         delay={0.08}
       />
       <StatRow
         icon={Globe}
-        label="Покрытие"
+        label={t("strategies.stats.coverage")}
         value={stats.coverage}
         compact={compact}
         delay={0.16}

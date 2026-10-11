@@ -2,15 +2,16 @@ import { Badge, Button, Text } from "@/components/ui";
 import { GlassPanel } from "@/components/shared/GlassPanel";
 import StatusOrb from "@/components/dashboard/StatusOrb";
 import { useI18n } from "@/i18n";
+import type { TranslationKey } from "@/i18n/types";
 import { CONNECTION_LABELS, type ConnectionStatus } from "@/lib/constants";
 
 const HERO_STATUS = {
-  connected: "Обход активен",
-  connecting: "Подключение...",
-  disconnected: "Обход выключен",
-  vpn: "VPN активен",
-  error: "Произошла ошибка запуска",
-} as const satisfies Record<ConnectionStatus, string>;
+  connected: "dashboard.hero.connected",
+  connecting: "dashboard.hero.connecting",
+  disconnected: "dashboard.hero.disconnected",
+  vpn: "dashboard.hero.vpn",
+  error: "dashboard.hero.error",
+} as const satisfies Record<ConnectionStatus, TranslationKey>;
 
 const BADGE_VARIANT = {
   connected: "success",
@@ -48,7 +49,7 @@ function DashboardHero({
     ? vpnLabel === null
       ? t("settings.vpn.heroVpn")
       : `${t("settings.vpn.badgeVpn")}: ${vpnLabel}`
-    : (strategyName ?? "Обход не настроен");
+    : (strategyName ?? t("dashboard.hero.notConfigured"));
 
   return (
     <GlassPanel padding="lg" className="flex min-h-[200px] items-center gap-8">
@@ -56,7 +57,7 @@ function DashboardHero({
 
       <div className="flex min-w-0 flex-1 flex-col items-start gap-3">
         <Badge variant={badgeVariant} dot={isActive} pulse={isActive}>
-          {CONNECTION_LABELS[status]}
+          {t(CONNECTION_LABELS[status])}
         </Badge>
 
         <div className="flex flex-col gap-1">
@@ -64,7 +65,7 @@ function DashboardHero({
             {heading}
           </h2>
           <Text variant="body" size="sm" className="text-text-secondary">
-            {HERO_STATUS[status]}
+            {t(HERO_STATUS[status])}
             {isActive && uptime !== "--:--:--" ? ` · ${uptime}` : ""}
           </Text>
         </div>

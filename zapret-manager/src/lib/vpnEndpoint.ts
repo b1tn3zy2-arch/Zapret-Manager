@@ -1,3 +1,4 @@
+import { translateKey } from "@/i18n/core";
 import { toCountryCode } from "@/lib/geo";
 import type { CountryCode } from "@/assets/flags/countryCodes";
 
@@ -56,11 +57,11 @@ export function validateVpnSource(text: string): string | null {
   const trimmed = text.trim();
 
   if (trimmed === "") {
-    return "Вставьте ссылку на подписку или конфиг";
+    return translateKey("validation.vpnSourceEmpty");
   }
 
   if (trimmed.length > 8 * 1024) {
-    return "Ссылка слишком длинная";
+    return translateKey("validation.vpnSourceTooLong");
   }
 
   if (/^https?:\/\//i.test(trimmed) || LINK_SCHEMES.test(trimmed)) {
@@ -71,5 +72,5 @@ export function validateVpnSource(text: string): string | null {
     return null;
   }
 
-  return "Ожидается https-адрес подписки или ссылка vless, vmess, trojan, ss";
+  return translateKey("validation.vpnSourceFormat");
 }

@@ -72,7 +72,7 @@ export function composeSnapshot(
   context.fillStyle = TITLE_COLOR;
   context.font = "700 20px Inter, sans-serif";
   context.textBaseline = "top";
-  context.fillText("Zapret Manager — монитор трафика", PADDING, PADDING);
+  context.fillText(translateKey("trafficMonitor.title"), PADDING, PADDING);
 
   context.fillStyle = SUBTITLE_COLOR;
   context.font = "400 13px Inter, sans-serif";
@@ -91,3 +91,4 @@ export function composeSnapshot(
 
   return canvas.toDataURL("image/png");
 }
+import { translateKey } from "@/i18n/core";

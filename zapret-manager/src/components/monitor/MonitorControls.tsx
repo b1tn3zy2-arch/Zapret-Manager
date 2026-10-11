@@ -1,3 +1,4 @@
+import { useI18n } from "@/i18n";
 import { Camera, Pause, Play, Trash2 } from "lucide-react";
 
 import { Button, Tooltip } from "@/components/ui";
@@ -17,6 +18,7 @@ function MonitorControls({
   onSnapshot,
   onClear,
 }: MonitorControlsProps) {
+  const { t } = useI18n();
   return (
     <div className="flex flex-wrap items-center gap-2">
       <Button
@@ -31,14 +33,14 @@ function MonitorControls({
           )
         }
       >
-        {isPaused ? "Возобновить" : "Пауза"}
+        {isPaused ? t("common.resume") : t("common.pause")}
       </Button>
 
-      <Tooltip content="Сохранить графики в PNG">
+      <Tooltip content={t("monitor.controls.snapshot")}>
         <Button
           size="icon"
           variant="secondary"
-          aria-label="Сохранить снимок графиков"
+          aria-label={t("monitor.controls.snapshotAria")}
           disabled={isSaving}
           onClick={onSnapshot}
           icon={
@@ -47,11 +49,11 @@ function MonitorControls({
         />
       </Tooltip>
 
-      <Tooltip content="Очистить буфер и начать график заново">
+      <Tooltip content={t("monitor.controls.clear")}>
         <Button
           size="icon"
           variant="ghost"
-          aria-label="Очистить буфер графика"
+          aria-label={t("monitor.controls.clearAria")}
           onClick={onClear}
           icon={
             <Trash2 aria-hidden="true" className="size-4" strokeWidth={2} />

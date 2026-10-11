@@ -9,6 +9,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
+import type { TranslationKey } from "@/i18n/types";
 import type { LogLevel, LogSource } from "@/types";
 
 export const APP_NAME = "Zapret Manager";
@@ -48,27 +49,27 @@ export type ConnectionStatus =
   (typeof CONNECTION_STATUS)[keyof typeof CONNECTION_STATUS];
 
 export const CONNECTION_LABELS = {
-  connected: "Подключено",
-  connecting: "Подключение",
-  disconnected: "Отключено",
-  vpn: "VPN",
-  error: "Ошибка",
-} as const satisfies Record<ConnectionStatus, string>;
+  connected: "connection.connected",
+  connecting: "connection.connecting",
+  disconnected: "connection.disconnected",
+  vpn: "connection.vpn",
+  error: "connection.error",
+} as const satisfies Record<ConnectionStatus, TranslationKey>;
 
 export interface NavItem {
   readonly route: AppPage;
-  readonly label: string;
+  readonly labelKey: TranslationKey;
   readonly icon: LucideIcon;
 }
 
 export const NAV_ITEMS = [
-  { route: ROUTES.dashboard, label: "Главная", icon: LayoutDashboard },
-  { route: ROUTES.strategies, label: "Стратегии", icon: Layers },
-  { route: ROUTES.games, label: "Игры", icon: Gamepad2 },
-  { route: ROUTES.monitor, label: "Монитор", icon: Activity },
-  { route: ROUTES.logs, label: "Логи", icon: ScrollText },
-  { route: ROUTES.settings, label: "Настройки", icon: Settings },
-  { route: ROUTES.about, label: "О приложении", icon: Info },
+  { route: ROUTES.dashboard, labelKey: "nav.dashboard", icon: LayoutDashboard },
+  { route: ROUTES.strategies, labelKey: "nav.strategies", icon: Layers },
+  { route: ROUTES.games, labelKey: "nav.games", icon: Gamepad2 },
+  { route: ROUTES.monitor, labelKey: "nav.monitor", icon: Activity },
+  { route: ROUTES.logs, labelKey: "nav.logs", icon: ScrollText },
+  { route: ROUTES.settings, labelKey: "nav.settings", icon: Settings },
+  { route: ROUTES.about, labelKey: "nav.about", icon: Info },
 ] as const satisfies readonly NavItem[];
 
 export const ANIMATION = {
@@ -203,19 +204,19 @@ export const LOG_SOURCES = [
 ] as const satisfies readonly LogSource[];
 
 export const LOG_LEVEL_LABELS = {
-  debug: "отладка",
-  info: "инфо",
-  success: "успешно",
-  warn: "предупреждение",
-  error: "ошибка",
-} as const satisfies Record<LogLevel, string>;
+  debug: "logs.levels.debug",
+  info: "logs.levels.info",
+  success: "logs.levels.success",
+  warn: "logs.levels.warn",
+  error: "logs.levels.error",
+} as const satisfies Record<LogLevel, TranslationKey>;
 
 export const LOG_SOURCE_LABELS = {
-  system: "система",
-  strategy: "стратегия",
-  user: "пользователь",
-  vpn: "VPN",
-} as const satisfies Record<LogSource, string>;
+  system: "logs.sources.system",
+  strategy: "logs.sources.strategy",
+  user: "logs.sources.user",
+  vpn: "logs.sources.vpn",
+} as const satisfies Record<LogSource, TranslationKey>;
 
 export const LOG_LEVEL_CLASSES = {
   debug: "text-text-tertiary",

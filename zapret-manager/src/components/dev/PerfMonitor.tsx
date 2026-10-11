@@ -1,3 +1,4 @@
+import { useI18n } from "@/i18n";
 import { useEffect } from "react";
 
 import { usePerfSnapshot } from "@/hooks/usePerfSnapshot";
@@ -8,6 +9,7 @@ const REPORT_INTERVAL_MS = 5000;
 const LONG_TASK_THRESHOLD_MS = 50;
 
 export function PerfMonitor() {
+  const { t } = useI18n();
   const { fps, heapMb, domNodes, longTasks } = usePerfSnapshot();
   const fpsTarget = PERF_TARGETS.fps;
   const fpsState = fps === 0 ? "—" : fps >= fpsTarget ? "ok" : "low";
@@ -27,7 +29,7 @@ export function PerfMonitor() {
 
   return (
     <aside
-      aria-label="Метрики производительности"
+      aria-label={t("ui.perfAria")}
       className="border-accent-primary/30 bg-bg-secondary/90 text-text-secondary pointer-events-none fixed right-4 bottom-4 z-[10000] flex flex-col gap-0.5 rounded-lg border px-3 py-2 font-mono text-[11px] shadow-lg"
     >
       <span className="text-text-primary font-semibold">perf</span>

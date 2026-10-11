@@ -1,3 +1,5 @@
+import { currentLanguage } from "@/lib/format";
+import { translateKey } from "@/i18n/core";
 import { UPDATE_UNKNOWN_VERSION } from "@/lib/constants";
 
 export function normalizeVersion(value: string): string {
@@ -9,7 +11,9 @@ export function normalizeVersion(value: string): string {
 export function formatVersion(value: string): string {
   const normalized = normalizeVersion(value);
 
-  return normalized === UPDATE_UNKNOWN_VERSION ? "неизвестно" : normalized;
+  return normalized === UPDATE_UNKNOWN_VERSION
+    ? translateKey("updateMeta.unknownVersion")
+    : normalized;
 }
 
 export function isKnownVersion(value: string): boolean {
@@ -24,34 +28,39 @@ export function isVersionIgnored(version: string, ignored: string[]): boolean {
 
 export function formatReleaseDate(iso: string): string {
   if (iso.trim() === "") {
-    return "дата неизвестна";
+    return translateKey("updateMeta.unknownDate");
   }
 
   const parsed = new Date(iso);
 
   if (Number.isNaN(parsed.getTime())) {
-    return "дата неизвестна";
+    return translateKey("updateMeta.unknownDate");
   }
 
-  return parsed.toLocaleDateString("ru-RU", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
+  return parsed.toLocaleDateString(
+    currentLanguage() === "ru" ? "ru-RU" : "en-US",
+    {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    }
+  );
 }
 
 export function formatEta(seconds: number | null): string {
   if (seconds === null || !Number.isFinite(seconds)) {
-    return "осталось неизвестно";
+    return translateKey("updateMeta.remainingUnknown");
   }
 
   if (seconds < 60) {
-    return `осталось ~${Math.ceil(seconds)} сек`;
+    return translateKey("updateMeta.remainingSeconds", {
+      seconds: Math.ceil(seconds),
+    });
   }
 
   const minutes = Math.ceil(seconds / 60);
 
-  return `осталось ~${minutes} мин`;
+  return translateKey("updateMeta.remainingMinutes", { minutes });
 }
 
 const REPO_PATTERN = /^[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+$/;

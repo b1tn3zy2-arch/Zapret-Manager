@@ -62,7 +62,7 @@
     "resources": ["resources/**/*", "icons/tray/*.png"],
     "windows": {
       "wix": {
-        "language": ["ru-RU"]
+        "language": ["ru-RU", "en-US"]
       },
       "nsis": {
         "installerIcon": "icons/icon.ico",

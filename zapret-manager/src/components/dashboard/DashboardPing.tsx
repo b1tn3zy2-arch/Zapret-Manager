@@ -2,17 +2,19 @@ import { memo } from "react";
 import PingSparkline from "@/components/dashboard/PingSparkline";
 import { Text } from "@/components/ui";
 import { GlassPanel } from "@/components/shared/GlassPanel";
+import { useI18n } from "@/i18n";
 import { usePing } from "@/hooks/usePing";
 import { PING_HOSTS } from "@/lib/constants";
 import { formatPing, getPingColor, lastLatency } from "@/lib/pingUtils";
 
 function DashboardPing() {
+  const { t } = useI18n();
   const { history } = usePing();
 
   return (
     <GlassPanel padding="lg" className="flex flex-col gap-4">
       <h3 className="text-text-primary text-base font-semibold">
-        Пинг до сервисов
+        {t("dashboard.ping.title")}
       </h3>
 
       <div className="flex flex-col gap-3">
@@ -45,7 +47,7 @@ function DashboardPing() {
       </div>
 
       <Text variant="caption" size="sm" className="text-text-tertiary">
-        Измеряется TCP-доступность на порту 443, обновление раз в 5 секунд
+        {t("dashboard.ping.hint")}
       </Text>
     </GlassPanel>
   );

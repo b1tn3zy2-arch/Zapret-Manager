@@ -1,6 +1,7 @@
 import { AlertTriangle } from "lucide-react";
 
 import { Button, Modal } from "@/components/ui";
+import { useI18n } from "@/i18n";
 
 export interface ClearLogsDialogProps {
   open: boolean;
@@ -15,20 +16,22 @@ function ClearLogsDialog({
   onCancel,
   onConfirm,
 }: ClearLogsDialogProps) {
+  const { t } = useI18n();
+
   return (
     <Modal
       open={open}
       onClose={onCancel}
-      title="Очистить логи?"
-      description={`Будет удалено записей: ${totalCount}. Действие необратимо.`}
+      title={t("logs.clearDialog.title")}
+      description={t("logs.clearDialog.description", { count: totalCount })}
       size="sm"
       footer={
         <>
           <Button variant="ghost" onClick={onCancel}>
-            Отмена
+            {t("common.cancel")}
           </Button>
           <Button variant="danger" onClick={onConfirm}>
-            Очистить
+            {t("logs.clear")}
           </Button>
         </>
       }
@@ -38,10 +41,7 @@ function ClearLogsDialog({
           aria-hidden="true"
           className="text-accent-danger mt-0.5 size-5 shrink-0"
         />
-        <span>
-          Все строки журнала будут стёрты из памяти приложения. Экспортированные
-          ранее файлы останутся на диске.
-        </span>
+        <span>{t("logs.clearDialog.body")}</span>
       </div>
     </Modal>
   );

@@ -1,3 +1,5 @@
+import type { TranslationKey } from "@/i18n/types";
+import { translateKey } from "@/i18n/core";
 import type {
   CardStats,
   CollectionSummary,
@@ -212,15 +214,15 @@ export const RARITY_ORDER = [
   "common",
 ] as const satisfies readonly Rarity[];
 
-const RARITY_LABELS_RU = {
-  common: "Обычная",
-  rare: "Редкая",
-  epic: "Эпическая",
-  legendary: "Легендарная",
-} as const satisfies Record<Rarity, string>;
+const RARITY_LABEL_KEYS = {
+  common: "rarity.common",
+  rare: "rarity.rare",
+  epic: "rarity.epic",
+  legendary: "rarity.legendary",
+} as const satisfies Record<Rarity, TranslationKey>;
 
 export function getRarityLabel(rarity: Rarity): string {
-  return RARITY_LABELS_RU[rarity];
+  return translateKey(RARITY_LABEL_KEYS[rarity]);
 }
 
 export interface RarityPalette {

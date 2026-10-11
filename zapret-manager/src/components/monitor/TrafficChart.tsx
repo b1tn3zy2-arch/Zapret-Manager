@@ -1,3 +1,4 @@
+import { useI18n } from "@/i18n";
 import { GlassPanel } from "@/components/shared/GlassPanel";
 import { useTrafficCanvas } from "@/hooks/useTrafficCanvas";
 import { TRAFFIC_CHART_HEIGHT } from "@/lib/constants";
@@ -25,6 +26,7 @@ function TrafficChart({
   height = TRAFFIC_CHART_HEIGHT,
   canvasRef,
 }: TrafficChartProps) {
+  const { t } = useI18n();
   const localRef = useRef<HTMLCanvasElement | null>(null);
   const targetRef = canvasRef ?? localRef;
 
@@ -49,14 +51,17 @@ function TrafficChart({
       <canvas
         ref={targetRef}
         role="img"
-        aria-label={`График: ${label}, ${formatSpeed(currentValue)}`}
+        aria-label={t("monitor.chart.aria", {
+          label,
+          value: formatSpeed(currentValue),
+        })}
         className="block w-full rounded-lg"
         style={{ height: `${height}px` }}
       />
 
       {isPaused ? (
         <span className="text-text-tertiary text-[10px] uppercase">
-          Пауза — график заморожен
+          {t("monitor.chart.frozen")}
         </span>
       ) : null}
     </GlassPanel>

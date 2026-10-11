@@ -1,3 +1,4 @@
+import { useI18n } from "@/i18n";
 import { TriangleAlert } from "lucide-react";
 
 import { Button, Text } from "@/components/ui";
@@ -8,6 +9,7 @@ export interface ScanErrorBannerProps {
 }
 
 export function ScanErrorBanner({ message, onRetry }: ScanErrorBannerProps) {
+  const { t } = useI18n();
   return (
     <div className="border-accent-danger/30 bg-accent-danger/10 flex items-center gap-3 rounded-lg border px-4 py-3">
       <TriangleAlert
@@ -19,7 +21,7 @@ export function ScanErrorBanner({ message, onRetry }: ScanErrorBannerProps) {
         {message}
       </Text>
       <Button size="sm" variant="secondary" onClick={onRetry}>
-        Повторить
+        {t("common.retry")}
       </Button>
     </div>
   );

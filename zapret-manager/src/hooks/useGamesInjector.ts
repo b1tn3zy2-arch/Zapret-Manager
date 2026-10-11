@@ -1,3 +1,4 @@
+import { translateKey } from "@/i18n/core";
 import { invoke } from "@tauri-apps/api/core";
 import { useCallback, useState } from "react";
 
@@ -61,7 +62,10 @@ export function useGamesInjector(): UseGamesInjectorResult {
             addLog({
               level: "error",
               source: "user",
-              message: `${game.name}: инъекция не выполнена — ${toErrorMessage(caught)}`,
+              message: translateKey("log.injectFailed", {
+                name: game.name,
+                error: toErrorMessage(caught),
+              }),
             });
 
             return null;
@@ -71,11 +75,11 @@ export function useGamesInjector(): UseGamesInjectorResult {
         addLog({
           level: "info",
           source: "user",
-          message: `Инъекция завершена: ${active
-            .map((game) => game.name)
-            .join(", ")} — всего ${summary.totalDomains} доменов и ${
-            summary.totalIps
-          } IP`,
+          message: translateKey("log.injectDone", {
+            names: active.map((game) => game.name).join(", "),
+            domains: summary.totalDomains,
+            ips: summary.totalIps,
+          }),
         });
 
         return summary;
@@ -94,7 +98,9 @@ export function useGamesInjector(): UseGamesInjectorResult {
         addLog({
           level: "error",
           source: "user",
-          message: `Не удалось убрать секции — ${toErrorMessage(caught)}`,
+          message: translateKey("log.restoreFailed", {
+            error: toErrorMessage(caught),
+          }),
         });
 
         return 0;
@@ -111,7 +117,9 @@ export function useGamesInjector(): UseGamesInjectorResult {
         addLog({
           level: "error",
           source: "user",
-          message: `Не удалось получить список бэкапов: ${toErrorMessage(caught)}`,
+          message: translateKey("log.backupsFailed", {
+            error: toErrorMessage(caught),
+          }),
         });
 
         return [];
@@ -134,7 +142,10 @@ function logReport(
     addLog({
       level: "info",
       source: "user",
-      message: `${game.name}: новых записей нет (пропущено дубликатов: ${report.skippedDuplicates})`,
+      message: translateKey("log.noNewEntries", {
+        name: game.name,
+        count: report.skippedDuplicates,
+      }),
     });
     return;
   }
@@ -142,14 +153,22 @@ function logReport(
   addLog({
     level: "info",
     source: "user",
-    message: `${game.name}: доменов ${report.domainsAdded}, IP ${report.ipsAdded} в ${report.filesModified.length} конфигов`,
+    message: translateKey("log.entriesAdded", {
+      name: game.name,
+      domains: report.domainsAdded,
+      ips: report.ipsAdded,
+      files: report.filesModified.length,
+    }),
   });
 
   if (report.rejectedEntries > 0) {
     addLog({
       level: "warn",
       source: "user",
-      message: `${game.name}: отклонено некорректных записей — ${report.rejectedEntries}`,
+      message: translateKey("log.entriesRejected", {
+        name: game.name,
+        count: report.rejectedEntries,
+      }),
     });
   }
 }

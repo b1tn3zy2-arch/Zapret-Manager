@@ -1,3 +1,4 @@
+import { useI18n } from "@/i18n";
 import { useEffect, useId, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
@@ -62,6 +63,7 @@ export default function Modal({
   className,
   children,
 }: ModalProps) {
+  const { t } = useI18n();
   const panelRef = useRef<HTMLDivElement>(null);
   const restoreFocusRef = useRef<HTMLElement | null>(null);
   const titleId = useId();
@@ -203,7 +205,7 @@ export default function Modal({
                 <button
                   type="button"
                   onClick={onClose}
-                  aria-label="Закрыть окно"
+                  aria-label={t("ui.closeAria")}
                   className={cn(
                     "inline-flex size-8 shrink-0 items-center justify-center rounded-lg",
                     "text-text-secondary transition-colors duration-200 ease-out",

@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 
 import { Button } from "@/components/ui";
+import { useI18n } from "@/i18n";
+import type { TranslationKey } from "@/i18n/types";
 import { cn } from "@/lib/utils";
 import type { SortMode } from "@/types";
 
@@ -11,13 +13,14 @@ export interface SortDropdownProps {
 }
 
 const OPTIONS = [
-  { value: "rarity-desc", label: "Редкость ↓" },
-  { value: "rarity-asc", label: "Редкость ↑" },
-  { value: "name", label: "По алфавиту" },
-  { value: "date", label: "По дате" },
-] as const satisfies readonly { value: SortMode; label: string }[];
+  { value: "rarity-desc", labelKey: "strategies.sort.rarityDesc" },
+  { value: "rarity-asc", labelKey: "strategies.sort.rarityAsc" },
+  { value: "name", labelKey: "strategies.sort.name" },
+  { value: "date", labelKey: "strategies.sort.date" },
+] as const satisfies readonly { value: SortMode; labelKey: TranslationKey }[];
 
 function SortDropdown({ value, onChange }: SortDropdownProps) {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const current = OPTIONS.find((option) => option.value === value);
@@ -68,7 +71,9 @@ function SortDropdown({ value, onChange }: SortDropdownProps) {
           />
         }
       >
-        {current?.label ?? "Сортировка"}
+        {current === undefined
+          ? t("strategies.sort.title")
+          : t(current.labelKey)}
       </Button>
 
       {open ? (
@@ -95,7 +100,7 @@ function SortDropdown({ value, onChange }: SortDropdownProps) {
                     isActive ? "text-accent-primary" : "text-text-secondary"
                   )}
                 >
-                  {option.label}
+                  {t(option.labelKey)}
                 </button>
               </li>
             );

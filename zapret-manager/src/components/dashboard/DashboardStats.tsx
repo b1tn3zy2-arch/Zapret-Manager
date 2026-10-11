@@ -3,6 +3,7 @@ import type { LucideIcon } from "lucide-react";
 
 import { GlassPanel } from "@/components/shared/GlassPanel";
 import { AnimatedNumber } from "@/components/ui";
+import { useI18n } from "@/i18n";
 import { useErrorsCount } from "@/stores/selectors/useLogSelectors";
 import { useStrategiesStore } from "@/stores/useStrategiesStore";
 
@@ -39,6 +40,7 @@ function MetricCard({ icon: Icon, value, label, tone }: MetricCardProps) {
 function DashboardStats({ uptime }: DashboardStatsProps) {
   const strategies = useStrategiesStore((state) => state.strategies);
   const errorsCount = useErrorsCount();
+  const { t } = useI18n();
 
   const activeCount = strategies.filter(
     (strategy) =>
@@ -50,19 +52,19 @@ function DashboardStats({ uptime }: DashboardStatsProps) {
       <MetricCard
         icon={Layers}
         value={strategies.length}
-        label="Всего стратегий"
+        label={t("dashboard.stats.total")}
         tone="text-text-primary"
       />
       <MetricCard
         icon={Zap}
         value={activeCount}
-        label="Активных"
+        label={t("dashboard.stats.active")}
         tone="text-accent-primary"
       />
       <MetricCard
         icon={AlertTriangle}
         value={errorsCount}
-        label="Ошибок за сессию"
+        label={t("dashboard.stats.errors")}
         tone="text-accent-danger"
       />
       <GlassPanel
@@ -74,7 +76,9 @@ function DashboardStats({ uptime }: DashboardStatsProps) {
           <Clock aria-hidden="true" className="size-4" strokeWidth={2} />
           <span className="text-2xl font-bold tabular-nums">{uptime}</span>
         </span>
-        <span className="text-text-secondary text-xs">Время работы</span>
+        <span className="text-text-secondary text-xs">
+          {t("dashboard.stats.uptime")}
+        </span>
       </GlassPanel>
     </div>
   );

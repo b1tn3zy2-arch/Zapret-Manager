@@ -1,3 +1,4 @@
+import { translateKey } from "@/i18n/core";
 import { invoke } from "@tauri-apps/api/core";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -58,7 +59,9 @@ export function useStrategies(): UseStrategiesResult {
         addLog({
           level: "success",
           source: "strategy",
-          message: `Найдено стратегий: ${result.length}`,
+          message: translateKey("settings.strategies.foundLog", {
+            count: result.length,
+          }),
         });
       } catch (caught) {
         const message =
@@ -72,7 +75,7 @@ export function useStrategies(): UseStrategiesResult {
         addLog({
           level: "error",
           source: "strategy",
-          message: `Сканирование не удалось: ${message}`,
+          message: translateKey("log.scanFailed", { error: message }),
         });
       } finally {
         setLoading(false);

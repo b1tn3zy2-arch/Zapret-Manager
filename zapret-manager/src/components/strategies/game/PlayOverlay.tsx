@@ -1,3 +1,4 @@
+import { useI18n } from "@/i18n";
 import { motion } from "framer-motion";
 import { Play, Square } from "lucide-react";
 
@@ -19,6 +20,7 @@ export default function PlayOverlay({
   onRun,
   onStop,
 }: PlayOverlayProps) {
+  const { t } = useI18n();
   const handleClick = (event: React.MouseEvent): void => {
     event.stopPropagation();
 
@@ -48,7 +50,11 @@ export default function PlayOverlay({
       <motion.button
         type="button"
         disabled={isBusy}
-        aria-label={isRunning ? "Остановить стратегию" : "Запустить стратегию"}
+        aria-label={
+          isRunning
+            ? t("strategies.overlay.stopAria")
+            : t("strategies.overlay.runAria")
+        }
         onClick={handleClick}
         whileHover={motionDisabled ? { scale: 1 } : { scale: 1.1 }}
         whileTap={motionDisabled ? { scale: 1 } : { scale: 0.95 }}

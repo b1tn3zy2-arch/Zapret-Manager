@@ -1,3 +1,4 @@
+import { translateKey } from "@/i18n/core";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { useEffect, useRef } from "react";
@@ -42,9 +43,9 @@ export function useTrayNotifications(): void {
       useLogsStore.getState().addLog({
         level: KIND_LEVEL[parsed.kind],
         source: "system",
-        message: `Уведомление: ${parsed.title}${
-          parsed.body === "" ? "" : ` — ${parsed.body}`
-        }`,
+        message:
+          translateKey("log.notifyTitle", { title: parsed.title }) +
+          (parsed.body === "" ? "" : ` — ${parsed.body}`),
       });
     });
 
@@ -68,11 +69,23 @@ export function useTrayNotifications(): void {
     }
 
     if (vpnState === "connected") {
-      void emit("VPN подключён", "Трафик идёт через туннель", "success");
+      void emit(
+        translateKey("log.vpnConnectedTitle"),
+        translateKey("log.vpnConnectedBody"),
+        "success"
+      );
     } else if (vpnState === "error") {
-      void emit("Ошибка VPN", "Подробности в журнале событий", "error");
+      void emit(
+        translateKey("log.vpnErrorTitle"),
+        translateKey("log.vpnErrorBody"),
+        "error"
+      );
     } else if (previous === "connected") {
-      void emit("VPN отключён", "Возврат в обычный режим", "info");
+      void emit(
+        translateKey("log.vpnDisconnectedTitle"),
+        translateKey("log.vpnDisconnectedBody"),
+        "info"
+      );
     }
   }, [showNotifications, vpnState]);
 
@@ -94,8 +107,8 @@ export function useTrayNotifications(): void {
     }
 
     void emit(
-      "Доступно обновление",
-      `Стратегии можно обновить до ${key}`,
+      translateKey("log.updateAvailableTitle"),
+      translateKey("log.updateAvailableBody", { version: key }),
       "info"
     );
   }, [showNotifications, showUpdate, updateStatus, updateVersion]);
@@ -112,7 +125,9 @@ async function emit(
     useLogsStore.getState().addLog({
       level: "warn",
       source: "system",
-      message: `Уведомление не отправлено: ${toErrorMessage(caught)}`,
+      message: translateKey("log.notifyFailed", {
+        error: toErrorMessage(caught),
+      }),
     });
   }
 }

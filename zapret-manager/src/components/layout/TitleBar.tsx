@@ -13,6 +13,7 @@ import {
 
 import { APP_NAME, ROUTES } from "@/lib/constants";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/i18n";
 import { useAppStore } from "@/stores/useAppStore";
 
 import ModeBadge from "./ModeBadge";
@@ -31,6 +32,7 @@ export default function TitleBar({
 }: TitleBarProps) {
   const [maximized, setMaximized] = useState(false);
   const setActivePage = useAppStore((state) => state.setActivePage);
+  const { t } = useI18n();
 
   useEffect(() => {
     const appWindow = getCurrentWindow();
@@ -115,11 +117,11 @@ export default function TitleBar({
           onClick={onToggleFullscreen}
           aria-label={
             isFullscreen
-              ? "Выйти из полноэкранного режима"
-              : "Полноэкранный режим"
+              ? t("titleBar.exitFullscreen")
+              : t("titleBar.fullscreen")
           }
           aria-pressed={isFullscreen}
-          title="Полноэкранный режим (F11)"
+          title={t("titleBar.fullscreenHint")}
           className={CONTROL_BUTTON_CLASS}
         >
           <FullscreenIcon
@@ -131,7 +133,7 @@ export default function TitleBar({
         <button
           type="button"
           onClick={minimize}
-          aria-label="Свернуть окно"
+          aria-label={t("titleBar.minimize")}
           className={CONTROL_BUTTON_CLASS}
         >
           <Minus aria-hidden="true" className="size-4" strokeWidth={2} />
@@ -139,7 +141,9 @@ export default function TitleBar({
         <button
           type="button"
           onClick={toggleMaximize}
-          aria-label={maximized ? "Восстановить окно" : "Развернуть окно"}
+          aria-label={
+            maximized ? t("titleBar.restore") : t("titleBar.maximize")
+          }
           className={CONTROL_BUTTON_CLASS}
         >
           <MaximizeIcon aria-hidden="true" className="size-4" strokeWidth={2} />
@@ -147,7 +151,7 @@ export default function TitleBar({
         <button
           type="button"
           onClick={close}
-          aria-label="Закрыть окно"
+          aria-label={t("titleBar.close")}
           className={cn(
             CONTROL_BUTTON_CLASS,
             "hover:bg-accent-danger hover:text-white"

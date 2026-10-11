@@ -1,5 +1,6 @@
 import { LayoutGrid, List } from "lucide-react";
 
+import { useI18n } from "@/i18n";
 import { cn } from "@/lib/utils";
 import type { ViewMode } from "@/types";
 
@@ -9,22 +10,20 @@ export interface ViewModeToggleProps {
 }
 
 const OPTIONS = [
-  { value: "cards", label: "Карты", icon: LayoutGrid },
-  { value: "list", label: "Список", icon: List },
-] as const satisfies readonly {
-  value: ViewMode;
-  label: string;
-  icon: typeof LayoutGrid;
-}[];
+  { value: "cards", labelKey: "strategies.view.cards", icon: LayoutGrid },
+  { value: "list", labelKey: "strategies.view.list", icon: List },
+] as const;
 
 function ViewModeToggle({ mode, onChange }: ViewModeToggleProps) {
+  const { t } = useI18n();
+
   return (
     <div
       role="group"
-      aria-label="Режим отображения стратегий"
+      aria-label={t("strategies.view.aria")}
       className="border-glass-border bg-glass-bg flex items-center gap-1 rounded-lg border p-0.5"
     >
-      {OPTIONS.map(({ value, label, icon: Icon }) => {
+      {OPTIONS.map(({ value, labelKey, icon: Icon }) => {
         const isActive = mode === value;
 
         return (
@@ -45,7 +44,7 @@ function ViewModeToggle({ mode, onChange }: ViewModeToggleProps) {
             )}
           >
             <Icon aria-hidden="true" className="size-3.5" />
-            {label}
+            {t(labelKey)}
           </button>
         );
       })}

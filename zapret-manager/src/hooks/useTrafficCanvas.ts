@@ -1,3 +1,4 @@
+import { translateKey } from "@/i18n/core";
 import { useEffect, useRef, useState } from "react";
 import type { RefObject } from "react";
 
@@ -100,7 +101,11 @@ function drawFrame(
   context.fillText(`${Math.round(maxValue)}`, 4, 4);
   context.fillText("0", 4, height - 14);
   context.textAlign = "right";
-  context.fillText("сейчас", width - 4, height - 14);
+  context.fillText(
+    translateKey("trafficMonitor.nowLabel"),
+    width - 4,
+    height - 14
+  );
   context.textAlign = "left";
 }
 

@@ -1,3 +1,4 @@
+import { translateKey } from "@/i18n/core";
 import { useEffect } from "react";
 
 import { PROCESS_CHECK_INTERVAL_MS } from "@/lib/constants";
@@ -26,7 +27,7 @@ export function useProcessWatcher(checkStatus: CheckStrategyStatus): void {
 
           if (!status.running) {
             setStatus(strategy.id, "error");
-            setError(strategy.id, "Процесс неожиданно завершился");
+            setError(strategy.id, translateKey("log.processExited"));
           }
         });
       }

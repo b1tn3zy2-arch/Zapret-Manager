@@ -109,28 +109,38 @@ export function domainError(value: string): string | null {
   const trimmed = value.trim();
 
   if (trimmed === "") {
-    return "Пустое значение";
+    return translateKey("validation.emptyValue");
   }
 
-  return isValidDomain(trimmed) ? null : "Некорректный домен";
+  return isValidDomain(trimmed)
+    ? null
+    : translateKey("validation.invalidDomain");
 }
 
 export function ipError(value: string): string | null {
   const trimmed = value.trim();
 
   if (trimmed === "") {
-    return "Пустое значение";
+    return translateKey("validation.emptyValue");
   }
 
-  return isValidIpRange(trimmed) ? null : "Некорректный IP или CIDR";
+  return isValidIpRange(trimmed)
+    ? null
+    : translateKey("validation.invalidIpRange");
 }
 
 export function portError(value: string): string | null {
   const trimmed = value.trim();
 
   if (trimmed === "") {
-    return "Пустое значение";
+    return translateKey("validation.emptyValue");
   }
 
-  return isValidPort(trimmed) ? null : `Порт вне ${MIN_PORT}–${MAX_PORT}`;
+  return isValidPort(trimmed)
+    ? null
+    : translateKey("validation.portOutOfRange", {
+        min: MIN_PORT,
+        max: MAX_PORT,
+      });
 }
+import { translateKey } from "@/i18n/core";

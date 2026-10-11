@@ -42,7 +42,7 @@ function DangerZone() {
       addLog({
         level: "warn",
         source: "user",
-        message: "Все настройки сброшены к значениям по умолчанию",
+        message: t("settings.common.resetDone"),
       });
     }
 
@@ -51,7 +51,7 @@ function DangerZone() {
       addLog({
         level: "warn",
         source: "user",
-        message: "Журнал логов очищен",
+        message: t("settings.common.logsCleared"),
       });
     }
 
@@ -61,13 +61,15 @@ function DangerZone() {
         addLog({
           level: "warn",
           source: "user",
-          message: `Удалено бэкапов: ${removed}`,
+          message: t("settings.common.backupsRemoved", { count: removed }),
         });
       } catch (caught) {
         addLog({
           level: "error",
           source: "user",
-          message: `Бэкапы не удалены: ${toErrorMessage(caught)}`,
+          message: t("settings.common.backupsRemoveFailed", {
+            error: toErrorMessage(caught),
+          }),
         });
       }
     }
@@ -124,12 +126,12 @@ function DangerZone() {
         open={danger !== null}
         onClose={close}
         title={t("settings.advanced.danger")}
-        description="Введите DELETE для подтверждения"
+        description={t("settings.common.deleteConfirmPlaceholder")}
         size="sm"
         footer={
           <>
             <Button variant="ghost" onClick={close}>
-              Отмена
+              {t("settings.common.cancel")}
             </Button>
             <Button
               variant="danger"
@@ -138,7 +140,7 @@ function DangerZone() {
                 void confirmDanger();
               }}
             >
-              Подтвердить
+              {t("settings.common.confirm")}
             </Button>
           </>
         }
@@ -147,7 +149,7 @@ function DangerZone() {
           variant="filled"
           value={confirm}
           placeholder={DANGER_CONFIRM}
-          aria-label="Подтверждение"
+          aria-label={t("settings.common.confirm")}
           onChange={(event) => {
             setConfirm(event.target.value);
           }}

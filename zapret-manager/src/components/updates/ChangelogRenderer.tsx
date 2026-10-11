@@ -1,3 +1,4 @@
+import { useI18n } from "@/i18n";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -22,10 +23,11 @@ const PROSE_CLASSES = [
 ].join(" ");
 
 function ChangelogRenderer({ markdown }: ChangelogRendererProps) {
+  const { t } = useI18n();
   if (markdown.trim() === "") {
     return (
       <p className="text-text-tertiary text-sm">
-        Описание изменений в релизе отсутствует.
+        {t("updates.changelogEmpty")}
       </p>
     );
   }

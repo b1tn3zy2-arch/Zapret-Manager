@@ -1,3 +1,4 @@
+import { useI18n } from "@/i18n";
 import { memo, useCallback, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Gamepad2 } from "lucide-react";
@@ -53,6 +54,7 @@ function StrategyGameCardImpl({
   onStop,
   onOpenFolder,
 }: StrategyGameCardProps) {
+  const { t } = useI18n();
   const { strategy, rarity, stats } = card;
   const palette = getRarityColor(rarity);
   const isRunning = strategy.status === "running";
@@ -127,7 +129,9 @@ function StrategyGameCardImpl({
           <button
             type="button"
             onClick={onFlip}
-            aria-label={`Подробнее о стратегии ${strategy.name}`}
+            aria-label={t("strategies.card.detailsAria", {
+              name: strategy.name,
+            })}
             aria-expanded={flipped}
             style={{
               borderColor: palette.border,

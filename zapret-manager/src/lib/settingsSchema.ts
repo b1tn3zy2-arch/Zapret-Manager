@@ -1,3 +1,4 @@
+import { translateKey } from "@/i18n/core";
 import { z } from "zod";
 
 import {
@@ -106,7 +107,7 @@ const strategyUpdatesSchema = z.object({
   githubRepo: z
     .string()
     .refine((value) => isValidRepo(value), {
-      message: "Ожидается владелец/имя",
+      error: () => translateKey("validation.expectedRepo"),
     })
     .default(DEFAULT_STRATEGY_UPDATES.githubRepo),
   ignoredVersions: z.array(z.string()).default([]),
@@ -217,8 +218,10 @@ export function validateSettings(data: unknown): AppSettings {
 
   if (!result.success) {
     const first = result.error.issues[0];
-    const path = first?.path.join(".") ?? "настройки";
-    throw new Error(`${path}: ${first?.message ?? "неверное значение"}`);
+    const path = first?.path.join(".") ?? translateKey("settingsFile.root");
+    throw new Error(
+      `${path}: ${first?.message ?? translateKey("settingsFile.invalidValue")}`
+    );
   }
 
   return result.data;

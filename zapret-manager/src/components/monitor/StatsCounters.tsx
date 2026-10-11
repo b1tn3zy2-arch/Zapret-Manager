@@ -1,3 +1,4 @@
+import { useI18n } from "@/i18n";
 import { ArrowDown, ArrowUp, Network, Package } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -37,34 +38,35 @@ function Counter({ icon: Icon, label, value, format, tone }: CounterProps) {
 }
 
 function StatsCounters({ stats }: StatsCountersProps) {
+  const { t } = useI18n();
   const packets = (stats?.packetsIn ?? 0) + (stats?.packetsOut ?? 0);
 
   return (
     <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
       <Counter
         icon={ArrowDown}
-        label="Загружено всего"
+        label={t("monitor.counters.downloaded")}
         value={stats?.bytesIn ?? 0}
         format={formatBytes}
         tone="text-accent-primary"
       />
       <Counter
         icon={ArrowUp}
-        label="Отдано всего"
+        label={t("monitor.counters.uploaded")}
         value={stats?.bytesOut ?? 0}
         format={formatBytes}
         tone="text-accent-secondary"
       />
       <Counter
         icon={Package}
-        label="Пакетов"
+        label={t("monitor.counters.packets")}
         value={packets}
         format={formatCount}
         tone="text-text-primary"
       />
       <Counter
         icon={Network}
-        label="Соединений"
+        label={t("monitor.counters.connections")}
         value={stats?.connections ?? 0}
         format={(value) => String(Math.round(value))}
         tone="text-accent-secondary"

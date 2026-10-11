@@ -1,9 +1,8 @@
+import { translateKey } from "@/i18n/core";
 import { invoke } from "@tauri-apps/api/core";
 import type { z } from "zod";
 
 import { redactSecrets } from "@/lib/sanitize";
-
-const INVOKE_ERROR_PREFIX = "Ошибка вызова Tauri:";
 
 class IpcError extends Error {
   constructor(
@@ -32,7 +31,7 @@ function toMessage(error: unknown): string {
     }
   }
 
-  return "Неизвестная ошибка IPC";
+  return translateKey("errors.ipcUnknown");
 }
 
 export async function secureInvoke<T>(
@@ -55,10 +54,7 @@ export async function secureInvokeValidated<S extends z.ZodType>(
   const result = schema.safeParse(raw);
 
   if (!result.success) {
-    throw new IpcError(
-      `${INVOKE_ERROR_PREFIX} ответ ${command} не прошёл проверку схемы`,
-      command
-    );
+    throw new IpcError(translateKey("errors.ipcSchema", { command }), command);
   }
 
   return result.data;

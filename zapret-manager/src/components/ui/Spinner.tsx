@@ -1,3 +1,4 @@
+import { useI18n } from "@/i18n";
 import { cn } from "@/lib/utils";
 
 import type { SpinnerSize } from "./types";
@@ -14,12 +15,13 @@ const PIXEL_SIZE = {
 } as const satisfies Record<SpinnerSize, number>;
 
 export default function Spinner({ size = "md", className }: SpinnerProps) {
+  const { t } = useI18n();
   const pixels = PIXEL_SIZE[size];
 
   return (
     <svg
       role="status"
-      aria-label="Загрузка"
+      aria-label={t("ui.loading")}
       viewBox="0 0 24 24"
       width={pixels}
       height={pixels}

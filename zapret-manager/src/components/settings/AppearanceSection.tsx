@@ -2,7 +2,10 @@ import Dropdown from "@/components/settings/Dropdown";
 import SectionContainer from "@/components/settings/SectionContainer";
 import SettingRow from "@/components/settings/SettingRow";
 import Toggle from "@/components/ui/Toggle";
+import { useMemo } from "react";
+
 import { useI18n } from "@/i18n";
+import type { TranslationKey } from "@/i18n/types";
 import { DEFAULT_APPEARANCE, DEFAULT_POST_PROCESSING } from "@/lib/defaults";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import type {
@@ -13,35 +16,41 @@ import type {
 } from "@/types";
 
 const THEME_OPTIONS = [
-  { value: "dark", label: "Тёмная" },
-  { value: "light", label: "Светлая" },
-  { value: "auto", label: "Как в системе" },
+  { value: "dark", labelKey: "settings.appearance.values.dark" },
+  { value: "light", labelKey: "settings.appearance.values.light" },
+  { value: "auto", labelKey: "settings.appearance.values.auto" },
 ] as const satisfies readonly {
   value: ThemeMode;
-  label: string;
+  labelKey: TranslationKey;
   disabled?: boolean;
 }[];
 
 const DENSITY_OPTIONS = [
-  { value: "compact", label: "Плотно" },
-  { value: "normal", label: "Обычно" },
-  { value: "comfy", label: "Просторно" },
-] as const satisfies readonly { value: DensityMode; label: string }[];
+  { value: "compact", labelKey: "settings.appearance.values.compact" },
+  { value: "normal", labelKey: "settings.appearance.values.normal" },
+  { value: "comfy", labelKey: "settings.appearance.values.comfy" },
+] as const satisfies readonly {
+  value: DensityMode;
+  labelKey: TranslationKey;
+}[];
 
 const INTENSITY_OPTIONS = [
-  { value: "off", label: "Выкл" },
-  { value: "subtle", label: "Едва заметно" },
-  { value: "normal", label: "Обычно" },
-  { value: "strong", label: "Сильно" },
-] as const satisfies readonly { value: EffectIntensity; label: string }[];
+  { value: "off", labelKey: "settings.appearance.values.off" },
+  { value: "subtle", labelKey: "settings.appearance.values.subtle" },
+  { value: "normal", labelKey: "settings.appearance.values.normal" },
+  { value: "strong", labelKey: "settings.appearance.values.strong" },
+] as const satisfies readonly {
+  value: EffectIntensity;
+  labelKey: TranslationKey;
+}[];
 
 const QUALITY_OPTIONS = [
-  { value: "low", label: "Низкое" },
-  { value: "medium", label: "Среднее" },
-  { value: "high", label: "Высокое" },
+  { value: "low", labelKey: "settings.appearance.values.low" },
+  { value: "medium", labelKey: "settings.appearance.values.medium" },
+  { value: "high", labelKey: "settings.appearance.values.high" },
 ] as const satisfies readonly {
   value: PostProcessingQuality;
-  label: string;
+  labelKey: TranslationKey;
 }[];
 
 function AppearanceSection() {
@@ -52,6 +61,42 @@ function AppearanceSection() {
     (state) => state.updatePostProcessing
   );
   const effects = appearance.postProcessing;
+
+  const themeOptions = useMemo(
+    () =>
+      THEME_OPTIONS.map((option) => ({
+        value: option.value,
+        label: t(option.labelKey),
+      })),
+    [t]
+  );
+
+  const densityOptions = useMemo(
+    () =>
+      DENSITY_OPTIONS.map((option) => ({
+        value: option.value,
+        label: t(option.labelKey),
+      })),
+    [t]
+  );
+
+  const intensityOptions = useMemo(
+    () =>
+      INTENSITY_OPTIONS.map((option) => ({
+        value: option.value,
+        label: t(option.labelKey),
+      })),
+    [t]
+  );
+
+  const qualityOptions = useMemo(
+    () =>
+      QUALITY_OPTIONS.map((option) => ({
+        value: option.value,
+        label: t(option.labelKey),
+      })),
+    [t]
+  );
 
   return (
     <>
@@ -69,7 +114,7 @@ function AppearanceSection() {
             <Dropdown
               label={t("settings.appearance.theme")}
               value={appearance.theme}
-              options={THEME_OPTIONS}
+              options={themeOptions}
               onChange={(theme) => {
                 updateAppearance({ theme });
               }}
@@ -83,7 +128,7 @@ function AppearanceSection() {
             <Dropdown
               label={t("settings.appearance.density")}
               value={appearance.density}
-              options={DENSITY_OPTIONS}
+              options={densityOptions}
               onChange={(density) => {
                 updateAppearance({ density });
               }}
@@ -147,7 +192,7 @@ function AppearanceSection() {
             <Dropdown
               label={t("settings.appearance.bloom")}
               value={effects.bloom}
-              options={INTENSITY_OPTIONS}
+              options={intensityOptions}
               onChange={(bloom) => {
                 updatePostProcessing({ bloom });
               }}
@@ -162,7 +207,7 @@ function AppearanceSection() {
             <Dropdown
               label={t("settings.appearance.vignette")}
               value={effects.vignette}
-              options={INTENSITY_OPTIONS}
+              options={intensityOptions}
               onChange={(vignette) => {
                 updatePostProcessing({ vignette });
               }}
@@ -233,7 +278,7 @@ function AppearanceSection() {
             <Dropdown
               label={t("settings.appearance.quality")}
               value={effects.globalQuality}
-              options={QUALITY_OPTIONS}
+              options={qualityOptions}
               onChange={(globalQuality) => {
                 updatePostProcessing({ globalQuality });
               }}

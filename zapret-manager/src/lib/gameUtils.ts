@@ -1,3 +1,5 @@
+import { translateKey } from "@/i18n/core";
+import { currentLanguage } from "@/lib/format";
 import type { GameSettings } from "@/types";
 
 const MAX_ID_ATTEMPTS = 50;
@@ -80,11 +82,21 @@ function pluralize(
 }
 
 function domainForms(): readonly [string, string, string] {
-  return ["домен", "домена", "доменов"];
+  const one = translateKey("units.domainOne");
+  const few = translateKey("units.domainFew");
+
+  return currentLanguage() === "ru"
+    ? [one, translateKey("units.domainTwo"), few]
+    : [one, few, few];
 }
 
 function portForms(): readonly [string, string, string] {
-  return ["порт", "порта", "портов"];
+  const one = translateKey("units.portOne");
+  const few = translateKey("units.portFew");
+
+  return currentLanguage() === "ru"
+    ? [one, translateKey("units.portTwo"), few]
+    : [one, few, few];
 }
 
 function ipForms(): readonly [string, string, string] {

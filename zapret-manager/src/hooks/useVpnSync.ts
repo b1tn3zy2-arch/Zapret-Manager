@@ -1,3 +1,4 @@
+import { translateKey } from "@/i18n/core";
 import { listen } from "@tauri-apps/api/event";
 import { useCallback, useEffect } from "react";
 
@@ -88,7 +89,7 @@ export function useVpnSync(): void {
         addLog({
           level: "success",
           source: "vpn",
-          message: "VPN подключён",
+          message: translateKey("log.vpnConnected"),
         });
       }),
       listen<string>("vpn-disconnected", (event) => {
@@ -106,8 +107,8 @@ export function useVpnSync(): void {
           source: "vpn",
           message:
             event.payload === "error"
-              ? "VPN отключён с ошибкой"
-              : "VPN отключён",
+              ? translateKey("log.vpnDisconnectedError")
+              : translateKey("log.vpnDisconnected"),
         });
       }),
     ];

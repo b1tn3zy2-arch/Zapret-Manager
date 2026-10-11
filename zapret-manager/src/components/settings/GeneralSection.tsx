@@ -1,27 +1,37 @@
 import { enable, disable, isEnabled } from "@tauri-apps/plugin-autostart";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import Dropdown from "@/components/settings/Dropdown";
 import SectionContainer from "@/components/settings/SectionContainer";
 import SettingRow from "@/components/settings/SettingRow";
 import Toggle from "@/components/ui/Toggle";
 import { useI18n } from "@/i18n";
+import type { TranslationKey } from "@/i18n/types";
 import { toErrorMessage } from "@/lib/utils";
 import { useLogsStore } from "@/stores/useLogsStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import type { Language } from "@/types";
 
 const LANGUAGE_OPTIONS = [
-  { value: "ru", label: "Русский" },
-  { value: "en", label: "English" },
-] as const satisfies readonly { value: Language; label: string }[];
+  { value: "ru", labelKey: "settings.general.languageRu" },
+  { value: "en", labelKey: "settings.general.languageEn" },
+] as const satisfies readonly { value: Language; labelKey: TranslationKey }[];
 
 function GeneralSection() {
   const { t } = useI18n();
   const general = useSettingsStore((state) => state.settings.general);
   const updateGeneral = useSettingsStore((state) => state.updateGeneral);
   const addLog = useLogsStore((state) => state.addLog);
+
+  const languageOptions = useMemo(
+    () =>
+      LANGUAGE_OPTIONS.map((option) => ({
+        value: option.value,
+        label: t(option.labelKey),
+      })),
+    [t]
+  );
 
   const [autoStart, setAutoStart] = useState(general.autoStart);
   const [autoStartBusy, setAutoStartBusy] = useState(false);
@@ -63,8 +73,8 @@ function GeneralSection() {
         level: "info",
         source: "user",
         message: value
-          ? "Автозапуск при старте Windows включён"
-          : "Автозапуск при старте Windows выключен",
+          ? t("settings.general.autoStartOn")
+          : t("settings.general.autoStartOff"),
       });
     } catch (caught) {
       const message = toErrorMessage(caught);
@@ -72,7 +82,7 @@ function GeneralSection() {
       addLog({
         level: "error",
         source: "user",
-        message: `Не удалось изменить автозапуск: ${message}`,
+        message: t("settings.general.autoStartFailed", { error: message }),
       });
     } finally {
       setAutoStartBusy(false);
@@ -101,7 +111,7 @@ function GeneralSection() {
           <Dropdown
             label={t("settings.general.language")}
             value={general.language}
-            options={LANGUAGE_OPTIONS}
+            options={languageOptions}
             onChange={(language) => {
               updateGeneral({ language });
             }}

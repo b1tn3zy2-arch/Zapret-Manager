@@ -21,17 +21,11 @@ export function validateDomain(value: string): ValidationResult {
   const domain = value.trim().toLowerCase();
 
   if (domain.length === 0 || domain.length > 253) {
-    return result(
-      false,
-      "Домен не должен быть пустым или длиннее 253 символов"
-    );
+    return result(false, translateKey("validation.domainTooLong"));
   }
 
   if (!DOMAIN_PATTERN.test(domain)) {
-    return result(
-      false,
-      "Домен должен состоять из латинских букв, цифр и дефисов"
-    );
+    return result(false, translateKey("validation.domainChars"));
   }
 
   return OK;
@@ -39,11 +33,11 @@ export function validateDomain(value: string): ValidationResult {
 
 export function validatePort(value: number): ValidationResult {
   if (!Number.isInteger(value)) {
-    return result(false, "Порт должен быть целым числом");
+    return result(false, translateKey("validation.portInteger"));
   }
 
   if (value < 1024 || value > 65535) {
-    return result(false, "Порт должен быть в диапазоне 1024–65535");
+    return result(false, translateKey("validation.portRange"));
   }
 
   return OK;
@@ -56,7 +50,7 @@ export function validateIp(value: string): ValidationResult {
     const octets = address.split(".").map(Number);
 
     if (octets.some((octet) => octet > 255)) {
-      return result(false, "Октет адреса больше 255");
+      return result(false, translateKey("validation.octetTooLarge"));
     }
 
     return OK;
@@ -66,14 +60,14 @@ export function validateIp(value: string): ValidationResult {
     return OK;
   }
 
-  return result(false, "Адрес должен быть IPv4 или IPv6");
+  return result(false, translateKey("validation.ipFamily"));
 }
 
 export function validateIpRange(value: string): ValidationResult {
   const [address, prefix] = value.trim().split("/");
 
   if (address === undefined || prefix === undefined) {
-    return result(false, "Укажите адрес с маской, например 10.0.0.0/8");
+    return result(false, translateKey("validation.cidrExample"));
   }
 
   const addressCheck = validateIp(address);
@@ -85,7 +79,7 @@ export function validateIpRange(value: string): ValidationResult {
   const max = address.includes(":") ? 128 : 32;
 
   if (!Number.isInteger(length) || length < 0 || length > max) {
-    return result(false, `Маска должна быть числом от 0 до ${max}`);
+    return result(false, translateKey("validation.cidrMaskRange", { max }));
   }
 
   return OK;
@@ -95,15 +89,15 @@ export function validateFilePath(value: string): ValidationResult {
   const path = value.trim();
 
   if (path.length === 0) {
-    return result(false, "Путь не может быть пустым");
+    return result(false, translateKey("validation.pathEmpty"));
   }
 
   if (!/^[a-zA-Z]:[\\/]/.test(path) && !path.startsWith("\\\\")) {
-    return result(false, "Нужен полный путь, например C:\\strategies");
+    return result(false, translateKey("validation.pathAbsolute"));
   }
 
   if (path.includes("..")) {
-    return result(false, "Путь не должен содержать переходов между папками");
+    return result(false, translateKey("validation.pathTraversal"));
   }
 
   return OK;
@@ -111,7 +105,7 @@ export function validateFilePath(value: string): ValidationResult {
 
 export function validateVersion(value: string): ValidationResult {
   if (!VERSION_PATTERN.test(value.trim())) {
-    return result(false, "Версия должна выглядеть как 1.10.3");
+    return result(false, translateKey("validation.versionFormat"));
   }
 
   return OK;
@@ -131,13 +125,18 @@ export function validateTextFilePath(value: string): ValidationResult {
 
   return allowed
     ? OK
-    : result(false, `Поддерживаются только ${TEXT_EXTENSIONS.join(", ")}`);
+    : result(
+        false,
+        translateKey("validation.extensionsOnly", {
+          list: TEXT_EXTENSIONS.join(", "),
+        })
+      );
 }
 
 export function isWithinSizeLimit(content: string): ValidationResult {
   return content.length <= MAX_TEXT_FILE_BYTES
     ? OK
-    : result(false, "Файл больше 1 МБ");
+    : result(false, translateKey("validation.fileTooLarge"));
 }
 
 export function escapeHtml(value: string): string {
@@ -152,6 +151,7 @@ export function escapeHtml(value: string): string {
 export function redactSecrets(message: string): string {
   return message.replace(
     /(privatekey|presharedkey|secret|password|passwd|token|apikey|api_key)\s*=\s*\S+/gi,
-    "$1 = [скрыто]"
+    `$1 = [${translateKey("validation.redacted")}]`
   );
 }
+import { translateKey } from "@/i18n/core";

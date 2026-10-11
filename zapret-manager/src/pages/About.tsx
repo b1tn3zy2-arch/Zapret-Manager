@@ -53,7 +53,7 @@ export default function About() {
     <div className="flex flex-col gap-6 pb-8">
       <AboutIdentity
         appVersion={formatVersion(info?.appVersion ?? "0.0.0")}
-        resourcesVersion={formatResourceVersion(resourcesVersion)}
+        resourcesVersion={formatResourceVersion(resourcesVersion, t)}
         resourcesLabel={resourcesLabel}
       />
 

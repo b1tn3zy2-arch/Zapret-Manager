@@ -1,6 +1,8 @@
 import { Gamepad2, Play, RefreshCw, Square } from "lucide-react";
 
 import EngineBadge from "@/components/strategies/EngineBadge";
+import { useI18n } from "@/i18n";
+import type { TranslationKey } from "@/i18n/types";
 import { Badge, Button, Card, Spinner, Tooltip } from "@/components/ui";
 import {
   capitalizeService,
@@ -27,13 +29,13 @@ const STATUS_VARIANTS = {
 >;
 
 const STATUS_LABELS = {
-  idle: "Не запущена",
-  running: "Запущена",
-  error: "Ошибка",
-  stopped: "Остановлена",
-  starting: "Запускается",
-  stopping: "Останавливается",
-} as const satisfies Record<StrategyStatus, string>;
+  idle: "strategies.status.idle",
+  running: "strategies.status.running",
+  error: "strategies.status.error",
+  stopped: "strategies.status.stopped",
+  starting: "strategies.status.starting",
+  stopping: "strategies.status.stopping",
+} as const satisfies Record<StrategyStatus, TranslationKey>;
 
 export interface StrategyCardProps {
   strategy: Strategy;
@@ -46,6 +48,7 @@ export default function StrategyCard({
   onRun,
   onStop,
 }: StrategyCardProps) {
+  const { t } = useI18n();
   const { status } = strategy;
   const isBusy = status === "starting" || status === "stopping";
   const isRunning = status === "running";
@@ -53,7 +56,7 @@ export default function StrategyCard({
 
   const modified =
     strategy.modifiedAt === undefined
-      ? "нет данных"
+      ? t("common.noData")
       : formatRelativeTime(strategy.modifiedAt);
 
   const renderAction = () => {
@@ -62,7 +65,7 @@ export default function StrategyCard({
         <Button
           size="icon"
           variant="secondary"
-          aria-label={`${STATUS_LABELS[status]} ${strategy.name}`}
+          aria-label={`${t(STATUS_LABELS[status])} ${strategy.name}`}
           disabled
         >
           <Spinner size="sm" />
@@ -75,7 +78,7 @@ export default function StrategyCard({
         <Button
           size="icon"
           variant="danger"
-          aria-label={`Остановить ${strategy.name}`}
+          aria-label={t("strategies.card.stopAria", { name: strategy.name })}
           disabled={onStop === undefined}
           onClick={() => {
             onStop?.(strategy);
@@ -90,7 +93,7 @@ export default function StrategyCard({
       <Button
         size="icon"
         variant="primary"
-        aria-label={`Запустить ${strategy.name}`}
+        aria-label={t("strategies.card.runAria", { name: strategy.name })}
         disabled={onRun === undefined}
         onClick={() => {
           onRun?.(strategy);
@@ -116,7 +119,7 @@ export default function StrategyCard({
           dot={status === "running"}
           pulse={status === "running" || status === "starting"}
         >
-          {STATUS_LABELS[status]}
+          {t(STATUS_LABELS[status])}
         </Badge>
       </div>
 
@@ -153,7 +156,7 @@ export default function StrategyCard({
         <EngineBadge strategy={strategy} />
 
         {outlastEnabled ? (
-          <Tooltip content="Домены Outlast Trials будут добавлены в конфиги при запуске">
+          <Tooltip content={t("strategies.card.outlastHint")}>
             <span>
               <Badge variant="accent">
                 <Gamepad2 aria-hidden="true" className="size-3" />+ Outlast

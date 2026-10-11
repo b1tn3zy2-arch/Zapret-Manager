@@ -16,16 +16,33 @@ import { useFolderPicker } from "@/hooks/useFolderPicker";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useProcessWatcher } from "@/hooks/useProcessWatcher";
 import { useStrategies } from "@/hooks/useStrategies";
+import { useI18n } from "@/i18n";
+import type { TranslationKey } from "@/i18n/types";
 import { useStrategyRunner } from "@/hooks/useStrategyRunner";
 import { SEARCH_DEBOUNCE_MS } from "@/lib/constants";
-import { formatCount } from "@/lib/format";
 import { useAppStore } from "@/stores/useAppStore";
 import { useCollectionStats, useFilteredCards } from "@/stores/selectors";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import { useStrategiesStore } from "@/stores/useStrategiesStore";
 import type { Strategy } from "@/types";
 
+function strategiesCountKey(count: number): TranslationKey {
+  const mod10 = count % 10;
+  const mod100 = count % 100;
+
+  if (mod10 === 1 && mod100 !== 11) {
+    return "strategies.page.countOne";
+  }
+
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) {
+    return "strategies.page.countFew";
+  }
+
+  return "strategies.page.countMany";
+}
+
 export default function Strategies() {
+  const { t, language } = useI18n();
   const strategies = useStrategiesStore((state) => state.strategies);
   const folder = useSettingsStore((state) => state.settings.strategiesFolder);
   const { pickFolder } = useFolderPicker();
@@ -107,9 +124,9 @@ export default function Strategies() {
   return (
     <section className="flex flex-col gap-6">
       <header className="flex flex-col gap-2">
-        <Heading level={1}>Стратегии</Heading>
+        <Heading level={1}>{t("strategies.page.title")}</Heading>
         <Text variant="body" size="lg" className="text-text-secondary">
-          Коллекция карт обхода блокировок
+          {t("strategies.page.subtitle")}
         </Text>
       </header>
 
@@ -128,7 +145,7 @@ export default function Strategies() {
               void pickFolder();
             }}
           >
-            Выбрать папку
+            {t("strategies.page.chooseFolder")}
           </Button>
 
           <Button
@@ -145,7 +162,7 @@ export default function Strategies() {
               void refresh();
             }}
           >
-            Обновить
+            {t("strategies.page.refresh")}
           </Button>
 
           <Input
@@ -153,8 +170,8 @@ export default function Strategies() {
             size="sm"
             className="max-w-xs"
             icon={<Search className="size-3.5" />}
-            placeholder="Поиск по названию"
-            aria-label="Поиск стратегии по названию"
+            placeholder={t("strategies.page.searchPlaceholder")}
+            aria-label={t("strategies.page.searchAria")}
             value={search}
             onChange={(event) => {
               setSearch(event.target.value);
@@ -165,12 +182,9 @@ export default function Strategies() {
           <SortDropdown value={sortMode} onChange={setSortMode} />
 
           <Badge variant={strategies.length > 0 ? "neutral" : "warning"}>
-            {formatCount(
-              strategies.length,
-              "стратегия",
-              "стратегии",
-              "стратегий"
-            )}
+            {t(strategiesCountKey(strategies.length), {
+              count: strategies.length,
+            })}
           </Badge>
 
           {isLoading && strategies.length > 0 ? <Spinner size="sm" /> : null}
@@ -192,7 +206,11 @@ export default function Strategies() {
               size="sm"
               className="text-text-tertiary ml-auto"
             >
-              Обновлено в {new Date(lastScanAt).toLocaleTimeString("ru-RU")}
+              {t("strategies.page.updatedAt", {
+                time: new Date(lastScanAt).toLocaleTimeString(
+                  language === "ru" ? "ru-RU" : "en-US"
+                ),
+              })}
             </Text>
           ) : null}
         </div>
@@ -247,14 +265,21 @@ export default function Strategies() {
               />
             )
           }
-          title={folder === "" ? "Папка не выбрана" : "В папке нет .bat файлов"}
+          title={
+            folder === ""
+              ? t("strategies.empty.noFolderTitle")
+              : t("strategies.empty.noBatsTitle")
+          }
           description={
             folder === ""
-              ? "Укажите папку с .bat-файлами zapret, чтобы собрать коллекцию карт."
-              : `По пути ${folder} не найдено ни одного .bat файла. Проверьте папку или выберите другую.`
+              ? t("strategies.empty.noFolderDesc")
+              : t("strategies.empty.noBatsDesc", { folder })
           }
           action={{
-            label: folder === "" ? "Выбрать папку" : "Выбрать другую папку",
+            label:
+              folder === ""
+                ? t("strategies.empty.chooseFolder")
+                : t("strategies.empty.chooseAnother"),
             onClick: () => {
               void pickFolder();
             },
@@ -267,10 +292,10 @@ export default function Strategies() {
           icon={
             <Search aria-hidden="true" className="size-7" strokeWidth={2} />
           }
-          title="Ничего не найдено"
-          description="Под текущие фильтры не подошла ни одна карта"
+          title={t("strategies.empty.notFoundTitle")}
+          description={t("strategies.empty.notFoundDesc")}
           action={{
-            label: "Сбросить фильтры",
+            label: t("strategies.empty.resetFilters"),
             onClick: () => {
               setSearch("");
               resetFilters();

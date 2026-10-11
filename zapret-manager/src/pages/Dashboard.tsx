@@ -1,3 +1,4 @@
+import { useI18n } from "@/i18n";
 import { useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -16,6 +17,7 @@ import { useAppStore } from "@/stores/useAppStore";
 import { useVpnStore } from "@/stores/useVpnStore";
 
 export default function Dashboard() {
+  const { t } = useI18n();
   const mode = useAppStore((state) => state.dashboardMode);
   const setDashboardMode = useAppStore((state) => state.setDashboardMode);
   const switchStep = useVpnStore((state) => state.switchStep);
@@ -46,7 +48,7 @@ export default function Dashboard() {
         <div className="flex flex-col gap-2">
           <Heading level={1}>{getGreeting()}</Heading>
           <Text variant="body" size="lg" className="text-text-secondary">
-            Управление обходом блокировок
+            {t("dashboard.subtitle")}
           </Text>
         </div>
 

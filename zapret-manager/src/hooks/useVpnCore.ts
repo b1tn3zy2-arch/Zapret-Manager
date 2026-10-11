@@ -1,3 +1,4 @@
+import { translateKey } from "@/i18n/core";
 import { useCallback, useEffect } from "react";
 
 import * as commands from "@/lib/vpnCommands";
@@ -44,7 +45,9 @@ export function useVpnCore(): UseVpnCoreResult {
         addLog({
           level: "success",
           source: "vpn",
-          message: `Загружено серверов: ${result.servers.length}`,
+          message: translateKey("log.serversLoaded", {
+            count: result.servers.length,
+          }),
         });
       } catch (caught) {
         const message = toErrorMessage(caught);
@@ -53,7 +56,7 @@ export function useVpnCore(): UseVpnCoreResult {
         addLog({
           level: "error",
           source: "vpn",
-          message: `Ссылка не обработана: ${message}`,
+          message: translateKey("log.linkFailed", { error: message }),
         });
       } finally {
         useVpnCoreStore.getState().setLoading(false);
@@ -73,7 +76,7 @@ export function useVpnCore(): UseVpnCoreResult {
       addLog({
         level: "success",
         source: "vpn",
-        message: "Ядро Xray установлено",
+        message: translateKey("log.coreInstalled"),
       });
       await refreshStatus();
     } catch (caught) {
@@ -83,7 +86,7 @@ export function useVpnCore(): UseVpnCoreResult {
       addLog({
         level: "error",
         source: "vpn",
-        message: `Ядро не установлено: ${message}`,
+        message: translateKey("log.coreNotInstalled", { error: message }),
       });
     } finally {
       useVpnCoreStore.getState().setLoading(false);
@@ -102,7 +105,7 @@ export function useVpnCore(): UseVpnCoreResult {
           addLog({
             level: "info",
             source: "vpn",
-            message: "Ядро Xray не найдено, устанавливаю…",
+            message: translateKey("log.coreMissingInstalling"),
           });
 
           await commands.installVpnCore();
@@ -119,7 +122,7 @@ export function useVpnCore(): UseVpnCoreResult {
         addLog({
           level: "success",
           source: "vpn",
-          message: `VPN подключён: ${server.name}`,
+          message: translateKey("log.vpnConnected", { name: server.name }),
         });
       } catch (caught) {
         const message = toErrorMessage(caught);
@@ -128,7 +131,7 @@ export function useVpnCore(): UseVpnCoreResult {
         addLog({
           level: "error",
           source: "vpn",
-          message: `Подключение не удалось: ${message}`,
+          message: translateKey("log.vpnConnectFailed", { error: message }),
         });
         await refreshStatus();
       } finally {
@@ -144,7 +147,11 @@ export function useVpnCore(): UseVpnCoreResult {
 
       useVpnCoreStore.getState().setStatus(status);
       useVpnCoreStore.getState().setActiveServer(null);
-      addLog({ level: "info", source: "vpn", message: "VPN отключён" });
+      addLog({
+        level: "info",
+        source: "vpn",
+        message: translateKey("log.vpnDisconnected"),
+      });
     } catch (caught) {
       useVpnCoreStore.getState().setError(toErrorMessage(caught));
     }

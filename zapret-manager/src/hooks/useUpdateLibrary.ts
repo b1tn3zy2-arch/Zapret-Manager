@@ -1,3 +1,4 @@
+import { translateKey } from "@/i18n/core";
 import { useCallback } from "react";
 
 import { rescanStrategies } from "@/hooks/useUpdateActions";
@@ -48,14 +49,16 @@ export function useUpdateLibrary(
         addLog({
           level: "success",
           source: "system",
-          message: "Возвращена предыдущая версия стратегий",
+          message: translateKey("log.rollbackDone"),
         });
       } catch (caught) {
         state.setError(toErrorMessage(caught));
         addLog({
           level: "error",
           source: "system",
-          message: `Откат не удался: ${toErrorMessage(caught)}`,
+          message: translateKey("log.rollbackFailed", {
+            error: toErrorMessage(caught),
+          }),
         });
       }
     },
@@ -72,7 +75,7 @@ export function useUpdateLibrary(
         addLog({
           level: "info",
           source: "system",
-          message: `Версия стратегий отмечена как ${version}`,
+          message: translateKey("log.versionMarked", { version }),
         });
 
         await check();
@@ -82,7 +85,7 @@ export function useUpdateLibrary(
         addLog({
           level: "error",
           source: "system",
-          message: `Не удалось отметить версию: ${message}`,
+          message: translateKey("log.versionMarkFailed", { error: message }),
         });
       }
     },
@@ -112,7 +115,7 @@ export function useUpdateLibrary(
       addLog({
         level: "info",
         source: "system",
-        message: `Версия ${version} добавлена в список игнорируемых`,
+        message: translateKey("log.versionIgnored", { version }),
       });
     },
     [addLog]

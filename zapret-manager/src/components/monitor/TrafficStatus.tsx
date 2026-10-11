@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 
 import { GlassPanel } from "@/components/shared/GlassPanel";
 import { Badge } from "@/components/ui";
+import { useI18n } from "@/i18n";
+import type { TranslationKey } from "@/i18n/types";
 import { MONITOR_STALL_THRESHOLD_MS } from "@/lib/constants";
 import { formatSpeed } from "@/lib/trafficUtils";
 import type { MonitorState, NetworkStats, Strategy } from "@/types";
@@ -15,31 +17,31 @@ export interface TrafficStatusProps {
 
 const STATUS_VIEW = {
   background: {
-    label: "Фоновый режим",
+    labelKey: "monitor.status.background",
     variant: "neutral",
-    hint: "Стратегия не запущена — показываем весь трафик системы",
+    hintKey: "monitor.status.backgroundHint",
   },
   active: {
-    label: "Обход активен",
+    labelKey: "monitor.status.active",
     variant: "success",
-    hint: "Стратегия запущена, трафик идёт",
+    hintKey: "monitor.status.activeHint",
   },
   stalled: {
-    label: "Возможны проблемы с обходом",
+    labelKey: "monitor.status.stalled",
     variant: "warning",
-    hint: "Стратегия запущена, но входящего трафика нет больше 5 секунд",
+    hintKey: "monitor.status.stalledHint",
   },
   error: {
-    label: "Ошибка мониторинга",
+    labelKey: "monitor.status.error",
     variant: "error",
-    hint: "Не удалось получить данные о трафике",
+    hintKey: "monitor.status.errorHint",
   },
 } as const satisfies Record<
   MonitorState,
   {
-    label: string;
+    labelKey: TranslationKey;
     variant: "neutral" | "success" | "warning" | "error";
-    hint: string;
+    hintKey: TranslationKey;
   }
 >;
 
@@ -80,6 +82,7 @@ function TrafficStatus({
   error,
   activeStrategy,
 }: TrafficStatusProps) {
+  const { t } = useI18n();
   const stalled = useStalled(stats);
   const isRunning = activeStrategy?.status === "running";
   const total = (stats?.speedIn ?? 0) + (stats?.speedOut ?? 0);
@@ -102,9 +105,11 @@ function TrafficStatus({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <Badge variant={view.variant} pulse={state === "active"}>
-            {view.label}
+            {t(view.labelKey)}
           </Badge>
-          {isPaused ? <Badge variant="warning">Пауза</Badge> : null}
+          {isPaused ? (
+            <Badge variant="warning">{t("common.pause")}</Badge>
+          ) : null}
           {activeStrategy !== undefined && isRunning ? (
             <span className="text-text-secondary truncate text-xs">
               {activeStrategy.name}
@@ -117,7 +122,7 @@ function TrafficStatus({
         </span>
       </div>
 
-      <span className="text-text-tertiary text-xs">{view.hint}</span>
+      <span className="text-text-tertiary text-xs">{t(view.hintKey)}</span>
     </GlassPanel>
   );
 }

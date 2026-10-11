@@ -1,3 +1,4 @@
+import { translateKey } from "@/i18n/core";
 import type { CountryCode } from "@/assets/flags/countryCodes";
 
 import { COUNTRY_CODES } from "@/assets/flags/countryCodes";
@@ -48,16 +49,16 @@ export function getGreeting(date: Date = new Date()): string {
   const hour = date.getHours();
 
   if (hour >= 5 && hour < 12) {
-    return "Доброе утро";
+    return translateKey("geo.morning");
   }
 
   if (hour >= 12 && hour < 18) {
-    return "Добрый день";
+    return translateKey("geo.afternoon");
   }
 
   if (hour >= 18 && hour < 23) {
-    return "Добрый вечер";
+    return translateKey("geo.evening");
   }
 
-  return "Доброй ночи";
+  return translateKey("geo.night");
 }

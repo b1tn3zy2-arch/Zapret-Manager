@@ -1,3 +1,4 @@
+import { useI18n } from "@/i18n";
 import { RARITY_ORDER, getRarityLabel } from "@/lib/rarity";
 import { cn } from "@/lib/utils";
 import type { CollectionSummary, Rarity, ServiceType } from "@/types";
@@ -28,6 +29,7 @@ function RarityFilters({
   onToggleService,
   onReset,
 }: RarityFiltersProps) {
+  const { t } = useI18n();
   const isActive = rarityFilter.length > 0 || serviceFilter.length > 0;
 
   return (
@@ -69,7 +71,7 @@ function RarityFilters({
           onClick={onReset}
           className="text-text-tertiary hover:text-text-primary text-xs transition-colors"
         >
-          Сбросить фильтры
+          {t("strategies.empty.resetFilters")}
         </button>
       ) : null}
     </div>

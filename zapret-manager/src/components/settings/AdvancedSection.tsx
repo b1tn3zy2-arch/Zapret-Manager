@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { AlertTriangle } from "lucide-react";
 
 import DangerZone from "@/components/settings/DangerZone";
@@ -22,7 +22,7 @@ import type { ConfigCheckReport, LogLevel } from "@/types";
 
 const LEVEL_OPTIONS = LOG_LEVEL_VALUES.map((level) => ({
   value: level,
-  label: LOG_LEVEL_LABELS[level],
+  labelKey: LOG_LEVEL_LABELS[level],
 }));
 
 function clampRetention(value: string): number {
@@ -39,13 +39,14 @@ function clampRetention(value: string): number {
 }
 
 function ReportText({ report }: { report: ConfigCheckReport }) {
+  const { t } = useI18n();
   const problems =
     report.emptyFiles.length + report.duplicates.length + report.invalid.length;
 
   if (problems === 0) {
     return (
       <Text variant="body" size="sm" className="text-accent-primary">
-        Проверено {report.checked}: проблем не найдено
+        {t("settings.advanced.verifyOk", { checked: report.checked })}
       </Text>
     );
   }
@@ -53,21 +54,30 @@ function ReportText({ report }: { report: ConfigCheckReport }) {
   return (
     <div className="flex flex-col gap-1">
       <Text variant="body" size="sm" className="text-text-secondary">
-        Проверено {report.checked}, замечаний {problems}
+        {t("settings.advanced.verifyProblems", {
+          checked: report.checked,
+          problems,
+        })}
       </Text>
       {report.emptyFiles.length > 0 ? (
         <Text variant="caption" size="sm" className="text-accent-danger">
-          Пустые: {report.emptyFiles.join(", ")}
+          {t("settings.advanced.verifyEmptyFiles", {
+            list: report.emptyFiles.join(", "),
+          })}
         </Text>
       ) : null}
       {report.duplicates.length > 0 ? (
         <Text variant="caption" size="sm" className="text-accent-warning">
-          Дубликаты: {report.duplicates.slice(0, 8).join(", ")}
+          {t("settings.advanced.verifyDuplicates", {
+            list: report.duplicates.slice(0, 8).join(", "),
+          })}
         </Text>
       ) : null}
       {report.invalid.length > 0 ? (
         <Text variant="caption" size="sm" className="text-accent-danger">
-          Некорректные: {report.invalid.slice(0, 8).join(", ")}
+          {t("settings.advanced.verifyInvalid", {
+            list: report.invalid.slice(0, 8).join(", "),
+          })}
         </Text>
       ) : null}
     </div>
@@ -83,6 +93,15 @@ function AdvancedSection() {
 
   const [report, setReport] = useState<ConfigCheckReport | null>(null);
 
+  const levelOptions = useMemo(
+    () =>
+      LEVEL_OPTIONS.map((option) => ({
+        value: option.value,
+        label: t(option.labelKey),
+      })),
+    [t]
+  );
+
   const runVerify = async (): Promise<void> => {
     if (folder === "") {
       return;
@@ -94,7 +113,9 @@ function AdvancedSection() {
       addLog({
         level: "error",
         source: "user",
-        message: `Проверка не удалась: ${toErrorMessage(caught)}`,
+        message: t("settings.common.verifyFailed", {
+          error: toErrorMessage(caught),
+        }),
       });
     }
   };
@@ -150,7 +171,7 @@ function AdvancedSection() {
           <Dropdown
             label={t("settings.advanced.loggingLevel")}
             value={advanced.loggingLevel}
-            options={LEVEL_OPTIONS}
+            options={levelOptions}
             onChange={(loggingLevel: LogLevel) => {
               updateAdvanced({ loggingLevel });
             }}
@@ -189,11 +210,11 @@ function AdvancedSection() {
           }}
           label={t("settings.advanced.extraArgs")}
           placeholder="--dpi-desync=fake"
-          addLabel="Добавить аргумент"
-          emptyMessage="Аргументы не заданы — используются штатные значения"
+          addLabel={t("settings.advanced.addArgument")}
+          emptyMessage={t("settings.advanced.noArgs")}
           validate={(value) =>
             value.trim() === "" || value.startsWith(" ")
-              ? "Пробел в начале"
+              ? t("settings.advanced.leadingSpace")
               : null
           }
         />

@@ -1,3 +1,4 @@
+import { translateKey } from "@/i18n/core";
 import { APP_NAME } from "@/lib/constants";
 import { formatLogTime } from "@/lib/utils";
 import { formatVersion } from "@/lib/updateUtils";
@@ -11,7 +12,7 @@ function runningStrategies(strategies: Strategy[]): string {
     .map((strategy) => strategy.name);
 
   if (names.length === 0) {
-    return "нет";
+    return translateKey("system.none");
   }
 
   return names.join(", ");
@@ -19,7 +20,7 @@ function runningStrategies(strategies: Strategy[]): string {
 
 function logLines(logs: LogEntry[]): string {
   if (logs.length === 0) {
-    return "нет";
+    return translateKey("system.none");
   }
 
   return logs
@@ -54,7 +55,7 @@ export function formatSystemInfo(
     `Strategies: ${strategies.length}`,
     `Running: ${runningStrategies(strategies)}`,
     `Logs: ${logs.length}`,
-    "Последние логи:",
+    translateKey("system.recentLogs"),
     logLines(logs),
   ].join("\n");
 }

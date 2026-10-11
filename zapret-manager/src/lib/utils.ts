@@ -1,3 +1,4 @@
+import { translateKey } from "@/i18n/core";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -32,5 +33,5 @@ export function toErrorMessage(caught: unknown): string {
     return caught.message;
   }
 
-  return "Неизвестная ошибка";
+  return translateKey("errors.unknown");
 }

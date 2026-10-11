@@ -50,7 +50,9 @@ function ResourcesSection() {
       addLog({
         level: "success",
         source: "system",
-        message: `Ресурсы восстановлены: ${result.restored} файлов`,
+        message: t("settings.resources.restoredLog", {
+          count: result.restored,
+        }),
       });
     } catch (caught) {
       setError(toErrorMessage(caught));
@@ -95,7 +97,7 @@ function ResourcesSection() {
 
       <Row
         label={t("settings.resources.version")}
-        value={formatResourceVersion(version)}
+        value={formatResourceVersion(version, t)}
       />
       <Row
         label={t("settings.resources.location")}

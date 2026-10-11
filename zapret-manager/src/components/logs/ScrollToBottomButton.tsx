@@ -1,3 +1,4 @@
+import { useI18n } from "@/i18n";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowDown } from "lucide-react";
 
@@ -10,6 +11,7 @@ export interface ScrollToBottomButtonProps {
 }
 
 function ScrollToBottomButton({ visible, onClick }: ScrollToBottomButtonProps) {
+  const { t } = useI18n();
   return (
     <AnimatePresence>
       {visible ? (
@@ -23,8 +25,8 @@ function ScrollToBottomButton({ visible, onClick }: ScrollToBottomButtonProps) {
         >
           <Button
             size="icon"
-            aria-label="Прокрутить к последним логам"
-            title="Прокрутить вниз"
+            aria-label={t("logs.scrollAria")}
+            title={t("logs.scrollTitle")}
             onClick={onClick}
             icon={<ArrowDown className="size-4" />}
           />

@@ -1,3 +1,4 @@
+import { translateKey } from "@/i18n/core";
 import { save } from "@tauri-apps/plugin-dialog";
 import { open } from "@tauri-apps/plugin-dialog";
 import { readUserTextFile, writeUserTextFile } from "@/lib/userCommands";
@@ -54,7 +55,7 @@ export function deserializeSettings(json: string): AppSettings {
   const parsed: unknown = JSON.parse(json);
 
   if (typeof parsed !== "object" || parsed === null) {
-    throw new Error("Файл не содержит объекта настроек");
+    throw new Error(translateKey("settingsFile.noObject"));
   }
 
   const payload = parsed as Partial<SettingsExportFile>;

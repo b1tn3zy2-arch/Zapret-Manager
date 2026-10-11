@@ -45,7 +45,7 @@ function StrategiesSection() {
     addLog({
       level: "info",
       source: "system",
-      message: "Пересканирование стратегий…",
+      message: t("settings.strategies.rescanning"),
     });
 
     try {
@@ -56,7 +56,9 @@ function StrategiesSection() {
       addLog({
         level: "success",
         source: "system",
-        message: `Найдено стратегий: ${strategies.length}`,
+        message: t("settings.strategies.foundLog", {
+          count: strategies.length,
+        }),
       });
     } finally {
       setBusy(false);

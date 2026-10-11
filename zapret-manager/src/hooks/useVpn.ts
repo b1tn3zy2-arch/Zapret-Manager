@@ -1,3 +1,4 @@
+import { translateKey } from "@/i18n/core";
 import { useCallback } from "react";
 
 import * as commands from "@/lib/vpnCommands";
@@ -42,7 +43,7 @@ async function restoreDpiStrategy(strategyId: string | null): Promise<void> {
     addLog({
       level: "success",
       source: "strategy",
-      message: `DPI-стратегия восстановлена, PID ${result.pid}`,
+      message: translateKey("log.dpiRestored", { pid: result.pid }),
       strategyId,
     });
   } catch (caught) {
@@ -50,7 +51,9 @@ async function restoreDpiStrategy(strategyId: string | null): Promise<void> {
     addLog({
       level: "error",
       source: "strategy",
-      message: `Не удалось вернуть DPI-стратегию: ${toErrorMessage(caught)}`,
+      message: translateKey("log.dpiRestoreFailed", {
+        error: toErrorMessage(caught),
+      }),
       strategyId,
     });
   }
@@ -100,7 +103,7 @@ export function useVpn(): UseVpnResult {
         addLog({
           level: "info",
           source: "vpn",
-          message: `Удалён конфиг: ${id}`,
+          message: translateKey("log.configDeleted", { id }),
         });
       } catch (caught) {
         useVpnStore.getState().setError(toErrorMessage(caught));
@@ -140,7 +143,10 @@ export function useVpn(): UseVpnResult {
         addLog({
           level: "success",
           source: "vpn",
-          message: `VPN подключён: ${status.endpoint ?? "endpoint неизвестен"}`,
+          message: translateKey("log.vpnConnected", {
+            name:
+              status.endpoint ?? translateKey("dashboard.vpn.endpointUnknown"),
+          }),
         });
       } catch (caught) {
         const message = toErrorMessage(caught);
@@ -149,7 +155,7 @@ export function useVpn(): UseVpnResult {
         addLog({
           level: "error",
           source: "vpn",
-          message: `Подключение не удалось: ${message}`,
+          message: translateKey("log.vpnConnectFailed", { error: message }),
         });
       } finally {
         useVpnStore.getState().setSwitching(false);
@@ -162,7 +168,7 @@ export function useVpn(): UseVpnResult {
     const id = useVpnStore.getState().activeConfigId;
 
     if (id === null) {
-      useVpnStore.getState().setError("Сначала выберите конфиг");
+      useVpnStore.getState().setError(translateKey("log.chooseConfig"));
       return;
     }
 
@@ -179,7 +185,11 @@ export function useVpn(): UseVpnResult {
       useVpnStore.getState().setStatus({ state: "disconnected" });
       useVpnStore.getState().setKillSwitchActive(false);
       useSettingsStore.getState().updateVpn({ enabled: false });
-      addLog({ level: "info", source: "vpn", message: "VPN отключён" });
+      addLog({
+        level: "info",
+        source: "vpn",
+        message: translateKey("log.vpnDisconnected"),
+      });
     } catch (caught) {
       useVpnStore.getState().setError(toErrorMessage(caught));
     } finally {
@@ -202,7 +212,7 @@ export function useVpn(): UseVpnResult {
       addLog({
         level: "info",
         source: "vpn",
-        message: "Переключение на DPI-обход",
+        message: translateKey("log.switchingToDpi"),
       });
 
       await restoreDpiStrategy(lastStrategyId);

@@ -5,6 +5,7 @@ import { memo, useMemo } from "react";
 import UpdateBadge from "@/components/updates/UpdateBadge";
 import { useAdaptiveSidebar } from "@/hooks/useAdaptiveSidebar";
 import { useBloom } from "@/hooks/useBloom";
+import { useI18n } from "@/i18n";
 import {
   CONNECTION_LABELS,
   NAV_ITEMS,
@@ -128,10 +129,13 @@ interface StatusIndicatorProps {
 }
 
 function StatusIndicator({ status, collapsed }: StatusIndicatorProps) {
+  const { t } = useI18n();
+  const statusLabel = t(CONNECTION_LABELS[status]);
+
   return (
     <button
       type="button"
-      aria-label={`Статус подключения: ${CONNECTION_LABELS[status]}`}
+      aria-label={t("connection.aria", { status: statusLabel })}
       className={cn(
         "flex w-full items-center gap-2.5 rounded-md px-3 py-2",
         "hover:bg-glass-hover transition-colors duration-200 ease-out",
@@ -151,7 +155,7 @@ function StatusIndicator({ status, collapsed }: StatusIndicatorProps) {
             STATUS_TEXT_CLASSES[status]
           )}
         >
-          {CONNECTION_LABELS[status]}
+          {statusLabel}
         </span>
       ) : null}
     </button>
@@ -160,6 +164,7 @@ function StatusIndicator({ status, collapsed }: StatusIndicatorProps) {
 
 export default function Sidebar() {
   const prefersReducedMotion = useReducedMotion();
+  const { t } = useI18n();
   const activePage = useAppStore((state) => state.activePage);
   const { isCollapsed: collapsed, toggle: toggleSidebar } =
     useAdaptiveSidebar();
@@ -199,7 +204,7 @@ export default function Sidebar() {
         <button
           type="button"
           onClick={toggleSidebar}
-          aria-label={collapsed ? "Развернуть меню" : "Свернуть меню"}
+          aria-label={collapsed ? t("sidebar.expand") : t("sidebar.collapse")}
           aria-expanded={!collapsed}
           className="text-text-secondary hover:text-text-primary hover:bg-glass-hover flex size-7 items-center justify-center rounded-md transition-colors duration-200 ease-out"
         >
@@ -219,12 +224,12 @@ export default function Sidebar() {
         </button>
       </div>
 
-      <nav aria-label="Основная навигация" className="flex-1 px-3">
+      <nav aria-label={t("sidebar.mainNav")} className="flex-1 px-3">
         <ul className="flex flex-col gap-1">
           {NAV_ITEMS.map((item) => (
             <NavButton
               key={item.route}
-              label={item.label}
+              label={t(item.labelKey)}
               icon={item.icon}
               active={item.route === activePage}
               collapsed={collapsed}

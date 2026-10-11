@@ -29,7 +29,7 @@ function ImportExportButtons() {
         addLog({
           level: "success",
           source: "user",
-          message: "Настройки выгружены в файл",
+          message: t("settings.importExport.exported"),
         });
       }
     } catch (caught) {
@@ -38,7 +38,7 @@ function ImportExportButtons() {
       addLog({
         level: "error",
         source: "user",
-        message: `Экспорт не удался: ${message}`,
+        message: t("settings.importExport.exportFailed", { error: message }),
       });
     } finally {
       setBusy(false);
@@ -61,7 +61,7 @@ function ImportExportButtons() {
       addLog({
         level: "error",
         source: "user",
-        message: `Импорт не удался: ${message}`,
+        message: t("settings.importExport.importFailed", { error: message }),
       });
     } finally {
       setBusy(false);
@@ -78,7 +78,7 @@ function ImportExportButtons() {
     addLog({
       level: "success",
       source: "user",
-      message: "Настройки загружены из файла",
+      message: t("settings.importExport.loaded"),
     });
   };
 
@@ -123,8 +123,8 @@ function ImportExportButtons() {
         onClose={() => {
           setPending(null);
         }}
-        title="Перезаписать настройки?"
-        description="Текущие настройки будут заменены содержимым файла. Папка со стратегиями и последняя стратегия останутся как есть."
+        title={t("settings.importExport.confirmTitle")}
+        description={t("settings.importExport.confirmDesc")}
         size="sm"
         footer={
           <>
@@ -134,18 +134,16 @@ function ImportExportButtons() {
                 setPending(null);
               }}
             >
-              Отмена
+              {t("settings.common.cancel")}
             </Button>
             <Button variant="primary" onClick={applyImport}>
-              Импортировать
+              {t("settings.importExport.importAction")}
             </Button>
           </>
         }
       >
         <Text variant="body" size="sm" className="text-text-secondary">
-          Импортируется раздел «Стратегии», «Обновления», «Общие», «Внешний
-          вид», «Продвинутые», «VPN» и «Outlast Trials». Список игнорируемых
-          версий и время последней проверки остаются прежними.
+          {t("settings.importExport.importerNote")}
         </Text>
       </Modal>
     </>

@@ -1,3 +1,4 @@
+import { translateKey } from "@/i18n/core";
 import { invoke } from "@tauri-apps/api/core";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -153,8 +154,7 @@ export function useStrategyRunner(): UseStrategyRunnerResult {
         addLog({
           level: "warn",
           source: "strategy",
-          message:
-            "Конфиг стратегии не распознан — запускаю legacy .bat через cmd.exe",
+          message: translateKey("log.nativeFallback"),
           strategyId,
         });
       }
@@ -163,7 +163,7 @@ export function useStrategyRunner(): UseStrategyRunnerResult {
         const summary = await injectAll(path);
 
         if (summary === null) {
-          throw new Error("Инъекция домен игр не удалась");
+          throw new Error(translateKey("log.injectGamesFailed"));
         }
       }
 
@@ -188,7 +188,7 @@ export function useStrategyRunner(): UseStrategyRunnerResult {
           addLog({
             level: "info",
             source: "strategy",
-            message: "Останавливаю VPN перед запуском стратегии",
+            message: translateKey("log.stoppingVpn"),
           });
           await invoke("switch_to_dpi");
           useVpnStore.getState().setStatus({
@@ -205,7 +205,7 @@ export function useStrategyRunner(): UseStrategyRunnerResult {
         addLog({
           level: "info",
           source: "strategy",
-          message: `Стратегия запущена, PID ${result.pid}`,
+          message: translateKey("log.strategyStarted", { pid: result.pid }),
           strategyId,
         });
       } catch (caught) {
@@ -218,8 +218,8 @@ export function useStrategyRunner(): UseStrategyRunnerResult {
           level: "error",
           source: "strategy",
           message: message.toLowerCase().includes(UAC_CANCELLED_MARKER)
-            ? "Запуск отменён: доступ не предоставлен"
-            : `Не удалось запустить: ${message}`,
+            ? translateKey("log.launchCancelled")
+            : translateKey("log.launchFailed", { error: message }),
           strategyId,
         });
       } finally {
@@ -248,7 +248,7 @@ export function useStrategyRunner(): UseStrategyRunnerResult {
         addLog({
           level: killed > 0 ? "warn" : "info",
           source: "strategy",
-          message: `Стратегия остановлена, процессов winws.exe: ${killed}`,
+          message: translateKey("log.strategyStopped", { count: killed }),
           strategyId,
         });
 
@@ -261,7 +261,7 @@ export function useStrategyRunner(): UseStrategyRunnerResult {
         addLog({
           level: "error",
           source: "strategy",
-          message: `Не удалось остановить: ${message}`,
+          message: translateKey("log.stopFailed", { error: message }),
           strategyId,
         });
       } finally {

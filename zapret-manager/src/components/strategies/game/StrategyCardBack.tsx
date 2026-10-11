@@ -1,3 +1,4 @@
+import { useI18n } from "@/i18n";
 import { FolderOpen, Play, Square, X } from "lucide-react";
 
 import { Button } from "@/components/ui";
@@ -19,7 +20,7 @@ const FILE_TYPE_LABELS = {
   winws: "winws",
   "goodbye-dpi": "goodbye-dpi",
   zapret: "zapret",
-  unknown: "неизвестно",
+  unknown: "common.unknown",
 } as const satisfies Record<Strategy["fileType"], string>;
 
 function StrategyCardBack({
@@ -31,6 +32,7 @@ function StrategyCardBack({
   onOpenFolder,
   onClose,
 }: StrategyCardBackProps) {
+  const { t } = useI18n();
   return (
     <div className="flex h-full flex-col gap-3 p-4 text-left">
       <div className="flex flex-col gap-1">
@@ -47,24 +49,26 @@ function StrategyCardBack({
       </p>
 
       <dl className="text-text-tertiary grid grid-cols-2 gap-x-2 gap-y-1 text-[10px]">
-        <dt>Тип</dt>
+        <dt>{t("strategies.card.type")}</dt>
         <dd className="text-text-secondary truncate text-right">
-          {FILE_TYPE_LABELS[strategy.fileType]}
+          {strategy.fileType === "unknown"
+            ? t(FILE_TYPE_LABELS.unknown)
+            : FILE_TYPE_LABELS[strategy.fileType]}
         </dd>
 
-        <dt>Размер</dt>
+        <dt>{t("strategies.card.size")}</dt>
         <dd className="text-text-secondary text-right">
           {formatFileSize(strategy.size)}
         </dd>
 
-        <dt>Изменён</dt>
+        <dt>{t("strategies.card.changed")}</dt>
         <dd className="text-text-secondary truncate text-right">
           {strategy.modifiedAt === undefined
             ? "—"
             : formatRelativeTime(strategy.modifiedAt)}
         </dd>
 
-        <dt>Сервисы</dt>
+        <dt>{t("strategies.card.services")}</dt>
         <dd className="text-text-secondary truncate text-right">
           {strategy.services.map(capitalizeService).join(", ") || "—"}
         </dd>
@@ -86,7 +90,7 @@ function StrategyCardBack({
             onClick={onStop}
             icon={<Square aria-hidden="true" className="size-3.5" />}
           >
-            Остановить
+            {t("strategies.card.stop")}
           </Button>
         ) : (
           <Button
@@ -95,7 +99,7 @@ function StrategyCardBack({
             onClick={onRun}
             icon={<Play aria-hidden="true" className="size-3.5" />}
           >
-            Запустить
+            {t("strategies.card.run")}
           </Button>
         )}
 
@@ -107,13 +111,13 @@ function StrategyCardBack({
             onClick={onOpenFolder}
             icon={<FolderOpen aria-hidden="true" className="size-3.5" />}
           >
-            Папка
+            {t("strategies.card.folder")}
           </Button>
           <Button
             size="sm"
             variant="ghost"
-            aria-label="Закрыть карту"
-            title="Закрыть"
+            aria-label={t("strategies.card.closeAria")}
+            title={t("strategies.card.closeTitle")}
             onClick={onClose}
             icon={<X aria-hidden="true" className="size-3.5" />}
           />

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 
 import { Button, Input, Text } from "@/components/ui";
+import { useI18n } from "@/i18n";
 
 export interface EditableListProps {
   items: string[];
@@ -38,6 +39,7 @@ function EditableRow({
   type,
   placeholder,
 }: RowProps) {
+  const { t } = useI18n();
   const [error, setError] = useState<string | null>(null);
 
   const handleChange = (next: string): void => {
@@ -56,7 +58,7 @@ function EditableRow({
         placeholder={placeholder}
         error={error !== null}
         errorMessage={error ?? undefined}
-        aria-label={`Элемент ${index + 1} из ${total}`}
+        aria-label={t("settings.common.itemAria", { index: index + 1, total })}
         onChange={(event) => {
           handleChange(event.target.value);
         }}
@@ -66,8 +68,8 @@ function EditableRow({
         size="icon"
         variant="ghost"
         disabled={disabled}
-        aria-label={`Удалить элемент ${index + 1}`}
-        title="Удалить"
+        aria-label={t("settings.common.deleteItemAria", { index: index + 1 })}
+        title={t("settings.common.deleteItemTitle")}
         onClick={onRemove}
         icon={<Trash2 className="size-4" />}
       />

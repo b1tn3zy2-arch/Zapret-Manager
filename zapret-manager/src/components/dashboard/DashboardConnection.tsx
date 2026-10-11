@@ -5,6 +5,7 @@ import CountryFlag from "@/components/dashboard/CountryFlag";
 import { Button, Spinner, Text } from "@/components/ui";
 import { GlassPanel } from "@/components/shared/GlassPanel";
 import { useNetworkInfo } from "@/hooks/useNetworkInfo";
+import { useI18n } from "@/i18n";
 
 const EMPTY_VALUE = "—";
 
@@ -35,20 +36,21 @@ function Row({
 }
 
 function DashboardConnection() {
+  const { t } = useI18n();
   const { info, isLoading, error, refresh } = useNetworkInfo();
 
   return (
     <GlassPanel padding="lg" className="flex flex-col gap-4">
       <div className="flex items-center justify-between gap-3">
         <h3 className="text-text-primary text-base font-semibold">
-          Информация о соединении
+          {t("dashboard.connection.title")}
         </h3>
 
         <Button
           size="icon"
           variant="ghost"
-          aria-label="Обновить данные о соединении"
-          title="Обновить"
+          aria-label={t("dashboard.connection.refreshAria")}
+          title={t("dashboard.connection.refresh")}
           disabled={isLoading}
           onClick={() => {
             void refresh();
@@ -85,8 +87,15 @@ function DashboardConnection() {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <Row label="IP-адрес" value={info?.ip || EMPTY_VALUE} mono />
-        <Row label="Провайдер" value={info?.isp || EMPTY_VALUE} />
+        <Row
+          label={t("dashboard.connection.ip")}
+          value={info?.ip || EMPTY_VALUE}
+          mono
+        />
+        <Row
+          label={t("dashboard.connection.isp")}
+          value={info?.isp || EMPTY_VALUE}
+        />
       </div>
 
       {error !== null ? (
@@ -100,7 +109,7 @@ function DashboardConnection() {
             className="mt-0.5 size-3.5 shrink-0"
             strokeWidth={2}
           />
-          <span>Не удалось определить IP: {error}</span>
+          <span>{t("dashboard.connection.failed", { error })}</span>
         </Text>
       ) : null}
     </GlassPanel>

@@ -36,7 +36,7 @@ function InitProgressModal({
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
           <Text variant="label" className="text-text-primary">
-            {stageLabel(progress?.stage ?? "idle")}
+            {stageLabel(progress?.stage ?? "idle", t)}
           </Text>
           <Text variant="caption" size="sm" className="text-text-tertiary">
             {progress?.currentFile ?? t("settings.resources.stageIdle")}

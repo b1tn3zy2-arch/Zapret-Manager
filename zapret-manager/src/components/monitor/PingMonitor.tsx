@@ -1,3 +1,4 @@
+import { useI18n } from "@/i18n";
 import { useMemo } from "react";
 import { motion } from "framer-motion";
 
@@ -18,10 +19,23 @@ import {
   lastSparklinePoint,
 } from "@/lib/pingUtils";
 import type { PingHistory } from "@/hooks/usePing";
+import type { Translate } from "@/i18n/types";
 import type { PingPoint } from "@/lib/pingUtils";
 
 const SPARK_WIDTH = 120;
 const SPARK_HEIGHT = 28;
+
+function pluralMeasurements(count: number, t: Translate): string {
+  if (count === 1) {
+    return t("monitor.ping.measurementsOne", { count });
+  }
+
+  if (count < 5) {
+    return t("monitor.ping.measurementsFew", { count });
+  }
+
+  return t("monitor.ping.measurementsMany", { count });
+}
 
 interface PingCardProps {
   label: string;
@@ -30,6 +44,7 @@ interface PingCardProps {
 }
 
 function PingCard({ label, points, title }: PingCardProps) {
+  const { t } = useI18n();
   const reducedMotion = usePrefersReducedMotion();
   const latency = lastLatency(points);
   const color = getPingColor(latency);
@@ -59,7 +74,7 @@ function PingCard({ label, points, title }: PingCardProps) {
         viewBox={`0 0 ${SPARK_WIDTH} ${SPARK_HEIGHT}`}
         preserveAspectRatio="none"
         role="img"
-        aria-label={`Пинг до сервиса ${label}`}
+        aria-label={t("monitor.ping.aria", { label })}
         className="h-7 w-full"
       >
         <path d={fill} fill={color} opacity={0.16} />
@@ -97,8 +112,8 @@ function PingCard({ label, points, title }: PingCardProps) {
 
       <span className="text-text-tertiary text-[10px]">
         {points.length === 0
-          ? "ожидание ответа…"
-          : `${points.length} ${points.length === 1 ? "замер" : "замеров"} за минуту`}
+          ? t("monitor.ping.waiting")
+          : pluralMeasurements(points.length, t)}
       </span>
     </GlassPanel>
   );

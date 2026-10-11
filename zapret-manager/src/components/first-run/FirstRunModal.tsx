@@ -71,7 +71,7 @@ function FirstRunModal({ open, report, onStart }: FirstRunModalProps) {
         <Text variant="caption" size="sm" className="text-text-tertiary">
           {t("settings.resources.welcomeVersion").replace(
             "{version}",
-            formatResourceVersion(report?.resourcesVersion ?? "")
+            formatResourceVersion(report?.resourcesVersion ?? "", t)
           ) + ` · ${APP_NAME}`}
         </Text>
       </div>

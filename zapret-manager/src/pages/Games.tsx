@@ -37,7 +37,9 @@ export default function Games() {
         try {
           const path = await save({
             defaultPath: safeFileName(game.name),
-            filters: [{ name: "Игра", extensions: ["json"] }],
+            filters: [
+              { name: t("settings.games.fileDialog"), extensions: ["json"] },
+            ],
           });
 
           if (typeof path !== "string" || path === "") {
@@ -48,18 +50,20 @@ export default function Games() {
           addLog({
             level: "success",
             source: "user",
-            message: `Игра выгружена: ${game.name}`,
+            message: t("settings.games.exported", { name: game.name }),
           });
         } catch (caught) {
           addLog({
             level: "error",
             source: "user",
-            message: `Не удалось выгрузить игру: ${toErrorMessage(caught)}`,
+            message: t("settings.games.exportFailed", {
+              error: toErrorMessage(caught),
+            }),
           });
         }
       })();
     },
-    [addLog]
+    [addLog, t]
   );
 
   const handleImport = useCallback(
@@ -69,7 +73,9 @@ export default function Games() {
           const path = await open({
             multiple: false,
             directory: false,
-            filters: [{ name: "Игра", extensions: ["json"] }],
+            filters: [
+              { name: t("settings.games.fileDialog"), extensions: ["json"] },
+            ],
           });
 
           if (typeof path !== "string" || path === "") {
@@ -82,7 +88,7 @@ export default function Games() {
             addLog({
               level: "error",
               source: "user",
-              message: "Файл не похож на описание игры",
+              message: t("settings.games.importInvalid"),
             });
             return;
           }
@@ -95,18 +101,20 @@ export default function Games() {
           addLog({
             level: "success",
             source: "user",
-            message: `Список загружен в игру ${game.name}`,
+            message: t("settings.games.imported", { name: game.name }),
           });
         } catch (caught) {
           addLog({
             level: "error",
             source: "user",
-            message: `Не удалось загрузить игру: ${toErrorMessage(caught)}`,
+            message: t("settings.games.importFailed", {
+              error: toErrorMessage(caught),
+            }),
           });
         }
       })();
     },
-    [addLog, updateGame]
+    [addLog, updateGame, t]
   );
 
   return (

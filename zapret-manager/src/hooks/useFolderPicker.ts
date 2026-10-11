@@ -1,3 +1,4 @@
+import { translateKey } from "@/i18n/core";
 import { open } from "@tauri-apps/plugin-dialog";
 import { useCallback } from "react";
 
@@ -17,7 +18,7 @@ export function useFolderPicker(): UseFolderPickerResult {
       const selected = await open({
         directory: true,
         multiple: false,
-        title: "Выберите папку со стратегиями",
+        title: translateKey("log.folderPickerTitle"),
       });
 
       if (typeof selected !== "string" || selected === "") {
@@ -28,7 +29,7 @@ export function useFolderPicker(): UseFolderPickerResult {
       addLog({
         level: "info",
         source: "user",
-        message: `Папка стратегий: ${selected}`,
+        message: translateKey("log.folderPicked", { path: selected }),
       });
 
       return selected;
@@ -38,7 +39,7 @@ export function useFolderPicker(): UseFolderPickerResult {
       addLog({
         level: "error",
         source: "user",
-        message: `Не удалось выбрать папку: ${message}`,
+        message: translateKey("log.folderPickFailed", { error: message }),
       });
 
       return null;

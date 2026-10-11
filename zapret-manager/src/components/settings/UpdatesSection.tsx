@@ -3,6 +3,7 @@ import { RefreshCw, ShieldOff, X } from "lucide-react";
 
 import BackupHistory from "@/components/updates/BackupHistory";
 import { Badge, Button, Card, Input, Text, Toggle } from "@/components/ui";
+import { useI18n } from "@/i18n";
 import { useUpdater } from "@/hooks/useUpdater";
 import { formatVersion, isValidRepo } from "@/lib/updateUtils";
 import {
@@ -14,6 +15,7 @@ import { useUpdateStore } from "@/stores/useUpdateStore";
 import type { StrategyUpdateSettings } from "@/types";
 
 function UpdatesSection() {
+  const { t } = useI18n();
   const settings = useSettingsStore((state) => state.settings.strategyUpdates);
   const patch = useSettingsStore((state) => state.updateStrategyUpdates);
   const info = useUpdateStore((state) => state.info);
@@ -32,7 +34,7 @@ function UpdatesSection() {
     setRepoError(
       isValidRepo(settings.githubRepo)
         ? null
-        : "Ожидается владелец/имя, например Flowseal/zapret-discord-youtube"
+        : t("settings.updates.repoInvalid")
     );
   };
 
@@ -56,17 +58,16 @@ function UpdatesSection() {
     <Card className="flex flex-col gap-5" padding="lg">
       <div className="flex flex-col gap-1">
         <h2 className="text-text-primary text-lg font-semibold">
-          Обновления стратегий
+          {t("settings.updates.title")}
         </h2>
         <Text variant="body" size="sm" className="text-text-secondary">
-          Стратегии обновляются из GitHub Releases. Ваши правки в списках и
-          настройки Outlast Trials сохраняются, перед заменой создаётся бэкап.
+          {t("settings.updates.description")}
         </Text>
       </div>
 
       <div className="text-text-secondary flex flex-wrap items-center gap-3 text-sm">
         <span>
-          Установлено:{" "}
+          {t("settings.updates.current")}:{" "}
           <span className="text-text-primary font-mono">
             {formatVersion(info?.currentVersion ?? "unknown")}
           </span>
@@ -74,12 +75,16 @@ function UpdatesSection() {
         {info !== null ? (
           <Badge variant={info.available ? "accent" : "neutral"}>
             {info.available
-              ? `Доступно ${info.latestVersion}`
-              : `Актуальная ${info.latestVersion}`}
+              ? t("settings.updates.availableVersion", {
+                  version: info.latestVersion,
+                })
+              : t("settings.updates.currentVersion", {
+                  version: info.latestVersion,
+                })}
           </Badge>
         ) : null}
         {status === "checking" ? (
-          <Badge variant="neutral">Проверка…</Badge>
+          <Badge variant="neutral">{t("settings.updates.checking")}</Badge>
         ) : null}
       </div>
 
@@ -88,13 +93,13 @@ function UpdatesSection() {
         onChange={(value) => {
           patchSetting("autoCheck", value);
         }}
-        label="Проверять обновления при запуске"
-        description="Через несколько секунд после открытия приложения"
+        label={t("settings.updates.autoCheck")}
+        description={t("settings.updates.autoCheckHint")}
       />
 
       <div className="flex flex-wrap items-end gap-3">
         <Input
-          label="Проверять каждые N часов"
+          label={t("settings.updates.interval")}
           type="number"
           min={UPDATE_MIN_INTERVAL_HOURS}
           max={UPDATE_MAX_INTERVAL_HOURS}
@@ -110,7 +115,7 @@ function UpdatesSection() {
           }}
           icon={<RefreshCw aria-hidden="true" className="size-4" />}
         >
-          Проверить сейчас
+          {t("settings.updates.checkNow")}
         </Button>
         <Button
           variant="ghost"
@@ -118,13 +123,13 @@ function UpdatesSection() {
           disabled={info === null}
           icon={<ShieldOff aria-hidden="true" className="size-4" />}
         >
-          Подробности
+          {t("settings.updates.details")}
         </Button>
       </div>
 
       <div className="flex flex-col gap-1">
         <Input
-          label="Репозиторий GitHub"
+          label={t("settings.updates.repo")}
           value={settings.githubRepo}
           error={repoError !== null}
           errorMessage={repoError ?? undefined}
@@ -135,23 +140,24 @@ function UpdatesSection() {
           onBlur={handleRepoBlur}
         />
         <Text variant="caption" size="sm" className="text-text-tertiary">
-          Репозиторий можно сменить, если апстрим переименуют
+          {t("settings.updates.repoHint")}
         </Text>
       </div>
 
       <div className="flex flex-col gap-1">
         <Text variant="body" size="sm" className="text-text-secondary">
-          Версия определяется автоматически по файлу{" "}
-          <span className="font-mono">.version</span> и содержимому{" "}
-          <span className="font-mono">service.bat</span>. Если обе подсказки
-          отсутствуют, обновление не будет предлагаться.
+          {t("settings.updates.versionAutoBefore")}{" "}
+          <span className="font-mono">.version</span>{" "}
+          {t("settings.updates.versionAutoMiddle")}{" "}
+          <span className="font-mono">service.bat</span>
+          {t("settings.updates.versionAutoAfter")}
         </Text>
       </div>
 
       {settings.ignoredVersions.length > 0 ? (
         <div className="flex flex-col gap-2">
           <Text variant="body" size="sm" className="text-text-secondary">
-            Игнорируемые версии
+            {t("settings.updates.ignored")}
           </Text>
           <div className="flex flex-wrap gap-2">
             {settings.ignoredVersions.map((version) => (
@@ -176,7 +182,7 @@ function UpdatesSection() {
 
       <div className="flex flex-col gap-2">
         <Text variant="body" size="sm" className="text-text-secondary">
-          История обновлений
+          {t("settings.updates.history")}
         </Text>
         <BackupHistory />
       </div>

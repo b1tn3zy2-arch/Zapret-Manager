@@ -1,7 +1,9 @@
+import { useI18n } from "@/i18n";
 import { useUpdateStore } from "@/stores/useUpdateStore";
 import { cn } from "@/lib/utils";
 
 function UpdateBadge() {
+  const { t } = useI18n();
   const info = useUpdateStore((state) =>
     state.status === "available" && !state.isDismissed ? state.info : null
   );
@@ -13,7 +15,7 @@ function UpdateBadge() {
   return (
     <span
       aria-hidden="true"
-      title={`Доступно обновление стратегий до ${info.latestVersion}`}
+      title={t("updates.badge", { version: info.latestVersion })}
       className={cn(
         "text-bg-bg text-accent-primary absolute -top-1 -right-1 z-10",
         "flex size-5 items-center justify-center rounded-full text-[10px] font-bold",

@@ -1,3 +1,4 @@
+import { useI18n } from "@/i18n";
 import { invoke } from "@tauri-apps/api/core";
 import { save } from "@tauri-apps/plugin-dialog";
 import { motion } from "framer-motion";
@@ -20,6 +21,7 @@ import { useLogsStore } from "@/stores/useLogsStore";
 const SNAPSHOT_WIDTH = 1180;
 
 export default function Monitor() {
+  const { t } = useI18n();
   const { bufferRef, stats, isPaused, error, clearBuffer, togglePause } =
     useNetworkMonitor();
   const activeStrategy = useActiveStrategy();
@@ -44,32 +46,34 @@ export default function Monitor() {
 
       const data = composeSnapshot(
         [
-          { label: "Входящий трафик", canvas: inboundRef.current },
-          { label: "Исходящий трафик", canvas: outboundRef.current },
+          { label: t("monitor.chart.in"), canvas: inboundRef.current },
+          { label: t("monitor.chart.out"), canvas: outboundRef.current },
         ],
         SNAPSHOT_WIDTH
       );
 
       if (data === "") {
-        throw new Error("Не удалось получить изображение с графика");
+        throw new Error(t("monitor.snapshotFailed"));
       }
 
       await invoke("write_monitor_snapshot", { path, data });
       addLog({
         level: "success",
         source: "system",
-        message: `Снимок монитора сохранён: ${path}`,
+        message: t("monitor.snapshotSaved", { path }),
       });
     } catch (caught) {
       addLog({
         level: "error",
         source: "system",
-        message: `Снимок не сохранён: ${toErrorMessage(caught)}`,
+        message: t("monitor.snapshotNotSaved", {
+          error: toErrorMessage(caught),
+        }),
       });
     } finally {
       setIsSaving(false);
     }
-  }, [addLog]);
+  }, [addLog, t]);
 
   return (
     <motion.section
@@ -79,9 +83,9 @@ export default function Monitor() {
       className="flex flex-col gap-6"
     >
       <motion.header variants={itemVariants} className="flex flex-col gap-2">
-        <Heading level={1}>Монитор</Heading>
+        <Heading level={1}>{t("monitor.title")}</Heading>
         <Text variant="body" size="lg" className="text-text-secondary">
-          Трафик и соединения в реальном времени
+          {t("monitor.subtitle")}
         </Text>
       </motion.header>
 
@@ -104,7 +108,7 @@ export default function Monitor() {
             onClear={clearBuffer}
           />
           <Text variant="caption" size="sm" className="text-text-tertiary">
-            Обновление 10 раз в секунду · буфер 12 секунд
+            {t("monitor.hint")}
           </Text>
         </div>
 
@@ -122,7 +126,7 @@ export default function Monitor() {
         <TrafficChart
           buffer={bufferRef}
           dataKey="in"
-          label="Входящий трафик"
+          label={t("monitor.chart.in")}
           color={TRAFFIC_COLORS.in}
           isPaused={isPaused}
           canvasRef={inboundRef}
@@ -130,7 +134,7 @@ export default function Monitor() {
         <TrafficChart
           buffer={bufferRef}
           dataKey="out"
-          label="Исходящий трафик"
+          label={t("monitor.chart.out")}
           color={TRAFFIC_COLORS.out}
           isPaused={isPaused}
           canvasRef={outboundRef}
