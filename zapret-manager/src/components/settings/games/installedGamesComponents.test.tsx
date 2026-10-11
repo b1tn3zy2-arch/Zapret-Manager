@@ -51,6 +51,8 @@ describe("InstalledGamesGrid", () => {
         motionDisabled
         onLaunch={vi.fn()}
         onRemove={vi.fn()}
+        onCloseGame={vi.fn()}
+        runningGameIds={{}}
       />
     );
 
@@ -70,6 +72,8 @@ describe("InstalledGamesGrid", () => {
         motionDisabled
         onLaunch={vi.fn()}
         onRemove={vi.fn()}
+        onCloseGame={vi.fn()}
+        runningGameIds={{}}
       />
     );
 
@@ -87,6 +91,8 @@ describe("InstalledGamesGrid", () => {
         motionDisabled
         onLaunch={vi.fn()}
         onRemove={vi.fn()}
+        onCloseGame={vi.fn()}
+        runningGameIds={{}}
       />
     );
 
@@ -108,6 +114,8 @@ describe("InstalledGamesGrid", () => {
         motionDisabled
         onLaunch={onLaunch}
         onRemove={vi.fn()}
+        onCloseGame={vi.fn()}
+        runningGameIds={{}}
       />
     );
 
@@ -135,6 +143,8 @@ describe("InstalledGamesGrid", () => {
         motionDisabled
         onLaunch={vi.fn()}
         onRemove={vi.fn()}
+        onCloseGame={vi.fn()}
+        runningGameIds={{}}
       />
     );
 

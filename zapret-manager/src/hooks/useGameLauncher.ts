@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { translateKey } from "@/i18n/core";
 import { useStrategyRunner } from "@/hooks/useStrategyRunner";
@@ -27,7 +27,9 @@ export interface UseGameLauncherResult {
   launchingId: string | null;
   prompt: LaunchPrompt | null;
   toast: string | null;
+  runningGames: Record<string, number>;
   launch: (game: InstalledGame) => Promise<void>;
+  closeGame: (game: InstalledGame) => Promise<void>;
   confirmPrompt: () => Promise<void>;
   dismissPrompt: () => void;
 }
@@ -36,6 +38,7 @@ type AddLog = (entry: Pick<LogEntry, "level" | "source" | "message">) => void;
 
 export function useGameLauncher(): UseGameLauncherResult {
   const [launchingId, setLaunchingId] = useState<string | null>(null);
+  const [runningGames, setRunningGames] = useState<Record<string, number>>({});
   const [prompt, setPrompt] = useState<LaunchPrompt | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const { run, checkStatus } = useStrategyRunner();
@@ -62,6 +65,7 @@ export function useGameLauncher(): UseGameLauncherResult {
           message: translateKey("log.gameLaunched", { name: game.name, pid }),
         });
         setToast(translateKey("settings.games.installed.launch.active"));
+        setRunningGames((previous) => ({ ...previous, [game.id]: pid }));
         recordLaunch(game.id);
         verifyBypass(game, addLog);
 
@@ -242,7 +246,82 @@ export function useGameLauncher(): UseGameLauncherResult {
     setLaunchingId(null);
   }, []);
 
-  return { launchingId, prompt, toast, launch, confirmPrompt, dismissPrompt };
+  const closeGame = useCallback(
+    async (game: InstalledGame) => {
+      const pid = runningGames[game.id];
+
+      if (pid === undefined) {
+        return;
+      }
+
+      try {
+        await invoke<boolean>("close_game", { pid });
+        addLog({
+          level: "info",
+          source: "user",
+          message: translateKey("settings.games.installed.closedGame", {
+            name: game.name,
+          }),
+        });
+      } catch (caught) {
+        addLog({
+          level: "error",
+          source: "user",
+          message: translateKey("settings.games.installed.closeGameFailed", {
+            error: caught instanceof Error ? caught.message : String(caught),
+          }),
+        });
+      }
+
+      setRunningGames((previous) => {
+        const next = { ...previous };
+        delete next[game.id];
+
+        return next;
+      });
+    },
+    [addLog, runningGames]
+  );
+
+  useEffect(() => {
+    const entries = Object.entries(runningGames);
+
+    if (entries.length === 0) {
+      return;
+    }
+
+    const timer = window.setInterval(() => {
+      for (const [id, pid] of entries) {
+        void invoke<boolean>("is_game_running", { pid })
+          .then((alive) => {
+            if (!alive) {
+              setRunningGames((previous) => {
+                const next = { ...previous };
+                delete next[id];
+
+                return next;
+              });
+            }
+          })
+          .catch(() => undefined);
+      }
+    }, 4000);
+
+    return () => {
+      window.clearInterval(timer);
+    };
+  }, [runningGames]);
+
+  return {
+    launchingId,
+    prompt,
+    toast,
+    runningGames,
+    launch,
+    closeGame,
+    confirmPrompt,
+    dismissPrompt,
+  };
 }
 
 function recordLaunch(id: string): void {

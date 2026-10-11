@@ -93,8 +93,9 @@ export default function VpnMode() {
   return (
     <div className="flex flex-col gap-6">
       <GlassPanel
+        variant="outlined"
         padding="lg"
-        className="bg-bg-primary flex flex-col items-center gap-5"
+        className="flex flex-col items-center gap-5"
       >
         <ConnectButton
           connected={connected}

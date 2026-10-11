@@ -494,6 +494,9 @@ export const ru = {
           cancel: "Отмена",
         },
         removeManual: "Убрать из списка",
+        closeGame: "Закрыть игру",
+        closedGame: "Игра закрыта: {name}",
+        closeGameFailed: "Не удалось закрыть игру: {error}",
         add: {
           action: "Добавить игру",
           title: "Добавить игру вручную",

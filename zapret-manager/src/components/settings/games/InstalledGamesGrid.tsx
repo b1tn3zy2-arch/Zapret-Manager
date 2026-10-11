@@ -16,6 +16,8 @@ export interface InstalledGamesGridProps {
   motionDisabled: boolean;
   onLaunch: (game: InstalledGame) => void;
   onRemove: (game: InstalledGame) => void;
+  onCloseGame: (game: InstalledGame) => void;
+  runningGameIds: Record<string, number>;
 }
 
 export default function InstalledGamesGrid({
@@ -25,6 +27,8 @@ export default function InstalledGamesGrid({
   motionDisabled,
   onLaunch,
   onRemove,
+  onCloseGame,
+  runningGameIds,
 }: InstalledGamesGridProps) {
   const { t } = useI18n();
 
@@ -63,6 +67,14 @@ export default function InstalledGamesGrid({
             onLaunch={() => {
               onLaunch(game);
             }}
+            running={runningGameIds[game.id] !== undefined}
+            onClose={
+              runningGameIds[game.id] === undefined
+                ? undefined
+                : () => {
+                    onCloseGame(game);
+                  }
+            }
             onRemove={
               game.manual === true
                 ? () => {

@@ -495,6 +495,9 @@ export const en = {
           cancel: "Cancel",
         },
         removeManual: "Remove from list",
+        closeGame: "Close game",
+        closedGame: "Game closed: {name}",
+        closeGameFailed: "Could not close the game: {error}",
         add: {
           action: "Add game",
           title: "Add a game manually",

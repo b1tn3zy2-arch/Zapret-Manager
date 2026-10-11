@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import type { RefObject } from "react";
 
 import { useMotionPreference } from "@/hooks/useMotionPreference";
+import { MONITOR_INTERVAL_MS } from "@/lib/constants";
 import {
   CHART_PULSE_PERIOD_MS,
   CHART_SMOOTH_TENSION,
@@ -176,6 +177,7 @@ export function useTrafficCanvas({
 
     const display: number[] = [];
     let lastLength = 0;
+    let lastArrival = performance.now();
 
     const render = (): void => {
       const raw = pickSeries(buffer.current, dataKey);
@@ -197,12 +199,19 @@ export function useTrafficCanvas({
         }
 
         lastLength = values.length;
+        lastArrival = performance.now();
       }
+
+      const now = performance.now();
+      const progress = Math.min(
+        Math.max((now - lastArrival) / MONITOR_INTERVAL_MS, 0),
+        1
+      );
 
       for (let index = 0; index < values.length; index += 1) {
         const current = display[index] ?? 0;
 
-        display[index] = current + ((values[index] ?? 0) - current) * 0.22;
+        display[index] = current + ((values[index] ?? 0) - current) * 0.35;
       }
 
       const smoothed = values.map((value, index) => display[index] ?? value);
@@ -224,10 +233,16 @@ export function useTrafficCanvas({
         return;
       }
 
+      const shift = progress * step;
       const points = smoothed.map((value, index) => ({
-        x: index * step,
+        x: index * step - shift,
         y: toY(value),
       }));
+
+      points.push({
+        x: width,
+        y: toY(smoothed[smoothed.length - 1] ?? 0),
+      });
 
       const areaPath = new Path2D(
         buildAreaPath(points, height, CHART_SMOOTH_TENSION)

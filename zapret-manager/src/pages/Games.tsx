@@ -27,8 +27,16 @@ export default function Games() {
     addFolder,
     removeFolder,
   } = useInstalledGames();
-  const { launchingId, prompt, toast, launch, confirmPrompt, dismissPrompt } =
-    useGameLauncher();
+  const {
+    launchingId,
+    prompt,
+    toast,
+    runningGames,
+    launch,
+    closeGame,
+    confirmPrompt,
+    dismissPrompt,
+  } = useGameLauncher();
   const bypassGames = useSettingsStore((state) => state.settings.games);
   const animationsOn = useSettingsStore(
     (state) => state.settings.appearance.animations
@@ -107,6 +115,10 @@ export default function Games() {
           onRemove={(game) => {
             removeGame(game.id);
           }}
+          onCloseGame={(game) => {
+            void closeGame(game);
+          }}
+          runningGameIds={runningGames}
         />
       )}
 

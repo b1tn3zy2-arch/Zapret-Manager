@@ -1,6 +1,6 @@
 import { memo, useState } from "react";
 import { motion } from "framer-motion";
-import { X } from "lucide-react";
+import { Square, X } from "lucide-react";
 
 import { GameCoverImage } from "@/components/settings/games/GameCoverImage";
 import GamePlayOverlay from "@/components/settings/games/GamePlayOverlay";
@@ -27,6 +27,8 @@ export interface GameCardInstalledProps {
   busy: boolean;
   motionDisabled: boolean;
   onLaunch: () => void;
+  onClose?: (() => void) | undefined;
+  running?: boolean;
   onRemove?: (() => void) | undefined;
 }
 
@@ -40,6 +42,8 @@ function GameCardInstalled({
   busy,
   motionDisabled,
   onLaunch,
+  onClose,
+  running = false,
   onRemove,
 }: GameCardInstalledProps) {
   const { t } = useI18n();
@@ -125,6 +129,26 @@ function GameCardInstalled({
                 : formatRelativeTime(game.lastLaunchedAt)}
             </p>
           </div>
+          {running && onClose !== undefined ? (
+            <button
+              type="button"
+              aria-label={t("settings.games.installed.closeGame")}
+              onClick={(event) => {
+                event.stopPropagation();
+                onClose();
+              }}
+              className={cn(
+                "bg-accent-danger/90 text-on-accent rounded-md p-1 transition-colors",
+                "hover:bg-accent-danger"
+              )}
+            >
+              <Square
+                aria-hidden="true"
+                className="size-4"
+                fill="currentColor"
+              />
+            </button>
+          ) : null}
           {onRemove === undefined ? null : (
             <button
               type="button"
