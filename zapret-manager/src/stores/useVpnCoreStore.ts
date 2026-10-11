@@ -11,6 +11,7 @@ export interface VpnCoreStoreState {
   isLoading: boolean;
   error: string | null;
   setSubscriptionUrl: (url: string) => void;
+  clearSubscription: () => void;
   setServers: (servers: SubscriptionServer[]) => void;
   setActiveServer: (id: string | null) => void;
   setStatus: (status: XrayStatus | null) => void;
@@ -28,6 +29,8 @@ export const useVpnCoreStore = create<VpnCoreStoreState>()(
       isLoading: false,
       error: null,
       setSubscriptionUrl: (url) => set({ subscriptionUrl: url }),
+      clearSubscription: () =>
+        set({ subscriptionUrl: "", servers: [], activeServerId: null }),
       setServers: (servers) => set({ servers }),
       setActiveServer: (id) => set({ activeServerId: id }),
       setStatus: (status) => set({ status }),

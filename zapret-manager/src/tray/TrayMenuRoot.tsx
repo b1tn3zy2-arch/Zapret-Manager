@@ -16,6 +16,7 @@ import {
   Unlock,
 } from "lucide-react";
 
+import NotificationToaster from "@/components/shared/NotificationToaster";
 import { Badge } from "@/components/ui";
 import { useI18n } from "@/i18n";
 import { cn } from "@/lib/utils";
@@ -163,104 +164,119 @@ export default function TrayMenuRoot() {
   }, [isVpn]);
 
   return (
-    <div className="flex h-full w-full p-2">
-      <div
-        key={animationKey}
-        data-corner={corner}
-        className={cn(
-          "tray-menu-shell border-glass-border bg-bg-secondary/95 flex w-full flex-col",
-          "rounded-lg border p-1.5 shadow-2xl backdrop-blur-xl"
-        )}
-      >
-        <header className="flex items-center gap-2 px-2 py-1.5">
-          <span
-            aria-hidden="true"
-            className={cn(
-              "size-2 shrink-0 rounded-full",
-              isActive ? "bg-accent-success" : "bg-text-tertiary"
-            )}
-          />
-
-          <span className="text-text-primary min-w-0 flex-1 truncate text-xs font-semibold">
-            Zapret Manager
-          </span>
-
-          <Badge variant={isActive ? "success" : "neutral"} size="sm">
-            {isActive
-              ? (subject ?? t("dashboard.tray.active"))
-              : t("dashboard.tray.disconnected")}
-          </Badge>
-        </header>
-
-        <Separator />
-
-        <MenuRow label={t("dashboard.tray.run")} icon={Play} action="run" />
-        <MenuRow label={t("dashboard.tray.stop")} icon={Square} action="stop" />
-        <button
-          type="button"
-          onClick={vpnAction}
+    <>
+      <NotificationToaster />
+      <div className="flex h-full w-full p-2">
+        <div
+          key={animationKey}
+          data-corner={corner}
           className={cn(
-            "group flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left",
-            "text-text-secondary hover:text-text-primary text-[13px]",
-            "hover:bg-glass-hover transition-colors duration-100"
+            "tray-menu-shell border-glass-border bg-bg-secondary/95 flex w-full flex-col",
+            "rounded-lg border p-1.5 shadow-2xl backdrop-blur-xl"
           )}
         >
-          {isVpn ? (
-            <Unlock
+          <header className="flex items-center gap-2 px-2 py-1.5">
+            <span
               aria-hidden="true"
-              className="text-text-tertiary group-hover:text-text-primary size-3.5 shrink-0"
-              strokeWidth={2}
+              className={cn(
+                "size-2 shrink-0 rounded-full",
+                isActive ? "bg-accent-success" : "bg-text-tertiary"
+              )}
             />
-          ) : (
-            <Lock
-              aria-hidden="true"
-              className="text-text-tertiary group-hover:text-text-primary size-3.5 shrink-0"
-              strokeWidth={2}
-            />
-          )}
-          <span className="truncate">
-            {isVpn
-              ? t("dashboard.tray.vpnDisconnect")
-              : t("dashboard.tray.vpnConnect")}
-          </span>
-        </button>
 
-        <Separator />
+            <span className="text-text-primary min-w-0 flex-1 truncate text-xs font-semibold">
+              Zapret Manager
+            </span>
 
-        <MenuRow
-          label={t("dashboard.tray.dashboard")}
-          icon={LayoutDashboard}
-          action="dashboard"
-        />
-        <MenuRow
-          label={t("dashboard.tray.strategies")}
-          icon={Layers}
-          action="strategies"
-        />
-        <MenuRow
-          label={t("dashboard.tray.logs")}
-          icon={ScrollText}
-          action="logs"
-        />
-        <MenuRow
-          label={t("dashboard.tray.settings")}
-          icon={SettingsIcon}
-          action="settings"
-        />
-        <MenuRow label={t("dashboard.tray.about")} icon={Info} action="about" />
+            <Badge variant={isActive ? "success" : "neutral"} size="sm">
+              {isActive
+                ? (subject ?? t("dashboard.tray.active"))
+                : t("dashboard.tray.disconnected")}
+            </Badge>
+          </header>
 
-        <Separator />
+          <Separator />
 
-        <MenuRow
-          label={t("dashboard.tray.checkUpdates")}
-          icon={RefreshCw}
-          action="updates"
-        />
+          <MenuRow label={t("dashboard.tray.run")} icon={Play} action="run" />
+          <MenuRow
+            label={t("dashboard.tray.stop")}
+            icon={Square}
+            action="stop"
+          />
+          <button
+            type="button"
+            onClick={vpnAction}
+            className={cn(
+              "group flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left",
+              "text-text-secondary hover:text-text-primary text-[13px]",
+              "hover:bg-glass-hover transition-colors duration-100"
+            )}
+          >
+            {isVpn ? (
+              <Unlock
+                aria-hidden="true"
+                className="text-text-tertiary group-hover:text-text-primary size-3.5 shrink-0"
+                strokeWidth={2}
+              />
+            ) : (
+              <Lock
+                aria-hidden="true"
+                className="text-text-tertiary group-hover:text-text-primary size-3.5 shrink-0"
+                strokeWidth={2}
+              />
+            )}
+            <span className="truncate">
+              {isVpn
+                ? t("dashboard.tray.vpnDisconnect")
+                : t("dashboard.tray.vpnConnect")}
+            </span>
+          </button>
 
-        <Separator />
+          <Separator />
 
-        <MenuRow label={t("dashboard.tray.quit")} icon={LogOut} action="quit" />
+          <MenuRow
+            label={t("dashboard.tray.dashboard")}
+            icon={LayoutDashboard}
+            action="dashboard"
+          />
+          <MenuRow
+            label={t("dashboard.tray.strategies")}
+            icon={Layers}
+            action="strategies"
+          />
+          <MenuRow
+            label={t("dashboard.tray.logs")}
+            icon={ScrollText}
+            action="logs"
+          />
+          <MenuRow
+            label={t("dashboard.tray.settings")}
+            icon={SettingsIcon}
+            action="settings"
+          />
+          <MenuRow
+            label={t("dashboard.tray.about")}
+            icon={Info}
+            action="about"
+          />
+
+          <Separator />
+
+          <MenuRow
+            label={t("dashboard.tray.checkUpdates")}
+            icon={RefreshCw}
+            action="updates"
+          />
+
+          <Separator />
+
+          <MenuRow
+            label={t("dashboard.tray.quit")}
+            icon={LogOut}
+            action="quit"
+          />
+        </div>
       </div>
-    </div>
+    </>
   );
 }

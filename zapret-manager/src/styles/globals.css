@@ -202,11 +202,11 @@
 }
 
 @layer utilities {
-  .scrollbar-none {
+  * {
     scrollbar-width: none;
   }
 
-  .scrollbar-none::-webkit-scrollbar {
+  *::-webkit-scrollbar {
     display: none;
   }
 
@@ -235,11 +235,11 @@
     background-color: var(--color-glass-hover);
   }
 
-  .scrollbar-none {
+  * {
     scrollbar-width: none;
   }
 
-  .scrollbar-none::-webkit-scrollbar {
+  *::-webkit-scrollbar {
     display: none;
   }
 }

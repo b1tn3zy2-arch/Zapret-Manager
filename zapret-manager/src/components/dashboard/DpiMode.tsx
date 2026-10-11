@@ -105,7 +105,7 @@ export default function DpiMode() {
       </motion.div>
 
       {logsEnabled ? (
-        <motion.div variants={itemVariants} className="grid">
+        <motion.div variants={itemVariants} className="dashboard-wide">
           <DashboardRecentLogs onOpenAllLogs={handleOpenAllLogs} />
         </motion.div>
       ) : null}

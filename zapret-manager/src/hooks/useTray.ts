@@ -46,18 +46,11 @@ export function useTray(): UseTrayResult {
   const connectionStatus = useConnectionStatus();
   const addLog = useLogsStore((state) => state.addLog);
   const lastSent = useRef(0);
+  const pendingPush = useRef<number | undefined>(undefined);
 
   const payload = useTrayPayload(connectionStatus);
 
-  const pushTrayState = useCallback(async (): Promise<void> => {
-    const now = Date.now();
-
-    if (now - lastSent.current < TRAY_UPDATE_THROTTLE_MS) {
-      return;
-    }
-
-    lastSent.current = now;
-
+  const sendTrayState = useCallback(async (): Promise<void> => {
     try {
       await updateTrayState(
         payload.trayState,
@@ -75,8 +68,35 @@ export function useTray(): UseTrayResult {
     }
   }, [addLog, payload.strategyName, payload.trayState, payload.vpnName]);
 
+  const pushTrayState = useCallback(async (): Promise<void> => {
+    const now = Date.now();
+    const elapsed = now - lastSent.current;
+
+    if (elapsed < TRAY_UPDATE_THROTTLE_MS) {
+      if (pendingPush.current === undefined) {
+        pendingPush.current = window.setTimeout(() => {
+          pendingPush.current = undefined;
+          lastSent.current = Date.now();
+          void sendTrayState();
+        }, TRAY_UPDATE_THROTTLE_MS - elapsed);
+      }
+
+      return;
+    }
+
+    lastSent.current = now;
+    await sendTrayState();
+  }, [sendTrayState]);
+
   useEffect(() => {
     void pushTrayState();
+
+    return () => {
+      if (pendingPush.current !== undefined) {
+        window.clearTimeout(pendingPush.current);
+        pendingPush.current = undefined;
+      }
+    };
   }, [pushTrayState]);
 
   useTraySettings();

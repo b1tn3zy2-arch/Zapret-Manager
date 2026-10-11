@@ -5,7 +5,6 @@ import ActionsRow from "@/components/dashboard/vpn/ActionsRow";
 import ConnectButton from "@/components/dashboard/vpn/ConnectButton";
 import EmptyState from "@/components/dashboard/vpn/EmptyState";
 import ServerList from "@/components/dashboard/vpn/ServerList";
-import SettingsPanel from "@/components/dashboard/vpn/SettingsPanel";
 import VpnFooter from "@/components/dashboard/vpn/Footer";
 import { Button, Input, Modal, Text } from "@/components/ui";
 import { useI18n } from "@/i18n";
@@ -24,10 +23,10 @@ export default function VpnMode() {
   const isLoading = useVpnCoreStore((state) => state.isLoading);
   const error = useVpnCoreStore((state) => state.error);
 
+  const clearSubscription = useVpnCoreStore((state) => state.clearSubscription);
   const { loadServers, connectServer, disconnect } = useVpnCore();
   const { pings, isRefreshing, refresh } = useSubscriptionPings(servers);
 
-  const [settingsOpen, setSettingsOpen] = useState(false);
   const [linkOpen, setLinkOpen] = useState(false);
   const [draftLink, setDraftLink] = useState("");
   const [linkError, setLinkError] = useState<string | null>(null);
@@ -93,7 +92,10 @@ export default function VpnMode() {
 
   return (
     <div className="flex flex-col gap-6">
-      <GlassPanel padding="lg" className="flex flex-col items-center gap-5">
+      <GlassPanel
+        padding="lg"
+        className="bg-bg-primary flex flex-col items-center gap-5"
+      >
         <ConnectButton
           connected={connected}
           connecting={isLoading && connected}
@@ -111,9 +113,6 @@ export default function VpnMode() {
             setLinkOpen(true);
           }}
           onPasteLink={handlePasteLink}
-          onOpenSettings={() => {
-            setSettingsOpen(true);
-          }}
         />
 
         {error !== null ? (
@@ -143,6 +142,7 @@ export default function VpnMode() {
               void loadServers(subscriptionUrl);
             }
           }}
+          onClearSubscription={clearSubscription}
         />
       )}
 
@@ -194,13 +194,6 @@ export default function VpnMode() {
           </div>
         </div>
       </Modal>
-
-      <SettingsPanel
-        open={settingsOpen}
-        onClose={() => {
-          setSettingsOpen(false);
-        }}
-      />
     </div>
   );
 }

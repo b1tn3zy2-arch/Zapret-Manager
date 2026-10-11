@@ -16,7 +16,8 @@
       align-items: start;
     }
 
-    .dashboard-layout > .dashboard-lead {
+    .dashboard-layout > .dashboard-lead,
+    .dashboard-layout > .dashboard-wide {
       grid-column: span 2;
     }
   }

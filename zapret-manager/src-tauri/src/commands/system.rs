@@ -249,3 +249,40 @@ pub fn delete_all_backups(strategies_dir: String) -> AppResult<usize> {
 #[cfg(test)]
 #[path = "system_tests.rs"]
 mod tests;
+#[tauri::command]
+pub fn system_toasts_enabled() -> bool {
+    use winapi::shared::minwindef::DWORD;
+    use winapi::shared::winerror::ERROR_SUCCESS;
+    use winapi::um::winnt::{KEY_READ, REG_DWORD};
+    use winapi::um::winreg::{RegCloseKey, RegOpenKeyExW, RegQueryValueExW, HKEY_CURRENT_USER};
+
+    const KEY: &str = r"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Notifications\\Settings";
+    const VALUE: &str = "NOC_GLOBAL_SETTING_TOASTS_ENABLED";
+
+    let path: Vec<u16> = KEY.encode_utf16().chain(std::iter::once(0)).collect();
+    let name: Vec<u16> = VALUE.encode_utf16().chain(std::iter::once(0)).collect();
+    let mut key = std::ptr::null_mut();
+    let opened = unsafe { RegOpenKeyExW(HKEY_CURRENT_USER, path.as_ptr(), 0, KEY_READ, &mut key) };
+
+    if opened != ERROR_SUCCESS as i32 {
+        return true;
+    }
+
+    let mut kind: DWORD = 0;
+    let mut data: DWORD = 0;
+    let mut size = std::mem::size_of::<DWORD>() as DWORD;
+    let read = unsafe {
+        RegQueryValueExW(
+            key,
+            name.as_ptr(),
+            std::ptr::null_mut(),
+            &mut kind,
+            &mut data as *mut DWORD as *mut u8,
+            &mut size,
+        )
+    };
+
+    unsafe { RegCloseKey(key) };
+
+    read == ERROR_SUCCESS as i32 && kind == REG_DWORD && data != 0
+}

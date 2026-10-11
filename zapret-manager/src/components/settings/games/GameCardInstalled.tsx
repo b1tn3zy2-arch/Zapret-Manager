@@ -120,7 +120,7 @@ function GameCardInstalled({
               {name}
             </p>
             <p className="text-text-tertiary truncate text-[11px]">
-              {game.lastLaunchedAt === undefined
+              {game.lastLaunchedAt === undefined || game.lastLaunchedAt === null
                 ? platformLabel
                 : formatRelativeTime(game.lastLaunchedAt)}
             </p>

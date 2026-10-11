@@ -145,17 +145,15 @@ describe("ConnectButton", () => {
 });
 
 describe("ActionsRow", () => {
-  it("вызывает все три обработчика", async () => {
+  it("вызывает обработчики", async () => {
     const onAddLink = vi.fn();
     const onPasteLink = vi.fn();
-    const onOpenSettings = vi.fn();
 
     render(
       <ActionsRow
         disabled={false}
         onAddLink={onAddLink}
         onPasteLink={onPasteLink}
-        onOpenSettings={onOpenSettings}
       />
     );
 
@@ -163,24 +161,13 @@ describe("ActionsRow", () => {
       screen.getByRole("button", { name: "Добавить ссылку" })
     );
     await userEvent.click(screen.getByRole("button", { name: "Вставить" }));
-    await userEvent.click(
-      screen.getByRole("button", { name: "Настройки VPN" })
-    );
 
     expect(onAddLink).toHaveBeenCalledTimes(1);
     expect(onPasteLink).toHaveBeenCalledTimes(1);
-    expect(onOpenSettings).toHaveBeenCalledTimes(1);
   });
 
   it("блокирует действия при занятости", () => {
-    render(
-      <ActionsRow
-        disabled
-        onAddLink={vi.fn()}
-        onPasteLink={vi.fn()}
-        onOpenSettings={vi.fn()}
-      />
-    );
+    render(<ActionsRow disabled onAddLink={vi.fn()} onPasteLink={vi.fn()} />);
 
     expect(
       screen.getByRole("button", { name: "Добавить ссылку" })

@@ -7,15 +7,8 @@ import { useAdaptiveSidebar } from "@/hooks/useAdaptiveSidebar";
 import { useMotionPreference } from "@/hooks/useMotionPreference";
 import { useBloom } from "@/hooks/useBloom";
 import { useI18n } from "@/i18n";
-import {
-  CONNECTION_LABELS,
-  NAV_ITEMS,
-  ROUTES,
-  type AppPage,
-  type ConnectionStatus,
-} from "@/lib/constants";
+import { NAV_ITEMS, ROUTES, type AppPage } from "@/lib/constants";
 import { cn } from "@/lib/utils";
-import { useConnectionStatus } from "@/stores/selectors";
 import { useAppStore } from "@/stores/useAppStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 
@@ -24,23 +17,6 @@ const SIDEBAR_TRANSITION = {
   duration: 0.25,
   ease: [0.16, 1, 0.3, 1],
 } as const;
-
-const STATUS_DOT_CLASSES = {
-  connected:
-    "bg-accent-primary animate-pulse shadow-[0_0_8px_var(--color-accent-primary)]",
-  connecting: "bg-accent-warning animate-pulse",
-  vpn: "bg-accent-secondary",
-  disconnected: "bg-text-tertiary",
-  error: "bg-accent-danger",
-} as const satisfies Record<ConnectionStatus, string>;
-
-const STATUS_TEXT_CLASSES = {
-  connected: "text-text-primary",
-  connecting: "text-accent-warning",
-  vpn: "text-accent-secondary",
-  disconnected: "text-text-tertiary",
-  error: "text-accent-danger",
-} as const satisfies Record<ConnectionStatus, string>;
 
 interface NavButtonProps {
   readonly label: string;
@@ -128,46 +104,7 @@ function NavButtonImpl({
 
 const NavButton = memo(NavButtonImpl);
 
-interface StatusIndicatorProps {
-  readonly status: ConnectionStatus;
-  readonly collapsed: boolean;
-}
-
-function StatusIndicator({ status, collapsed }: StatusIndicatorProps) {
-  const { t } = useI18n();
-  const statusLabel = t(CONNECTION_LABELS[status]);
-
-  return (
-    <button
-      type="button"
-      aria-label={t("connection.aria", { status: statusLabel })}
-      className={cn(
-        "flex w-full items-center gap-2.5 rounded-md px-3 py-2",
-        "hover:bg-glass-hover transition-colors duration-200 ease-out",
-        collapsed && "justify-center px-0"
-      )}
-    >
-      <span
-        className={cn(
-          "size-2 shrink-0 rounded-full",
-          STATUS_DOT_CLASSES[status]
-        )}
-      />
-      {!collapsed ? (
-        <span
-          className={cn(
-            "truncate text-xs font-medium",
-            STATUS_TEXT_CLASSES[status]
-          )}
-        >
-          {statusLabel}
-        </span>
-      ) : null}
-    </button>
-  );
-}
-
-export default function Sidebar() {
+function Sidebar() {
   const { reduced: prefersReducedMotion } = useMotionPreference();
   const { t } = useI18n();
   const activePage = useAppStore((state) => state.activePage);
@@ -184,7 +121,6 @@ export default function Sidebar() {
     [logsEnabled]
   );
   const setActivePage = useAppStore((state) => state.setActivePage);
-  const status = useConnectionStatus();
 
   const selectHandlers = useMemo(() => {
     const handlers = {} as Record<AppPage, () => void>;
@@ -257,10 +193,8 @@ export default function Sidebar() {
           ))}
         </ul>
       </nav>
-
-      <div className="shrink-0 px-3 pb-3">
-        <StatusIndicator status={status} collapsed={collapsed} />
-      </div>
     </motion.aside>
   );
 }
+
+export default memo(Sidebar);

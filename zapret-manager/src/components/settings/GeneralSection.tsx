@@ -6,6 +6,7 @@ import Dropdown from "@/components/settings/Dropdown";
 import SectionContainer from "@/components/settings/SectionContainer";
 import SettingRow from "@/components/settings/SettingRow";
 import { Button } from "@/components/ui/Button";
+import Text from "@/components/ui/Text";
 import Toggle from "@/components/ui/Toggle";
 import { useI18n } from "@/i18n";
 import type { TranslationKey } from "@/i18n/types";
@@ -27,6 +28,16 @@ function GeneralSection() {
   const general = useSettingsStore((state) => state.settings.general);
   const updateGeneral = useSettingsStore((state) => state.updateGeneral);
   const addLog = useLogsStore((state) => state.addLog);
+
+  const [systemToasts, setSystemToasts] = useState(true);
+
+  useEffect(() => {
+    void invoke<boolean>("system_toasts_enabled")
+      .then((value) => {
+        setSystemToasts(value);
+      })
+      .catch(() => undefined);
+  }, []);
 
   const testNotification = async (): Promise<void> => {
     try {
@@ -265,6 +276,12 @@ function GeneralSection() {
           />
         }
       />
+
+      {systemToasts ? null : (
+        <Text variant="caption" size="sm" className="text-accent-warning">
+          {t("settings.general.toastsDisabledHint")}
+        </Text>
+      )}
 
       <SettingRow
         label={t("settings.general.testNotification")}

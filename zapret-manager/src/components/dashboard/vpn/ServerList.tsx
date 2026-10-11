@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, Trash2 } from "lucide-react";
 
 import ServerCard from "@/components/dashboard/vpn/ServerCard";
 import { Badge, Text } from "@/components/ui";
@@ -15,6 +15,7 @@ export interface ServerListProps {
   onSelect: (server: SubscriptionServer) => void;
   onRefreshPings: () => void;
   onRefreshSubscription: () => void;
+  onClearSubscription: () => void;
 }
 
 export default function ServerList({
@@ -25,6 +26,7 @@ export default function ServerList({
   onSelect,
   onRefreshPings,
   onRefreshSubscription,
+  onClearSubscription,
 }: ServerListProps) {
   const { t } = useI18n();
 
@@ -58,6 +60,15 @@ export default function ServerList({
             className={isRefreshing ? "size-4 animate-spin" : "size-4"}
             strokeWidth={2}
           />
+        </button>
+        <button
+          type="button"
+          onClick={onClearSubscription}
+          disabled={isRefreshing}
+          aria-label={t("dashboard.vpn.clearSubscription")}
+          className="text-text-tertiary hover:text-accent-danger hover:bg-glass-hover rounded-md p-1.5 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <Trash2 aria-hidden="true" className="size-4" strokeWidth={2} />
         </button>
       </div>
 

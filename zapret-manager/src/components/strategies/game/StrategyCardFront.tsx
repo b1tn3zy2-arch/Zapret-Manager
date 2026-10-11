@@ -3,6 +3,7 @@ import { useCallback, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Gamepad2, Info } from "lucide-react";
 
+import CardStatsBars from "@/components/strategies/game/CardStatsBars";
 import PlayOverlay from "@/components/strategies/game/PlayOverlay";
 import RarityBadge from "@/components/strategies/game/RarityBadge";
 import RarityParticles from "@/components/strategies/game/RarityParticles";
@@ -143,6 +144,9 @@ export default function StrategyCardFront({
         </span>
         <span className="text-text-tertiary truncate font-mono text-[10px]">
           {strategy.filename}
+        </span>
+        <span className="border-glass-border bg-bg-primary/40 block rounded-lg border p-2 backdrop-blur">
+          <CardStatsBars stats={card.stats} />
         </span>
         <span className="flex flex-wrap gap-1">
           {strategy.services.map((service) => (

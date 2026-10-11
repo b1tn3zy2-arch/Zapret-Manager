@@ -50,6 +50,9 @@ function sanitizeGame(value: unknown): InstalledGame | null {
     ...game,
     name: game.name.trim() || game.executablePath,
     launchCount: typeof game.launchCount === "number" ? game.launchCount : 0,
+    ...(typeof game.lastLaunchedAt === "number"
+      ? { lastLaunchedAt: game.lastLaunchedAt }
+      : { lastLaunchedAt: undefined }),
   } as InstalledGame;
 }
 

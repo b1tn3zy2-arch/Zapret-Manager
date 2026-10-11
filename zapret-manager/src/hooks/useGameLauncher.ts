@@ -12,6 +12,7 @@ import { gameBypass, usesAnticheat } from "@/lib/installedGames";
 import { useInstalledGamesStore } from "@/stores/useInstalledGamesStore";
 import { useLogsStore } from "@/stores/useLogsStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
+import { useBypassScoreStore } from "@/stores/useBypassScoreStore";
 import { useStrategiesStore } from "@/stores/useStrategiesStore";
 import type { InstalledGame, LogEntry, Strategy } from "@/types";
 
@@ -282,11 +283,21 @@ export function pickStrategy(
   strategies: readonly Strategy[],
   lastStrategyId: string | null
 ): Strategy | undefined {
-  const last = strategies.find((item) => item.id === lastStrategyId);
+  const usable = strategies.filter((item) => item.error === undefined);
 
-  if (last !== undefined) {
-    return last;
+  if (usable.length === 0) {
+    return undefined;
   }
 
-  return strategies.find((item) => item.error === undefined);
+  const fastestId = useBypassScoreStore
+    .getState()
+    .best(usable.map((item) => item.id));
+
+  if (fastestId !== null) {
+    return usable.find((item) => item.id === fastestId) ?? usable[0];
+  }
+
+  const last = usable.find((item) => item.id === lastStrategyId);
+
+  return last ?? usable[0];
 }

@@ -238,6 +238,8 @@ export const ru = {
     general: {
       enableLogs: "Вести логи",
       enableLogsHint: "Журнал событий, раздел «Логи» и блок последних событий",
+      toastsDisabledHint:
+        "Системные уведомления Windows отключены — включите их в Параметры → Система → Уведомления. Внутри приложения уведомления всё равно показываются.",
       testNotification: "Уведомления",
       testNotificationHint: "Проверить, что системные уведомления работают",
       testNotificationAction: "Проверить уведомление",
@@ -963,6 +965,7 @@ export const ru = {
       subscriptionCount: "Серверов в подписке: {count}",
       refreshSubscription: "Обновить подписку",
       refreshAll: "Обновить подписку и пинги",
+      clearSubscription: "Очистить подписку",
       coreTitle: "Ядро подключения",
       coreInstalled: "Ядро Xray установлено и готово к работе",
       coreMissing: "Ядро Xray ещё не установлено",

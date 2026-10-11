@@ -56,7 +56,10 @@ function DashboardHero({
     : (strategyName ?? t("dashboard.hero.notConfigured"));
 
   return (
-    <GlassPanel padding="lg" className="flex min-h-[200px] items-center gap-8">
+    <GlassPanel
+      padding="lg"
+      className="bg-bg-primary flex min-h-[200px] items-center gap-8"
+    >
       <StatusOrb status={status} />
 
       <div className="flex min-w-0 flex-1 flex-col items-start gap-3">

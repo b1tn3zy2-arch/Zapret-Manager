@@ -25,7 +25,7 @@ export default function Layout({ children }: LayoutProps) {
         <Sidebar />
         <main
           ref={scrollRef}
-          className="scroll-thin flex min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto"
+          className="flex min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto"
           style={{
             paddingTop: "max(var(--space-lg), env(safe-area-inset-top, 0px))",
             paddingRight:

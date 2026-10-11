@@ -7,6 +7,7 @@ import InitProgressModal from "@/components/first-run/InitProgressModal";
 import Layout from "@/components/layout/Layout";
 import { PerfMonitor } from "@/components/dev/PerfMonitor";
 import PageSkeleton from "@/components/shared/PageSkeleton";
+import NotificationToaster from "@/components/shared/NotificationToaster";
 import UpdateModal from "@/components/updates/UpdateModal";
 import { Text } from "@/components/ui";
 import { useResourceInit } from "@/hooks/useResourceInit";
@@ -156,6 +157,7 @@ export default function App() {
       ) : null}
 
       {import.meta.env.DEV ? <PerfMonitor /> : null}
+      <NotificationToaster />
     </Layout>
   );
 }

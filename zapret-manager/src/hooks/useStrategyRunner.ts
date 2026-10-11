@@ -9,6 +9,7 @@ import { useLogsStore } from "@/stores/useLogsStore";
 import { useStrategiesStore } from "@/stores/useStrategiesStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import { useVpnStore } from "@/stores/useVpnStore";
+import { recordStrategyScore } from "@/lib/bypassScore";
 import { toErrorMessage } from "@/lib/utils";
 import type { GameSettings, LogLevel } from "@/types";
 
@@ -202,6 +203,7 @@ export function useStrategyRunner(): UseStrategyRunnerResult {
         setStatus(strategyId, "running");
         setPid(strategyId, result.pid);
         setLastStrategyId(strategyId);
+        void recordStrategyScore(strategyId);
         addLog({
           level: "info",
           source: "strategy",

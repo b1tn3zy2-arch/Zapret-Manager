@@ -241,6 +241,8 @@ export const en = {
       enableLogs: "Keep logs",
       enableLogsHint:
         "Event journal, the Logs section and the recent events block",
+      toastsDisabledHint:
+        "Windows system notifications are disabled — enable them in Settings → System → Notifications. In-app notifications keep working regardless.",
       testNotification: "Notifications",
       testNotificationHint: "Check that system notifications work",
       testNotificationAction: "Test notification",
@@ -960,6 +962,7 @@ export const en = {
       subscriptionCount: "Servers in subscription: {count}",
       refreshSubscription: "Refresh subscription",
       refreshAll: "Refresh subscription and pings",
+      clearSubscription: "Clear subscription",
       coreTitle: "Connection core",
       coreInstalled: "Xray core is installed and ready",
       coreMissing: "Xray core is not installed yet",

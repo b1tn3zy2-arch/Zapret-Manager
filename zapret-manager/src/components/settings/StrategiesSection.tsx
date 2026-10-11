@@ -13,22 +13,9 @@ import { useSettingsStore } from "@/stores/useSettingsStore";
 import { useStrategiesStore } from "@/stores/useStrategiesStore";
 import type { Strategy } from "@/types";
 
-import { MAX_TIMEOUT_SEC, MIN_TIMEOUT_SEC } from "@/lib/settingsSchema";
-
-function clampTimeout(value: string): number {
-  const parsed = Number.parseInt(value, 10);
-
-  if (Number.isNaN(parsed)) {
-    return MIN_TIMEOUT_SEC;
-  }
-
-  return Math.min(Math.max(parsed, MIN_TIMEOUT_SEC), MAX_TIMEOUT_SEC);
-}
-
 function StrategiesSection() {
   const { t } = useI18n();
   const folder = useSettingsStore((state) => state.settings.strategiesFolder);
-  const advanced = useSettingsStore((state) => state.settings.advanced);
   const updateAdvanced = useSettingsStore((state) => state.updateAdvanced);
   const setStrategies = useStrategiesStore((state) => state.setStrategies);
   const addLog = useLogsStore((state) => state.addLog);
@@ -125,44 +112,6 @@ function StrategiesSection() {
               </Button>
             </div>
           </div>
-        }
-      />
-
-      <SettingRow
-        label={t("settings.strategies.startTimeout")}
-        control={
-          <Input
-            variant="filled"
-            type="number"
-            min={MIN_TIMEOUT_SEC}
-            max={MAX_TIMEOUT_SEC}
-            value={String(advanced.strategyStartTimeoutSec)}
-            aria-label={t("settings.strategies.startTimeout")}
-            onChange={(event) => {
-              updateAdvanced({
-                strategyStartTimeoutSec: clampTimeout(event.target.value),
-              });
-            }}
-          />
-        }
-      />
-
-      <SettingRow
-        label={t("settings.strategies.stopTimeout")}
-        control={
-          <Input
-            variant="filled"
-            type="number"
-            min={MIN_TIMEOUT_SEC}
-            max={MAX_TIMEOUT_SEC}
-            value={String(advanced.strategyStopTimeoutSec)}
-            aria-label={t("settings.strategies.stopTimeout")}
-            onChange={(event) => {
-              updateAdvanced({
-                strategyStopTimeoutSec: clampTimeout(event.target.value),
-              });
-            }}
-          />
         }
       />
     </SectionContainer>
