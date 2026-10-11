@@ -1,0 +1,189 @@
+import { useI18n } from "@/i18n";
+import { useCallback, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Gamepad2, Info } from "lucide-react";
+
+import PlayOverlay from "@/components/strategies/game/PlayOverlay";
+import RarityBadge from "@/components/strategies/game/RarityBadge";
+import RarityParticles from "@/components/strategies/game/RarityParticles";
+import StrategyPoster from "@/components/strategies/game/StrategyPoster";
+import EngineBadge from "@/components/strategies/EngineBadge";
+import { useBloom } from "@/hooks/useBloom";
+import { useChromatic } from "@/hooks/useChromatic";
+import { capitalizeService } from "@/lib/format";
+import { getRarityColor } from "@/lib/rarity";
+import { cn } from "@/lib/utils";
+import {
+  selectHasEnabledGame,
+  useSettingsStore,
+} from "@/stores/useSettingsStore";
+import type { StrategyCard } from "@/types";
+
+export interface StrategyCardFrontProps {
+  card: StrategyCard;
+  flipped: boolean;
+  isHovered: boolean;
+  isRunning: boolean;
+  isBusy: boolean;
+  motionDisabled: boolean;
+  particlesDisabled: boolean;
+  onHoverChange: (hovered: boolean) => void;
+  onFlip: () => void;
+  onRun: () => void;
+  onStop: () => void;
+}
+
+export default function StrategyCardFront({
+  card,
+  flipped,
+  isHovered,
+  isRunning,
+  isBusy,
+  motionDisabled,
+  particlesDisabled,
+  onHoverChange,
+  onFlip,
+  onRun,
+  onStop,
+}: StrategyCardFrontProps) {
+  const { t } = useI18n();
+  const { strategy, rarity } = card;
+  const palette = getRarityColor(rarity);
+  const outlastEnabled = useSettingsStore(selectHasEnabledGame);
+  const bloomColor = rarity === "legendary" ? "primary" : "secondary";
+  const bloomIntensity = rarity === "legendary" ? "strong" : "subtle";
+  const bloom = useBloom(bloomColor, bloomIntensity);
+  const chromatic = useChromatic(!motionDisabled);
+  const showOverlay = isHovered || isRunning;
+  const [pointerGlow, setPointerGlow] = useState("transparent");
+
+  const handleMove = useCallback(
+    (event: React.MouseEvent<HTMLDivElement>): void => {
+      const rect = event.currentTarget.getBoundingClientRect();
+      const x = ((event.clientX - rect.left) / rect.width) * 100;
+      const y = ((event.clientY - rect.top) / rect.height) * 100;
+
+      setPointerGlow(
+        `radial-gradient(65% 55% at ${x.toFixed(1)}% ${y.toFixed(1)}%, ${palette.glow} 0%, transparent 70%)`
+      );
+    },
+    [palette.glow]
+  );
+
+  return (
+    <div
+      onMouseEnter={() => {
+        onHoverChange(true);
+      }}
+      onMouseLeave={() => {
+        onHoverChange(false);
+        setPointerGlow("transparent");
+      }}
+      onMouseMove={handleMove}
+      style={{
+        borderColor: palette.border,
+        boxShadow:
+          bloom.boxShadow === ""
+            ? undefined
+            : isRunning
+              ? bloom.boxShadowHover
+              : bloom.boxShadow,
+      }}
+      className={cn(
+        "bg-bg-secondary/80 absolute inset-0 overflow-hidden rounded-xl border",
+        "backface-hidden"
+      )}
+    >
+      <StrategyPoster services={strategy.services} />
+      <span className="from-bg-primary via-bg-primary/55 absolute inset-0 bg-gradient-to-t to-transparent" />
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 transition-opacity duration-200"
+        style={{ background: pointerGlow, opacity: isHovered ? 1 : 0 }}
+      />
+      {chromatic.isEnabled ? (
+        <motion.span
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+          style={{
+            boxShadow: `inset 0 0 0 1px ${palette.border}`,
+            filter: chromatic.filter,
+          }}
+        />
+      ) : null}
+
+      <span className="absolute inset-x-0 top-0 flex items-start justify-between gap-2 p-3">
+        <RarityBadge rarity={rarity} compact />
+        {isRunning ? (
+          <span className="border-accent-primary/40 bg-bg-primary/70 text-accent-primary inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium backdrop-blur">
+            <span className="bg-accent-primary inline-block size-1.5 animate-pulse rounded-full" />
+            {t("strategies.card.runningBadge")}
+          </span>
+        ) : (
+          <button
+            type="button"
+            aria-label={t("strategies.card.detailsAria", {
+              name: strategy.name,
+            })}
+            aria-expanded={flipped}
+            onClick={(event) => {
+              event.stopPropagation();
+              onFlip();
+            }}
+            className="bg-bg-primary/60 text-text-secondary hover:text-text-primary rounded-md p-1 opacity-0 backdrop-blur transition-opacity group-hover:opacity-100"
+          >
+            <Info aria-hidden="true" className="size-3.5" />
+          </button>
+        )}
+      </span>
+
+      <span className="absolute inset-x-0 bottom-0 flex flex-col gap-2 p-3">
+        <span className="text-text-primary text-lg leading-tight font-bold">
+          {strategy.name}
+        </span>
+        <span className="text-text-tertiary truncate font-mono text-[10px]">
+          {strategy.filename}
+        </span>
+        <span className="flex flex-wrap gap-1">
+          {strategy.services.map((service) => (
+            <span
+              key={service}
+              className="text-text-secondary border-glass-border bg-bg-primary/50 rounded-full border px-2 py-0.5 text-[10px] backdrop-blur"
+            >
+              {capitalizeService(service)}
+            </span>
+          ))}
+          {outlastEnabled ? <OutlastBadge /> : null}
+          <EngineBadge strategy={strategy} />
+        </span>
+      </span>
+
+      <RarityParticles
+        rarity={rarity}
+        color={palette.solid}
+        disabled={particlesDisabled}
+      />
+
+      <AnimatePresence>
+        {showOverlay ? (
+          <PlayOverlay
+            key="play-overlay"
+            isRunning={isRunning}
+            isBusy={isBusy}
+            motionDisabled={motionDisabled}
+            onRun={onRun}
+            onStop={onStop}
+          />
+        ) : null}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+function OutlastBadge() {
+  return (
+    <span className="text-accent-primary border-accent-primary/40 bg-bg-primary/50 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium backdrop-blur">
+      <Gamepad2 aria-hidden="true" className="size-2.5" />+ Outlast
+    </span>
+  );
+}

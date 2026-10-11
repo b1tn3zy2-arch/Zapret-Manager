@@ -213,8 +213,14 @@ pub fn check_configs(dir: &std::path::Path) -> ConfigCheckReport {
 }
 
 #[tauri::command]
-pub fn verify_configs(strategies_dir: String) -> AppResult<ConfigCheckReport> {
-    Ok(check_configs(std::path::Path::new(&strategies_dir)))
+pub async fn verify_configs(strategies_dir: String) -> AppResult<ConfigCheckReport> {
+    tauri::async_runtime::spawn_blocking(move || {
+        check_configs(std::path::Path::new(&strategies_dir))
+    })
+    .await
+    .map_err(|error| crate::error::AppError::custom(format!(
+        "Проверка конфигов прервана: {error}"
+    )))
 }
 
 pub fn remove_backups(dir: &std::path::Path) -> AppResult<usize> {

@@ -39,6 +39,7 @@ const NAVIGATION: Record<string, AppPage> = {
   "navigate-strategies": "strategies",
   "navigate-logs": "logs",
   "navigate-settings": "settings",
+  "navigate-about": "about",
 };
 
 export function useTray(): UseTrayResult {

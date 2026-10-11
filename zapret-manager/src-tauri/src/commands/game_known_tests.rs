@@ -89,7 +89,6 @@ fn test_anticheat_of_defaults_to_none() {
         cover: None,
         domain_settings_id: None,
         anticheat: None,
-        bypass_mode: None,
         aliases: Vec::new(),
     }), Anticheat::None);
     assert_eq!(
@@ -99,8 +98,7 @@ fn test_anticheat_of_defaults_to_none() {
             cover: None,
             domain_settings_id: None,
             anticheat: None,
-            bypass_mode: None,
-            aliases: Vec::new(),
+                aliases: Vec::new(),
         })),
         Anticheat::BattlEye
     );

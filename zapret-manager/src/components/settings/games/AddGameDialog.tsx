@@ -84,13 +84,6 @@ export default function AddGameDialog({
           ? {}
           : { gameSettingsId: match.domainSettingsId }),
         anticheat: match.anticheat as NonNullable<InstalledGame["anticheat"]>,
-        ...(match.bypassMode === null
-          ? {}
-          : {
-              bypassMode: match.bypassMode as NonNullable<
-                InstalledGame["bypassMode"]
-              >,
-            }),
       });
     });
 

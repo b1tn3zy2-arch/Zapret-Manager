@@ -65,6 +65,7 @@ export interface GeneralSettings {
   minimizeToTray: boolean;
   startMinimized: boolean;
   showNotifications: boolean;
+  enableLogs: boolean;
   showNotificationsOnStart: boolean;
   showNotificationsOnStop: boolean;
   showUpdateNotifications: boolean;

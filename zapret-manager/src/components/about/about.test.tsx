@@ -41,15 +41,12 @@ describe("AboutIdentity", () => {
 });
 
 describe("AboutSystemCard", () => {
-  it("выводит все строки системной информации", () => {
+  it("выводит ключевые строки системной информации", () => {
     render(<AboutSystemCard info={INFO} t={T} />);
 
     expect(screen.getByText("Система")).toBeTruthy();
     expect(screen.getByText("Архитектура")).toBeTruthy();
     expect(screen.getByText("x86_64")).toBeTruthy();
-    expect(screen.getByText("WebView2")).toBeTruthy();
-    expect(screen.getByText("Tauri")).toBeTruthy();
-    expect(screen.getByText("Rust")).toBeTruthy();
   });
 
   it("показывает заглушку, пока данные не пришли", () => {

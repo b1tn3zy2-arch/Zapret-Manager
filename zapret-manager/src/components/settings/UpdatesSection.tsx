@@ -2,14 +2,10 @@ import { useState } from "react";
 import { RefreshCw, ShieldOff, X } from "lucide-react";
 
 import BackupHistory from "@/components/updates/BackupHistory";
-import { Badge, Button, Card, Input, Text, Toggle } from "@/components/ui";
+import { Badge, Button, Card, Input, Text } from "@/components/ui";
 import { useI18n } from "@/i18n";
 import { useUpdater } from "@/hooks/useUpdater";
 import { formatVersion, isValidRepo } from "@/lib/updateUtils";
-import {
-  UPDATE_MAX_INTERVAL_HOURS,
-  UPDATE_MIN_INTERVAL_HOURS,
-} from "@/lib/constants";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import { useUpdateStore } from "@/stores/useUpdateStore";
 import type { StrategyUpdateSettings } from "@/types";
@@ -35,22 +31,6 @@ function UpdatesSection() {
       isValidRepo(settings.githubRepo)
         ? null
         : t("settings.updates.repoInvalid")
-    );
-  };
-
-  const handleIntervalChange = (value: string): void => {
-    const parsed = Number.parseInt(value, 10);
-
-    if (Number.isNaN(parsed)) {
-      return;
-    }
-
-    patchSetting(
-      "checkIntervalHours",
-      Math.min(
-        Math.max(parsed, UPDATE_MIN_INTERVAL_HOURS),
-        UPDATE_MAX_INTERVAL_HOURS
-      )
     );
   };
 
@@ -88,26 +68,7 @@ function UpdatesSection() {
         ) : null}
       </div>
 
-      <Toggle
-        checked={settings.autoCheck}
-        onChange={(value) => {
-          patchSetting("autoCheck", value);
-        }}
-        label={t("settings.updates.autoCheck")}
-        description={t("settings.updates.autoCheckHint")}
-      />
-
       <div className="flex flex-wrap items-end gap-3">
-        <Input
-          label={t("settings.updates.interval")}
-          type="number"
-          min={UPDATE_MIN_INTERVAL_HOURS}
-          max={UPDATE_MAX_INTERVAL_HOURS}
-          value={String(settings.checkIntervalHours)}
-          onChange={(event) => {
-            handleIntervalChange(event.target.value);
-          }}
-        />
         <Button
           variant="secondary"
           onClick={() => {

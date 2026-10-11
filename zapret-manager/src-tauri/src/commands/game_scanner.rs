@@ -29,7 +29,6 @@ pub struct KnownGameMatch {
     pub cover: Option<String>,
     pub domain_settings_id: Option<String>,
     pub anticheat: String,
-    pub bypass_mode: Option<String>,
 }
 
 #[tauri::command]
@@ -43,7 +42,6 @@ pub fn match_known_game(app: AppHandle, name: String) -> Option<KnownGameMatch> 
         cover: entry.cover.clone(),
         domain_settings_id: entry.domain_settings_id.clone(),
         anticheat: super::game_known::anticheat_of(entry).as_str().to_string(),
-        bypass_mode: entry.bypass_mode.clone(),
     })
 }
 
@@ -175,7 +173,6 @@ pub fn enrich(known: &KnownGames, games: &mut [InstalledGame]) {
             game.cover_url = entry.cover.clone();
             game.game_settings_id = entry.domain_settings_id.clone();
             game.anticheat = Some(anticheat_of(entry).as_str().to_string());
-            game.bypass_mode = entry.bypass_mode.clone();
             game.name = entry.name.clone();
         }
     }

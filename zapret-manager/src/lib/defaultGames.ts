@@ -33,8 +33,10 @@ export const BUILTIN_GAMES: readonly GameSettings[] = [
       ...ANTI_CHEAT_DOMAINS,
       "gamelift.amazonaws.com",
       "epicgames.com",
+      "epicgames.dev",
       "redbarrelsgames.com",
       "outlasttrials.com",
+      "rbg-services.com",
     ],
     ipRanges: [],
     ports: [

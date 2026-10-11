@@ -1,15 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type { UnlistenFn } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import {
-  Copy,
-  Maximize2,
-  Minimize2,
-  Minus,
-  Shield,
-  Square,
-  X,
-} from "lucide-react";
+import { Copy, Minus, Shield, Square, X } from "lucide-react";
 
 import { APP_NAME, ROUTES } from "@/lib/constants";
 import { cn } from "@/lib/utils";
@@ -21,15 +13,7 @@ import ModeBadge from "./ModeBadge";
 const CONTROL_BUTTON_CLASS =
   "flex size-8 shrink-0 items-center justify-center text-text-secondary transition-colors duration-200 ease-out hover:bg-glass-hover hover:text-text-primary";
 
-export interface TitleBarProps {
-  isFullscreen: boolean;
-  onToggleFullscreen: () => void;
-}
-
-export default function TitleBar({
-  isFullscreen,
-  onToggleFullscreen,
-}: TitleBarProps) {
+export default function TitleBar() {
   const [maximized, setMaximized] = useState(false);
   const setActivePage = useAppStore((state) => state.setActivePage);
   const { t } = useI18n();
@@ -76,12 +60,11 @@ export default function TitleBar({
   }, []);
 
   const MaximizeIcon = maximized ? Copy : Square;
-  const FullscreenIcon = isFullscreen ? Minimize2 : Maximize2;
 
   return (
     <header
       data-tauri-drag-region
-      className="border-glass-border flex shrink-0 items-center justify-between border-b"
+      className="flex shrink-0 items-center justify-between"
       style={{ height: "var(--titlebar-height)" }}
     >
       <div data-tauri-drag-region className="flex items-center gap-2 pr-2 pl-3">
@@ -112,24 +95,6 @@ export default function TitleBar({
           }}
         />
 
-        <button
-          type="button"
-          onClick={onToggleFullscreen}
-          aria-label={
-            isFullscreen
-              ? t("titleBar.exitFullscreen")
-              : t("titleBar.fullscreen")
-          }
-          aria-pressed={isFullscreen}
-          title={t("titleBar.fullscreenHint")}
-          className={CONTROL_BUTTON_CLASS}
-        >
-          <FullscreenIcon
-            aria-hidden="true"
-            className="size-4"
-            strokeWidth={2}
-          />
-        </button>
         <button
           type="button"
           onClick={minimize}

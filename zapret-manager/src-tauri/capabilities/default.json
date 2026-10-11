@@ -30,6 +30,7 @@
     "fs:allow-exists",
     "fs:allow-mkdir",
     "dialog:allow-open",
+    "notification:default",
     "dialog:allow-save",
     "autostart:default",
     "autostart:allow-enable",

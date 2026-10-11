@@ -5,6 +5,7 @@ import { GlassPanel } from "@/components/shared/GlassPanel";
 import { AnimatedNumber } from "@/components/ui";
 import { useI18n } from "@/i18n";
 import { useErrorsCount } from "@/stores/selectors/useLogSelectors";
+import { useSettingsStore } from "@/stores/useSettingsStore";
 import { useStrategiesStore } from "@/stores/useStrategiesStore";
 
 export interface DashboardStatsProps {
@@ -40,6 +41,9 @@ function MetricCard({ icon: Icon, value, label, tone }: MetricCardProps) {
 function DashboardStats({ uptime }: DashboardStatsProps) {
   const strategies = useStrategiesStore((state) => state.strategies);
   const errorsCount = useErrorsCount();
+  const logsEnabled = useSettingsStore(
+    (state) => state.settings.general.enableLogs
+  );
   const { t } = useI18n();
 
   const activeCount = strategies.filter(
@@ -61,12 +65,21 @@ function DashboardStats({ uptime }: DashboardStatsProps) {
         label={t("dashboard.stats.active")}
         tone="text-accent-primary"
       />
-      <MetricCard
-        icon={AlertTriangle}
-        value={errorsCount}
-        label={t("dashboard.stats.errors")}
-        tone="text-accent-danger"
-      />
+      {logsEnabled ? (
+        <MetricCard
+          icon={AlertTriangle}
+          value={errorsCount}
+          label={t("dashboard.stats.errors")}
+          tone="text-accent-danger"
+        />
+      ) : (
+        <MetricCard
+          icon={Zap}
+          value={strategies.length - activeCount}
+          label={t("dashboard.stats.idle")}
+          tone="text-text-secondary"
+        />
+      )}
       <GlassPanel
         variant="interactive"
         padding="md"

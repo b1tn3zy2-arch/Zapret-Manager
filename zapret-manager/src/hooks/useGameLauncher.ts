@@ -13,11 +13,9 @@ import { useInstalledGamesStore } from "@/stores/useInstalledGamesStore";
 import { useLogsStore } from "@/stores/useLogsStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import { useStrategiesStore } from "@/stores/useStrategiesStore";
-import { useVpnStore } from "@/stores/useVpnStore";
-import type { InstalledGame, LogEntry, Strategy, VpnStatus } from "@/types";
+import type { InstalledGame, LogEntry, Strategy } from "@/types";
 
-export type LaunchPromptKind =
-  "anticheat" | "bypass" | "noStrategy" | "vpn" | "noVpn";
+export type LaunchPromptKind = "anticheat" | "noStrategy";
 
 export interface LaunchPrompt {
   kind: LaunchPromptKind;
@@ -32,6 +30,8 @@ export interface UseGameLauncherResult {
   confirmPrompt: () => Promise<void>;
   dismissPrompt: () => void;
 }
+
+type AddLog = (entry: Pick<LogEntry, "level" | "source" | "message">) => void;
 
 export function useGameLauncher(): UseGameLauncherResult {
   const [launchingId, setLaunchingId] = useState<string | null>(null);
@@ -156,89 +156,31 @@ export function useGameLauncher(): UseGameLauncherResult {
     return false;
   }, [addLog, checkStatus, lastStrategyId, run, strategies]);
 
-  const ensureVpn = useCallback(async (): Promise<boolean> => {
-    const store = useVpnStore.getState();
+  const start = useCallback(
+    async (game: InstalledGame): Promise<void> => {
+      const bypass = gameBypass(game, gamesSettings);
 
-    if (store.status.state === "connected") {
-      return true;
-    }
-
-    if (store.activeConfigId === null) {
-      setPrompt({ kind: "noVpn", game: null });
-
-      return false;
-    }
-
-    addLog({
-      level: "info",
-      source: "vpn",
-      message: translateKey("settings.games.installed.launch.vpnStarting"),
-    });
-
-    await invoke("connect_vpn_server", {
-      configId: store.activeConfigId,
-    }).catch(() => undefined);
-    await invoke<VpnStatus>("get_vpn_status")
-      .then((status) => {
-        useVpnStore.getState().setStatus(status);
-      })
-      .catch(() => undefined);
-
-    return useVpnStore.getState().status.state === "connected";
-  }, [addLog]);
-
-  const prepare = useCallback(
-    async (game: InstalledGame): Promise<boolean> => {
-      const vpn = useVpnStore.getState();
-
-      if (game.bypassMode === "vpn") {
-        if (vpn.status.state === "connected") {
-          return true;
-        }
-
-        if (vpn.activeConfigId === null) {
-          setPrompt({ kind: "noVpn", game });
-
-          return false;
-        }
-
-        setPrompt({ kind: "vpn", game });
-
-        return false;
-      }
-
-      if (vpn.killSwitchActive && vpn.status.state === "connected") {
+      if (bypass !== undefined && !bypass.enabled) {
+        updateGameSettings(bypass.id, { enabled: true });
         addLog({
-          level: "warn",
-          source: "vpn",
+          level: "info",
+          source: "user",
           message: translateKey(
-            "settings.games.installed.launch.killSwitchWarning"
+            "settings.games.installed.launch.bypassAutoOn",
+            {
+              name: game.name,
+            }
           ),
         });
       }
 
-      return ensureStrategy();
-    },
-    [addLog, ensureStrategy]
-  );
-
-  const start = useCallback(
-    async (game: InstalledGame): Promise<void> => {
-      if (!(await prepare(game))) {
-        return;
-      }
-
-      const bypass = gameBypass(game, gamesSettings);
-
-      if (bypass !== undefined && !bypass.enabled) {
-        setPrompt({ kind: "bypass", game });
-
+      if (!(await ensureStrategy())) {
         return;
       }
 
       await finishLaunch(game);
     },
-    [finishLaunch, gamesSettings, prepare]
+    [addLog, ensureStrategy, finishLaunch, gamesSettings, updateGameSettings]
   );
 
   const launch = useCallback(
@@ -270,7 +212,7 @@ export function useGameLauncher(): UseGameLauncherResult {
       return;
     }
 
-    const { kind, game } = prompt;
+    const { game } = prompt;
 
     setPrompt(null);
 
@@ -280,28 +222,8 @@ export function useGameLauncher(): UseGameLauncherResult {
       return;
     }
 
-    if (kind === "bypass") {
-      const bypass = gameBypass(game, gamesSettings);
-
-      if (bypass !== undefined) {
-        updateGameSettings(bypass.id, { enabled: true });
-      }
-
-      await start(game);
-
-      return;
-    }
-
-    if (kind === "vpn") {
-      if (await ensureVpn()) {
-        await start(game);
-      }
-
-      return;
-    }
-
     await start(game);
-  }, [ensureVpn, gamesSettings, prompt, start, updateGameSettings]);
+  }, [prompt, start]);
 
   const dismissPrompt = useCallback(() => {
     setPrompt(null);
@@ -325,20 +247,13 @@ function recordLaunch(id: string): void {
   });
 }
 
-type AddLog = (entry: Pick<LogEntry, "level" | "source" | "message">) => void;
-
 function verifyBypass(game: InstalledGame, addLog: AddLog): void {
   window.setTimeout(() => {
-    const vpnConnected = useVpnStore.getState().status.state === "connected";
-    const strategyRunning = useStrategiesStore
+    const running = useStrategiesStore
       .getState()
       .strategies.some((item) => item.status === "running");
-    const ok =
-      game.bypassMode === "vpn"
-        ? vpnConnected
-        : strategyRunning || vpnConnected;
 
-    if (ok) {
+    if (running) {
       return;
     }
 

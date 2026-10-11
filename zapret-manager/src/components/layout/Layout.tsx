@@ -13,21 +13,19 @@ export interface LayoutProps {
 }
 
 export default function Layout({ children }: LayoutProps) {
-  const { isFullscreen, toggleFullscreen } = useFullscreen();
+  const { isFullscreen } = useFullscreen();
   const scrollRef = useRef<HTMLElement>(null);
 
   useSmoothWheelScroll(scrollRef);
 
   return (
     <div className="bg-bg-primary flex h-screen w-screen flex-col overflow-hidden">
-      {isFullscreen ? null : (
-        <TitleBar isFullscreen={false} onToggleFullscreen={toggleFullscreen} />
-      )}
+      {isFullscreen ? null : <TitleBar />}
       <div className="flex min-h-0 flex-1 overflow-hidden">
         <Sidebar />
         <main
           ref={scrollRef}
-          className="flex min-w-0 flex-1 scrollbar-none flex-col overflow-x-hidden overflow-y-auto"
+          className="scroll-thin flex min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto"
           style={{
             paddingTop: "max(var(--space-lg), env(safe-area-inset-top, 0px))",
             paddingRight:

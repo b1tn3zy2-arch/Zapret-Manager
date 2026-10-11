@@ -108,6 +108,7 @@ commands::system::get_system_info,
             commands::tray::toggle_tray_window,
             commands::tray::show_tray_window,
             commands::tray::tray_menu_snapshot,
+            commands::tray::tray_menu_ready,
             commands::tray::tray_menu_hide,
             commands::tray::tray_menu_action,
             commands::tray::quit_app,
@@ -133,6 +134,10 @@ commands::resources_commands::read_license_text,
                 commands::runner::cleanup_orphans(&handle, &state).await;
             });
             tray::create_tray(&handle)?;
+            tray_menu::schedule_warmup(handle.clone());
+            if let Err(error) = crate::commands::notify::ensure_permission(&handle) {
+                tracing::warn!("Разрешение на уведомления: {error}");
+            }
 
             let resources_handle = handle.clone();
             tauri::async_runtime::spawn(async move {

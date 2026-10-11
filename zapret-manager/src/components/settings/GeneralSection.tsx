@@ -5,11 +5,15 @@ import { useEffect, useMemo, useState } from "react";
 import Dropdown from "@/components/settings/Dropdown";
 import SectionContainer from "@/components/settings/SectionContainer";
 import SettingRow from "@/components/settings/SettingRow";
+import { Button } from "@/components/ui/Button";
 import Toggle from "@/components/ui/Toggle";
 import { useI18n } from "@/i18n";
 import type { TranslationKey } from "@/i18n/types";
+import { ROUTES } from "@/lib/constants";
 import { toErrorMessage } from "@/lib/utils";
+import { invoke } from "@tauri-apps/api/core";
 import { useLogsStore } from "@/stores/useLogsStore";
+import { useAppStore } from "@/stores/useAppStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import type { Language } from "@/types";
 
@@ -23,6 +27,29 @@ function GeneralSection() {
   const general = useSettingsStore((state) => state.settings.general);
   const updateGeneral = useSettingsStore((state) => state.updateGeneral);
   const addLog = useLogsStore((state) => state.addLog);
+
+  const testNotification = async (): Promise<void> => {
+    try {
+      await invoke("show_notification", {
+        title: t("settings.general.testNotificationTitle"),
+        body: t("settings.general.testNotificationBody"),
+        kind: "success",
+      });
+      addLog({
+        level: "success",
+        source: "system",
+        message: t("settings.general.testNotificationSent"),
+      });
+    } catch (caught) {
+      addLog({
+        level: "error",
+        source: "system",
+        message: t("settings.general.testNotificationFailed", {
+          error: caught instanceof Error ? caught.message : String(caught),
+        }),
+      });
+    }
+  };
 
   const languageOptions = useMemo(
     () =>
@@ -207,6 +234,25 @@ function GeneralSection() {
       />
 
       <SettingRow
+        label={t("settings.general.enableLogs")}
+        description={t("settings.general.enableLogsHint")}
+        control={
+          <Toggle
+            ariaLabel={t("settings.general.enableLogs")}
+            checked={general.enableLogs}
+            onChange={(value) => {
+              updateGeneral({ enableLogs: value });
+
+              if (!value) {
+                useLogsStore.getState().clearLogs();
+                useAppStore.getState().setActivePage(ROUTES.dashboard);
+              }
+            }}
+          />
+        }
+      />
+
+      <SettingRow
         label={t("settings.general.showNotifications")}
         description={t("settings.general.showNotificationsHint")}
         control={
@@ -217,6 +263,22 @@ function GeneralSection() {
               updateGeneral({ showNotifications: value });
             }}
           />
+        }
+      />
+
+      <SettingRow
+        label={t("settings.general.testNotification")}
+        description={t("settings.general.testNotificationHint")}
+        control={
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => {
+              void testNotification();
+            }}
+          >
+            {t("settings.general.testNotificationAction")}
+          </Button>
         }
       />
     </SectionContainer>

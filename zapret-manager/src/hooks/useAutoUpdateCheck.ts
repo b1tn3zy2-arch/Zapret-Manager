@@ -1,14 +1,11 @@
 ﻿import { useEffect } from "react";
 
 import { useUpdater } from "@/hooks/useUpdater";
-import {
-  UPDATE_CHECK_DELAY_MS,
-  UPDATE_MAX_INTERVAL_HOURS,
-  UPDATE_MIN_INTERVAL_HOURS,
-} from "@/lib/constants";
+import { UPDATE_CHECK_DELAY_MS } from "@/lib/constants";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 
 const HOUR_MS = 60 * 60 * 1000;
+const UPDATE_DEFAULT_INTERVAL_HOURS = 24;
 
 export function useAutoUpdateCheck(): void {
   const check = useUpdater().check;
@@ -18,25 +15,16 @@ export function useAutoUpdateCheck(): void {
       const store = useSettingsStore.getState();
       const { settings } = store;
 
-      if (
-        !store.loaded ||
-        !settings.strategyUpdates.autoCheck ||
-        settings.strategiesFolder === ""
-      ) {
+      if (!store.loaded || settings.strategiesFolder === "") {
         return window.setTimeout(schedule, UPDATE_CHECK_DELAY_MS);
       }
 
-      const hours = Math.min(
-        Math.max(
-          settings.strategyUpdates.checkIntervalHours,
-          UPDATE_MIN_INTERVAL_HOURS
-        ),
-        UPDATE_MAX_INTERVAL_HOURS
-      );
-
       void check();
 
-      return window.setTimeout(schedule, hours * HOUR_MS);
+      return window.setTimeout(
+        schedule,
+        UPDATE_DEFAULT_INTERVAL_HOURS * HOUR_MS
+      );
     };
 
     const timer = schedule();

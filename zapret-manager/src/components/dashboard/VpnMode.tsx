@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 
+import { GlassPanel } from "@/components/shared/GlassPanel";
 import ActionsRow from "@/components/dashboard/vpn/ActionsRow";
 import ConnectButton from "@/components/dashboard/vpn/ConnectButton";
 import EmptyState from "@/components/dashboard/vpn/EmptyState";
@@ -92,31 +93,33 @@ export default function VpnMode() {
 
   return (
     <div className="flex flex-col gap-6">
-      <ConnectButton
-        connected={connected}
-        connecting={isLoading && connected}
-        isSwitching={isLoading}
-        switchStep={null}
-        activeServerName={activeServer?.name ?? null}
-        onClick={handleToggle}
-      />
+      <GlassPanel padding="lg" className="flex flex-col items-center gap-5">
+        <ConnectButton
+          connected={connected}
+          connecting={isLoading && connected}
+          isSwitching={isLoading}
+          switchStep={null}
+          activeServerName={activeServer?.name ?? null}
+          onClick={handleToggle}
+        />
 
-      <ActionsRow
-        disabled={isLoading}
-        onAddLink={() => {
-          setDraftLink(subscriptionUrl);
-          setLinkError(null);
-          setLinkOpen(true);
-        }}
-        onPasteLink={handlePasteLink}
-        onOpenSettings={() => {
-          setSettingsOpen(true);
-        }}
-      />
+        <ActionsRow
+          disabled={isLoading}
+          onAddLink={() => {
+            setDraftLink(subscriptionUrl);
+            setLinkError(null);
+            setLinkOpen(true);
+          }}
+          onPasteLink={handlePasteLink}
+          onOpenSettings={() => {
+            setSettingsOpen(true);
+          }}
+        />
 
-      {error !== null ? (
-        <p className="text-accent-danger text-center text-xs">{error}</p>
-      ) : null}
+        {error !== null ? (
+          <p className="text-accent-danger text-center text-xs">{error}</p>
+        ) : null}
+      </GlassPanel>
 
       {servers.length === 0 ? (
         <EmptyState

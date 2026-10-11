@@ -17,6 +17,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useConnectionStatus } from "@/stores/selectors";
 import { useAppStore } from "@/stores/useAppStore";
+import { useSettingsStore } from "@/stores/useSettingsStore";
 
 const ACTIVE_INDICATOR_ID = "sidebar-active-indicator";
 const SIDEBAR_TRANSITION = {
@@ -172,20 +173,30 @@ export default function Sidebar() {
   const activePage = useAppStore((state) => state.activePage);
   const { isCollapsed: collapsed, toggle: toggleSidebar } =
     useAdaptiveSidebar();
+  const logsEnabled = useSettingsStore(
+    (state) => state.settings.general.enableLogs
+  );
+  const items = useMemo(
+    () =>
+      logsEnabled
+        ? NAV_ITEMS
+        : NAV_ITEMS.filter((item) => item.route !== ROUTES.logs),
+    [logsEnabled]
+  );
   const setActivePage = useAppStore((state) => state.setActivePage);
   const status = useConnectionStatus();
 
   const selectHandlers = useMemo(() => {
     const handlers = {} as Record<AppPage, () => void>;
 
-    for (const item of NAV_ITEMS) {
+    for (const item of items) {
       handlers[item.route] = () => {
         setActivePage(item.route);
       };
     }
 
     return handlers;
-  }, [setActivePage]);
+  }, [items, setActivePage]);
 
   const width = collapsed
     ? "var(--sidebar-width-collapsed)"
@@ -196,7 +207,7 @@ export default function Sidebar() {
       animate={{ width }}
       initial={false}
       transition={prefersReducedMotion ? { duration: 0 } : SIDEBAR_TRANSITION}
-      className="bg-bg-secondary/40 border-glass-border flex shrink-0 flex-col overflow-visible border-r"
+      className="bg-bg-secondary/40 flex shrink-0 flex-col overflow-visible"
     >
       <div
         className={cn(
@@ -233,7 +244,7 @@ export default function Sidebar() {
 
       <nav aria-label={t("sidebar.mainNav")} className="flex-1 px-3">
         <ul className="flex flex-col gap-1">
-          {NAV_ITEMS.map((item) => (
+          {items.map((item) => (
             <NavButton
               key={item.route}
               label={t(item.labelKey)}

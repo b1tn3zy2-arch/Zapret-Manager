@@ -17,7 +17,7 @@ export async function scanInstalledGames(): Promise<InstalledGame[]> {
     const scanned = await invoke<InstalledGame[]>("scan_installed_games", {
       userFolders: store.folders,
     });
-    const merged = mergeScannedGames(scanned, store.games);
+    const merged = mergeScannedGames(scanned.map(normalizeGame), store.games);
 
     store.setGames(merged);
 
@@ -27,6 +27,16 @@ export async function scanInstalledGames(): Promise<InstalledGame[]> {
 
     return store.games;
   }
+}
+
+function normalizeGame(game: InstalledGame): InstalledGame {
+  return {
+    ...game,
+    ...(game.lastLaunchedAt === null || game.lastLaunchedAt === undefined
+      ? {}
+      : { lastLaunchedAt: game.lastLaunchedAt }),
+    launchCount: game.launchCount ?? 0,
+  };
 }
 
 export function startInstalledGamesScan(): void {

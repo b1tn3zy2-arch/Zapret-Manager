@@ -1,13 +1,8 @@
-import { useCallback, useMemo, useState } from "react";
-import { invoke } from "@tauri-apps/api/core";
-import { open } from "@tauri-apps/plugin-dialog";
-import { FolderPlus, Image, Pencil, Plus, Trash2 } from "lucide-react";
+import { useMemo, useState } from "react";
+import { FolderPlus, Plus } from "lucide-react";
 
 import AddGameDialog from "@/components/settings/games/AddGameDialog";
 import GameBypassSettings from "@/components/settings/games/GameBypassSettings";
-import GameContextMenu, {
-  type GameContextMenuItem,
-} from "@/components/settings/games/GameContextMenu";
 import GameFoldersDialog from "@/components/settings/games/GameFoldersDialog";
 import GameLaunchPrompt from "@/components/settings/games/GameLaunchPrompt";
 import GameScanIndicator from "@/components/settings/games/GameScanIndicator";
@@ -18,16 +13,7 @@ import { useGameLauncher } from "@/hooks/useGameLauncher";
 import { useInstalledGames } from "@/hooks/useInstalledGames";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { isBypassEnabled } from "@/lib/installedGames";
-import { useLogsStore } from "@/stores/useLogsStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
-import { useVpnStore } from "@/stores/useVpnStore";
-import type { InstalledGame } from "@/types";
-
-interface ContextState {
-  game: InstalledGame;
-  x: number;
-  y: number;
-}
 
 export default function Games() {
   const { t } = useI18n();
@@ -38,22 +24,18 @@ export default function Games() {
     progress,
     addManualGame,
     removeGame,
-    updateGame,
     addFolder,
     removeFolder,
   } = useInstalledGames();
   const { launchingId, prompt, toast, launch, confirmPrompt, dismissPrompt } =
     useGameLauncher();
   const bypassGames = useSettingsStore((state) => state.settings.games);
-  const addLog = useLogsStore((state) => state.addLog);
   const animationsOn = useSettingsStore(
     (state) => state.settings.appearance.animations
   );
   const canHover = useMediaQuery("(hover: hover)");
-  const killSwitchActive = useVpnStore((state) => state.killSwitchActive);
   const [addOpen, setAddOpen] = useState(false);
   const [foldersOpen, setFoldersOpen] = useState(false);
-  const [context, setContext] = useState<ContextState | null>(null);
   const [focusId, setFocusId] = useState<string | null>(null);
   const motionDisabled = !animationsOn || !canHover;
   const scanning = scanStatus === "scanning";
@@ -65,86 +47,6 @@ export default function Games() {
       ),
     [bypassGames, games]
   );
-
-  const pickCover = useCallback(
-    async (game: InstalledGame): Promise<void> => {
-      const selected = await open({
-        multiple: false,
-        directory: false,
-        filters: [
-          { name: "cover", extensions: ["jpg", "jpeg", "png", "webp"] },
-        ],
-      });
-
-      if (typeof selected !== "string") {
-        return;
-      }
-
-      try {
-        const cover = await invoke<string>("import_game_cover", {
-          sourcePath: selected,
-        });
-
-        updateGame(game.id, { coverUrl: cover });
-        addLog({
-          level: "success",
-          source: "user",
-          message: t("settings.games.installed.cover.ready"),
-        });
-      } catch (caught) {
-        addLog({
-          level: "error",
-          source: "user",
-          message: t("settings.games.installed.cover.pickFailed", {
-            error: caught instanceof Error ? caught.message : String(caught),
-          }),
-        });
-      }
-    },
-    [addLog, t, updateGame]
-  );
-
-  const contextItems = useMemo<GameContextMenuItem[]>(() => {
-    if (context === null) {
-      return [];
-    }
-
-    return [
-      {
-        key: "folder",
-        label: t("settings.games.installed.context.openFolder"),
-        icon: FolderPlus,
-        onSelect: () => {
-          void invoke("open_folder", { path: context.game.installPath });
-        },
-      },
-      {
-        key: "configure",
-        label: t("settings.games.installed.context.configure"),
-        icon: Pencil,
-        onSelect: () => {
-          setFocusId(context.game.gameSettingsId ?? null);
-        },
-      },
-      {
-        key: "cover",
-        label: t("settings.games.installed.context.changeCover"),
-        icon: Image,
-        onSelect: () => {
-          void pickCover(context.game);
-        },
-      },
-      {
-        key: "remove",
-        label: t("settings.games.installed.context.remove"),
-        icon: Trash2,
-        danger: true,
-        onSelect: () => {
-          removeGame(context.game.id);
-        },
-      },
-    ];
-  }, [context, pickCover, removeGame, t]);
 
   return (
     <section className="flex flex-col gap-6 pb-8">
@@ -194,39 +96,18 @@ export default function Games() {
           {t("settings.games.installed.empty.body")}
         </Text>
       ) : (
-        <div
-          onContextMenu={(event) => {
-            const card = (event.target as HTMLElement).closest(
-              "[data-game-id]"
-            );
-
-            if (card === null) {
-              return;
-            }
-
-            const game = games.find(
-              (item) => item.id === card.getAttribute("data-game-id")
-            );
-
-            if (game !== undefined) {
-              event.preventDefault();
-              setContext({ game, x: event.clientX, y: event.clientY });
-            }
+        <InstalledGamesGrid
+          games={games}
+          bypassByGameId={bypassByGameId}
+          launchingId={launchingId}
+          motionDisabled={motionDisabled}
+          onLaunch={(game) => {
+            void launch(game);
           }}
-        >
-          <InstalledGamesGrid
-            games={games}
-            bypassByGameId={bypassByGameId}
-            launchingId={launchingId}
-            motionDisabled={motionDisabled}
-            onLaunch={(game) => {
-              void launch(game);
-            }}
-            onOpenMenu={(game) => {
-              setContext({ game, x: 0, y: 0 });
-            }}
-          />
-        </div>
+          onRemove={(game) => {
+            removeGame(game.id);
+          }}
+        />
       )}
 
       <GameBypassSettings
@@ -244,6 +125,7 @@ export default function Games() {
         }}
         onAdd={(game) => {
           addManualGame(game);
+          setFocusId(game.gameSettingsId ?? null);
         }}
       />
       <GameFoldersDialog
@@ -258,20 +140,10 @@ export default function Games() {
       />
       <GameLaunchPrompt
         prompt={prompt}
-        killSwitchActive={killSwitchActive}
         onConfirm={() => {
           void confirmPrompt();
         }}
         onCancel={dismissPrompt}
-      />
-      <GameContextMenu
-        open={context !== null}
-        x={context?.x ?? 0}
-        y={context?.y ?? 0}
-        items={contextItems}
-        onClose={() => {
-          setContext(null);
-        }}
       />
     </section>
   );

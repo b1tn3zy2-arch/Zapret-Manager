@@ -21,8 +21,6 @@ export type InstalledGameSource =
 
 export type InstalledGameAnticheat = "battleye" | "eac" | "none";
 
-export type GameBypassMode = "vpn" | "dpi";
-
 export interface InstalledGame {
   id: string;
   name: string;
@@ -35,7 +33,6 @@ export interface InstalledGame {
   coverUrl?: string;
   gameSettingsId?: string;
   anticheat?: InstalledGameAnticheat;
-  bypassMode?: GameBypassMode;
   lastLaunchedAt?: number;
   launchCount: number;
   manual?: boolean;

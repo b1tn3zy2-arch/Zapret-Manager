@@ -1,5 +1,5 @@
 use tauri::{AppHandle, Emitter};
-use tauri_plugin_notification::NotificationExt;
+use tauri_plugin_notification::{NotificationExt, PermissionState};
 
 use crate::error::AppResult;
 use crate::tray::NotificationKind;
@@ -28,6 +28,22 @@ pub fn emit_event(kind: NotificationKind, title: &str, body: &str) -> String {
     format!("{NOTIFY_PREFIX}{}:{title}|{body}", kind.as_str())
 }
 
+pub fn ensure_permission(app: &AppHandle) -> AppResult<()> {
+    let notification = app.notification();
+
+    match notification.permission_state() {
+        Ok(PermissionState::Granted) => Ok(()),
+        _ => notification
+            .request_permission()
+            .map(|_| ())
+            .map_err(|error| {
+                crate::error::AppError::custom(format!(
+                    "Разрешение на уведомления не получено: {error}"
+                ))
+            }),
+    }
+}
+
 pub fn send(
     app: &AppHandle,
     title: &str,
@@ -35,19 +51,29 @@ pub fn send(
     kind: NotificationKind,
 ) -> AppResult<()> {
     let event = emit_event(kind, title, body);
+    let _ = app.emit(EVENT_NOTIFY, &event);
 
-    if app.emit(EVENT_NOTIFY, &event).is_ok() {
-        return Ok(());
+    if let Err(error) = ensure_permission(app) {
+        tracing::warn!("Уведомления недоступны: {error}");
     }
 
-    tracing::debug!("Событие уведомления не доставлено, отправляю системное: {event}");
-
-    app.notification()
+    let result = app
+        .notification()
         .builder()
         .title(full_title(kind, title))
         .body(body)
-        .show()
-        .map_err(|error| crate::error::AppError::custom(format!("Уведомление не отправлено: {error}")))
+        .show();
+
+    match result {
+        Ok(()) => {
+            tracing::debug!("Системное уведомление отправлено: {title}");
+
+            Ok(())
+        }
+        Err(error) => Err(crate::error::AppError::custom(format!(
+            "Уведомление не отправлено: {error}"
+        ))),
+    }
 }
 
 #[cfg(test)]

@@ -25,19 +25,6 @@ const invokeMock = vi.fn(async (command: string, _args?: unknown) => {
     };
   }
 
-  if (command === "get_vpn_status") {
-    return {
-      state: "connected",
-      interface: "zapret",
-      endpoint: "1.2.3.4",
-      handshakeAt: 1,
-      bytesIn: 1,
-      bytesOut: 1,
-      uptimeSec: 1,
-      error: null,
-    };
-  }
-
   return null;
 });
 
@@ -134,42 +121,6 @@ describe("запуск игры с обходом", () => {
     });
 
     expect(invokeMock.mock.calls[0]?.[0]).toBe("launch_game");
-    expect(invokeMock).toHaveBeenCalledWith("launch_game", {
-      executablePath: expect.any(String),
-      launchArgs: null,
-      workingDir: expect.any(String),
-    });
-  });
-
-  it("для игры с режимом VPN сначала спрашивает про VPN", async () => {
-    const { result } = renderHook(() => useGameLauncher());
-
-    await act(async () => {
-      await result.current.launch(game({ bypassMode: "vpn" }));
-    });
-
-    expect(result.current.prompt?.kind).toBe("vpn");
-    expect(invokeMock).not.toHaveBeenCalledWith("launch_game", {
-      executablePath: expect.any(String),
-      launchArgs: null,
-      workingDir: expect.any(String),
-    });
-  });
-
-  it("после подтверждения подключает VPN и запускает игру", async () => {
-    const { result } = renderHook(() => useGameLauncher());
-
-    await act(async () => {
-      await result.current.launch(game({ bypassMode: "vpn" }));
-    });
-
-    await act(async () => {
-      await result.current.confirmPrompt();
-    });
-
-    expect(invokeMock).toHaveBeenCalledWith("connect_vpn_server", {
-      configId: "cfg-1",
-    });
     expect(invokeMock).toHaveBeenCalledWith("launch_game", {
       executablePath: expect.any(String),
       launchArgs: null,

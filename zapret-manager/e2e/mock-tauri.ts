@@ -254,6 +254,7 @@ export async function mockTauri(
           subscriptionUrl: null,
           servers: [],
         }),
+        tray_menu_ready: () => null,
         tray_menu_snapshot: () => ({
           state: "idle",
           activeStrategy: null,

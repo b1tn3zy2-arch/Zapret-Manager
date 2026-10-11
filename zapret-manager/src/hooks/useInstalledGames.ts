@@ -104,7 +104,6 @@ interface KnownGameMatch {
   cover: string | null;
   domainSettingsId: string | null;
   anticheat: string;
-  bypassMode: string | null;
 }
 
 async function enrichManualGames(): Promise<void> {
@@ -131,13 +130,6 @@ async function enrichManualGames(): Promise<void> {
           ? {}
           : { gameSettingsId: match.domainSettingsId }),
         anticheat: match.anticheat as NonNullable<InstalledGame["anticheat"]>,
-        ...(match.bypassMode === null
-          ? {}
-          : {
-              bypassMode: match.bypassMode as NonNullable<
-                InstalledGame["bypassMode"]
-              >,
-            }),
       });
     } catch {
       continue;

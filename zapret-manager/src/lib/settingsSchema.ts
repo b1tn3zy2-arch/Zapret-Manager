@@ -74,6 +74,7 @@ const generalSchema = z.object({
   minimizeToTray: z.boolean().default(DEFAULT_GENERAL.minimizeToTray),
   startMinimized: z.boolean().default(DEFAULT_GENERAL.startMinimized),
   showNotifications: z.boolean().default(DEFAULT_GENERAL.showNotifications),
+  enableLogs: z.boolean().default(DEFAULT_GENERAL.enableLogs),
   showNotificationsOnStart: z
     .boolean()
     .default(DEFAULT_GENERAL.showNotificationsOnStart),

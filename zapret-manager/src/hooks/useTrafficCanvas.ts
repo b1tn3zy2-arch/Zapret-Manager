@@ -174,10 +174,24 @@ export function useTrafficCanvas({
     observer.observe(canvas);
     resize();
 
+    let tail = 0;
+    let tailReady = false;
+
     const render = (): void => {
       const raw = pickSeries(buffer.current, dataKey);
       const values = applyEWMA(raw);
       const last = values[values.length - 1] ?? 0;
+
+      if (!tailReady) {
+        tail = last;
+        tailReady = true;
+      } else {
+        tail += (last - tail) * 0.18;
+      }
+
+      if (values.length > 1) {
+        values[values.length - 1] = tail;
+      }
 
       valueRef.current = last;
       maxRef.current = computeMax(values, maxRef.current);

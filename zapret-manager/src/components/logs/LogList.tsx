@@ -81,7 +81,7 @@ const LogList = forwardRef<LogListHandle, LogListProps>(function LogList(
     <div
       ref={parentRef}
       onScroll={handleScroll}
-      className="logs-container min-h-0 flex-1 overflow-y-auto overscroll-contain"
+      className="logs-container min-h-0 flex-1 scrollbar-none overflow-y-auto overscroll-contain"
     >
       <div style={{ height: virtualizer.getTotalSize(), position: "relative" }}>
         {items.map((item) => {

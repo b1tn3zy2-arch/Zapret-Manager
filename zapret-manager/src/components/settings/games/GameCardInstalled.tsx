@@ -1,9 +1,10 @@
 import { memo, useState } from "react";
 import { motion } from "framer-motion";
-import { MoreVertical } from "lucide-react";
+import { X } from "lucide-react";
 
 import { GameCoverImage } from "@/components/settings/games/GameCoverImage";
 import GamePlayOverlay from "@/components/settings/games/GamePlayOverlay";
+import { useI18n } from "@/i18n";
 import { useCardTilt } from "@/hooks/useCardTilt";
 import { formatRelativeTime } from "@/lib/format";
 import {
@@ -23,11 +24,10 @@ export interface GameCardInstalledProps {
   bypassLabel: string;
   bypassEnabled: boolean;
   launchLabel: string;
-  menuLabel: string;
   busy: boolean;
   motionDisabled: boolean;
   onLaunch: () => void;
-  onOpenMenu: () => void;
+  onRemove?: (() => void) | undefined;
 }
 
 function GameCardInstalled({
@@ -37,12 +37,12 @@ function GameCardInstalled({
   bypassLabel,
   bypassEnabled,
   launchLabel,
-  menuLabel,
   busy,
   motionDisabled,
   onLaunch,
-  onOpenMenu,
+  onRemove,
 }: GameCardInstalledProps) {
+  const { t } = useI18n();
   const [hovered, setHovered] = useState(false);
   const { containerRef, handleMouseMove, handleMouseLeave, rotateX, rotateY } =
     useCardTilt({
@@ -125,20 +125,22 @@ function GameCardInstalled({
                 : formatRelativeTime(game.lastLaunchedAt)}
             </p>
           </div>
-          <button
-            type="button"
-            aria-label={menuLabel}
-            onClick={(event) => {
-              event.stopPropagation();
-              onOpenMenu();
-            }}
-            className={cn(
-              "text-text-secondary hover:text-text-primary rounded-md p-1 transition-colors",
-              "hover:bg-glass-hover"
-            )}
-          >
-            <MoreVertical aria-hidden="true" className="size-4" />
-          </button>
+          {onRemove === undefined ? null : (
+            <button
+              type="button"
+              aria-label={t("settings.games.installed.removeManual")}
+              onClick={(event) => {
+                event.stopPropagation();
+                onRemove();
+              }}
+              className={cn(
+                "text-text-secondary hover:text-accent-danger rounded-md p-1 transition-colors",
+                "hover:bg-glass-hover opacity-0 group-hover:opacity-100"
+              )}
+            >
+              <X aria-hidden="true" className="size-4" />
+            </button>
+          )}
         </div>
         <GamePlayOverlay
           visible={hovered}

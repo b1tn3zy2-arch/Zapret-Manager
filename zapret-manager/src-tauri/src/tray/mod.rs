@@ -13,6 +13,7 @@ pub const EVENT_NAVIGATE_DASHBOARD: &str = "navigate-dashboard";
 pub const EVENT_NAVIGATE_STRATEGIES: &str = "navigate-strategies";
 pub const EVENT_NAVIGATE_LOGS: &str = "navigate-logs";
 pub const EVENT_NAVIGATE_SETTINGS: &str = "navigate-settings";
+pub const EVENT_NAVIGATE_ABOUT: &str = "navigate-about";
 
 pub use runtime::{
     apply_state, configure, create_tray, register, set_icon_state, show_window, snapshot,

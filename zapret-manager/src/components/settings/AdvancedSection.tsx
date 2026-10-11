@@ -1,15 +1,13 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { AlertTriangle } from "lucide-react";
 
 import DangerZone from "@/components/settings/DangerZone";
-import Dropdown from "@/components/settings/Dropdown";
 import EditableList from "@/components/settings/EditableList";
 import ResourcesSection from "@/components/settings/ResourcesSection";
 import SectionContainer from "@/components/settings/SectionContainer";
 import SettingRow from "@/components/settings/SettingRow";
 import { Button, Input, Text, Toggle } from "@/components/ui";
 import { useI18n } from "@/i18n";
-import { LOG_LEVEL_LABELS, LOG_LEVEL_VALUES } from "@/lib/constants";
 import {
   MAX_LOG_RETENTION_DAYS,
   MIN_LOG_RETENTION_DAYS,
@@ -18,12 +16,7 @@ import { verifyConfigs } from "@/hooks/useSystemInfo";
 import { cn, toErrorMessage } from "@/lib/utils";
 import { useLogsStore } from "@/stores/useLogsStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
-import type { ConfigCheckReport, LogLevel } from "@/types";
-
-const LEVEL_OPTIONS = LOG_LEVEL_VALUES.map((level) => ({
-  value: level,
-  labelKey: LOG_LEVEL_LABELS[level],
-}));
+import type { ConfigCheckReport } from "@/types";
 
 function clampRetention(value: string): number {
   const parsed = Number.parseInt(value, 10);
@@ -93,15 +86,6 @@ function AdvancedSection() {
 
   const [report, setReport] = useState<ConfigCheckReport | null>(null);
 
-  const levelOptions = useMemo(
-    () =>
-      LEVEL_OPTIONS.map((option) => ({
-        value: option.value,
-        label: t(option.labelKey),
-      })),
-    [t]
-  );
-
   const runVerify = async (): Promise<void> => {
     if (folder === "") {
       return;
@@ -162,20 +146,6 @@ function AdvancedSection() {
               );
             })}
           </div>
-        }
-      />
-
-      <SettingRow
-        label={t("settings.advanced.loggingLevel")}
-        control={
-          <Dropdown
-            label={t("settings.advanced.loggingLevel")}
-            value={advanced.loggingLevel}
-            options={levelOptions}
-            onChange={(loggingLevel: LogLevel) => {
-              updateAdvanced({ loggingLevel });
-            }}
-          />
         }
       />
 

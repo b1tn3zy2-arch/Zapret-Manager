@@ -204,13 +204,6 @@ export const LOG_LEVELS = [
   "error",
 ] as const satisfies readonly LogLevel[];
 
-export const LOG_LEVEL_VALUES = [
-  "debug",
-  "info",
-  "warn",
-  "error",
-] as const satisfies readonly LogLevel[];
-
 export const LOG_SOURCES = [
   "system",
   "strategy",

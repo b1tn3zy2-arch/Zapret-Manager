@@ -1,10 +1,9 @@
 import { useCallback } from "react";
 import { motion } from "framer-motion";
 
-import DashboardConnection from "@/components/dashboard/DashboardConnection";
+import ConnectionStrip from "@/components/dashboard/ConnectionStrip";
 import DashboardHero from "@/components/dashboard/DashboardHero";
 import DashboardPing from "@/components/dashboard/DashboardPing";
-import DashboardQuickActions from "@/components/dashboard/DashboardQuickActions";
 import DashboardRecentLogs from "@/components/dashboard/DashboardRecentLogs";
 import DashboardStats from "@/components/dashboard/DashboardStats";
 import { ROUTES } from "@/lib/constants";
@@ -13,6 +12,7 @@ import { useStrategyRunner } from "@/hooks/useStrategyRunner";
 import { useUptime } from "@/hooks/useUptime";
 import { useVpn } from "@/hooks/useVpn";
 import { useAppStore } from "@/stores/useAppStore";
+import { useSettingsStore } from "@/stores/useSettingsStore";
 import {
   useActiveStrategy,
   useConnectionStatus,
@@ -23,7 +23,6 @@ import { selectActiveConfig, useVpnStore } from "@/stores/useVpnStore";
 
 export default function DpiMode() {
   const setActivePage = useAppStore((state) => state.setActivePage);
-  const setDashboardMode = useAppStore((state) => state.setDashboardMode);
   const connectionStatus = useConnectionStatus();
   const activeStrategy = useActiveStrategy();
   const lastStrategy = useLastStrategy();
@@ -31,6 +30,9 @@ export default function DpiMode() {
   const activeVpnConfig = useVpnStore(selectActiveConfig);
   const vpnConnected = useVpnStore(
     (state) => state.status.state === "connected"
+  );
+  const logsEnabled = useSettingsStore(
+    (state) => state.settings.general.enableLogs
   );
 
   const { run, stop, isStarting, isStopping } = useStrategyRunner();
@@ -73,10 +75,6 @@ export default function DpiMode() {
     setActivePage(ROUTES.logs);
   }, [setActivePage]);
 
-  const handleOpenVpnSettings = useCallback((): void => {
-    setDashboardMode("vpn");
-  }, [setDashboardMode]);
-
   return (
     <motion.div
       variants={containerVariants}
@@ -93,7 +91,9 @@ export default function DpiMode() {
           isConnecting={isBusy}
           onConnect={handleConnect}
           onDisconnect={handleDisconnect}
-        />
+        >
+          <ConnectionStrip />
+        </DashboardHero>
       </motion.div>
 
       <motion.div variants={itemVariants} className="dashboard-lead">
@@ -101,27 +101,14 @@ export default function DpiMode() {
       </motion.div>
 
       <motion.div variants={itemVariants}>
-        <DashboardConnection />
-      </motion.div>
-
-      <motion.div variants={itemVariants}>
         <DashboardPing />
       </motion.div>
 
-      <motion.div variants={itemVariants} className="grid">
-        <DashboardQuickActions
-          lastStrategy={lastStrategy}
-          isActive={activeStrategy !== undefined}
-          isBusy={isBusy || vpnConnected}
-          onRun={handleConnect}
-          onStop={handleDisconnect}
-          onOpenVpnSettings={handleOpenVpnSettings}
-        />
-      </motion.div>
-
-      <motion.div variants={itemVariants} className="grid">
-        <DashboardRecentLogs onOpenAllLogs={handleOpenAllLogs} />
-      </motion.div>
+      {logsEnabled ? (
+        <motion.div variants={itemVariants} className="grid">
+          <DashboardRecentLogs onOpenAllLogs={handleOpenAllLogs} />
+        </motion.div>
+      ) : null}
     </motion.div>
   );
 }

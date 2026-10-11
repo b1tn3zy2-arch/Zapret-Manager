@@ -1,5 +1,7 @@
 import { nanoid } from "nanoid";
 import { create } from "zustand";
+
+import { useSettingsStore } from "@/stores/useSettingsStore";
 import { immer } from "zustand/middleware/immer";
 
 import { DEFAULT_LOG_BUFFER_SIZE } from "@/lib/defaults";
@@ -49,6 +51,10 @@ function toEntry(entry: NewLogEntry): LogEntry {
   };
 }
 
+function logsEnabled(): boolean {
+  return useSettingsStore.getState().settings.general.enableLogs;
+}
+
 export const useLogsStore = create<LogsStoreState>()(
   immer((set) => ({
     logs: [],
@@ -58,6 +64,10 @@ export const useLogsStore = create<LogsStoreState>()(
 
     addLog: (entry) =>
       set((state) => {
+        if (!logsEnabled()) {
+          return;
+        }
+
         state.pendingBatch.push(toEntry(entry));
 
         if (state.pendingBatch.length >= FLUSH_THRESHOLD) {
@@ -67,6 +77,10 @@ export const useLogsStore = create<LogsStoreState>()(
 
     addLogs: (entries) =>
       set((state) => {
+        if (!logsEnabled()) {
+          return;
+        }
+
         for (const entry of entries) {
           state.pendingBatch.push(toEntry(entry));
         }

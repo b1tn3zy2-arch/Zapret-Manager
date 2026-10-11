@@ -5,9 +5,7 @@ import "@/styles/fonts.css";
 import "@/styles/globals.css";
 import "@/styles/container-queries.css";
 
-import App from "@/app/App";
-import Providers from "@/app/providers";
-import TrayMenuRoot from "@/tray/TrayMenuRoot";
+import Root from "@/app/Root";
 import { mark } from "@/lib/perf";
 
 const container = document.getElementById("root");
@@ -41,6 +39,6 @@ if (isTrayView) {
 
 ReactDOM.createRoot(container).render(
   <React.StrictMode>
-    <Providers>{isTrayView ? <TrayMenuRoot /> : <App />}</Providers>
+    <Root trayView={isTrayView} />
   </React.StrictMode>
 );

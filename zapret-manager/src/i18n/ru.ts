@@ -236,6 +236,15 @@ export const ru = {
       deleteItemTitle: "Удалить",
     },
     general: {
+      enableLogs: "Вести логи",
+      enableLogsHint: "Журнал событий, раздел «Логи» и блок последних событий",
+      testNotification: "Уведомления",
+      testNotificationHint: "Проверить, что системные уведомления работают",
+      testNotificationAction: "Проверить уведомление",
+      testNotificationTitle: "Zapret Manager",
+      testNotificationBody: "Тестовое уведомление — всё работает",
+      testNotificationSent: "Тестовое уведомление отправлено",
+      testNotificationFailed: "Уведомление не отправлено: {error}",
       title: "Общие",
       description: "Язык, автозапуск, поведение окна и уведомления",
       language: "Язык интерфейса",
@@ -462,11 +471,9 @@ export const ru = {
           starting: "Запуск {name}…",
           active: "Обход активен, игра запускается",
           failed: "Не удалось запустить игру",
-          vpnStarting: "Подключаю VPN перед запуском игры…",
-          killSwitchWarning:
-            "Внимание: kill switch VPN может блокировать игру — Outlast Trials и другие онлайн-игры с античитом often ломаются",
           bypassLost: "Обход перестал работать после запуска {name}",
           strategyStarting: "Запускаю стратегию обхода…",
+          bypassAutoOn: "Включаю обход для {name}",
           strategyFailed: "Стратегия не запустилась: {error}",
           strategyNotRunning: "процесс обхода не найден",
           count: "Запусков: {count}",
@@ -481,25 +488,10 @@ export const ru = {
           noStrategyTitle: "Нет стратегии",
           noStrategyBody:
             "Не выбрана стратегия обхода. Откройте раздел Стратегии, запустите любую стратегию и повторите запуск игры.",
-          vpnTitle: "Нужен VPN",
-          vpnBody:
-            "{name} недоступна через DPI-обход: сервис заблокирован для региона или использует античит. Подключить VPN и запустить игру?",
-          vpnKillSwitchBody:
-            "{name} требует VPN. Внимание: включённый kill switch может блокировать игру — его лучше выключить в настройках VPN.",
-          noVpnTitle: "Нет VPN-конфига",
-          noVpnBody:
-            "Для {name} нужен настоящий VPN: DPI-обход не помогает. Добавьте конфиг в разделе Настройки → VPN или запустите игру без обхода.",
           confirm: "Запустить",
           cancel: "Отмена",
         },
-        context: {
-          menu: "Действия с игрой",
-          openFolder: "Открыть папку с игрой",
-          configure: "Настроить обход",
-          changePath: "Изменить путь к .exe",
-          changeCover: "Выбрать обложку",
-          remove: "Убрать из списка",
-        },
+        removeManual: "Убрать из списка",
         add: {
           action: "Добавить игру",
           title: "Добавить игру вручную",
@@ -868,6 +860,9 @@ export const ru = {
     subtitle: "Управление обходом блокировок",
     tray: {
       disconnected: "Отключено",
+      vpnConnect: "Подключить VPN",
+      vpnDisconnect: "Отключить VPN",
+      about: "О приложении",
       active: "Активно",
       run: "Запустить последнюю стратегию",
       stop: "Остановить",
@@ -914,6 +909,7 @@ export const ru = {
     },
     stats: {
       total: "Всего стратегий",
+      idle: "Простаивают",
       active: "Активных",
       errors: "Ошибок за сессию",
       uptime: "Время работы",

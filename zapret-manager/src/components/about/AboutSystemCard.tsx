@@ -15,9 +15,6 @@ export default function AboutSystemCard({ info, t }: AboutSystemCardProps) {
       : [
           [t("about.os"), formatOsLabel(info)],
           [t("about.arch"), info.arch],
-          [t("about.webview"), info.webviewVersion],
-          [t("about.tauri"), info.tauriVersion],
-          [t("about.rust"), info.rustVersion],
         ];
 
   return (

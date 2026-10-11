@@ -3,7 +3,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::{Duration, Instant};
 
 use tauri::tray::{TrayIcon, TrayIconBuilder, TrayIconEvent};
-use tauri::{AppHandle, Emitter, Manager, Wry};
+use tauri::{AppHandle, Emitter, Manager, Runtime, Wry};
 
 use crate::error::{AppError, AppResult};
 use crate::tray::icons::{load_icon, tooltip};
@@ -134,7 +134,7 @@ pub fn update_tooltip_and_menu(app: &AppHandle) -> AppResult<()> {
     Ok(())
 }
 
-pub fn snapshot(app: &AppHandle) -> (TrayState, Option<String>, Option<String>) {
+pub fn snapshot<R: Runtime>(app: &AppHandle<R>) -> (TrayState, Option<String>, Option<String>) {
     app.try_state::<TrayStateHolder>()
         .map(|holder| holder.snapshot())
         .unwrap_or((TrayState::Idle, None, None))

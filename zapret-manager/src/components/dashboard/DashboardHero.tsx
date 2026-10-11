@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 import { Badge, Button, Text } from "@/components/ui";
 import { GlassPanel } from "@/components/shared/GlassPanel";
 import StatusOrb from "@/components/dashboard/StatusOrb";
@@ -23,6 +25,7 @@ const BADGE_VARIANT = {
 
 export interface DashboardHeroProps {
   status: ConnectionStatus;
+  children?: ReactNode;
   strategyName: string | null;
   vpnLabel: string | null;
   uptime: string;
@@ -33,6 +36,7 @@ export interface DashboardHeroProps {
 
 function DashboardHero({
   status,
+  children,
   strategyName,
   vpnLabel,
   uptime,
@@ -69,6 +73,8 @@ function DashboardHero({
             {isActive && uptime !== "--:--:--" ? ` · ${uptime}` : ""}
           </Text>
         </div>
+
+        {children}
 
         {isActive ? (
           <Button

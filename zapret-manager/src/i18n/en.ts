@@ -238,6 +238,16 @@ export const en = {
       deleteItemTitle: "Remove",
     },
     general: {
+      enableLogs: "Keep logs",
+      enableLogsHint:
+        "Event journal, the Logs section and the recent events block",
+      testNotification: "Notifications",
+      testNotificationHint: "Check that system notifications work",
+      testNotificationAction: "Test notification",
+      testNotificationTitle: "Zapret Manager",
+      testNotificationBody: "Test notification — everything works",
+      testNotificationSent: "Test notification sent",
+      testNotificationFailed: "Notification not sent: {error}",
       title: "General",
       description: "Language, autostart, window behaviour and notifications",
       language: "Interface language",
@@ -462,11 +472,9 @@ export const en = {
           starting: "Launching {name}…",
           active: "Bypass is active, launching the game",
           failed: "Could not launch the game",
-          vpnStarting: "Connecting VPN before launching the game…",
-          killSwitchWarning:
-            "Heads up: VPN kill switch can block the game — Outlast Trials and other online games often break with it",
           bypassLost: "Bypass stopped working after launching {name}",
           strategyStarting: "Starting the bypass strategy…",
+          bypassAutoOn: "Enabling bypass for {name}",
           strategyFailed: "The strategy did not start: {error}",
           strategyNotRunning: "bypass process was not found",
           count: "Launches: {count}",
@@ -481,25 +489,10 @@ export const en = {
           noStrategyTitle: "No strategy",
           noStrategyBody:
             "No bypass strategy is selected. Open the Strategies section, start any strategy, then launch the game again.",
-          vpnTitle: "VPN required",
-          vpnBody:
-            "{name} cannot be reached through DPI bypass: the service is region-blocked or uses anti-cheat. Connect VPN and launch the game?",
-          vpnKillSwitchBody:
-            "{name} requires a VPN. Note: an enabled kill switch may block the game — turn it off in VPN settings.",
-          noVpnTitle: "No VPN config",
-          noVpnBody:
-            "{name} needs a real VPN: DPI bypass does not help. Add a config in Settings → VPN or launch the game without a bypass.",
           confirm: "Launch",
           cancel: "Cancel",
         },
-        context: {
-          menu: "Game actions",
-          openFolder: "Open game folder",
-          configure: "Configure bypass",
-          changePath: "Change .exe path",
-          changeCover: "Choose cover",
-          remove: "Remove from list",
-        },
+        removeManual: "Remove from list",
         add: {
           action: "Add game",
           title: "Add a game manually",
@@ -865,6 +858,9 @@ export const en = {
     subtitle: "Bypass management",
     tray: {
       disconnected: "Disconnected",
+      vpnConnect: "Connect VPN",
+      vpnDisconnect: "Disconnect VPN",
+      about: "About",
       active: "Active",
       run: "Run last strategy",
       stop: "Stop",
@@ -911,6 +907,7 @@ export const en = {
     },
     stats: {
       total: "Total strategies",
+      idle: "Idle",
       active: "Active",
       errors: "Errors this session",
       uptime: "Uptime",

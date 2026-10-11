@@ -15,7 +15,7 @@ export interface InstalledGamesGridProps {
   launchingId: string | null;
   motionDisabled: boolean;
   onLaunch: (game: InstalledGame) => void;
-  onOpenMenu: (game: InstalledGame) => void;
+  onRemove: (game: InstalledGame) => void;
 }
 
 export default function InstalledGamesGrid({
@@ -24,7 +24,7 @@ export default function InstalledGamesGrid({
   launchingId,
   motionDisabled,
   onLaunch,
-  onOpenMenu,
+  onRemove,
 }: InstalledGamesGridProps) {
   const { t } = useI18n();
 
@@ -58,15 +58,18 @@ export default function InstalledGamesGrid({
                 : "settings.games.installed.badge.bypassOff"
             )}
             launchLabel={t("settings.games.installed.launch.action")}
-            menuLabel={t("settings.games.installed.context.menu")}
             busy={launchingId === game.id}
             motionDisabled={motionDisabled}
             onLaunch={() => {
               onLaunch(game);
             }}
-            onOpenMenu={() => {
-              onOpenMenu(game);
-            }}
+            onRemove={
+              game.manual === true
+                ? () => {
+                    onRemove(game);
+                  }
+                : undefined
+            }
           />
         </motion.div>
       ))}

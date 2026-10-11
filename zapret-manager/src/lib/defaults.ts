@@ -34,6 +34,7 @@ export const DEFAULT_GENERAL: GeneralSettings = {
   minimizeToTray: true,
   startMinimized: false,
   showNotifications: true,
+  enableLogs: true,
   showNotificationsOnStart: false,
   showNotificationsOnStop: false,
   showUpdateNotifications: true,

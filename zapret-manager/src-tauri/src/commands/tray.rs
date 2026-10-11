@@ -72,25 +72,44 @@ pub struct TrayMenuSnapshot {
 
 #[tauri::command]
 pub fn tray_menu_snapshot(app: tauri::AppHandle) -> TrayMenuSnapshot {
-    let (state, active_strategy, vpn_name) = crate::tray::snapshot(&app);
+    tray_snapshot(&app)
+}
 
-    TrayMenuSnapshot {
-        state: match state {
-            TrayState::Idle => "idle",
-            TrayState::Connecting => "connecting",
-            TrayState::Connected => "connected",
-            TrayState::Vpn => "vpn",
-            TrayState::Error => "error",
+pub fn tray_snapshot<R: tauri::Runtime>(app: &tauri::AppHandle<R>) -> TrayMenuSnapshot {
+    let (state, active_strategy, vpn_name) = crate::tray::snapshot(app);
+
+    TrayMenuSnapshot::from_parts(state, active_strategy, vpn_name)
+}
+
+impl TrayMenuSnapshot {
+    pub fn from_parts(
+        state: TrayState,
+        active_strategy: Option<String>,
+        vpn_name: Option<String>,
+    ) -> Self {
+        Self {
+            state: match state {
+                TrayState::Idle => "idle",
+                TrayState::Connecting => "connecting",
+                TrayState::Connected => "connected",
+                TrayState::Vpn => "vpn",
+                TrayState::Error => "error",
+            }
+            .to_string(),
+            active_strategy,
+            vpn_name,
         }
-        .to_string(),
-        active_strategy,
-        vpn_name,
     }
 }
 
 #[tauri::command]
 pub fn tray_menu_hide(app: tauri::AppHandle) {
     crate::tray_menu::hide(&app);
+}
+
+#[tauri::command]
+pub fn tray_menu_ready() {
+    crate::tray_menu::mark_ready();
 }
 
 #[tauri::command]
@@ -114,9 +133,19 @@ pub fn tray_menu_action(app: tauri::AppHandle, action: String) -> AppResult<()> 
 
             Ok(())
         }
-        "dashboard" | "strategies" | "logs" | "settings" => {
+        "dashboard" | "strategies" | "logs" | "settings" | "about" => {
             crate::tray::show_window(&app);
             let _ = app.emit(navigation_event(&action), ());
+
+            Ok(())
+        }
+        "vpn-connect" => {
+            let _ = app.emit(crate::tray::EVENT_CONNECT_VPN, ());
+
+            Ok(())
+        }
+        "vpn-disconnect" => {
+            let _ = app.emit(crate::tray::EVENT_DISCONNECT_VPN, ());
 
             Ok(())
         }
@@ -141,6 +170,7 @@ fn navigation_event(action: &str) -> &'static str {
         "strategies" => crate::tray::EVENT_NAVIGATE_STRATEGIES,
         "logs" => crate::tray::EVENT_NAVIGATE_LOGS,
         "settings" => crate::tray::EVENT_NAVIGATE_SETTINGS,
+        "about" => crate::tray::EVENT_NAVIGATE_ABOUT,
         _ => crate::tray::EVENT_NAVIGATE_DASHBOARD,
     }
 }
