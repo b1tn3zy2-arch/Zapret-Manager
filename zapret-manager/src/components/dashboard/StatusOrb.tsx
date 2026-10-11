@@ -1,7 +1,9 @@
 import { motion } from "framer-motion";
 import { Lock, ShieldCheck, TriangleAlert, WifiOff } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 import { useBloom } from "@/hooks/useBloom";
+import { useMotionPreference } from "@/hooks/useMotionPreference";
 import { useI18n } from "@/i18n";
 import { CONNECTION_LABELS } from "@/lib/constants";
 import type { ConnectionStatus } from "@/lib/constants";
@@ -64,12 +66,28 @@ export interface StatusOrbProps {
 
 function StatusOrb({ status, size }: StatusOrbProps) {
   const { t } = useI18n();
+  const { reduced } = useMotionPreference();
   const palette = PALETTE[status];
   const isActive = ACTIVE_STATUSES.includes(status);
   const { Icon } = palette;
   const bloomProfile = BLOOM_BY_STATUS[status];
   const bloom = useBloom(bloomProfile.color, bloomProfile.delta);
   const diameter = size ?? undefined;
+  const [burstKey, setBurstKey] = useState(0);
+  const previousStatus = useRef<ConnectionStatus | null>(null);
+
+  useEffect(() => {
+    const wasActive =
+      previousStatus.current === "connected" ||
+      previousStatus.current === "vpn";
+    const isNowActive = status === "connected" || status === "vpn";
+
+    if (isNowActive && previousStatus.current !== null && !wasActive) {
+      setBurstKey((key) => key + 1);
+    }
+
+    previousStatus.current = status;
+  }, [status]);
 
   return (
     <div
@@ -91,7 +109,7 @@ function StatusOrb({ status, size }: StatusOrbProps) {
           style={{ boxShadow: bloom.boxShadow }}
         />
       ) : null}
-      {isActive ? (
+      {isActive && !reduced ? (
         <>
           <motion.span
             aria-hidden="true"
@@ -100,9 +118,9 @@ function StatusOrb({ status, size }: StatusOrbProps) {
               border: `1px solid ${palette.ring}`,
               willChange: "transform, opacity",
             }}
-            animate={{ scale: [1, 1.18, 1], opacity: [0.7, 0, 0.7] }}
+            animate={{ scale: [1, 1.22, 1], opacity: [0.85, 0, 0.85] }}
             transition={{
-              duration: 2.4,
+              duration: 2.2,
               repeat: Infinity,
               ease: ANIMATION.easeInOutExpo,
             }}
@@ -114,14 +132,25 @@ function StatusOrb({ status, size }: StatusOrbProps) {
               border: `1px solid ${palette.ring}`,
               willChange: "transform, opacity",
             }}
-            animate={{ scale: [1, 1.3, 1], opacity: [0.5, 0, 0.5] }}
+            animate={{ scale: [1, 1.34, 1], opacity: [0.6, 0, 0.6] }}
             transition={{
-              duration: 2.4,
+              duration: 2.2,
               repeat: Infinity,
-              delay: 0.6,
+              delay: 0.55,
               ease: ANIMATION.easeInOutExpo,
             }}
           />
+          {burstKey > 0 && !reduced ? (
+            <motion.span
+              key={burstKey}
+              aria-hidden="true"
+              className="absolute inset-0 rounded-full"
+              style={{ border: `2px solid ${palette.ring}` }}
+              initial={{ scale: 0.85, opacity: 0.9 }}
+              animate={{ scale: 1.55, opacity: 0 }}
+              transition={{ duration: 0.9, ease: "easeOut" }}
+            />
+          ) : null}
         </>
       ) : null}
 

@@ -904,7 +904,7 @@ export const en = {
     },
     ping: {
       title: "Service latency",
-      hint: "TCP availability on port 443, refreshed every 5 seconds",
+      hint: "TCP availability on port 443, refreshed every 2 seconds",
     },
     recentLogs: {
       title: "Recent events",

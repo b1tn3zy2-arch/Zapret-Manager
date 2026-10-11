@@ -49,10 +49,10 @@ function NavButtonImpl({
         aria-label={label}
         whileTap={{ scale: 0.98 }}
         className={cn(
-          "group relative flex h-11 w-full items-center gap-3 rounded-md",
+          "group relative flex h-11 w-full items-center gap-3 rounded-lg",
           "transition-colors duration-200 ease-out",
           "hover:bg-glass-hover",
-          active && "bg-glass-hover",
+          active && (collapsed ? "bg-accent-primary/12" : "bg-glass-hover"),
           collapsed ? "justify-center" : "px-3"
         )}
       >
@@ -143,7 +143,7 @@ function Sidebar() {
       animate={{ width }}
       initial={false}
       transition={prefersReducedMotion ? { duration: 0 } : SIDEBAR_TRANSITION}
-      className="bg-bg-secondary/40 flex shrink-0 flex-col overflow-visible"
+      className="flex shrink-0 flex-col overflow-visible"
     >
       <div
         className={cn(
@@ -151,7 +151,6 @@ function Sidebar() {
           collapsed ? "justify-center" : "justify-end"
         )}
       >
-        {" "}
         <button
           type="button"
           onMouseDown={(event) => {

@@ -332,6 +332,7 @@ export async function mockTauri(
           },
         ],
         game_cover: () => null,
+        game_steam_cover: () => null,
         import_game_cover: () => "imported-cover.jpg",
         launch_game: () => 4242,
         hide_main_window: () => null,

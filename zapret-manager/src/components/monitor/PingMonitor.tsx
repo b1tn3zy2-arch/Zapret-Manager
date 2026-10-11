@@ -9,6 +9,7 @@ import {
   CHART_PULSE_PERIOD_MS,
   MONITOR_PING_HISTORY_SIZE,
   PING_HOSTS,
+  PING_INTERVAL_MS,
 } from "@/lib/constants";
 import {
   buildSparklineFill,
@@ -113,7 +114,7 @@ function PingCard({ label, points, title }: PingCardProps) {
       <span className="text-text-tertiary text-[10px]">
         {points.length === 0
           ? t("monitor.ping.waiting")
-          : pluralMeasurements(points.length, t)}
+          : pluralMeasurements(Math.round(60000 / PING_INTERVAL_MS), t)}
       </span>
     </GlassPanel>
   );

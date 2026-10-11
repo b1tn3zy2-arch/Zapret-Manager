@@ -42,6 +42,7 @@ export const BUILTIN_GAMES: readonly GameSettings[] = [
     ipRanges: [],
     ports: [
       27015, 27016, 27017, 27018, 27019, 27020, 27031, 27036, 3478, 4379, 4380,
+      7777, 7780, 7781, 7790, 7800,
     ],
     autoRestore: true,
     createBackup: true,

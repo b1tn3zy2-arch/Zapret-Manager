@@ -59,7 +59,7 @@ function DashboardHero({
     <GlassPanel
       variant="outlined"
       padding="lg"
-      className="flex min-h-[200px] items-center gap-8"
+      className="flex min-h-[200px] items-center gap-8 border-0"
       style={{ backgroundColor: "var(--color-bg-primary)" }}
     >
       <StatusOrb status={status} />

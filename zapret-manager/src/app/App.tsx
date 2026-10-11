@@ -156,7 +156,9 @@ export default function App() {
         </div>
       ) : null}
 
-      {import.meta.env.DEV ? <PerfMonitor /> : null}
+      {import.meta.env.DEV && import.meta.env.VITE_PERF_MONITOR === "1" ? (
+        <PerfMonitor />
+      ) : null}
       <NotificationToaster />
     </Layout>
   );

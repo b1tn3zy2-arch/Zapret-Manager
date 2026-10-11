@@ -12,6 +12,8 @@ use crate::error::{AppError, AppResult};
 pub const COVERS_SUBDIR: &str = "covers";
 pub const COVER_URL_TEMPLATE: &str =
     "https://cdn.cloudflare.steamstatic.com/steam/apps/{appid}/library_600x900.jpg";
+pub const STEAM_SEARCH_URL: &str =
+    "https://store.steampowered.com/api/storesearch/?term={term}&l=english&cc=US";
 pub const MAX_COVER_BYTES: u64 = 4 * 1024 * 1024;
 
 #[tauri::command]
@@ -29,17 +31,22 @@ pub async fn game_cover(
     let Some(appid) = appid.map(|value| value.trim().to_string()) else {
         return Ok(None);
     };
-    let cached = covers_dir(&app)?.join(format!("{appid}.jpg"));
+
+    load_appid_cover(&app, &appid).await
+}
+
+async fn load_appid_cover(app: &AppHandle, appid: &str) -> AppResult<Option<String>> {
+    let cached = covers_dir(app)?.join(format!("{appid}.jpg"));
 
     if cached.is_file() {
         return read_file_as_data_uri(&cached);
     }
 
-    if let Some(data) = read_cover(&app, &appid)? {
+    if let Some(data) = read_cover(app, appid)? {
         return Ok(Some(data));
     }
 
-    let url = COVER_URL_TEMPLATE.replace("{appid}", &appid);
+    let url = COVER_URL_TEMPLATE.replace("{appid}", appid);
 
     match fetch_cover(&url).await {
         Ok(bytes) => {
@@ -49,6 +56,120 @@ pub async fn game_cover(
         }
         Err(_) => Ok(None),
     }
+}
+
+#[tauri::command]
+pub async fn game_steam_cover(app: AppHandle, name: String) -> AppResult<Option<String>> {
+    let term = steam_search_term(&name);
+
+    if term.len() < 2 {
+        return Ok(None);
+    }
+
+    let key = sha_name(Path::new(&format!("steam:{}", normalize_name(&term))));
+    let index = covers_dir(&app)?.join(format!("{key}.index"));
+
+    if let Ok(cached) = std::fs::read_to_string(&index) {
+        let appid = cached.trim();
+
+        if appid.is_empty() {
+            return Ok(None);
+        }
+
+        return load_appid_cover(&app, appid).await;
+    }
+
+    let url = STEAM_SEARCH_URL.replace("{term}", &encode_term(&term));
+
+    let Ok(response) = reqwest::get(&url).await else {
+        return Ok(None);
+    };
+
+    if !response.status().is_success() {
+        return Ok(None);
+    }
+
+    let Ok(body) = response.text().await else {
+        return Ok(None);
+    };
+
+    let Some(appid) = pick_steam_appid(&body, &term) else {
+        return Ok(None);
+    };
+
+    let _ = std::fs::write(&index, &appid);
+
+    load_appid_cover(&app, &appid).await
+}
+
+pub fn steam_search_term(name: &str) -> String {
+    let base = name.split(['—', '–']).next().unwrap_or(name).trim();
+
+    base.trim_end_matches(['.', ' ']).to_string()
+}
+
+fn normalize_name(value: &str) -> String {
+    value
+        .chars()
+        .filter(|character| character.is_ascii_alphanumeric())
+        .map(|character| character.to_ascii_lowercase())
+        .collect()
+}
+
+pub fn pick_steam_appid(json: &str, query: &str) -> Option<String> {
+    let parsed: serde_json::Value = serde_json::from_str(json).ok()?;
+    let items = parsed.get("items")?.as_array()?;
+    let normalized_query = normalize_name(query);
+
+    if normalized_query.is_empty() {
+        return None;
+    }
+
+    let mut fallback: Option<String> = None;
+
+    for item in items {
+        let Some(id) = item.get("id") else {
+            continue;
+        };
+        let candidate = match id {
+            serde_json::Value::Number(number) => number.to_string(),
+            serde_json::Value::String(text) => text.clone(),
+            _ => continue,
+        };
+        let Some(name) = item.get("name").and_then(|value| value.as_str()) else {
+            continue;
+        };
+        let normalized = normalize_name(name);
+
+        if normalized == normalized_query {
+            return Some(candidate);
+        }
+
+        if fallback.is_none()
+            && (normalized.contains(&normalized_query)
+                || normalized_query.contains(&normalized))
+        {
+            fallback = Some(candidate);
+        }
+    }
+
+    fallback
+}
+
+fn encode_term(term: &str) -> String {
+    let mut encoded = String::new();
+
+    for byte in term.bytes() {
+        match byte {
+            b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'-' | b'_' | b'.' | b'~' => {
+                encoded.push(byte as char);
+            }
+            b' ' => encoded.push_str("%20"),
+            _ => encoded.push_str(&format!("%{byte:02X}")),
+        }
+    }
+
+    encoded
 }
 
 #[tauri::command]

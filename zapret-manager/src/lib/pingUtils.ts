@@ -70,7 +70,10 @@ function project(
   const values = usable.map((point) => point.latencyMs ?? 0);
   const min = Math.min(...values);
   const max = Math.max(...values);
-  const span = max - min || 1;
+  const average = values.reduce((sum, value) => sum + value, 0) / values.length;
+  const span = Math.max(max - min, Math.max(average * 0.35, 24));
+  const top = (min + max) / 2 + span / 2;
+  const bottom = top - span;
   const usableHeight = height - SPARKLINE_PADDING * 2;
   const step = width / (usable.length - 1);
 
@@ -82,7 +85,8 @@ function project(
       y:
         SPARKLINE_PADDING +
         usableHeight -
-        ((value - min) / span) * usableHeight,
+        ((Math.min(Math.max(value, bottom), top) - bottom) / span) *
+          usableHeight,
     };
   });
 }

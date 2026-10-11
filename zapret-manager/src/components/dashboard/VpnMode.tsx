@@ -95,7 +95,7 @@ export default function VpnMode() {
       <GlassPanel
         variant="outlined"
         padding="lg"
-        className="flex flex-col items-center gap-5"
+        className="flex flex-col items-center gap-5 border-0"
         style={{ backgroundColor: "var(--color-bg-primary)" }}
       >
         <ConnectButton

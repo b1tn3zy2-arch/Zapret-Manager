@@ -20,12 +20,60 @@ interface CoverFallbackProps {
   className?: string | undefined;
 }
 
+const BASE64_MARKER = "base64,";
+
+function decodePngSize(
+  source: string
+): { width: number; height: number } | null {
+  const index = source.indexOf(BASE64_MARKER);
+
+  if (index === -1 || !source.startsWith("data:image/png")) {
+    return null;
+  }
+
+  try {
+    const start = index + BASE64_MARKER.length;
+    const head = atob(source.slice(start, start + 32));
+
+    if (head.length < 24) {
+      return null;
+    }
+
+    const width =
+      (head.charCodeAt(16) << 24) |
+      (head.charCodeAt(17) << 16) |
+      (head.charCodeAt(18) << 8) |
+      head.charCodeAt(19);
+    const height =
+      (head.charCodeAt(20) << 24) |
+      (head.charCodeAt(21) << 16) |
+      (head.charCodeAt(22) << 8) |
+      head.charCodeAt(23);
+
+    if (width <= 0 || height <= 0) {
+      return null;
+    }
+
+    return { width, height };
+  } catch {
+    return null;
+  }
+}
+
 export function GameCoverImage({ game, className, alt }: GameCoverImageProps) {
   const [sources, setSources] = useState<Record<string, CoverSource>>({});
   const source = sources[game.id] ?? null;
 
   useEffect(() => {
     let active = true;
+
+    const store = (next: CoverSource): void => {
+      setSources((previous) =>
+        previous[game.id]?.src === next.src
+          ? previous
+          : { ...previous, [game.id]: next }
+      );
+    };
 
     void invoke<string | null>("game_cover", {
       appid: game.appid ?? null,
@@ -37,11 +85,21 @@ export function GameCoverImage({ game, className, alt }: GameCoverImageProps) {
         }
 
         if (value !== null) {
-          setSources((previous) =>
-            previous[game.id]?.src === value
-              ? previous
-              : { ...previous, [game.id]: { src: value, kind: "cover" } }
-          );
+          store({ src: value, kind: "cover" });
+
+          return;
+        }
+
+        const steamCover = await invoke<string | null>("game_steam_cover", {
+          name: game.name,
+        }).catch(() => null);
+
+        if (!active) {
+          return;
+        }
+
+        if (steamCover !== null) {
+          store({ src: steamCover, kind: "cover" });
 
           return;
         }
@@ -51,11 +109,7 @@ export function GameCoverImage({ game, className, alt }: GameCoverImageProps) {
         }).catch(() => null);
 
         if (active && icon !== null) {
-          setSources((previous) =>
-            previous[game.id]?.src === icon
-              ? previous
-              : { ...previous, [game.id]: { src: icon, kind: "icon" } }
-          );
+          store({ src: icon, kind: "icon" });
         }
       })
       .catch(() => undefined);
@@ -63,30 +117,41 @@ export function GameCoverImage({ game, className, alt }: GameCoverImageProps) {
     return () => {
       active = false;
     };
-  }, [game.appid, game.coverUrl, game.executablePath, game.id]);
+  }, [game.appid, game.coverUrl, game.executablePath, game.id, game.name]);
 
   if (source === null) {
     return <CoverFallback name={game.name} className={className} />;
   }
 
   if (source.kind === "icon") {
+    const size = decodePngSize(source.src);
+    const small = size !== null && Math.max(size.width, size.height) <= 72;
+
     return (
       <span
         className={cn("relative block size-full overflow-hidden", className)}
       >
-        <img
-          aria-hidden="true"
-          alt=""
-          src={source.src}
-          className="absolute inset-0 size-full scale-125 object-cover opacity-40 blur-2xl"
-        />
-        <span className="from-bg-secondary/70 via-bg-primary/40 to-bg-primary/85 absolute inset-0 bg-gradient-to-b" />
+        <span className="from-bg-secondary via-bg-secondary/60 to-bg-primary absolute inset-0 bg-gradient-to-b" />
         <img
           alt={alt}
           src={source.src}
           loading="lazy"
           decoding="async"
-          className="relative z-10 size-full object-contain p-[20%] drop-shadow-[0_10px_24px_rgba(0,0,0,0.55)]"
+          style={
+            small && size !== null
+              ? {
+                  width: size.width * 2,
+                  height: size.height * 2,
+                  imageRendering: "pixelated",
+                }
+              : undefined
+          }
+          className={cn(
+            "absolute inset-0 m-auto drop-shadow-[0_8px_20px_rgba(0,0,0,0.55)]",
+            small
+              ? "max-h-[42%] max-w-[42%] object-contain"
+              : "size-full object-contain p-[16%]"
+          )}
         />
       </span>
     );
