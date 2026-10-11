@@ -6,6 +6,7 @@ use super::game_registry::{parse_icon_target, uninstall_entries};
 use super::game_sources_stores::{scan_store_folder, to_game};
 
 pub const SYSTEM_DEPTH: usize = 2;
+pub const GAME_ROOT_DEPTH: usize = 4;
 const STORE_FOLDERS: &[(&str, GamePlatform, GameSource)] = &[
     (
         "EA Games",
@@ -82,6 +83,50 @@ fn registry_game(entry: super::game_registry::UninstallEntry) -> Option<Installe
     game.name = entry.display_name;
 
     Some(game)
+}
+
+pub fn user_home_roots() -> Vec<PathBuf> {
+    let Some(home) = std::env::var_os("USERPROFILE") else {
+        return Vec::new();
+    };
+    let home = PathBuf::from(home);
+
+    ["Downloads", "Desktop", "Documents", "Games"]
+        .iter()
+        .map(|name| home.join(name))
+        .filter(|path| path.is_dir())
+        .collect()
+}
+
+pub fn scan_user_home_games() -> Vec<InstalledGame> {
+    let mut result = Vec::new();
+
+    for root in user_home_roots() {
+        for game_root in super::game_heuristics::collect_game_roots(
+            &root,
+            super::game_heuristics::GAME_ROOTS_DEPTH,
+        ) {
+            result.extend(scan_game_root(&game_root));
+        }
+    }
+
+    result
+}
+
+pub fn scan_game_root(root: &Path) -> Vec<InstalledGame> {
+    super::game_heuristics::collect_candidates_relaxed(root, GAME_ROOT_DEPTH)
+        .into_iter()
+        .map(|executable| {
+            let install_path = super::game_heuristics::install_root(&executable);
+
+            InstalledGame::new(
+                GamePlatform::Custom,
+                GameSource::KnownFolder,
+                &install_path.to_string_lossy(),
+                &executable.to_string_lossy(),
+            )
+        })
+        .collect()
 }
 
 pub fn known_folders() -> Vec<PathBuf> {

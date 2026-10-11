@@ -7,6 +7,7 @@
 
   --color-accent-primary: #00ff88;
   --color-accent-secondary: #00d4ff;
+  --color-accent-success: #22c55e;
   --color-accent-danger: #ff3b5c;
   --color-accent-warning: #ffb800;
 
@@ -14,6 +15,7 @@
   --color-accent-secondary-rgb: 0 212 255;
   --color-accent-danger-rgb: 255 59 92;
   --color-accent-warning-rgb: 255 184 0;
+  --color-accent-success-rgb: 34 197 94;
   --color-text-primary-rgb: 255 255 255;
 
   --color-text-primary: #ffffff;
@@ -62,6 +64,7 @@
   --color-bg-tertiary: #ebebee;
 
   --color-accent-primary: #00a855;
+  --color-accent-success: #16a34a;
   --color-accent-secondary: #0077cc;
   --color-accent-danger: #cc1f3d;
   --color-accent-warning: #b87400;

@@ -78,7 +78,10 @@ function dedupe(games: InstalledGame[]): InstalledGame[] {
   for (const game of games) {
     const seen = result.some(
       (item) =>
-        item.executablePath.toLowerCase() === game.executablePath.toLowerCase()
+        item.executablePath.toLowerCase() ===
+          game.executablePath.toLowerCase() ||
+        (game.appid !== undefined && item.appid === game.appid) ||
+        item.name.toLowerCase() === game.name.toLowerCase()
     );
 
     if (!seen) {

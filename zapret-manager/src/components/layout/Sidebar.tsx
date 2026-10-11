@@ -64,6 +64,9 @@ function NavButtonImpl({
     <li className="relative">
       <motion.button
         type="button"
+        onMouseDown={(event) => {
+          event.preventDefault();
+        }}
         onClick={onSelect}
         aria-current={active ? "page" : undefined}
         aria-label={label}
@@ -204,6 +207,9 @@ export default function Sidebar() {
         {" "}
         <button
           type="button"
+          onMouseDown={(event) => {
+            event.preventDefault();
+          }}
           onClick={toggleSidebar}
           aria-label={collapsed ? t("sidebar.expand") : t("sidebar.collapse")}
           aria-expanded={!collapsed}

@@ -1,18 +1,19 @@
-use std::cmp::Reverse;
 use std::path::{Path, PathBuf};
 
 use serde::Deserialize;
 use winapi::um::winreg::{HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE};
 
-use super::game_heuristics::collect_candidates;
+use super::game_heuristics::{collect_candidates_relaxed, has_unreal_layout};
 use super::game_model::{GamePlatform, GameSource, InstalledGame};
 use super::game_registry::{read_registry_string, VIEW_32, VIEW_64};
 use super::game_scanner_vdf::{parse_acf, parse_install_dir, parse_library_paths};
 
-pub const STORE_DEPTH: usize = 2;
+pub const STORE_DEPTH: usize = 4;
 const STEAM_KEY: &str = r"SOFTWARE\Valve\Steam";
 const STEAM_WOW_KEY: &str = r"SOFTWARE\WOW6432Node\Valve\Steam";
 const EPIC_MANIFEST: &str = r"C:\ProgramData\Epic\UnrealEngineLauncher\LauncherInstalled.dat";
+const NON_GAME_STORE_TITLES: &[&str] = &["obs studio", "wallpaper engine"];
+const NON_GAME_APPIDS: &[&str] = &["1905180", "431960"];
 
 #[derive(Deserialize)]
 #[serde(rename_all = "PascalCase")]
@@ -30,6 +31,12 @@ struct EpicEntry {
     install_location: String,
 }
 
+fn same_path(left: &Path, right: &Path) -> bool {
+    left.to_string_lossy()
+        .replace('/', "\\")
+        .eq_ignore_ascii_case(&right.to_string_lossy().replace('/', "\\"))
+}
+
 pub fn scan_steam() -> Vec<InstalledGame> {
     let Some(root) = steam_root() else {
         return Vec::new();
@@ -40,7 +47,7 @@ pub fn scan_steam() -> Vec<InstalledGame> {
         for path in parse_library_paths(&content) {
             let candidate = PathBuf::from(path);
 
-            if candidate.is_dir() && !libraries.contains(&candidate) {
+            if candidate.is_dir() && !libraries.iter().any(|item| same_path(item, &candidate)) {
                 libraries.push(candidate);
             }
         }
@@ -97,6 +104,10 @@ fn steam_game(steamapps: &Path, manifest_path: &Path) -> Option<InstalledGame> {
     let install_path = steamapps.join("common").join(folder);
 
     if !install_path.is_dir() {
+        return None;
+    }
+
+    if is_non_game(name.to_ascii_lowercase().as_str(), &appid) {
         return None;
     }
 
@@ -164,12 +175,17 @@ fn epic_from_path(manifest_path: &Path) -> Vec<InstalledGame> {
         .collect()
 }
 
+fn is_non_game(name: &str, appid: &str) -> bool {
+    NON_GAME_STORE_TITLES.iter().any(|title| name.contains(title))
+        || NON_GAME_APPIDS.contains(&appid)
+}
+
 pub fn scan_store_folder(
     folder: &Path,
     platform: GamePlatform,
     source: GameSource,
 ) -> Vec<InstalledGame> {
-    collect_candidates(folder, STORE_DEPTH)
+    collect_candidates_relaxed(folder, STORE_DEPTH)
         .into_iter()
         .filter_map(|executable| {
             let install_path = executable.parent()?.to_path_buf();
@@ -180,9 +196,9 @@ pub fn scan_store_folder(
 }
 
 pub fn pick_executable(folder: &Path, name_hint: &str) -> Option<PathBuf> {
-    collect_candidates(folder, STORE_DEPTH)
+    collect_candidates_relaxed(folder, STORE_DEPTH)
         .into_iter()
-        .max_by_key(|path| executable_priority(path, name_hint))
+        .max_by_key(|path| executable_score(path, name_hint))
 }
 
 pub fn to_game(
@@ -199,7 +215,7 @@ pub fn to_game(
     )
 }
 
-pub fn executable_priority(path: &Path, game_name: &str) -> Reverse<usize> {
+pub fn executable_score(path: &Path, game_name: &str) -> u64 {
     let stem = path
         .file_stem()
         .and_then(|value| value.to_str())
@@ -210,8 +226,25 @@ pub fn executable_priority(path: &Path, game_name: &str) -> Reverse<usize> {
         .chars()
         .filter(|item| item.is_alphanumeric())
         .collect();
+    let mut score = 0;
 
-    Reverse(usize::from(name.is_empty() || !stem.contains(&name)))
+    if !name.is_empty() && stem.replace('-', "").contains(&name) {
+        score += 100;
+    }
+
+    if has_unreal_layout(path) {
+        score += 50;
+    }
+
+    if stem.contains("shipping") {
+        score += 25;
+    }
+
+    let megabytes = std::fs::metadata(path)
+        .map(|value| value.len() / (1024 * 1024))
+        .unwrap_or(0);
+
+    score + megabytes.min(30)
 }
 
 #[cfg(test)]

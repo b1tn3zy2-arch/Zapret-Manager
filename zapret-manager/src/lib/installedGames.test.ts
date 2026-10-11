@@ -58,10 +58,15 @@ describe("mergeScannedGames", () => {
   it("сортирует игры по названию", () => {
     const merged = mergeScannedGames(
       [
-        game({ name: "Zeta", executablePath: "D:\\Games\\zeta.exe" }),
+        game({
+          name: "Zeta",
+          appid: "1",
+          executablePath: "D:\\Games\\zeta.exe",
+        }),
         game({
           id: "x",
           name: "Alpha",
+          appid: "2",
           executablePath: "D:\\Games\\alpha.exe",
         }),
       ],

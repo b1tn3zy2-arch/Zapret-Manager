@@ -53,7 +53,6 @@ export const DEFAULT_APPEARANCE: AppearanceSettings = {
   theme: "dark",
   density: "normal",
   animations: true,
-  reduceMotion: false,
   animateTrayIcon: true,
   postProcessing: DEFAULT_POST_PROCESSING,
 };

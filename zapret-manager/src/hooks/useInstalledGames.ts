@@ -1,3 +1,4 @@
+import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { useCallback, useEffect, useMemo } from "react";
 
@@ -97,9 +98,67 @@ export function useInstalledGames(): UseInstalledGamesResult {
   );
 }
 
+interface KnownGameMatch {
+  appid: string;
+  name: string;
+  cover: string | null;
+  domainSettingsId: string | null;
+  anticheat: string;
+  bypassMode: string | null;
+}
+
+async function enrichManualGames(): Promise<void> {
+  const store = useInstalledGamesStore.getState();
+  const pending = store.games.filter(
+    (game) => game.manual === true && game.appid === undefined
+  );
+
+  for (const game of pending) {
+    try {
+      const match = await invoke<KnownGameMatch | null>("match_known_game", {
+        name: game.name,
+      });
+
+      if (match === null) {
+        continue;
+      }
+
+      useInstalledGamesStore.getState().updateGame(game.id, {
+        appid: match.appid,
+        name: match.name,
+        ...(match.cover === null ? {} : { coverUrl: match.cover }),
+        ...(match.domainSettingsId === null
+          ? {}
+          : { gameSettingsId: match.domainSettingsId }),
+        anticheat: match.anticheat as NonNullable<InstalledGame["anticheat"]>,
+        ...(match.bypassMode === null
+          ? {}
+          : {
+              bypassMode: match.bypassMode as NonNullable<
+                InstalledGame["bypassMode"]
+              >,
+            }),
+      });
+    } catch {
+      continue;
+    }
+  }
+}
+
+export async function matchManualGame(
+  name: string
+): Promise<KnownGameMatch | null> {
+  try {
+    return await invoke<KnownGameMatch | null>("match_known_game", { name });
+  } catch {
+    return null;
+  }
+}
+
 export function useInstalledGamesStartup(): void {
   useEffect(() => {
     startInstalledGamesScan();
+    void enrichManualGames();
 
     const subscription = listen<GameScanProgress>(GAME_SCAN_EVENT, (event) => {
       useInstalledGamesStore.getState().setScanProgress(event.payload);

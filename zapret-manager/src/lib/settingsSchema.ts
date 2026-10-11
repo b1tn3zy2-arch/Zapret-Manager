@@ -89,7 +89,6 @@ const appearanceSchema = z.object({
   theme: themeSchema.default(DEFAULT_APPEARANCE.theme),
   density: densitySchema.default(DEFAULT_APPEARANCE.density),
   animations: z.boolean().default(DEFAULT_APPEARANCE.animations),
-  reduceMotion: z.boolean().default(DEFAULT_APPEARANCE.reduceMotion),
   animateTrayIcon: z.boolean().default(DEFAULT_APPEARANCE.animateTrayIcon),
   postProcessing: postProcessingSchema,
 });

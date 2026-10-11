@@ -7,6 +7,7 @@ import Dropdown from "@/components/settings/Dropdown";
 import { Input } from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
 import { useI18n } from "@/i18n";
+import { matchManualGame } from "@/hooks/useInstalledGames";
 import { manualGame, PLATFORM_LABEL_KEYS } from "@/lib/installedGames";
 import type { GameSettings, InstalledGame } from "@/types";
 
@@ -60,14 +61,39 @@ export default function AddGameDialog({
       return;
     }
 
-    onAdd(
-      manualGame(
-        name,
-        path.trim(),
-        platform,
-        bypassId === "" ? undefined : bypassId
-      )
+    const created = manualGame(
+      name,
+      path.trim(),
+      platform,
+      bypassId === "" ? undefined : bypassId
     );
+
+    void matchManualGame(created.name).then((match) => {
+      if (match === null) {
+        onAdd(created);
+
+        return;
+      }
+
+      onAdd({
+        ...created,
+        appid: match.appid,
+        name: match.name,
+        ...(match.cover === null ? {} : { coverUrl: match.cover }),
+        ...(match.domainSettingsId === null
+          ? {}
+          : { gameSettingsId: match.domainSettingsId }),
+        anticheat: match.anticheat as NonNullable<InstalledGame["anticheat"]>,
+        ...(match.bypassMode === null
+          ? {}
+          : {
+              bypassMode: match.bypassMode as NonNullable<
+                InstalledGame["bypassMode"]
+              >,
+            }),
+      });
+    });
+
     reset();
     onClose();
   };

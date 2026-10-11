@@ -74,7 +74,6 @@ export interface AppearanceSettings {
   theme: ThemeMode;
   density: DensityMode;
   animations: boolean;
-  reduceMotion: boolean;
   animateTrayIcon: boolean;
   postProcessing: PostProcessingSettings;
 }

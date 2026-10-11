@@ -1,7 +1,7 @@
 import { useI18n } from "@/i18n";
 import { memo, useCallback, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Gamepad2 } from "lucide-react";
+import { Gamepad2, Sparkles } from "lucide-react";
 
 import CardStatsBars from "@/components/strategies/game/CardStatsBars";
 import PlayOverlay from "@/components/strategies/game/PlayOverlay";
@@ -166,6 +166,19 @@ function StrategyGameCardImpl({
                 willChange: "background",
               }}
             />
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 rounded-xl opacity-70"
+              style={{
+                background: `radial-gradient(120% 90% at 18% 0%, ${palette.glow} 0%, transparent 58%)`,
+              }}
+            />
+            <Sparkles
+              aria-hidden="true"
+              className="pointer-events-none absolute -right-8 -bottom-8 size-44 opacity-[0.07]"
+              style={{ color: palette.solid }}
+              strokeWidth={1}
+            />
 
             <motion.span
               className="absolute inset-0 rounded-xl"
@@ -177,7 +190,7 @@ function StrategyGameCardImpl({
                   {isRunning ? (
                     <span className="text-accent-primary border-accent-primary/40 bg-accent-primary/10 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium">
                       <span className="bg-accent-primary inline-block size-1.5 animate-pulse rounded-full" />
-                      Запущена
+                      {t("strategies.card.runningBadge")}
                     </span>
                   ) : null}
                 </span>
@@ -189,6 +202,11 @@ function StrategyGameCardImpl({
                   <span className="text-text-tertiary truncate font-mono text-[10px]">
                     {strategy.filename}
                   </span>
+                  {strategy.description.trim() === "" ? null : (
+                    <span className="text-text-secondary mt-1 line-clamp-2 text-[11px] leading-snug">
+                      {strategy.description}
+                    </span>
+                  )}
                 </span>
 
                 <span className="block">

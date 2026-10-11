@@ -1,9 +1,9 @@
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { Power } from "lucide-react";
 
 import { Text } from "@/components/ui";
 import { useI18n } from "@/i18n";
-import { ANIMATION } from "@/lib/constants";
+import { useMotionPreference } from "@/hooks/useMotionPreference";
 import { SWITCH_STEP_LABELS } from "@/lib/vpnConstants";
 import { cn } from "@/lib/utils";
 import type { SwitchStep } from "@/types";
@@ -17,10 +17,6 @@ export interface ConnectButtonProps {
   onClick: () => void;
 }
 
-const PULSE_KEYFRAMES = {
-  scale: [1, 1.05, 1],
-};
-
 export default function ConnectButton({
   connected,
   connecting,
@@ -30,7 +26,9 @@ export default function ConnectButton({
   onClick,
 }: ConnectButtonProps) {
   const { t } = useI18n();
-  const isBusy = connecting;
+  const { reduced } = useMotionPreference();
+  const isBusy = connecting || isSwitching;
+  const state = connected ? "on" : "off";
 
   const caption = isBusy
     ? switchStep !== null
@@ -52,35 +50,56 @@ export default function ConnectButton({
         aria-busy={isBusy}
         disabled={isSwitching}
         onClick={onClick}
-        animate={connected ? PULSE_KEYFRAMES : { scale: 1 }}
-        transition={
-          connected
-            ? { duration: 2, repeat: Infinity, ease: "easeInOut" }
-            : { duration: ANIMATION.normal }
-        }
-        whileHover={{ scale: 1.03 }}
-        whileTap={{ scale: 0.97 }}
+        {...(reduced
+          ? {}
+          : { whileHover: { scale: 1.03 }, whileTap: { scale: 0.94 } })}
         className={cn(
-          "bg-bg-secondary/60 flex items-center justify-center rounded-full border-2",
-          "size-[clamp(160px,18vw,200px)] transition-colors",
-          "hover:border-accent-primary/60 duration-300",
+          "bg-bg-secondary/60 relative flex items-center justify-center rounded-full border-2",
+          "size-[clamp(160px,18vw,200px)]",
+          "transition-[border-color,background-color,box-shadow] duration-300",
           "disabled:cursor-not-allowed disabled:opacity-60",
           connected
-            ? "border-accent-success bg-accent-success/10"
+            ? "border-accent-success bg-accent-success/10 shadow-[0_0_48px_rgb(var(--color-accent-success-rgb)/0.28)]"
             : isBusy
-              ? "border-accent-warning"
-              : "border-glass-border"
+              ? "border-accent-warning shadow-[0_0_32px_rgb(var(--color-accent-warning-rgb)/0.25)]"
+              : "border-glass-border hover:border-accent-primary/60"
         )}
       >
-        <Power
-          aria-hidden="true"
-          className={cn(
-            "size-16 transition-colors duration-300",
-            isBusy && "animate-spin",
-            connected ? "text-accent-success" : "text-text-secondary"
-          )}
-          strokeWidth={1.75}
-        />
+        <AnimatePresence>
+          <motion.span
+            key={state}
+            aria-hidden="true"
+            initial={reduced ? false : { scale: 0.7, opacity: 0.6 }}
+            animate={{ scale: 1.25, opacity: 0 }}
+            transition={{ duration: reduced ? 0 : 0.5, ease: "easeOut" }}
+            className={cn(
+              "pointer-events-none absolute inset-0 rounded-full border-2",
+              connected ? "border-accent-success" : "border-glass-border"
+            )}
+          />
+        </AnimatePresence>
+
+        <motion.span
+          animate={
+            reduced || !connected
+              ? { scale: 1 }
+              : {
+                  scale: [1, 1.06, 1],
+                  transition: { duration: 2.4, repeat: Infinity },
+                }
+          }
+          className="flex items-center justify-center"
+        >
+          <Power
+            aria-hidden="true"
+            className={cn(
+              "size-16 transition-colors duration-300",
+              isBusy && "animate-spin",
+              connected ? "text-accent-success" : "text-text-secondary"
+            )}
+            strokeWidth={1.75}
+          />
+        </motion.span>
       </motion.button>
 
       <Text

@@ -61,6 +61,7 @@ pub fn run() {
             commands::monitor::is_monitoring,
             commands::monitor_snapshot::write_monitor_snapshot,
             commands::game_scanner::scan_installed_games,
+            commands::game_scanner::match_known_game,
             commands::game_launcher::launch_game,
             commands::game_launcher::hide_main_window,
             commands::game_launcher::is_game_running,

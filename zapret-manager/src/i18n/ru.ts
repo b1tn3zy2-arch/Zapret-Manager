@@ -268,7 +268,6 @@ export const ru = {
       density: "Плотность интерфейса",
       animations: "Анимации",
       animationsHint: "Отключает переходы и появление карточек",
-      reduceMotion: "Следовать системному режиму уменьшения движения",
       trayIcon: "Анимировать иконку в трее",
       postProcessing: "Пост-обработка",
       postProcessingHint: "Свечение, виньетка и зернистость поверх интерфейса",
@@ -705,6 +704,7 @@ export const ru = {
       run: "Запустить",
       running: "Запущена",
       detailsAria: "Подробнее о стратегии {name}",
+      runningBadge: "Запущена",
       runAria: "Запустить {name}",
       stopAria: "Остановить {name}",
       outlastHint:
@@ -966,6 +966,7 @@ export const ru = {
       subscriptionClear: "Очистить подписку",
       subscriptionCount: "Серверов в подписке: {count}",
       refreshSubscription: "Обновить подписку",
+      refreshAll: "Обновить подписку и пинги",
       coreTitle: "Ядро подключения",
       coreInstalled: "Ядро Xray установлено и готово к работе",
       coreMissing: "Ядро Xray ещё не установлено",

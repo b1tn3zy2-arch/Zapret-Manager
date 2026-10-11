@@ -8,6 +8,9 @@ use super::game_model::{InstalledGame, GameSource};
 pub const MIN_EXE_BYTES: u64 = 50 * 1024 * 1024;
 pub const MARKED_EXE_BYTES: u64 = 8 * 1024 * 1024;
 pub const MAX_CANDIDATES: usize = 400;
+pub const TRUSTED_MIN_BYTES: u64 = 1024 * 1024;
+pub const MAX_GAME_ROOTS: usize = 80;
+pub const GAME_ROOTS_DEPTH: usize = 3;
 
 const SKIP_NAME_PARTS: &[&str] = &[
     "uninstall",
@@ -33,6 +36,28 @@ const SKIP_NAME_PARTS: &[&str] = &[
     "runtime",
     "installer",
     "monitor",
+    "crashreportclient",
+    "unrealeditor",
+    "epicwebhelper",
+    "eossdk",
+];
+
+const RELAXED_SKIP_NAME_PARTS: &[&str] = &[
+    "uninstall",
+    "unins",
+    "crashpad",
+    "prereq",
+    "redist",
+    "vcredist",
+    "dxsetup",
+    "dotnetfx",
+    "unrealeditor",
+    "crashreportclient",
+    "epicwebhelper",
+    "eossdk",
+    "eacsetup",
+    "anticheatsetup",
+    "vconsole",
 ];
 
 const SKIP_FOLDER_NAMES: &[&str] = &[
@@ -63,6 +88,21 @@ const SKIP_PATH_PARTS: &[&str] = &[
     "epic online services",
     "windows defender",
     "\\$recycle.bin",
+    "\\engine\\binaries\\",
+    "\\node_modules\\",
+    "\\.git\\",
+];
+
+const PRUNED_DIRS: &[&str] = &[
+    "node_modules",
+    ".git",
+    "target",
+    "dist",
+    "build",
+    "__pycache__",
+    ".venv",
+    "appdata",
+    "zapret-discord-youtube",
 ];
 
 const GAME_MARKERS: &[&str] = &[
@@ -135,7 +175,7 @@ pub fn is_candidate_executable(path: &Path) -> bool {
     let Some(parent) = path.parent() else {
         return false;
     };
-    let marked = has_game_markers(parent);
+    let marked = has_game_markers(parent) || has_unreal_layout(path);
 
     if !marked && !has_name_affinity(path) {
         return false;
@@ -191,7 +231,83 @@ fn has_name_affinity(executable: &Path) -> bool {
         && (stem_alnum.contains(&folder_alnum) || folder_alnum.contains(&stem_alnum))
 }
 
+pub fn has_unreal_layout(path: &Path) -> bool {
+    let lowered = path.to_string_lossy().to_ascii_lowercase();
+
+    lowered.contains("\\binaries\\win64\\")
+}
+
+pub fn is_pruned_dir(path: &Path) -> bool {
+    let name = path
+        .file_name()
+        .and_then(|value| value.to_str())
+        .unwrap_or_default()
+        .to_ascii_lowercase();
+
+    PRUNED_DIRS.contains(&name.as_str())
+}
+
+pub fn is_game_root(dir: &Path) -> bool {
+    dir.join("UnityPlayer.dll").is_file()
+        || dir.join("Engine").join("Binaries").is_dir()
+        || dir.join("REEngine").is_dir()
+        || dir.join("Binaries").join("Win64").is_dir()
+        || dir.join("Content").join("Paks").is_dir()
+        || has_content_bundle(dir)
+}
+
+pub fn collect_game_roots(root: &Path, depth: usize) -> Vec<PathBuf> {
+    if !root.is_dir() {
+        return Vec::new();
+    }
+
+    WalkDir::new(root)
+        .max_depth(depth)
+        .into_iter()
+        .filter_entry(|entry| {
+            !is_excluded_path(entry.path()) && !is_pruned_dir(entry.path())
+        })
+        .filter_map(Result::ok)
+        .filter(|entry| entry.file_type().is_dir())
+        .filter(|entry| is_game_root(entry.path()))
+        .map(|entry| entry.path().to_path_buf())
+        .take(MAX_GAME_ROOTS)
+        .collect()
+}
+
+pub fn install_root(executable: &Path) -> PathBuf {
+    let mut current = executable
+        .parent()
+        .map(Path::to_path_buf)
+        .unwrap_or_default();
+
+    loop {
+        let name = current
+            .file_name()
+            .and_then(|value| value.to_str())
+            .unwrap_or_default()
+            .to_ascii_lowercase();
+
+        if name != "win64" && name != "binaries" {
+            return current;
+        }
+
+        match current.parent() {
+            Some(parent) => current = parent.to_path_buf(),
+            None => return current,
+        }
+    }
+}
+
 pub fn collect_candidates(root: &Path, depth: usize) -> Vec<PathBuf> {
+    collect(root, depth, false)
+}
+
+pub fn collect_candidates_relaxed(root: &Path, depth: usize) -> Vec<PathBuf> {
+    collect(root, depth, true)
+}
+
+fn collect(root: &Path, depth: usize, relaxed: bool) -> Vec<PathBuf> {
     if !root.is_dir() {
         return Vec::new();
     }
@@ -202,10 +318,40 @@ pub fn collect_candidates(root: &Path, depth: usize) -> Vec<PathBuf> {
         .filter_entry(|entry| !is_excluded_path(entry.path()))
         .filter_map(Result::ok)
         .filter(|entry| entry.file_type().is_file())
-        .filter(|entry| is_candidate_executable(entry.path()))
+        .filter(|entry| {
+            if relaxed {
+                is_relaxed_executable(entry.path())
+            } else {
+                is_candidate_executable(entry.path())
+            }
+        })
         .map(|entry| entry.path().to_path_buf())
         .take(MAX_CANDIDATES)
         .collect()
+}
+
+pub fn is_relaxed_executable(path: &Path) -> bool {
+    let name = file_name(path).to_ascii_lowercase();
+    let is_exe = path
+        .extension()
+        .and_then(|value| value.to_str())
+        .map(|value| value.eq_ignore_ascii_case("exe"))
+        .unwrap_or(false);
+
+    if !is_exe || is_excluded_path(path) {
+        return false;
+    }
+
+    if RELAXED_SKIP_NAME_PARTS
+        .iter()
+        .any(|part| name.contains(part))
+    {
+        return false;
+    }
+
+    std::fs::metadata(path)
+        .map(|value| value.len() >= TRUSTED_MIN_BYTES)
+        .unwrap_or(false)
 }
 
 fn file_name(path: &Path) -> String {

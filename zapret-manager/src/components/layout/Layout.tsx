@@ -33,7 +33,7 @@ export default function Layout({ children }: LayoutProps) {
             paddingRight:
               "max(var(--space-xl), env(safe-area-inset-right, 0px))",
             paddingBottom:
-              "max(var(--space-lg), env(safe-area-inset-bottom, 0px))",
+              "max(clamp(32px, 6vh, 96px), env(safe-area-inset-bottom, 0px))",
             paddingLeft: "max(var(--space-xl), env(safe-area-inset-left, 0px))",
           }}
         >

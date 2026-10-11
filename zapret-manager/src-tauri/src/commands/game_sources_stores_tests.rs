@@ -27,10 +27,24 @@ fn write_marker(folder: &Path) {
 
 #[test]
 fn test_executable_priority_prefers_matching_stem() {
-    let matching = executable_priority(Path::new("D:\\Portal\\portal.exe"), "Portal");
-    let other = executable_priority(Path::new("D:\\Portal\\hl2.exe"), "Portal");
+    let matching = executable_score(Path::new("D:\\Portal\\portal.exe"), "Portal");
+    let other = executable_score(Path::new("D:\\Portal\\hl2.exe"), "Portal");
 
     assert!(matching > other);
+}
+
+#[test]
+fn test_executable_priority_prefers_unreal_shipping_binary() {
+    let shipping = executable_score(
+        Path::new("C:\\Game\\OPP\\Binaries\\Win64\\TOTClient-Win64-Shipping.exe"),
+        "The Outlast Trials",
+    );
+    let launcher = executable_score(
+        Path::new("C:\\Game\\start_protected_game.exe"),
+        "The Outlast Trials",
+    );
+
+    assert!(shipping > launcher);
 }
 
 #[test]

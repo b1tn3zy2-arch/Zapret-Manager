@@ -9,6 +9,7 @@ use super::game_sources_registry::{scan_gog, scan_gog_folders, scan_ubisoft};
 use super::game_sources_stores::{scan_epic, scan_steam};
 use super::game_sources_system::{
     scan_known_folders, scan_store_folders, scan_uninstall_registry, scan_user_folders,
+    scan_user_home_games,
 };
 use crate::error::{AppError, AppResult};
 
@@ -18,6 +19,32 @@ pub const MAX_SCANNED_GAMES: usize = 200;
 struct ScanStep {
     source: GameSource,
     run: fn(&[String]) -> Vec<InstalledGame>,
+}
+
+#[derive(Debug, Clone, serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct KnownGameMatch {
+    pub appid: String,
+    pub name: String,
+    pub cover: Option<String>,
+    pub domain_settings_id: Option<String>,
+    pub anticheat: String,
+    pub bypass_mode: Option<String>,
+}
+
+#[tauri::command]
+pub fn match_known_game(app: AppHandle, name: String) -> Option<KnownGameMatch> {
+    let known = super::game_known::load_known_games(&app);
+    let entry = known.by_name(&name)?;
+
+    Some(KnownGameMatch {
+        appid: entry.appid.clone(),
+        name: entry.name.clone(),
+        cover: entry.cover.clone(),
+        domain_settings_id: entry.domain_settings_id.clone(),
+        anticheat: super::game_known::anticheat_of(entry).as_str().to_string(),
+        bypass_mode: entry.bypass_mode.clone(),
+    })
 }
 
 #[tauri::command]
@@ -100,7 +127,13 @@ fn scan_steps() -> Vec<ScanStep> {
         },
         ScanStep {
             source: GameSource::KnownFolder,
-            run: |_| scan_known_folders(),
+            run: |_| {
+                let mut games = scan_known_folders();
+
+                games.extend(scan_user_home_games());
+
+                games
+            },
         },
         ScanStep {
             source: GameSource::UserFolder,

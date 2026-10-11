@@ -151,19 +151,6 @@ function AppearanceSection() {
         />
 
         <SettingRow
-          label={t("settings.appearance.reduceMotion")}
-          control={
-            <Toggle
-              ariaLabel={t("settings.appearance.reduceMotion")}
-              checked={appearance.reduceMotion}
-              onChange={(reduceMotion) => {
-                updateAppearance({ reduceMotion });
-              }}
-            />
-          }
-        />
-
-        <SettingRow
           label={t("settings.appearance.trayIcon")}
           control={
             <Toggle

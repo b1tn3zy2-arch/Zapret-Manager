@@ -24,14 +24,8 @@ function applyDensity(density: DensityMode): void {
   root.style.setProperty("--density-scale", String(DENSITY_SCALE[density]));
 }
 
-function applyMotion(animations: boolean, reduceMotion: boolean): void {
+function applyMotion(animations: boolean): void {
   document.documentElement.dataset.animations = animations ? "on" : "off";
-
-  if (reduceMotion) {
-    document.documentElement.dataset.systemMotion = "reduce";
-  } else {
-    delete document.documentElement.dataset.systemMotion;
-  }
 }
 
 export function useAppearance(): void {
@@ -42,10 +36,6 @@ export function useAppearance(): void {
   const animations = useSettingsStore(
     (state) => state.settings.appearance.animations
   );
-  const reduceMotion = useSettingsStore(
-    (state) => state.settings.appearance.reduceMotion
-  );
-
   useEffect(() => {
     applyTheme(theme);
 
@@ -70,6 +60,6 @@ export function useAppearance(): void {
   }, [density]);
 
   useEffect(() => {
-    applyMotion(animations, reduceMotion);
-  }, [animations, reduceMotion]);
+    applyMotion(animations);
+  }, [animations]);
 }

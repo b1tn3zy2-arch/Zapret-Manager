@@ -72,3 +72,4 @@ fn test_registry_game_uses_icon_path_when_location_missing() {
     assert_eq!(game.map(|item| item.name).as_deref(), Some("Hollow Knight"));
     let _ = fs::remove_dir_all(&folder);
 }
+
