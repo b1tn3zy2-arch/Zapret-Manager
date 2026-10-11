@@ -181,3 +181,7 @@ fn sha_name(path: &Path) -> String {
 #[cfg(test)]
 #[path = "game_covers_tests.rs"]
 mod tests;
+#[tauri::command]
+pub fn game_exe_icon(path: String) -> Option<String> {
+    super::game_icons::exe_icon_data_uri(std::path::Path::new(&path))
+}

@@ -1,5 +1,6 @@
 pub mod game_covers;
 pub mod game_heuristics;
+pub mod game_icons;
 pub mod game_known;
 pub mod game_launcher;
 pub mod game_model;

@@ -68,6 +68,7 @@ pub fn run() {
             commands::game_launcher::close_game,
             commands::game_covers::game_cover,
             commands::game_covers::import_game_cover,
+            commands::game_covers::game_exe_icon,
             commands::updater::check_for_updates,
             commands::updater_download::download_update,
             commands::updater_apply::install_update,

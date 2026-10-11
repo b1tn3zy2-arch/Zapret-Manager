@@ -26,12 +26,30 @@ export function GameCoverImage({ game, className, alt }: GameCoverImageProps) {
       appid: game.appid ?? null,
       cover: game.coverUrl ?? null,
     })
-      .then((value) => {
-        if (active && value !== null) {
+      .then(async (value) => {
+        if (!active) {
+          return;
+        }
+
+        if (value !== null) {
           setCovers((previous) =>
             previous[game.id] === value
               ? previous
               : { ...previous, [game.id]: value }
+          );
+
+          return;
+        }
+
+        const icon = await invoke<string | null>("game_exe_icon", {
+          path: game.executablePath,
+        }).catch(() => null);
+
+        if (active && icon !== null) {
+          setCovers((previous) =>
+            previous[game.id] === icon
+              ? previous
+              : { ...previous, [game.id]: icon }
           );
         }
       })
