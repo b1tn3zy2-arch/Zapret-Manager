@@ -1,5 +1,4 @@
-import { AnimatePresence, motion } from "framer-motion";
-import type { Variants } from "framer-motion";
+import { motion } from "framer-motion";
 
 import StrategyCard from "@/components/strategies/StrategyCard";
 import { StrategyGameCardItem } from "@/components/strategies/game/StrategyGameCard";
@@ -12,8 +11,6 @@ export interface StrategyCollectionProps {
   tiltDisabled: boolean;
   particlesDisabled: boolean;
   motionDisabled: boolean;
-  containerVariants: Variants;
-  cardVariants: Variants;
   onFlip: (id: string) => void;
   onRun: (strategy: Strategy) => void;
   onStop: (strategy: Strategy) => void;
@@ -27,8 +24,6 @@ function StrategyCollection({
   tiltDisabled,
   particlesDisabled,
   motionDisabled,
-  containerVariants,
-  cardVariants,
   onFlip,
   onRun,
   onStop,
@@ -54,35 +49,32 @@ function StrategyCollection({
   }
 
   return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-      className="cards-container card-grid"
-    >
-      <AnimatePresence mode="popLayout">
-        {cards.map((card) => (
-          <motion.div
-            key={card.strategy.id}
-            layout
-            variants={cardVariants}
-            exit="exit"
-          >
-            <StrategyGameCardItem
-              card={card}
-              flipped={flippedId === card.strategy.id}
-              tiltDisabled={tiltDisabled}
-              particlesDisabled={particlesDisabled}
-              motionDisabled={motionDisabled}
-              onFlip={onFlip}
-              onRun={onRun}
-              onStop={onStop}
-              onOpenFolder={onOpenFolder}
-            />
-          </motion.div>
-        ))}
-      </AnimatePresence>
-    </motion.div>
+    <div className="cards-container card-grid">
+      {cards.map((card, index) => (
+        <motion.div
+          key={card.strategy.id}
+          initial={motionDisabled ? false : { opacity: 0, y: 24, scale: 0.97 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{
+            duration: 0.45,
+            delay: motionDisabled ? 0 : Math.min(index * 0.04, 0.5),
+            ease: [0.16, 1, 0.3, 1],
+          }}
+        >
+          <StrategyGameCardItem
+            card={card}
+            flipped={flippedId === card.strategy.id}
+            tiltDisabled={tiltDisabled}
+            particlesDisabled={particlesDisabled}
+            motionDisabled={motionDisabled}
+            onFlip={onFlip}
+            onRun={onRun}
+            onStop={onStop}
+            onOpenFolder={onOpenFolder}
+          />
+        </motion.div>
+      ))}
+    </div>
   );
 }
 

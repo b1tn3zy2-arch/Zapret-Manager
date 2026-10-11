@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { FolderOpen, FolderSearch, RefreshCw, Search } from "lucide-react";
 
-import CollectionStats from "@/components/strategies/game/CollectionStats";
 import { ScanErrorBanner } from "@/components/strategies/game/ScanErrorBanner";
 import RarityFilters from "@/components/strategies/game/RarityFilters";
 import StrategyCollection from "@/components/strategies/game/StrategyCollection";
@@ -9,7 +8,6 @@ import SortDropdown from "@/components/strategies/game/SortDropdown";
 import ViewModeToggle from "@/components/strategies/game/ViewModeToggle";
 import EmptyState from "@/components/strategies/EmptyState";
 import { Badge, Button, Heading, Input, Spinner, Text } from "@/components/ui";
-import { useCardDealAnimation } from "@/hooks/useCardDealAnimation";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useDeviceTier } from "@/hooks/useDeviceTier";
 import { useMotionPreference } from "@/hooks/useMotionPreference";
@@ -69,8 +67,6 @@ export default function Strategies() {
   const tier = useDeviceTier();
   const { reduced: reducedMotion } = useMotionPreference();
   const canHover = useMediaQuery("(hover: hover)");
-  const { containerVariants, cardVariants } =
-    useCardDealAnimation(reducedMotion);
 
   useProcessWatcher(checkStatus);
 
@@ -235,8 +231,6 @@ export default function Strategies() {
             }}
           />
         ) : null}
-
-        {strategies.length > 0 ? <CollectionStats summary={summary} /> : null}
       </div>
       {showSkeletons ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -311,8 +305,6 @@ export default function Strategies() {
         tiltDisabled={tiltDisabled}
         particlesDisabled={particlesDisabled}
         motionDisabled={reducedMotion}
-        containerVariants={containerVariants}
-        cardVariants={cardVariants}
         onFlip={handleFlip}
         onRun={handleRun}
         onStop={handleStop}

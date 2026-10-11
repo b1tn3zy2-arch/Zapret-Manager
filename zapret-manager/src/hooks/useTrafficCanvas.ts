@@ -186,7 +186,7 @@ export function useTrafficCanvas({
         tail = last;
         tailReady = true;
       } else {
-        tail += (last - tail) * 0.18;
+        tail += (last - tail) * 0.3;
       }
 
       if (values.length > 1) {

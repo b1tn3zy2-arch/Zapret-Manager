@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use super::config::{BuildOptions, FilterGroup, StrategyConfig};
+use super::config::{needs_any_protocol, BuildOptions, FilterGroup, StrategyConfig};
 
 fn config() -> StrategyConfig {
     StrategyConfig {
@@ -34,6 +34,7 @@ fn test_build_args_basic() {
             "--wf-udp=443,12",
             "--filter-udp=443",
             "--dpi-desync=fake",
+            "--dpi-desync-any-protocol",
             "--new",
             "--filter-tcp=80,443",
             "--dpi-desync=fake,split2",
@@ -76,8 +77,6 @@ fn test_build_args_games_injection() {
         .expect("должен добавиться ipset игр");
 
     assert!(hostlist_index < ipset_index);
-    assert_eq!(args[hostlist_index - 1], "--dpi-desync=fake");
-    assert_eq!(args[ipset_index - 1], "--dpi-desync=fake,split2");
 }
 
 #[test]
@@ -133,4 +132,25 @@ fn test_validate_accepts_full_config() {
 #[test]
 fn test_filter_groups_count() {
     assert_eq!(config().filter_groups_count(), 2);
+}
+
+#[test]
+fn test_any_protocol_flag_for_quic_groups() {
+    let quic = vec![
+        "--filter-udp=443".to_string(),
+        "--dpi-desync=fake".to_string(),
+    ];
+    let already = vec![
+        "--filter-udp=443".to_string(),
+        "--dpi-desync=fake".to_string(),
+        "--dpi-desync-any-protocol".to_string(),
+    ];
+    let tcp = vec![
+        "--filter-tcp=443".to_string(),
+        "--dpi-desync=fake".to_string(),
+    ];
+
+    assert!(needs_any_protocol(&quic));
+    assert!(!needs_any_protocol(&already));
+    assert!(!needs_any_protocol(&tcp));
 }

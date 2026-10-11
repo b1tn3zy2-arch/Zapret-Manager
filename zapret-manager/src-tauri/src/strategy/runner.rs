@@ -93,6 +93,7 @@ pub fn prepare_run(
     let options = BuildOptions {
         log_path: Some(log_path),
         games_hostlist: games_payload.hostlist.as_deref(),
+        games_hostlist_exclude: games_payload.exclude.as_deref(),
         games_ipset: games_payload.ipset.as_deref(),
         extra_args: &[],
     };

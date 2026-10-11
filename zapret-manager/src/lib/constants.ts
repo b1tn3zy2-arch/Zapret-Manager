@@ -97,7 +97,7 @@ export const PING_HOSTS = [
 
 export const MONITOR_PING_HISTORY_SIZE = 60;
 
-export const MONITOR_INTERVAL_MS = 100;
+export const MONITOR_INTERVAL_MS = 50;
 export const MONITOR_STATS_REFRESH_MS = 200;
 export const MONITOR_LABEL_REFRESH_MS = 1000;
 export const MONITOR_STALL_THRESHOLD_MS = 2000;
@@ -147,8 +147,6 @@ export const BLOOM_DEFAULT_INTENSITY = "subtle";
 
 export const CARD_ASPECT_RATIO = 0.68;
 export const CARD_FLIP_DURATION_MS = 600;
-export const CARD_DEAL_DURATION_MS = 400;
-export const CARD_DEAL_STAGGER_MS = 50;
 export const CARD_TILT_SPRING = { stiffness: 200, damping: 20 } as const;
 
 export const DASHBOARD_STAGGER_MS = 50;

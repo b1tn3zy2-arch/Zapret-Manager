@@ -125,3 +125,19 @@ fn test_cleanup_missing_files_is_noop() {
 
     let _ = fs::remove_dir_all(&dir);
 }
+
+#[test]
+fn test_generate_writes_anticheat_exclude_list() {
+    let dir = std::env::temp_dir().join("zapret-games-exclude-test");
+
+    let _ = std::fs::remove_dir_all(&dir);
+
+    let payload = generate(&dir, &["outlasttrials.com".to_string()], &[]).unwrap();
+    let exclude = payload.exclude.clone().unwrap_or_default();
+    let content = std::fs::read_to_string(&exclude).unwrap_or_default();
+
+    assert!(content.contains("easyanticheat.net"));
+    assert!(content.contains("battleye.com"));
+
+    let _ = std::fs::remove_dir_all(&dir);
+}

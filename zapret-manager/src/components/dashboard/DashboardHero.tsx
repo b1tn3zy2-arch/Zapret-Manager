@@ -58,7 +58,7 @@ function DashboardHero({
   return (
     <GlassPanel
       padding="lg"
-      className="bg-bg-primary flex min-h-[200px] items-center gap-8"
+      className="bg-bg-primary flex min-h-[200px] items-center gap-8 backdrop-blur-none"
     >
       <StatusOrb status={status} />
 

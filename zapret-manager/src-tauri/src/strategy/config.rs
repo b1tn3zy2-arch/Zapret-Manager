@@ -26,6 +26,7 @@ pub struct StrategyConfig {
 pub struct BuildOptions<'a> {
     pub log_path: Option<&'a Path>,
     pub games_hostlist: Option<&'a Path>,
+    pub games_hostlist_exclude: Option<&'a Path>,
     pub games_ipset: Option<&'a Path>,
     pub extra_args: &'a [String],
 }
@@ -53,9 +54,17 @@ impl StrategyConfig {
 
             args.extend(group.args.iter().cloned());
 
+            if needs_any_protocol(&args) {
+                args.push("--dpi-desync-any-protocol".to_string());
+            }
+
             if group.uses_general_hostlist {
                 if let Some(path) = options.games_hostlist {
                     args.push(format!("--hostlist={}", path.display()));
+                }
+
+                if let Some(path) = options.games_hostlist_exclude {
+                    args.push(format!("--hostlist-exclude={}", path.display()));
                 }
             }
 
@@ -71,7 +80,7 @@ impl StrategyConfig {
         args
     }
 
-    pub fn validate(&self) -> AppResult<()> {
+pub fn validate(&self) -> AppResult<()> {
         if self.winws_path.trim().is_empty() {
             return Err(AppError::custom(
                 "В конфигурации стратегии не указан winws.exe",
@@ -92,3 +101,12 @@ impl StrategyConfig {
         self.groups.len()
     }
 }
+
+pub fn needs_any_protocol(args: &[String]) -> bool {
+    let joined = args.join(" ");
+
+    joined.contains("--filter-udp=")
+        && joined.contains("--dpi-desync=")
+        && !joined.contains("--dpi-desync-any-protocol")
+}
+

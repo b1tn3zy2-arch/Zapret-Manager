@@ -9,7 +9,6 @@ import {
   CARD_ASPECT_RATIO,
   CARD_FLIP_DURATION_MS,
   GAME_CARD_HOVER_SCALE,
-  GAME_CARD_LIFT_SHADOW,
 } from "@/lib/constants";
 import { getRarityColor } from "@/lib/rarity";
 import { cn } from "@/lib/utils";
@@ -96,7 +95,9 @@ function StrategyGameCardImpl({
           transformStyle: "preserve-3d",
           willChange: isInteractive ? "transform" : "auto",
           borderRadius: "0.75rem",
-          boxShadow: lifted ? GAME_CARD_LIFT_SHADOW : "none",
+          boxShadow: lifted
+            ? `0 24px 48px rgb(0 0 0 / 0.45), 0 0 44px -10px ${palette.glow}`
+            : "none",
         }}
         className="relative h-full w-full rounded-xl"
       >

@@ -154,11 +154,12 @@ function StatusOrb({ status, size }: StatusOrbProps) {
       >
         <motion.span
           key={status}
+          className="flex size-full items-center justify-center"
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: ANIMATION.normal }}
         >
-          <Icon aria-hidden="true" className="size-[28%]" strokeWidth={1.75} />
+          <Icon aria-hidden="true" className="size-[38%]" strokeWidth={1.75} />
         </motion.span>
       </motion.div>
     </div>
