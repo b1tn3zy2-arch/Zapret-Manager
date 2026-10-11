@@ -37,6 +37,7 @@ export const BUILTIN_GAMES: readonly GameSettings[] = [
       "redbarrelsgames.com",
       "outlasttrials.com",
       "rbg-services.com",
+      "cloudfront.net",
     ],
     ipRanges: [],
     ports: [

@@ -2,7 +2,8 @@ import { forwardRef, type HTMLAttributes, type ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 
-export type GlassPanelVariant = "default" | "interactive" | "outlined";
+export type GlassPanelVariant =
+  "default" | "interactive" | "outlined" | "plain";
 export type GlassPanelPadding = "none" | "sm" | "md" | "lg";
 export type GlassPanelRounded = "md" | "lg" | "xl";
 
@@ -18,6 +19,7 @@ const VARIANT_CLASSES = {
   interactive:
     "bg-glass-bg border border-glass-border hover:bg-glass-hover hover:border-glass-border",
   outlined: "bg-transparent border border-glass-border",
+  plain: "bg-bg-primary border border-glass-border",
 } as const satisfies Record<GlassPanelVariant, string>;
 
 const PADDING_CLASSES = {

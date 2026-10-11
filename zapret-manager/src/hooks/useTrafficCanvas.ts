@@ -174,27 +174,41 @@ export function useTrafficCanvas({
     observer.observe(canvas);
     resize();
 
-    let tail = 0;
-    let tailReady = false;
+    const display: number[] = [];
+    let lastLength = 0;
 
     const render = (): void => {
       const raw = pickSeries(buffer.current, dataKey);
       const values = applyEWMA(raw);
       const last = values[values.length - 1] ?? 0;
 
-      if (!tailReady) {
-        tail = last;
-        tailReady = true;
-      } else {
-        tail += (last - tail) * 0.3;
+      if (values.length !== lastLength) {
+        if (
+          values.length < display.length ||
+          values.length > display.length + 1
+        ) {
+          display.length = 0;
+
+          for (const value of values) {
+            display.push(value);
+          }
+        } else {
+          display.push(values[values.length - 1] ?? 0);
+        }
+
+        lastLength = values.length;
       }
 
-      if (values.length > 1) {
-        values[values.length - 1] = tail;
+      for (let index = 0; index < values.length; index += 1) {
+        const current = display[index] ?? 0;
+
+        display[index] = current + ((values[index] ?? 0) - current) * 0.22;
       }
+
+      const smoothed = values.map((value, index) => display[index] ?? value);
 
       valueRef.current = last;
-      maxRef.current = computeMax(values, maxRef.current);
+      maxRef.current = computeMax(smoothed, maxRef.current);
 
       const scaleValue = maxRef.current || 1;
       const step = raw.length > 1 ? width / (raw.length - 1) : width;
@@ -205,12 +219,12 @@ export function useTrafficCanvas({
       drawGrid(context, width, height);
       drawFrame(context, width, height, scaleValue);
 
-      if (values.length < 2) {
+      if (smoothed.length < 2) {
         frame = window.requestAnimationFrame(render);
         return;
       }
 
-      const points = values.map((value, index) => ({
+      const points = smoothed.map((value, index) => ({
         x: index * step,
         y: toY(value),
       }));
