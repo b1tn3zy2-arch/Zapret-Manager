@@ -95,7 +95,7 @@ export const ru = {
     ipcSchema: "Ошибка вызова Tauri: ответ {command} не прошёл проверку схемы",
   },
   trafficMonitor: {
-    title: "Zapret Manager — монитор трафика",
+    title: "Zapret — монитор трафика",
     nowLabel: "сейчас",
   },
   exportLogs: {
@@ -243,7 +243,7 @@ export const ru = {
       testNotification: "Уведомления",
       testNotificationHint: "Проверить, что системные уведомления работают",
       testNotificationAction: "Проверить уведомление",
-      testNotificationTitle: "Zapret Manager",
+      testNotificationTitle: "Zapret",
       testNotificationBody: "Тестовое уведомление — всё работает",
       testNotificationSent: "Тестовое уведомление отправлено",
       testNotificationFailed: "Уведомление не отправлено: {error}",
@@ -642,7 +642,7 @@ export const ru = {
       stageFinalizing: "Финализация",
       stageDone: "Готово",
       progressAriaLabel: "Прогресс распаковки ресурсов",
-      welcomeTitle: "Добро пожаловать в Zapret Manager",
+      welcomeTitle: "Добро пожаловать в Zapret",
       welcomeBody:
         "Мы распаковали встроенные стратегии для Discord, YouTube и Outlast Trials. Можно начинать работу.",
       welcomeAction: "Начать работу",

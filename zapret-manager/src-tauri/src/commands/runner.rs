@@ -281,6 +281,126 @@ pub async fn run_strategy_native(
     })
 }
 
+fn strategy_is_native(content: &str, bat_path: &Path) -> bool {
+    let filename = bat_path
+        .file_name()
+        .map(|name| name.to_string_lossy().to_string())
+        .unwrap_or_default();
+    let dir = bat_path.parent().unwrap_or_else(|| Path::new("."));
+
+    crate::strategy::parser::parse_bat(content, &filename, dir).is_ok()
+}
+
+#[tauri::command]
+pub async fn run_strategy_auto(
+    app: AppHandle,
+    state: State<'_, ProcessManager>,
+    scan: State<'_, ScanState>,
+    strategy_id: String,
+    path: String,
+    games: Vec<GameRequest>,
+) -> AppResult<RunResult> {
+    validate_strategy_id(&strategy_id)?;
+
+    let allowed_root = scan.root();
+    let bat_path = validate_strategy_file(Path::new(&path), allowed_root.as_deref())?;
+    let content = tokio::fs::read_to_string(&bat_path)
+        .await
+        .map_err(AppError::Io)?;
+
+    if strategy_is_native(&content, &bat_path) {
+        return run_strategy_native(app, state, scan, strategy_id, path, games)
+            .await;
+    }
+
+    run_legacy_with_games(app, state, strategy_id, bat_path, games).await
+}
+
+async fn run_legacy_with_games(
+    app: AppHandle,
+    state: State<'_, ProcessManager>,
+    strategy_id: String,
+    bat_path: PathBuf,
+    games: Vec<GameRequest>,
+) -> AppResult<RunResult> {
+    check_run_strategy(&strategy_id)?;
+
+    if state.contains(&strategy_id) {
+        return Err(AppError::custom("Стратегия уже запущена"));
+    }
+
+    let working_dir = bat_path.parent().map(Path::to_path_buf);
+
+    if !games.is_empty() {
+        let names: Vec<&str> = games.iter().map(|game| game.name.as_str()).collect();
+
+        tracing::info!("Инъекция игр (режим совместимости): {}", names.join(", "));
+
+        for game in &games {
+            crate::commands::injector::inject_outlast(
+                bat_path.to_string_lossy().to_string(),
+                game.domains.clone(),
+                game.ips.clone(),
+                game.ports.clone(),
+                true,
+            )
+            .await?;
+        }
+    }
+
+    let dir = ensure_log_dir().await?;
+    let started_at = now_millis();
+    let log_path = dir.join(format!("{strategy_id}_{started_at}.log"));
+
+    ensure_empty_log(&log_path).await?;
+
+    let arguments = build_arguments(&bat_path, &log_path)?;
+
+    tracing::info!("Запуск cmd.exe для стратегии {strategy_id} (режим совместимости)");
+
+    let launched = tokio::task::spawn_blocking({
+        let arguments = arguments.clone();
+        move || shell_execute_runas("cmd.exe", &arguments, working_dir.as_deref())
+    })
+    .await
+    .map_err(|error| AppError::custom(error.to_string()))?;
+
+    let (handle, pid) = launched?;
+
+    tracing::info!(
+        "Стратегия {strategy_id} запущена, cmd PID {pid}, лог {}",
+        log_path.display()
+    );
+
+    let _ = app.emit(
+        EVENT_STRATEGY_LOG,
+        vec![strategy_line(
+            &strategy_id,
+            "info",
+            "Режим совместимости: запуск через cmd.exe".to_string(),
+        )],
+    );
+
+    state.insert(
+        strategy_id.clone(),
+        RunningProcess {
+            pid,
+            log_path: log_path.clone(),
+            started_at,
+            handle,
+        },
+    );
+
+    spawn_log_reader(app.clone(), strategy_id.clone(), log_path.clone());
+
+    let _ = app.emit(EVENT_STRATEGY_STARTED, &strategy_id);
+
+    Ok(RunResult {
+        pid,
+        log_path: log_path.to_string_lossy().to_string(),
+    })
+}
+
 #[tauri::command]
 pub async fn stop_strategy(
     app: AppHandle,

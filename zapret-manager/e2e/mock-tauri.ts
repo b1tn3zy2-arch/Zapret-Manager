@@ -157,6 +157,26 @@ export async function mockTauri(
 
           return { pid: 4242, logPath: "C:\\temp\\log.txt" };
         },
+        run_strategy_auto: () => {
+          for (const handler of listeners.values()) {
+            handler({
+              event: { id: 1, event: "strategy-log", windowLabel: "main" },
+              id: 1,
+              payload: [
+                {
+                  level: "success",
+                  message:
+                    "Встроенный движок: winws.exe запущен напрямую (PID 4242), групп фильтров 1",
+                },
+                { level: "info", message: "Запуск стратегии" },
+                { level: "info", message: "zapret поднят на порту 7911" },
+                { level: "warning", message: "Инъекция недоступна" },
+              ],
+            });
+          }
+
+          return { pid: 4242, logPath: "C:\\temp\\log.txt" };
+        },
         stop_strategy: () => 1,
         check_strategy_status: () => ({
           running: true,

@@ -65,7 +65,7 @@ fn notify_first_minimize(app: &AppHandle, state: &WindowBehavior) {
 
     let _ = crate::commands::notify::send(
         app,
-        "Zapret Manager",
+        "Zapret",
         "Приложение свёрнуто в трей. Окно можно вернуть кликом по иконке.",
         crate::tray::NotificationKind::Info,
     );

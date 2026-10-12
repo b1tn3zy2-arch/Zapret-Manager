@@ -12,7 +12,7 @@ import {
 import type { TranslationKey } from "@/i18n/types";
 import type { LogLevel, LogSource } from "@/types";
 
-export const APP_NAME = "Zapret Manager";
+export const APP_NAME = "Zapret";
 export const APP_VERSION = "0.1.0";
 
 export const ROUTES = {

@@ -96,7 +96,7 @@ export const en = {
       "Tauri call error: response for {command} failed schema validation",
   },
   trafficMonitor: {
-    title: "Zapret Manager — traffic monitor",
+    title: "Zapret — traffic monitor",
     nowLabel: "now",
   },
   exportLogs: {
@@ -246,7 +246,7 @@ export const en = {
       testNotification: "Notifications",
       testNotificationHint: "Check that system notifications work",
       testNotificationAction: "Test notification",
-      testNotificationTitle: "Zapret Manager",
+      testNotificationTitle: "Zapret",
       testNotificationBody: "Test notification — everything works",
       testNotificationSent: "Test notification sent",
       testNotificationFailed: "Notification not sent: {error}",
@@ -641,7 +641,7 @@ export const en = {
       stageFinalizing: "Finalizing",
       stageDone: "Done",
       progressAriaLabel: "Resource unpacking progress",
-      welcomeTitle: "Welcome to Zapret Manager",
+      welcomeTitle: "Welcome to Zapret",
       welcomeBody:
         "We have unpacked bundled strategies for Discord, YouTube and Outlast Trials. You can start now.",
       welcomeAction: "Get started",

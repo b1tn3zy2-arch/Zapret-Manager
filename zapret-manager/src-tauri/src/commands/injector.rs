@@ -112,7 +112,7 @@ fn inject_into_target(
     }
 
     let note = format!(
-        "Добавлено Zapret Manager: {}",
+        "Добавлено Zapret: {}",
         chrono_stamp(timestamp)
     );
     let updated = append_marker_section(&content, &entries, &note);

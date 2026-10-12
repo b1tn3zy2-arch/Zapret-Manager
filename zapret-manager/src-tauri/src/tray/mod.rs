@@ -37,7 +37,7 @@ pub const NAVIGATION_EVENTS: [&str; 4] = [
     "navigate-settings",
 ];
 
-pub const APP_NAME: &str = "Zapret Manager";
+pub const APP_NAME: &str = "Zapret";
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]

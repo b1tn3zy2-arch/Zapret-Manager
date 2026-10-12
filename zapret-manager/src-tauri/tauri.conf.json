@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Zapret Manager",
+  "productName": "Zapret",
   "version": "0.1.0",
   "identifier": "com.zapretmanager.app",
   "build": {
@@ -13,7 +13,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "Zapret Manager",
+        "title": "Zapret",
         "width": 1280,
         "height": 800,
         "minWidth": 800,
@@ -30,7 +30,7 @@
       },
       {
         "label": "tray-menu",
-        "title": "Zapret Manager",
+        "title": "Zapret",
         "url": "index.html?view=tray",
         "width": 236,
         "height": 332,
@@ -54,10 +54,10 @@
     "active": true,
     "targets": ["nsis", "msi"],
     "category": "Utility",
-    "publisher": "Zapret Manager Project",
-    "copyright": "Copyright (c) 2026 Zapret Manager Project",
-    "shortDescription": "Управление стратегиями обхода блокировок",
-    "longDescription": "Zapret Manager — десктопное приложение для сканирования, запуска и мониторинга стратегий обхода блокировок zapret: Discord, YouTube, Outlast Trials.",
+    "publisher": "Ivan Grafov",
+    "copyright": "Copyright (c) 2026 Ivan Grafov",
+    "shortDescription": "РЈРїСЂР°РІР»РµРЅРёРµ СЃС‚СЂР°С‚РµРіРёСЏРјРё РѕР±С…РѕРґР° Р±Р»РѕРєРёСЂРѕРІРѕРє",
+    "longDescription": "Zapret вЂ” РґРµСЃРєС‚РѕРїРЅРѕРµ РїСЂРёР»РѕР¶РµРЅРёРµ РґР»СЏ СЃРєР°РЅРёСЂРѕРІР°РЅРёСЏ, Р·Р°РїСѓСЃРєР° Рё РјРѕРЅРёС‚РѕСЂРёРЅРіР° СЃС‚СЂР°С‚РµРіРёР№ РѕР±С…РѕРґР° Р±Р»РѕРєРёСЂРѕРІРѕРє zapret: Discord, YouTube, Outlast Trials. By: Ivan Grafov.",
     "licenseFile": "installer/license.txt",
     "resources": ["resources/**/*", "icons/tray/*.png"],
     "windows": {

@@ -19,6 +19,11 @@ const VIEWPORTS: [number, number][] = [
   [1920, 1080],
 ];
 
+const SHORT_VIEWPORTS: [number, number][] = [
+  [1280, 632],
+  [1366, 600],
+];
+
 function navButton(page: Page, name: string) {
   return page
     .getByRole("navigation", { name: "Основная навигация" })
@@ -85,6 +90,79 @@ test.describe("Адаптив", () => {
 
     expect(columns.split(" ").length).toBeGreaterThanOrEqual(2);
   });
+
+  for (const [width, height] of SHORT_VIEWPORTS) {
+    test(`${width}x${height}: низ страниц не прилипает к краю при прокрутке`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height });
+      await mockTauri(page);
+      await page.goto("/");
+
+      for (const [name, slug] of PAGES) {
+        await navButton(page, name).click();
+        await page.waitForTimeout(600);
+
+        for (let attempt = 0; attempt < 8; attempt += 1) {
+          const before = await page.evaluate(() => {
+            const main = document.querySelector("main");
+
+            if (main !== null) {
+              main.scrollTop = main.scrollHeight;
+            }
+
+            return main?.scrollHeight ?? 0;
+          });
+
+          await page.waitForTimeout(150);
+
+          const after = await page.evaluate(
+            () => document.querySelector("main")?.scrollHeight ?? 0
+          );
+
+          if (before === after) {
+            break;
+          }
+        }
+
+        await page.waitForTimeout(150);
+
+        const gap = await page.evaluate(() => {
+          const main = document.querySelector("main");
+
+          if (main === null) {
+            return -1;
+          }
+
+          const mainRect = main.getBoundingClientRect();
+          let deepest = mainRect.top;
+
+          for (const node of Array.from(main.querySelectorAll("*"))) {
+            const rect = node.getBoundingClientRect();
+
+            if (rect.width === 0 || rect.height === 0) {
+              continue;
+            }
+
+            if (getComputedStyle(node).position === "fixed") {
+              continue;
+            }
+
+            if (rect.bottom > mainRect.top) {
+              deepest = Math.max(deepest, rect.bottom);
+            }
+          }
+
+          return mainRect.bottom - deepest;
+        });
+
+        expect(
+          gap,
+          `нет нижнего отступа на ${slug} @${width}x${height} (gap=${gap})`
+        ).toBeGreaterThanOrEqual(24);
+      }
+    });
+  }
 
   for (const [width, height] of VIEWPORTS) {
     test(`${width}x${height}: страницы без переполнения и обрезанных блоков`, async ({

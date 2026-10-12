@@ -42,6 +42,7 @@ pub fn run() {
             commands::scanner::get_default_strategies_path,
             commands::runner::run_strategy,
             commands::runner::run_strategy_native,
+            commands::runner::run_strategy_auto,
             commands::runner::stop_strategy,
             commands::runner::check_strategy_status,
             commands::runner::list_running_processes,

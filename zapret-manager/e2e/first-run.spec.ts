@@ -55,7 +55,7 @@ test.describe("Первый запуск", () => {
     const dialog = page.getByRole("dialog").first();
     await expect(dialog).toBeVisible();
     await expect(
-      page.getByRole("heading", { name: "Добро пожаловать в Zapret Manager" })
+      page.getByRole("heading", { name: "Добро пожаловать в Zapret" })
     ).toBeVisible();
 
     await dialog.getByRole("button", { name: "Начать работу" }).click();

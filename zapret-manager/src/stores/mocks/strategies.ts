@@ -2,7 +2,7 @@ import type { Strategy } from "@/types";
 
 export const USE_MOCKS = import.meta.env.DEV;
 
-const MOCK_DIR = String.raw`C:\Program Files\Zapret Manager\zapret`;
+const MOCK_DIR = String.raw`C:\Program Files\Zapret\zapret`;
 
 export const MOCK_STRATEGIES: Strategy[] = [
   {

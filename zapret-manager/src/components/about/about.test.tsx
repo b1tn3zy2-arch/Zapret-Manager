@@ -23,7 +23,7 @@ const INFO: SystemInfo = {
 };
 
 describe("AboutIdentity", () => {
-  it("показывает название, версию приложения и версию ресурсов", () => {
+  it("показывает название, автора, версию приложения и версию ресурсов", () => {
     render(
       <AboutIdentity
         appVersion="0.1.0"
@@ -32,9 +32,8 @@ describe("AboutIdentity", () => {
       />
     );
 
-    expect(
-      screen.getByRole("heading", { name: "Zapret Manager" })
-    ).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Zapret" })).toBeTruthy();
+    expect(screen.getByText("By: Ivan Grafov")).toBeTruthy();
     expect(screen.getByText("0.1.0")).toBeTruthy();
     expect(screen.getByText(/1\.10\.3/)).toBeTruthy();
   });

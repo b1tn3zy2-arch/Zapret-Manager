@@ -30,6 +30,9 @@ export default function AboutIdentity({
             <Badge variant="neutral">{appVersion}</Badge>
           </div>
           <Text variant="body" size="sm" className="text-text-secondary">
+            By: Ivan Grafov
+          </Text>
+          <Text variant="body" size="sm" className="text-text-secondary">
             {resourcesLabel} {resourcesVersion}
           </Text>
         </div>

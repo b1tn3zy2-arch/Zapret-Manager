@@ -50,7 +50,7 @@ fn test_launch_real_executable_returns_pid() {
         return;
     }
 
-    let pid = crate::winapi_helpers::shell_execute_normal(
+    let pid = crate::winapi_helpers::shell_execute_game(
         &program.to_string_lossy(),
         "",
         program.parent(),

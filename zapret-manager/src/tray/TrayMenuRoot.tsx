@@ -185,7 +185,7 @@ export default function TrayMenuRoot() {
             />
 
             <span className="text-text-primary min-w-0 flex-1 truncate text-xs font-semibold">
-              Zapret Manager
+              Zapret
             </span>
 
             <Badge variant={isActive ? "success" : "neutral"} size="sm">

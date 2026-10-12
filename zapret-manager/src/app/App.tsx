@@ -6,6 +6,7 @@ import FirstRunModal from "@/components/first-run/FirstRunModal";
 import InitProgressModal from "@/components/first-run/InitProgressModal";
 import Layout from "@/components/layout/Layout";
 import { PerfMonitor } from "@/components/dev/PerfMonitor";
+import BootSplash from "@/components/shared/BootSplash";
 import PageSkeleton from "@/components/shared/PageSkeleton";
 import NotificationToaster from "@/components/shared/NotificationToaster";
 import UpdateModal from "@/components/updates/UpdateModal";
@@ -54,6 +55,7 @@ const PAGE_TRANSITION = {
 export default function App() {
   const activePage = useAppStore(selectActivePage);
   const [welcomeDismissed, setWelcomeDismissed] = useState(false);
+  const [booted, setBooted] = useState(false);
   const resources = useResourceInit();
   useSettingsSync();
   useAutoUpdateCheck();
@@ -86,6 +88,16 @@ export default function App() {
     !isInitializing;
 
   useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setBooted(true);
+    }, 600);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, []);
+
+  useEffect(() => {
     startLogsFlusher();
 
     return () => {
@@ -103,7 +115,7 @@ export default function App() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -12 }}
             transition={PAGE_TRANSITION}
-            className="flex min-h-0 flex-1 flex-col gap-6"
+            className="flex min-h-full flex-none flex-col gap-6"
           >
             <Suspense fallback={<PageSkeleton />}>
               <CurrentPage />
@@ -161,6 +173,9 @@ export default function App() {
           <PerfMonitor />
         ) : null}
         <NotificationToaster />
+        <AnimatePresence>
+          {booted ? null : <BootSplash key="boot" />}
+        </AnimatePresence>
       </Layout>
     </MotionConfig>
   );

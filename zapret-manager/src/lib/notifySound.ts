@@ -38,12 +38,17 @@ export function unlockNotificationSound(): void {
   void audio.resume().catch(() => undefined);
 }
 
-const TONES: Record<NotificationKind, readonly [number, number]> = {
-  success: [660, 990],
-  error: [440, 300],
-  warning: [587, 494],
-  info: [740, 988],
+const SCALES: Record<NotificationKind, readonly number[]> = {
+  success: [523.25, 659.25, 783.99],
+  error: [415.3, 311.13],
+  warning: [587.33, 493.88],
+  info: [659.25, 987.77],
 };
+
+const NOTE_GAP_SECONDS = 0.085;
+const LEAD_GAIN = 0.15;
+const HARMONIC_GAIN = 0.3;
+const HARMONIC_RATIO = 2;
 
 export function playNotificationSound(kind: NotificationKind): void {
   const audio = ensureContext();
@@ -56,24 +61,46 @@ export function playNotificationSound(kind: NotificationKind): void {
     void audio.resume().catch(() => undefined);
   }
 
-  const tones = TONES[kind];
+  const notes = SCALES[kind];
   const start = audio.currentTime + 0.01;
+  const filter = audio.createBiquadFilter();
 
-  tones.forEach((frequency, index) => {
-    const oscillator = audio.createOscillator();
+  filter.type = "lowpass";
+  filter.frequency.value = 4200;
+  filter.Q.value = 0.6;
+  filter.connect(audio.destination);
+
+  notes.forEach((frequency, index) => {
+    const at = start + index * NOTE_GAP_SECONDS;
+    const decay = index === 0 ? 0.65 : 0.5;
     const gain = audio.createGain();
-    const at = start + index * 0.09;
-
-    oscillator.type = "sine";
-    oscillator.frequency.value = frequency;
 
     gain.gain.setValueAtTime(0.0001, at);
-    gain.gain.exponentialRampToValueAtTime(0.12, at + 0.02);
-    gain.gain.exponentialRampToValueAtTime(0.0001, at + 0.24);
+    gain.gain.exponentialRampToValueAtTime(
+      index === 0 ? LEAD_GAIN : LEAD_GAIN * 0.72,
+      at + 0.016
+    );
+    gain.gain.exponentialRampToValueAtTime(0.0001, at + decay);
+    gain.connect(filter);
 
-    oscillator.connect(gain);
-    gain.connect(audio.destination);
-    oscillator.start(at);
-    oscillator.stop(at + 0.26);
+    const fundamental = audio.createOscillator();
+
+    fundamental.type = "sine";
+    fundamental.frequency.value = frequency;
+    fundamental.connect(gain);
+    fundamental.start(at);
+    fundamental.stop(at + decay + 0.05);
+
+    const harmonic = audio.createOscillator();
+    const harmonicGain = audio.createGain();
+
+    harmonic.type = "sine";
+    harmonic.frequency.value = frequency * HARMONIC_RATIO;
+    harmonic.detune.value = 5;
+    harmonicGain.gain.value = HARMONIC_GAIN;
+    harmonic.connect(harmonicGain);
+    harmonicGain.connect(gain);
+    harmonic.start(at);
+    harmonic.stop(at + decay + 0.05);
   });
 }

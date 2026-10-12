@@ -77,3 +77,19 @@ fn test_now_millis_is_plausible() {
     let value = now_millis();
     assert!(value > 1_600_000_000_000);
 }
+#[test]
+fn test_strategy_is_native_accepts_standard_bat() {
+    let content = "@echo off\r\n\
+set \"BIN=%~dp0bin\\\"\r\n\
+start \"zapret\" /min \"%BIN%winws.exe\" --wf-tcp=80,443 --filter-udp=443 --dpi-desync=fake\r\n";
+
+    assert!(strategy_is_native(content, Path::new("C:/zapret/general-01-alt.bat")));
+}
+
+#[test]
+fn test_strategy_is_native_rejects_bat_without_winws() {
+    assert!(!strategy_is_native(
+        "@echo off\r\nnotepad.exe\r\n",
+        Path::new("C:/zapret/custom.bat")
+    ));
+}

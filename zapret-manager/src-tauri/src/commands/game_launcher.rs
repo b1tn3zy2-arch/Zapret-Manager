@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 use tauri::AppHandle;
 
 use crate::error::{AppError, AppResult};
-use crate::winapi_helpers::{is_pid_alive, shell_execute_normal};
+use crate::winapi_helpers::{is_pid_alive, shell_execute_game};
 
 #[tauri::command]
 pub async fn launch_game(
@@ -24,7 +24,7 @@ pub async fn launch_game(
     let arguments = launch_args.unwrap_or_default();
 
     tauri::async_runtime::spawn_blocking(move || {
-        shell_execute_normal(
+        shell_execute_game(
             &path.to_string_lossy(),
             &arguments,
             Some(working.as_path()),

@@ -115,5 +115,5 @@ fn test_event_names_are_distinct() {
 
 #[test]
 fn test_app_name_is_stable() {
-    assert_eq!(APP_NAME, "Zapret Manager");
+    assert_eq!(APP_NAME, "Zapret");
 }

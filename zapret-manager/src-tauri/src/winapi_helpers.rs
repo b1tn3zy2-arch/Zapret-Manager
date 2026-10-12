@@ -9,11 +9,16 @@ use winapi::um::errhandlingapi::GetLastError;
 use winapi::um::handleapi::CloseHandle;
 use winapi::um::iphlpapi::GetExtendedTcpTable;
 use winapi::um::processthreadsapi::{
-    GetExitCodeProcess, GetProcessId, OpenProcess, TerminateProcess,
+    GetCurrentProcess, GetExitCodeProcess, GetProcessId, OpenProcess,
+    OpenProcessToken, TerminateProcess,
 };
+use winapi::um::securitybaseapi::GetTokenInformation;
 use winapi::um::shellapi::ShellExecuteExW;
 use winapi::um::synchapi::WaitForSingleObject;
-use winapi::um::winnt::{HANDLE, PROCESS_QUERY_LIMITED_INFORMATION};
+use winapi::um::winnt::{
+    TokenElevation, HANDLE, PROCESS_QUERY_LIMITED_INFORMATION, TOKEN_ELEVATION,
+    TOKEN_QUERY,
+};
 
 use crate::error::{AppError, AppResult};
 
@@ -173,11 +178,66 @@ pub fn shell_execute_runas(
     Ok((OwnedProcessHandle::from_raw(raw), pid))
 }
 
-pub fn shell_execute_normal(
+pub fn is_process_elevated() -> bool {
+    unsafe {
+        let mut token: HANDLE = std::ptr::null_mut();
+
+        if OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &mut token) == 0 {
+            return false;
+        }
+
+        let mut elevation: TOKEN_ELEVATION = std::mem::zeroed();
+        let mut size: DWORD = 0;
+        let ok = GetTokenInformation(
+            token,
+            TokenElevation,
+            &mut elevation as *mut _ as *mut _,
+            std::mem::size_of::<TOKEN_ELEVATION>() as DWORD,
+            &mut size,
+        );
+
+        CloseHandle(token);
+
+        ok != 0 && elevation.TokenIsElevated != 0
+    }
+}
+
+pub fn game_launch_verb(elevated: bool) -> &'static str {
+    if elevated {
+        "runasuser"
+    } else {
+        "open"
+    }
+}
+
+pub fn shell_execute_game(
     program: &str,
     arguments: &str,
     working_dir: Option<&Path>,
 ) -> AppResult<u32> {
+    let verb = game_launch_verb(is_process_elevated());
+
+    match shell_execute_with_verb(program, arguments, working_dir, verb) {
+        Ok(pid) => Ok(pid),
+        Err(error) => {
+            if verb != "runasuser" {
+                return Err(error);
+            }
+
+            tracing::warn!("Понижение прав не удалось, обычный запуск: {error}");
+
+            shell_execute_with_verb(program, arguments, working_dir, "open")
+        }
+    }
+}
+
+pub fn shell_execute_with_verb(
+    program: &str,
+    arguments: &str,
+    working_dir: Option<&Path>,
+    verb: &str,
+) -> AppResult<u32> {
+    let verb = wide(verb);
     let file = wide(program);
     let params = wide(arguments);
     let directory = working_dir.map(|path| {
@@ -194,7 +254,7 @@ pub fn shell_execute_normal(
     info.cbSize =
         std::mem::size_of::<winapi::um::shellapi::SHELLEXECUTEINFOW>() as u32;
     info.fMask = SEE_MASK_NOCLOSEPROCESS_VALUE;
-    info.lpVerb = std::ptr::null();
+    info.lpVerb = verb.as_ptr();
     info.lpFile = file.as_ptr();
     info.lpParameters = params.as_ptr();
     info.lpDirectory = directory
@@ -446,4 +506,9 @@ mod tests {
             r#""say \"hi\" now""#
         );
     }
+}
+#[test]
+fn test_game_launch_verb_deelevates_when_elevated() {
+    assert_eq!(game_launch_verb(true), "runasuser");
+    assert_eq!(game_launch_verb(false), "open");
 }
