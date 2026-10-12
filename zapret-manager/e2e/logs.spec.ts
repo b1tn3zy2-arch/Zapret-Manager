@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 
-import { bootstrap, sidebar } from "./helpers";
+import { bootstrap, sidebar, waitForAnimationsSettled } from "./helpers";
 import { MOCK_FOLDER } from "./mock-tauri";
 
 async function openLogsWithEntries(page: Page): Promise<void> {
@@ -79,16 +79,20 @@ test.describe("Логи", () => {
 
     await dialog.getByRole("button", { name: "Отмена" }).click();
     await expect(dialog).toBeHidden();
+    await expect(dialog).toHaveCount(0);
+    await waitForAnimationsSettled(page);
     await expect(page.getByText("Запуск стратегии").first()).toBeVisible();
 
     await page
       .getByRole("button", { name: "Очистить", exact: true })
       .first()
       .click();
+    await expect(dialog).toBeVisible();
     await dialog.getByRole("button", { name: "Очистить" }).click();
 
     await expect(
       page.getByRole("heading", { name: "Логи пусты" })
     ).toBeVisible();
+    await waitForAnimationsSettled(page);
   });
 });

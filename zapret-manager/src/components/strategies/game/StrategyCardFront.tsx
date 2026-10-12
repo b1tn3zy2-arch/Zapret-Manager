@@ -92,7 +92,9 @@ export default function StrategyCardFront({
       }}
       className={cn(
         "bg-bg-secondary/80 absolute inset-0 overflow-hidden rounded-xl border",
-        "backface-hidden"
+        "backface-hidden",
+        // пока карточка перевёрнута, передняя грань невидима и не должна принимать клики
+        flipped && "pointer-events-none"
       )}
     >
       <StrategyPoster services={strategy.services} />

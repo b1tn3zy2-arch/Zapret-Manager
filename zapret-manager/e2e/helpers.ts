@@ -53,3 +53,30 @@ export function settingsNav(page: Page) {
 export function modeSwitcher(page: Page) {
   return page.getByRole("radiogroup", { name: "Переключить режим обхода" });
 }
+
+/**
+ * Ждёт, пока закончатся CSS-анимации и Web Animations (Framer Motion).
+ * Без этого клики попадают в ещё движущиеся карточки и незакрытые диалоги,
+ * и тесты падают только на медленных машинах и при полном параллельном прогоне.
+ */
+export async function waitForAnimationsSettled(page: Page): Promise<void> {
+  await page
+    .waitForFunction(
+      () =>
+        document.getAnimations().every((animation) => {
+          if (animation.playState !== "running") {
+            return true;
+          }
+
+          const timing = animation.effect?.getComputedTiming();
+
+          // бесконечные пульсации не завершаются никогда и не блокируют клики
+          return timing?.iterations === Infinity;
+        }),
+      undefined,
+      { timeout: 5000, polling: 100 }
+    )
+    .catch(() => undefined);
+
+  await page.waitForTimeout(120);
+}

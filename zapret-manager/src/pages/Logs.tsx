@@ -26,6 +26,7 @@ import {
   useStrategiesStore,
 } from "@/stores/useStrategiesStore";
 import { useLogsStore } from "@/stores/useLogsStore";
+import { useSettingsStore } from "@/stores/useSettingsStore";
 import type { LogEntry } from "@/types";
 
 interface ToastState {
@@ -39,6 +40,9 @@ export default function Logs() {
   const { t } = useI18n();
   const logs = useFilteredLogs();
   const totalCount = useLogsCount();
+  const logsEnabled = useSettingsStore(
+    (state) => state.settings.general.enableLogs
+  );
   const levelCounts = useLogLevelCounts();
   const sourceCounts = useLogSourceCounts();
   const filterActive = useFilterActive();
@@ -169,7 +173,7 @@ export default function Logs() {
         className="border-glass-border bg-glass-bg relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border"
       >
         {totalCount === 0 ? (
-          <LogsEmptyState variant="empty" />
+          <LogsEmptyState variant={logsEnabled ? "empty" : "disabled"} />
         ) : logs.length === 0 ? (
           <LogsEmptyState variant="no-match" onReset={resetFilter} />
         ) : (

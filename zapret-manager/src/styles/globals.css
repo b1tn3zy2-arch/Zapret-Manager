@@ -106,6 +106,10 @@
     color: var(--color-text-primary);
     font-family: var(--font-sans);
     font-size: clamp(0.875rem, 0.82rem + 0.25vw, 1.0625rem);
+    font-size: calc(
+      clamp(0.875rem, 0.82rem + 0.25vw, 1.0625rem) * var(--interface-scale, 1)
+    );
+    transition: font-size 260ms cubic-bezier(0.16, 1, 0.3, 1);
     min-width: 800px;
     min-height: 600px;
     font-synthesis: none;
@@ -189,6 +193,14 @@
 
   [data-density="compact"] {
     font-size: calc(1rem * var(--density-scale, 1));
+  }
+
+  body *,
+  body *::before,
+  body *::after {
+    transition-duration: calc(
+      var(--tw-duration, 200ms) * var(--motion-scale, 1)
+    ) !important;
   }
 
   #root {

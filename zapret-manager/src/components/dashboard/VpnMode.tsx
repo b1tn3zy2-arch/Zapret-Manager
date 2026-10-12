@@ -5,6 +5,7 @@ import ActionsRow from "@/components/dashboard/vpn/ActionsRow";
 import ConnectButton from "@/components/dashboard/vpn/ConnectButton";
 import EmptyState from "@/components/dashboard/vpn/EmptyState";
 import ServerList from "@/components/dashboard/vpn/ServerList";
+import VpnSettingsPanel from "@/components/dashboard/vpn/VpnSettingsPanel";
 import VpnFooter from "@/components/dashboard/vpn/Footer";
 import { Button, Input, Modal, Text } from "@/components/ui";
 import { useI18n } from "@/i18n";
@@ -149,6 +150,8 @@ export default function VpnMode() {
       )}
 
       <VpnFooter status={status} />
+
+      <VpnSettingsPanel />
 
       <Modal
         open={linkOpen}

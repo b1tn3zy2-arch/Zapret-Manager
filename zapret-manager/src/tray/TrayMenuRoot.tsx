@@ -16,7 +16,6 @@ import {
   Unlock,
 } from "lucide-react";
 
-import NotificationToaster from "@/components/shared/NotificationToaster";
 import { Badge } from "@/components/ui";
 import { useI18n } from "@/i18n";
 import { cn } from "@/lib/utils";
@@ -165,7 +164,6 @@ export default function TrayMenuRoot() {
 
   return (
     <>
-      <NotificationToaster />
       <div className="flex h-full w-full p-2">
         <div
           key={animationKey}

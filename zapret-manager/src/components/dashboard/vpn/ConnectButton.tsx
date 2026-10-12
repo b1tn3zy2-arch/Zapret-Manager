@@ -69,14 +69,29 @@ export default function ConnectButton({
           <motion.span
             key={state}
             aria-hidden="true"
-            initial={reduced ? false : { scale: 0.7, opacity: 0.6 }}
-            animate={{ scale: 1.25, opacity: 0 }}
-            transition={{ duration: reduced ? 0 : 0.5, ease: "easeOut" }}
+            initial={reduced ? false : { scale: 0.85, opacity: 0.75 }}
+            animate={{ scale: 1.45, opacity: 0 }}
+            transition={{ duration: reduced ? 0 : 0.65, ease: "easeOut" }}
             className={cn(
               "pointer-events-none absolute inset-0 rounded-full border-2",
               connected ? "border-accent-success" : "border-glass-border"
             )}
           />
+
+          {connected ? (
+            <motion.span
+              key={`${state}-halo`}
+              aria-hidden="true"
+              initial={reduced ? false : { opacity: 0.45 }}
+              animate={{ opacity: [0.45, 0.9, 0.45] }}
+              transition={{
+                duration: reduced ? 0 : 2.6,
+                repeat: reduced ? 0 : Infinity,
+                ease: "easeInOut",
+              }}
+              className="border-accent-success/40 pointer-events-none absolute -inset-1 rounded-full border"
+            />
+          ) : null}
         </AnimatePresence>
 
         <motion.span
@@ -84,21 +99,44 @@ export default function ConnectButton({
             reduced || !connected
               ? { scale: 1 }
               : {
-                  scale: [1, 1.06, 1],
-                  transition: { duration: 2.4, repeat: Infinity },
+                  scale: [1, 1.08, 1],
+                  transition: { duration: 2.6, repeat: Infinity },
                 }
           }
           className="flex items-center justify-center"
         >
-          <Power
-            aria-hidden="true"
-            className={cn(
-              "size-16 transition-colors duration-300",
-              isBusy && "animate-spin",
-              connected ? "text-accent-success" : "text-text-secondary"
-            )}
-            strokeWidth={1.75}
-          />
+          <motion.span
+            className="flex items-center justify-center"
+            {...(reduced
+              ? {}
+              : {
+                  animate: isBusy
+                    ? { rotate: 360 }
+                    : connected
+                      ? { rotate: [0, 360] }
+                      : { rotate: 0 },
+                  transition: isBusy
+                    ? {
+                        duration: 1.6,
+                        repeat: Infinity,
+                        ease: "linear" as const,
+                      }
+                    : {
+                        duration: 24,
+                        repeat: Infinity,
+                        ease: "linear" as const,
+                      },
+                })}
+          >
+            <Power
+              aria-hidden="true"
+              className={cn(
+                "size-16 transition-colors duration-300",
+                connected ? "text-accent-success" : "text-text-secondary"
+              )}
+              strokeWidth={1.75}
+            />
+          </motion.span>
         </motion.span>
       </motion.button>
 

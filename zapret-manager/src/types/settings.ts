@@ -74,6 +74,8 @@ export interface GeneralSettings {
 export interface AppearanceSettings {
   theme: ThemeMode;
   density: DensityMode;
+  interfaceScale: number;
+  animationSpeed: number;
   animations: boolean;
   animateTrayIcon: boolean;
   postProcessing: PostProcessingSettings;

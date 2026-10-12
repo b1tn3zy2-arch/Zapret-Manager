@@ -16,6 +16,8 @@ export { default as Modal } from "./Modal";
 export type { ModalProps } from "./Modal";
 export { default as Skeleton } from "./Skeleton";
 export type { SkeletonProps, SkeletonVariant } from "./Skeleton";
+export { Slider } from "./Slider";
+export type { SliderProps } from "./Slider";
 export { default as Spinner } from "./Spinner";
 export type { SpinnerProps } from "./Spinner";
 export { default as Text } from "./Text";

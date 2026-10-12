@@ -7,7 +7,9 @@ test.describe("Меню трея", () => {
     const collector = await bootstrap(page);
     await page.goto("/?view=tray");
 
-    await expect(page.getByText("Zapret", { exact: true }).first()).toBeVisible();
+    await expect(
+      page.getByText("Zapret", { exact: true }).first()
+    ).toBeVisible();
     await expect(
       page.getByRole("button", { name: "Запустить последнюю стратегию" })
     ).toBeVisible();
@@ -32,7 +34,9 @@ test.describe("Меню трея", () => {
 
     await page.getByRole("button", { name: "Стратегии" }).click();
 
-    await expect(page.getByText("Zapret", { exact: true }).first()).toBeVisible();
+    await expect(
+      page.getByText("Zapret", { exact: true }).first()
+    ).toBeVisible();
 
     expect(collector.errors).toEqual([]);
   });

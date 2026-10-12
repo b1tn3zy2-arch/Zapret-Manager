@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 
 import type { TranslationKey } from "@/i18n/types";
+import { getAnimationSpeedFactor } from "@/lib/appearanceTokens";
 import type { LogLevel, LogSource } from "@/types";
 
 export const APP_NAME = "Zapret";
@@ -72,13 +73,31 @@ export const NAV_ITEMS = [
   { route: ROUTES.about, labelKey: "nav.about", icon: Info },
 ] as const satisfies readonly NavItem[];
 
-export const ANIMATION = {
+const ANIMATION_BASE = {
   fast: 0.15,
   normal: 0.25,
   slow: 0.4,
+} as const;
+
+const ANIMATION_EASES = {
   easeOutExpo: [0.16, 1, 0.3, 1],
   easeInOutExpo: [0.87, 0, 0.13, 1],
 } as const;
+
+export const ANIMATION = new Proxy(
+  { ...ANIMATION_BASE, ...ANIMATION_EASES },
+  {
+    get(target, property, receiver): unknown {
+      const value = Reflect.get(target, property, receiver) as unknown;
+
+      if (typeof value === "number") {
+        return value * getAnimationSpeedFactor();
+      }
+
+      return value;
+    },
+  }
+) as Readonly<typeof ANIMATION_BASE & typeof ANIMATION_EASES>;
 
 export const PERF_TARGETS = {
   coldStartMs: 1500,

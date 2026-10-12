@@ -16,9 +16,7 @@ export interface StrategyRunResult {
   logPath: string;
 }
 
-export function toNativeGames(
-  games: readonly GameSettings[]
-): NativeGamePayload[] {
+function toNativeGames(games: readonly GameSettings[]): NativeGamePayload[] {
   return enabledGames(games).map((game) => ({
     name: game.name,
     domains: game.domains,

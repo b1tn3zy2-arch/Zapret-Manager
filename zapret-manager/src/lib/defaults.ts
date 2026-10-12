@@ -53,6 +53,8 @@ export const DEFAULT_POST_PROCESSING: PostProcessingSettings = {
 export const DEFAULT_APPEARANCE: AppearanceSettings = {
   theme: "dark",
   density: "normal",
+  interfaceScale: 100,
+  animationSpeed: 100,
   animations: true,
   animateTrayIcon: true,
   postProcessing: DEFAULT_POST_PROCESSING,

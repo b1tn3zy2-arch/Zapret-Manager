@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { bootstrap, sidebar } from "./helpers";
+import { bootstrap, sidebar, waitForAnimationsSettled } from "./helpers";
 import { MOCK_FOLDER } from "./mock-tauri";
 
 test.describe("Стратегии", () => {
@@ -74,8 +74,24 @@ test.describe("Стратегии", () => {
 
     await card.click();
     await expect(card).toHaveAttribute("aria-expanded", "true");
+    await expect(
+      card.locator("xpath=ancestor::*[@data-flipped]")
+    ).toHaveAttribute("data-flipped", "true");
+    await waitForAnimationsSettled(page);
 
-    await page.getByRole("button", { name: "Закрыть карту" }).first().click();
+    // Chromium ненадёжно определяет элемент под курсором внутри preserve-3d-поддерева
+    // сразу после 3D-переворота: клик уходит в родительский div и onFlip не вызывается.
+    // Кнопка закрытия находится точно в центре своей грани, поэтому кликаем принудительно.
+    await page
+      .getByRole("button", { name: "Закрыть карту" })
+      .first()
+      .click({ force: true });
     await expect(card).toHaveAttribute("aria-expanded", "false");
+    await waitForAnimationsSettled(page);
+
+    // после закрытия оборотная сторона скрыта, а блок карточки снова кликабелен
+    await expect(
+      page.getByRole("button", { name: "Подробнее о стратегии" }).first()
+    ).toBeVisible();
   });
 });

@@ -1,5 +1,9 @@
 import { useEffect } from "react";
 
+import {
+  applyAnimationSpeed,
+  interfaceScaleToRoot,
+} from "@/lib/appearanceTokens";
 import { DENSITY_SCALE } from "@/lib/settingsConstants";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import type { DensityMode, ThemeMode } from "@/types";
@@ -24,6 +28,24 @@ function applyDensity(density: DensityMode): void {
   root.style.setProperty("--density-scale", String(DENSITY_SCALE[density]));
 }
 
+function applyScale(percent: number): void {
+  const root = document.documentElement;
+
+  root.style.setProperty(
+    "--interface-scale",
+    String(interfaceScaleToRoot(percent))
+  );
+  root.dataset.interfaceScale = String(interfaceScaleToRoot(percent));
+}
+
+function applySpeed(percent: number): void {
+  const root = document.documentElement;
+  const clamped = applyAnimationSpeed(percent);
+
+  root.dataset.animationSpeed = String(clamped);
+  root.style.setProperty("--motion-scale", String(100 / clamped));
+}
+
 function applyMotion(animations: boolean): void {
   document.documentElement.dataset.animations = animations ? "on" : "off";
 }
@@ -32,6 +54,12 @@ export function useAppearance(): void {
   const theme = useSettingsStore((state) => state.settings.appearance.theme);
   const density = useSettingsStore(
     (state) => state.settings.appearance.density
+  );
+  const interfaceScale = useSettingsStore(
+    (state) => state.settings.appearance.interfaceScale
+  );
+  const animationSpeed = useSettingsStore(
+    (state) => state.settings.appearance.animationSpeed
   );
   const animations = useSettingsStore(
     (state) => state.settings.appearance.animations
@@ -58,6 +86,14 @@ export function useAppearance(): void {
   useEffect(() => {
     applyDensity(density);
   }, [density]);
+
+  useEffect(() => {
+    applyScale(interfaceScale);
+  }, [interfaceScale]);
+
+  useEffect(() => {
+    applySpeed(animationSpeed);
+  }, [animationSpeed]);
 
   useEffect(() => {
     applyMotion(animations);

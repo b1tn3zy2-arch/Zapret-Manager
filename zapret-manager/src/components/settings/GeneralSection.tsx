@@ -5,9 +5,8 @@ import { useEffect, useMemo, useState } from "react";
 import Dropdown from "@/components/settings/Dropdown";
 import SectionContainer from "@/components/settings/SectionContainer";
 import SettingRow from "@/components/settings/SettingRow";
-import { Button } from "@/components/ui/Button";
-import Text from "@/components/ui/Text";
-import Toggle from "@/components/ui/Toggle";
+import { Text } from "@/components/ui";
+import { Toggle } from "@/components/ui";
 import { useI18n } from "@/i18n";
 import type { TranslationKey } from "@/i18n/types";
 import { ROUTES } from "@/lib/constants";
@@ -38,29 +37,6 @@ function GeneralSection() {
       })
       .catch(() => undefined);
   }, []);
-
-  const testNotification = async (): Promise<void> => {
-    try {
-      await invoke("show_notification", {
-        title: t("settings.general.testNotificationTitle"),
-        body: t("settings.general.testNotificationBody"),
-        kind: "success",
-      });
-      addLog({
-        level: "success",
-        source: "system",
-        message: t("settings.general.testNotificationSent"),
-      });
-    } catch (caught) {
-      addLog({
-        level: "error",
-        source: "system",
-        message: t("settings.general.testNotificationFailed", {
-          error: caught instanceof Error ? caught.message : String(caught),
-        }),
-      });
-    }
-  };
 
   const languageOptions = useMemo(
     () =>
@@ -200,51 +176,6 @@ function GeneralSection() {
       />
 
       <SettingRow
-        label={t("settings.general.notifyOnStart")}
-        description={t("settings.general.notifyOnStartHint")}
-        control={
-          <Toggle
-            ariaLabel={t("settings.general.notifyOnStart")}
-            checked={general.showNotificationsOnStart}
-            disabled={!general.showNotifications}
-            onChange={(value) => {
-              updateGeneral({ showNotificationsOnStart: value });
-            }}
-          />
-        }
-      />
-
-      <SettingRow
-        label={t("settings.general.notifyOnStop")}
-        description={t("settings.general.notifyOnStopHint")}
-        control={
-          <Toggle
-            ariaLabel={t("settings.general.notifyOnStop")}
-            checked={general.showNotificationsOnStop}
-            disabled={!general.showNotifications}
-            onChange={(value) => {
-              updateGeneral({ showNotificationsOnStop: value });
-            }}
-          />
-        }
-      />
-
-      <SettingRow
-        label={t("settings.general.notifyOnUpdate")}
-        description={t("settings.general.notifyOnUpdateHint")}
-        control={
-          <Toggle
-            ariaLabel={t("settings.general.notifyOnUpdate")}
-            checked={general.showUpdateNotifications}
-            disabled={!general.showNotifications}
-            onChange={(value) => {
-              updateGeneral({ showUpdateNotifications: value });
-            }}
-          />
-        }
-      />
-
-      <SettingRow
         label={t("settings.general.enableLogs")}
         description={t("settings.general.enableLogsHint")}
         control={
@@ -277,27 +208,57 @@ function GeneralSection() {
         }
       />
 
-      {systemToasts ? null : (
+      {systemToasts && general.showNotifications ? (
         <Text variant="caption" size="sm" className="text-accent-warning">
           {t("settings.general.toastsDisabledHint")}
         </Text>
-      )}
+      ) : null}
 
-      <SettingRow
-        label={t("settings.general.testNotification")}
-        description={t("settings.general.testNotificationHint")}
-        control={
-          <Button
-            size="sm"
-            variant="secondary"
-            onClick={() => {
-              void testNotification();
-            }}
-          >
-            {t("settings.general.testNotificationAction")}
-          </Button>
-        }
-      />
+      {general.showNotifications ? (
+        <>
+          <SettingRow
+            label={t("settings.general.notifyOnStart")}
+            description={t("settings.general.notifyOnStartHint")}
+            control={
+              <Toggle
+                ariaLabel={t("settings.general.notifyOnStart")}
+                checked={general.showNotificationsOnStart}
+                onChange={(value) => {
+                  updateGeneral({ showNotificationsOnStart: value });
+                }}
+              />
+            }
+          />
+
+          <SettingRow
+            label={t("settings.general.notifyOnStop")}
+            description={t("settings.general.notifyOnStopHint")}
+            control={
+              <Toggle
+                ariaLabel={t("settings.general.notifyOnStop")}
+                checked={general.showNotificationsOnStop}
+                onChange={(value) => {
+                  updateGeneral({ showNotificationsOnStop: value });
+                }}
+              />
+            }
+          />
+
+          <SettingRow
+            label={t("settings.general.notifyOnUpdate")}
+            description={t("settings.general.notifyOnUpdateHint")}
+            control={
+              <Toggle
+                ariaLabel={t("settings.general.notifyOnUpdate")}
+                checked={general.showUpdateNotifications}
+                onChange={(value) => {
+                  updateGeneral({ showUpdateNotifications: value });
+                }}
+              />
+            }
+          />
+        </>
+      ) : null}
     </SectionContainer>
   );
 }

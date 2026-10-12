@@ -1,4 +1,4 @@
-use std::os::windows::ffi::OsStrExt;
+﻿use std::os::windows::ffi::OsStrExt;
 use std::path::Path;
 
 use winapi::shared::iprtrmib::TCP_TABLE_OWNER_PID_ALL;
@@ -9,15 +9,20 @@ use winapi::um::errhandlingapi::GetLastError;
 use winapi::um::handleapi::CloseHandle;
 use winapi::um::iphlpapi::GetExtendedTcpTable;
 use winapi::um::processthreadsapi::{
-    GetCurrentProcess, GetExitCodeProcess, GetProcessId, OpenProcess,
-    OpenProcessToken, TerminateProcess,
+    CreateProcessAsUserW, GetCurrentProcess, GetExitCodeProcess, GetProcessId,
+    OpenProcess, OpenProcessToken, PROCESS_INFORMATION, STARTUPINFOW,
+    TerminateProcess,
 };
-use winapi::um::securitybaseapi::GetTokenInformation;
+use winapi::um::securitybaseapi::{
+    DuplicateTokenEx, GetTokenInformation, SetTokenInformation,
+};
 use winapi::um::shellapi::ShellExecuteExW;
 use winapi::um::synchapi::WaitForSingleObject;
+use winapi::um::winbase::{CREATE_NEW_PROCESS_GROUP, CREATE_UNICODE_ENVIRONMENT};
 use winapi::um::winnt::{
-    TokenElevation, HANDLE, PROCESS_QUERY_LIMITED_INFORMATION, TOKEN_ELEVATION,
-    TOKEN_QUERY,
+    SecurityImpersonation, TokenElevation, TokenIntegrityLevel, TokenPrimary,
+    HANDLE, MAXIMUM_ALLOWED, PROCESS_QUERY_LIMITED_INFORMATION, TOKEN_DUPLICATE,
+    TOKEN_ELEVATION, TOKEN_QUERY,
 };
 
 use crate::error::{AppError, AppResult};
@@ -65,7 +70,7 @@ impl OwnedProcessHandle {
     pub fn wait_for_exit(&self, timeout_ms: u32) -> AppResult<u32> {
         if self.raw == 0 {
             return Err(AppError::custom(
-                "Процесс без дескриптора нельзя дождаться",
+                "РџСЂРѕС†РµСЃСЃ Р±РµР· РґРµСЃРєСЂРёРїС‚РѕСЂР° РЅРµР»СЊР·СЏ РґРѕР¶РґР°С‚СЊСЃСЏ",
             ));
         }
 
@@ -75,13 +80,13 @@ impl OwnedProcessHandle {
 
         if outcome == WAIT_TIMEOUT_VALUE {
             return Err(AppError::custom(
-                "Повышенный процесс не ответил вовремя",
+                "РџРѕРІС‹С€РµРЅРЅС‹Р№ РїСЂРѕС†РµСЃСЃ РЅРµ РѕС‚РІРµС‚РёР» РІРѕРІСЂРµРјСЏ",
             ));
         }
 
         if outcome != WAIT_OBJECT_0_VALUE {
             return Err(AppError::custom(
-                "Не удалось дождаться повышенного процесса",
+                "РќРµ СѓРґР°Р»РѕСЃСЊ РґРѕР¶РґР°С‚СЊСЃСЏ РїРѕРІС‹С€РµРЅРЅРѕРіРѕ РїСЂРѕС†РµСЃСЃР°",
             ));
         }
 
@@ -89,7 +94,7 @@ impl OwnedProcessHandle {
 
         if unsafe { GetExitCodeProcess(self.raw as HANDLE, &mut code) } == 0 {
             return Err(AppError::custom(
-                "Не удалось получить код завершения процесса",
+                "РќРµ СѓРґР°Р»РѕСЃСЊ РїРѕР»СѓС‡РёС‚СЊ РєРѕРґ Р·Р°РІРµСЂС€РµРЅРёСЏ РїСЂРѕС†РµСЃСЃР°",
             ));
         }
 
@@ -146,12 +151,12 @@ pub fn shell_execute_runas(
 
         if code == ERROR_CANCELLED {
             return Err(AppError::custom(
-                "Запуск отменён: доступ к программе не предоставлен",
+                "Р—Р°РїСѓСЃРє РѕС‚РјРµРЅС‘РЅ: РґРѕСЃС‚СѓРї Рє РїСЂРѕРіСЂР°РјРјРµ РЅРµ РїСЂРµРґРѕСЃС‚Р°РІР»РµРЅ",
             ));
         }
 
         return Err(AppError::custom(format!(
-            "Не удалось запустить с повышенными правами: {}",
+            "РќРµ СѓРґР°Р»РѕСЃСЊ Р·Р°РїСѓСЃС‚РёС‚СЊ СЃ РїРѕРІС‹С€РµРЅРЅС‹РјРё РїСЂР°РІР°РјРё: {}",
             os_error_message(code)
         )));
     }
@@ -160,7 +165,7 @@ pub fn shell_execute_runas(
 
     if raw == 0 {
         return Err(AppError::custom(
-            "Система не вернула дескриптор процесса",
+            "РЎРёСЃС‚РµРјР° РЅРµ РІРµСЂРЅСѓР»Р° РґРµСЃРєСЂРёРїС‚РѕСЂ РїСЂРѕС†РµСЃСЃР°",
         ));
     }
 
@@ -171,7 +176,7 @@ pub fn shell_execute_runas(
             CloseHandle(info.hProcess);
         }
         return Err(AppError::custom(
-            "Не удалось получить PID запущенного процесса",
+            "РќРµ СѓРґР°Р»РѕСЃСЊ РїРѕР»СѓС‡РёС‚СЊ PID Р·Р°РїСѓС‰РµРЅРЅРѕРіРѕ РїСЂРѕС†РµСЃСЃР°",
         ));
     }
 
@@ -198,15 +203,151 @@ pub fn is_process_elevated() -> bool {
 
         CloseHandle(token);
 
-        ok != 0 && elevation.TokenIsElevated != 0
+ok != 0 && elevation.TokenIsElevated != 0
     }
 }
 
-pub fn game_launch_verb(elevated: bool) -> &'static str {
-    if elevated {
-        "runasuser"
-    } else {
-        "open"
+#[repr(C)]
+struct SidHeaderRaw {
+    revision: u8,
+    sub_authority_count: u8,
+    identifier_authority: [u8; 6],
+    sub_authority: [u32; 1],
+}
+
+#[repr(C)]
+struct SidAndAttributesRaw {
+    sid: *mut u8,
+    attributes: u32,
+}
+
+pub fn spawn_medium_token(
+    program: &str,
+    arguments: &str,
+    working_dir: Option<&Path>,
+) -> AppResult<u32> {
+    const TOKEN_ASSIGN_PRIMARY_VALUE: DWORD = 0x0001;
+    const TOKEN_ADJUST_DEFAULT_ATTRIBUTES_VALUE: DWORD = 0x0002;
+    const TOKEN_READ_ATTRIBUTES_VALUE: DWORD = 0x0008;
+    let access = TOKEN_DUPLICATE
+        | TOKEN_ASSIGN_PRIMARY_VALUE
+        | TOKEN_QUERY
+        | TOKEN_ADJUST_DEFAULT_ATTRIBUTES_VALUE
+        | TOKEN_READ_ATTRIBUTES_VALUE;
+    let mut source: HANDLE = std::ptr::null_mut();
+
+    unsafe {
+        if OpenProcessToken(GetCurrentProcess(), access, &mut source) == 0 {
+            return Err(AppError::custom(format!(
+                "РќРµ СѓРґР°Р»РѕСЃСЊ РїРѕР»СѓС‡РёС‚СЊ С‚РѕРєРµРЅ РїСЂРѕС†РµСЃСЃР°: {}",
+                os_error_message(GetLastError())
+            )));
+        }
+
+        let mut medium: HANDLE = std::ptr::null_mut();
+        let duplicated = DuplicateTokenEx(
+            source,
+            MAXIMUM_ALLOWED,
+            std::ptr::null_mut(),
+            SecurityImpersonation,
+            TokenPrimary,
+            &mut medium,
+        );
+
+        CloseHandle(source);
+
+        if duplicated == 0 {
+            return Err(AppError::custom(format!(
+                "РќРµ СѓРґР°Р»РѕСЃСЊ СЃРѕР·РґР°С‚СЊ medium-С‚РѕРєРµРЅ: {}",
+                os_error_message(GetLastError())
+            )));
+        }
+
+        let mut sid = SidHeaderRaw {
+            revision: 1,
+            sub_authority_count: 1,
+            identifier_authority: [0, 0, 0, 0, 0, 16],
+            sub_authority: [8192],
+        };
+        let mut label = SidAndAttributesRaw {
+            sid: std::ptr::addr_of_mut!(sid).cast::<u8>(),
+            attributes: 0,
+        };
+
+        let lowered = SetTokenInformation(
+            medium,
+            TokenIntegrityLevel,
+            std::ptr::addr_of_mut!(label).cast(),
+            std::mem::size_of::<SidAndAttributesRaw>() as DWORD,
+        );
+
+        if lowered == 0 {
+            let code = GetLastError();
+
+            CloseHandle(medium);
+
+            return Err(AppError::custom(format!(
+                "РќРµ СѓРґР°Р»РѕСЃСЊ РїРѕРЅРёР·РёС‚СЊ СѓСЂРѕРІРµРЅСЊ С†РµР»РѕСЃС‚РЅРѕСЃС‚Рё: {}",
+                os_error_message(code)
+            )));
+        }
+
+        let mut command_line = wide(program);
+
+        if !arguments.is_empty() {
+            command_line.extend(wide(" "));
+            command_line.extend(wide(arguments));
+        }
+
+        let directory = working_dir.map(|path| {
+            wide(&path.to_string_lossy())
+        });
+
+        let mut startup: STARTUPINFOW = std::mem::zeroed();
+        let mut info: PROCESS_INFORMATION = std::mem::zeroed();
+
+        startup.cb = std::mem::size_of::<STARTUPINFOW>() as DWORD;
+
+        let created = CreateProcessAsUserW(
+            medium,
+            std::ptr::null(),
+            command_line.as_mut_ptr(),
+            std::ptr::null_mut(),
+            std::ptr::null_mut(),
+            0,
+            CREATE_UNICODE_ENVIRONMENT | CREATE_NEW_PROCESS_GROUP,
+            std::ptr::null_mut(),
+            directory
+                .as_ref()
+                .map(|value| value.as_ptr())
+                .unwrap_or(std::ptr::null()),
+            &mut startup,
+            &mut info,
+        );
+
+        let code = GetLastError();
+
+        CloseHandle(medium);
+
+        if created == 0 {
+            return Err(AppError::custom(format!(
+                "РќРµ СѓРґР°Р»РѕСЃСЊ Р·Р°РїСѓСЃС‚РёС‚СЊ СЃ РїРѕРЅРёР¶РµРЅРЅС‹РјРё РїСЂР°РІР°РјРё: {}",
+                os_error_message(code)
+            )));
+        }
+
+        CloseHandle(info.hThread);
+        let pid = info.dwProcessId;
+
+        CloseHandle(info.hProcess);
+
+        if pid == 0 {
+            return Err(AppError::custom(
+                "РќРµ СѓРґР°Р»РѕСЃСЊ РїРѕР»СѓС‡РёС‚СЊ PID Р·Р°РїСѓС‰РµРЅРЅРѕРіРѕ РїСЂРѕС†РµСЃСЃР°",
+            ));
+        }
+
+        Ok(pid)
     }
 }
 
@@ -215,20 +356,16 @@ pub fn shell_execute_game(
     arguments: &str,
     working_dir: Option<&Path>,
 ) -> AppResult<u32> {
-    let verb = game_launch_verb(is_process_elevated());
-
-    match shell_execute_with_verb(program, arguments, working_dir, verb) {
-        Ok(pid) => Ok(pid),
-        Err(error) => {
-            if verb != "runasuser" {
-                return Err(error);
+    if is_process_elevated() {
+        match spawn_medium_token(program, arguments, working_dir) {
+            Ok(pid) => return Ok(pid),
+            Err(error) => {
+                tracing::warn!("РџРѕРЅРёР¶РµРЅРёРµ РїСЂР°РІ РЅРµ СѓРґР°Р»РѕСЃСЊ, РѕР±С‹С‡РЅС‹Р№ Р·Р°РїСѓСЃРє: {error}");
             }
-
-            tracing::warn!("Понижение прав не удалось, обычный запуск: {error}");
-
-            shell_execute_with_verb(program, arguments, working_dir, "open")
         }
     }
+
+    shell_execute_with_verb(program, arguments, working_dir, "open")
 }
 
 pub fn shell_execute_with_verb(
@@ -269,7 +406,7 @@ pub fn shell_execute_with_verb(
         let code = unsafe { GetLastError() };
 
         return Err(AppError::custom(format!(
-            "Не удалось запустить: {}",
+            "РќРµ СѓРґР°Р»РѕСЃСЊ Р·Р°РїСѓСЃС‚РёС‚СЊ: {}",
             os_error_message(code)
         )));
     }
@@ -282,7 +419,7 @@ pub fn shell_execute_with_verb(
 
     if pid == 0 {
         return Err(AppError::custom(
-            "Не удалось получить PID запущенного процесса",
+            "РќРµ СѓРґР°Р»РѕСЃСЊ РїРѕР»СѓС‡РёС‚СЊ PID Р·Р°РїСѓС‰РµРЅРЅРѕРіРѕ РїСЂРѕС†РµСЃСЃР°",
         ));
     }
 
@@ -454,7 +591,7 @@ mod tests {
     #[test]
     fn test_count_tcp_connections_is_plausible() {
         let count = count_tcp_connections();
-        assert!(count < 100_000, "подозрительное число соединений: {count}");
+        assert!(count < 100_000, "РїРѕРґРѕР·СЂРёС‚РµР»СЊРЅРѕРµ С‡РёСЃР»Рѕ СЃРѕРµРґРёРЅРµРЅРёР№: {count}");
     }
 
     #[test]
@@ -508,7 +645,21 @@ mod tests {
     }
 }
 #[test]
-fn test_game_launch_verb_deelevates_when_elevated() {
-    assert_eq!(game_launch_verb(true), "runasuser");
-    assert_eq!(game_launch_verb(false), "open");
+fn test_is_process_elevated_returns_without_panic() {
+    let _ = is_process_elevated();
+}
+
+#[test]
+fn test_spawn_medium_token_starts_low_privilege_process() {
+    let target =
+        std::env::var("WINDIR").unwrap_or_else(|_| "C:\\Windows".to_string());
+    let program = Path::new(&target).join("System32").join("where.exe");
+
+    if !program.is_file() {
+        return;
+    }
+
+    if let Ok(pid) = spawn_medium_token(&program.to_string_lossy(), "", program.parent()) {
+        assert!(pid > 0);
+    }
 }

@@ -70,11 +70,9 @@ function Dropdown<T extends string>({
     };
 
     window.addEventListener("resize", handleResize);
-    window.addEventListener("scroll", handleResize, true);
 
     return () => {
       window.removeEventListener("resize", handleResize);
-      window.removeEventListener("scroll", handleResize, true);
     };
   }, [close, open]);
 

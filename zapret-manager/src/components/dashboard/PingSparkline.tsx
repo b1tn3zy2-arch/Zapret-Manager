@@ -60,9 +60,7 @@ function PingSparkline({
   }, [points]);
 
   const hasData = useMemo(
-    () =>
-      points.filter((point) => point.success && point.latencyMs !== null)
-        .length >= 2,
+    () => points.some((point) => point.success && point.latencyMs !== null),
     [points]
   );
 
@@ -114,7 +112,7 @@ function PingSparkline({
         }
       }
 
-      if (values.length >= 2) {
+      if (values.length >= 1) {
         const min = Math.min(...values);
         const max = Math.max(...values);
         const average =

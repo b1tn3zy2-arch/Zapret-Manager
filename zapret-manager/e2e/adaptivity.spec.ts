@@ -101,31 +101,56 @@ test.describe("Адаптив", () => {
 
       for (const [name, slug] of PAGES) {
         await navButton(page, name).click();
-        await page.waitForTimeout(600);
+        await page.waitForTimeout(400);
 
-        for (let attempt = 0; attempt < 8; attempt += 1) {
-          const before = await page.evaluate(() => {
-            const main = document.querySelector("main");
+        await page
+          .waitForFunction(
+            () => {
+              const main = document.querySelector("main");
 
-            if (main !== null) {
+              if (main === null) {
+                return false;
+              }
+
+              const mainRect = main.getBoundingClientRect();
+              let deepest = mainRect.top;
+
+              for (const node of Array.from(main.querySelectorAll("*"))) {
+                const rect = node.getBoundingClientRect();
+
+                if (rect.width === 0 || rect.height === 0) {
+                  continue;
+                }
+
+                if (getComputedStyle(node).position === "fixed") {
+                  continue;
+                }
+
+                if (rect.bottom > mainRect.top) {
+                  deepest = Math.max(deepest, rect.bottom);
+                }
+              }
+
               main.scrollTop = main.scrollHeight;
-            }
 
-            return main?.scrollHeight ?? 0;
-          });
+              const probe = window as unknown as {
+                __settleProbe?: string;
+                __settleHits?: number;
+              };
+              const signature = `${main.scrollHeight}:${Math.round(deepest)}`;
 
-          await page.waitForTimeout(150);
+              probe.__settleHits =
+                probe.__settleProbe === signature
+                  ? (probe.__settleHits ?? 0) + 1
+                  : 0;
+              probe.__settleProbe = signature;
 
-          const after = await page.evaluate(
-            () => document.querySelector("main")?.scrollHeight ?? 0
-          );
-
-          if (before === after) {
-            break;
-          }
-        }
-
-        await page.waitForTimeout(150);
+              return probe.__settleHits >= 3;
+            },
+            undefined,
+            { timeout: 5000, polling: 200 }
+          )
+          .catch(() => undefined);
 
         const gap = await page.evaluate(() => {
           const main = document.querySelector("main");

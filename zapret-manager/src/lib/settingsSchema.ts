@@ -15,6 +15,12 @@ import {
   MAX_GAMES,
   MAX_INJECTED_ENTRIES,
 } from "@/lib/settingsLimits";
+import {
+  ANIMATION_SPEED_MAX,
+  ANIMATION_SPEED_MIN,
+  INTERFACE_SCALE_MAX,
+  INTERFACE_SCALE_MIN,
+} from "@/lib/appearanceTokens";
 import { isValidRepo } from "@/lib/updateUtils";
 import type { AppSettings, GameSettings } from "@/types";
 
@@ -89,6 +95,16 @@ const generalSchema = z.object({
 const appearanceSchema = z.object({
   theme: themeSchema.default(DEFAULT_APPEARANCE.theme),
   density: densitySchema.default(DEFAULT_APPEARANCE.density),
+  interfaceScale: z
+    .number()
+    .min(INTERFACE_SCALE_MIN)
+    .max(INTERFACE_SCALE_MAX)
+    .default(DEFAULT_APPEARANCE.interfaceScale),
+  animationSpeed: z
+    .number()
+    .min(ANIMATION_SPEED_MIN)
+    .max(ANIMATION_SPEED_MAX)
+    .default(DEFAULT_APPEARANCE.animationSpeed),
   animations: z.boolean().default(DEFAULT_APPEARANCE.animations),
   animateTrayIcon: z.boolean().default(DEFAULT_APPEARANCE.animateTrayIcon),
   postProcessing: postProcessingSchema,

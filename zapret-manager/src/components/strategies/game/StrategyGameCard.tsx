@@ -81,6 +81,7 @@ function StrategyGameCardImpl({
         "strategy-card group relative [perspective:1000px]",
         isRunning && !motionDisabled && "card-running-pulse"
       )}
+      data-flipped={flipped}
       style={{ width: "100%", aspectRatio: String(CARD_ASPECT_RATIO) }}
     >
       <motion.div
@@ -121,7 +122,12 @@ function StrategyGameCardImpl({
           />
 
           <div
-            className="bg-bg-secondary/95 absolute inset-0 flex [transform:rotateY(180deg)] flex-col rounded-xl border p-0 [backface-visibility:hidden]"
+            className={cn(
+              "bg-bg-secondary/95 absolute inset-0 flex flex-col rounded-xl border p-0 [backface-visibility:hidden]",
+              "[transform:rotateY(180deg)]",
+              // задняя грань принимает клики только когда карточка действительно перевёрнута
+              flipped ? "pointer-events-auto" : "pointer-events-none"
+            )}
             style={{ borderColor: palette.border }}
           >
             <StrategyCardBack

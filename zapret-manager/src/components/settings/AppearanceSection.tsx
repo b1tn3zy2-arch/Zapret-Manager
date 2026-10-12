@@ -2,14 +2,22 @@ import Dropdown from "@/components/settings/Dropdown";
 import SectionContainer from "@/components/settings/SectionContainer";
 import SettingRow from "@/components/settings/SettingRow";
 import Toggle from "@/components/ui/Toggle";
+import { Slider } from "@/components/ui";
 import { useMemo } from "react";
 
 import { useI18n } from "@/i18n";
 import type { TranslationKey } from "@/i18n/types";
+import {
+  ANIMATION_SPEED_MAX,
+  ANIMATION_SPEED_MIN,
+  ANIMATION_SPEED_STEP,
+  INTERFACE_SCALE_MAX,
+  INTERFACE_SCALE_MIN,
+  INTERFACE_SCALE_STEP,
+} from "@/lib/appearanceTokens";
 import { DEFAULT_APPEARANCE, DEFAULT_POST_PROCESSING } from "@/lib/defaults";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import type {
-  DensityMode,
   EffectIntensity,
   PostProcessingQuality,
   ThemeMode,
@@ -23,14 +31,6 @@ const THEME_OPTIONS = [
   value: ThemeMode;
   labelKey: TranslationKey;
   disabled?: boolean;
-}[];
-
-const DENSITY_OPTIONS = [
-  { value: "compact", labelKey: "settings.appearance.values.compact" },
-  { value: "normal", labelKey: "settings.appearance.values.normal" },
-] as const satisfies readonly {
-  value: DensityMode;
-  labelKey: TranslationKey;
 }[];
 
 const INTENSITY_OPTIONS = [
@@ -64,15 +64,6 @@ function AppearanceSection() {
   const themeOptions = useMemo(
     () =>
       THEME_OPTIONS.map((option) => ({
-        value: option.value,
-        label: t(option.labelKey),
-      })),
-    [t]
-  );
-
-  const densityOptions = useMemo(
-    () =>
-      DENSITY_OPTIONS.map((option) => ({
         value: option.value,
         label: t(option.labelKey),
       })),
@@ -122,14 +113,38 @@ function AppearanceSection() {
         />
 
         <SettingRow
-          label={t("settings.appearance.density")}
+          label={t("settings.appearance.interfaceScale")}
+          description={t("settings.appearance.interfaceScaleHint")}
           control={
-            <Dropdown
-              label={t("settings.appearance.density")}
-              value={appearance.density}
-              options={densityOptions}
-              onChange={(density) => {
-                updateAppearance({ density });
+            <Slider
+              className="w-56"
+              value={appearance.interfaceScale}
+              min={INTERFACE_SCALE_MIN}
+              max={INTERFACE_SCALE_MAX}
+              step={INTERFACE_SCALE_STEP}
+              ariaLabel={t("settings.appearance.interfaceScale")}
+              formatValue={(value) => `${value}%`}
+              onChange={(interfaceScale) => {
+                updateAppearance({ interfaceScale });
+              }}
+            />
+          }
+        />
+
+        <SettingRow
+          label={t("settings.appearance.animationSpeed")}
+          description={t("settings.appearance.animationSpeedHint")}
+          control={
+            <Slider
+              className="w-56"
+              value={appearance.animationSpeed}
+              min={ANIMATION_SPEED_MIN}
+              max={ANIMATION_SPEED_MAX}
+              step={ANIMATION_SPEED_STEP}
+              ariaLabel={t("settings.appearance.animationSpeed")}
+              formatValue={(value) => `${value}%`}
+              onChange={(animationSpeed) => {
+                updateAppearance({ animationSpeed });
               }}
             />
           }

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { FolderOpen, RefreshCw, RotateCcw, ShieldCheck } from "lucide-react";
+import { FolderOpen, RefreshCw, RotateCcw } from "lucide-react";
 
 import { Button, Modal, Text } from "@/components/ui";
 import { useI18n } from "@/i18n";
@@ -79,24 +79,8 @@ function ResourcesSection() {
 
   return (
     <div className="flex flex-col gap-4 py-2">
-      <div className="flex items-start gap-3">
-        <ShieldCheck
-          aria-hidden="true"
-          className="text-accent-primary mt-0.5 size-5 shrink-0"
-          strokeWidth={2}
-        />
-        <div className="flex flex-col gap-1">
-          <Text variant="label" className="text-text-primary">
-            {t("settings.resources.title")}
-          </Text>
-          <Text variant="body" size="sm" className="text-text-secondary">
-            {t("settings.resources.description")}
-          </Text>
-        </div>
-      </div>
-
       <Row
-        label={t("settings.resources.version")}
+        label={t("settings.resources.title")}
         value={formatResourceVersion(version, t)}
       />
       <Row
