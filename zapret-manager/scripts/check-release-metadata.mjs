@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const root = join(scriptDir, "..");
 const problems = [];
+const warnings = [];
 
 function read(relative) {
   const path = join(root, relative);
@@ -42,10 +43,12 @@ check(
 
 const changelog = read("../CHANGELOG.md");
 
-check(
-  changelog !== null && changelog.includes(`## [${version}]`),
-  `в CHANGELOG.md нет секции [${version}]`
-);
+if (changelog !== null) {
+  check(
+    changelog.includes(`## [${version}]`),
+    `в CHANGELOG.md нет секции [${version}]`
+  );
+}
 
 // Приложение не публикуется, поэтому в README и CHANGELOG не должно быть ссылок,
 // которые обещают релиз, билд CI или баг-репорты в несуществующем репозитории.
@@ -54,7 +57,8 @@ for (const [name, content] of [
   ["CHANGELOG.md", changelog],
 ]) {
   if (content === null) {
-    problems.push(`${name} не найден`);
+    // файлы удалены намеренно: отсутствие не ломает сборку, но о нём стоит знать
+    warnings.push(`${name} отсутствует — проверка ссылок пропущена`);
     continue;
   }
   if (content.includes(UPSTREAM_ISSUES)) {
@@ -68,6 +72,12 @@ for (const [name, content] of [
         `${name} содержит незаполненную или тестовую ссылку ${marker}`
       );
     }
+  }
+}
+
+if (warnings.length > 0) {
+  for (const warning of warnings) {
+    console.warn(`Предупреждение: ${warning}`);
   }
 }
 

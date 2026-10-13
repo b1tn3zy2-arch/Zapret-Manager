@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -35,7 +35,7 @@ const targets = [
     },
   },
   {
-    label: "zapret-manager/src/lib/constants.ts",
+    label: "src/lib/constants.ts",
     update(content) {
       return content.replace(
         /export const APP_VERSION = "[^"]+"/,
@@ -45,6 +45,22 @@ const targets = [
   },
 ];
 
+const changelogPath = join(root, "..", "CHANGELOG.md");
+
+// Все файлы версии проверяются до первой записи: иначе версия обновится
+// в части файлов, и скрипт упадёт на следующем отсутствующем файле.
+const missing = targets
+  .map((target) => target.label)
+  .filter((label) => !existsSync(join(root, label)));
+
+if (missing.length > 0) {
+  console.error("Не найдены файлы для обновления версии:");
+  for (const label of missing) {
+    console.error(`  - ${label}`);
+  }
+  process.exit(1);
+}
+
 for (const target of targets) {
   const path = join(root, target.label);
   const content = readFileSync(path, "utf8");
@@ -52,7 +68,13 @@ for (const target of targets) {
   console.log(`обновлено: ${target.label}`);
 }
 
-const changelogPath = join(root, "CHANGELOG.md");
+// CHANGELOG удалён намеренно, поэтому это необязательный шаг.
+if (!existsSync(changelogPath)) {
+  console.warn("CHANGELOG.md отсутствует — секция версии не добавлена");
+  console.log(`Версия обновлена до ${version}`);
+  process.exit(0);
+}
+
 const changelog = readFileSync(changelogPath, "utf8");
 
 if (!changelog.includes(`## [${version}]`)) {

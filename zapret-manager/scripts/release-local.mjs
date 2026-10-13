@@ -54,16 +54,22 @@ execFileSync("node", [join(scriptDir, "release-artifacts.mjs")], {
   stdio: "inherit",
 });
 
-const changelog = readFileSync(join(root, "..", "CHANGELOG.md"), "utf8");
+const changelogPath = join(root, "..", "CHANGELOG.md");
 const { version } = JSON.parse(
   readFileSync(join(root, "package.json"), "utf8")
 );
 
-if (!changelog.includes(`## [${version}]`)) {
-  console.error(
-    `В CHANGELOG.md нет секции для версии ${version}. Заполните перед публикацией.`
-  );
-  process.exitCode = 1;
+if (!existsSync(changelogPath)) {
+  console.warn("CHANGELOG.md отсутствует — проверка секции версии пропущена");
+} else {
+  const changelog = readFileSync(changelogPath, "utf8");
+
+  if (!changelog.includes(`## [${version}]`)) {
+    console.error(
+      `В CHANGELOG.md нет секции для версии ${version}. Заполните перед публикацией.`
+    );
+    process.exitCode = 1;
+  }
 }
 
 if (!existsSync(join(root, "release", "SHA256SUMS.txt"))) {

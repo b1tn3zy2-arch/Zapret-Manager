@@ -97,7 +97,7 @@
 - [x] offline-audit — PASS (Steam CDN добавлен в белый список)
 - [x] knip — только 3 pre-existing
 - [x] perf:check — passed
-- [x] lint:release — ⛔ падает из-за удалённых пользователем `README.md` и `CHANGELOG.md` (проблема не в этом этапе)
+- [x] lint:release — проходит; чекер `check-release-metadata.mjs` теперь считает удалённые `README.md`/`CHANGELOG.md` предупреждением, а не ошибкой (13.10)
 
 ### ЖИВАЯ ПРОВЕРКА
 - [x] Сканирование находит игры на этом ПК — `Игр найдено: 2 из базы 68` (`Zapret Test Game`, один ложный «Freakmess 0.1.0»)

@@ -79,13 +79,44 @@ test.describe("Стратегии", () => {
     ).toHaveAttribute("data-flipped", "true");
     await waitForAnimationsSettled(page);
 
-    // Chromium ненадёжно определяет элемент под курсором внутри preserve-3d-поддерева
-    // сразу после 3D-переворота: клик уходит в родительский div и onFlip не вызывается.
-    // Кнопка закрытия находится точно в центре своей грани, поэтому кликаем принудительно.
-    await page
-      .getByRole("button", { name: "Закрыть карту" })
-      .first()
-      .click({ force: true });
+    const close = page.getByRole("button", { name: "Закрыть карту" }).first();
+
+    // Проверяем, что задняя грань реально кликабельна: элемент под курсором
+    // в центре кнопки должен принадлежать этой кнопке. Именно это ломалось
+    // в preserve-3d-поддереве: клик уходил в родительский div.
+    await expect
+      .poll(
+        async () =>
+          close.evaluate((node) => {
+            const rect = node.getBoundingClientRect();
+            const cx = rect.left + rect.width / 2;
+            const cy = rect.top + rect.height / 2;
+            const hit = document.elementFromPoint(cx, cy);
+
+            if (hit === null) {
+              return `точка вне вьюпорта: ${Math.round(cx)},${Math.round(cy)}`;
+            }
+
+            if (hit === node || node.contains(hit)) {
+              return true;
+            }
+
+            const owner = hit.closest<HTMLElement>("[data-flipped]");
+
+            return `под курсором ${hit.tagName}${
+              owner === null ? "" : " вне кнопки"
+            } (${Math.round(cx)},${Math.round(cy)})`;
+          }),
+        {
+          timeout: 10_000,
+          message: "задняя грань карточки принимает клики",
+        }
+      )
+      .toBe(true);
+
+    // Клик по самому элементу, а не по координатам: hit-testing внутри
+    // preserve-3d нестабилен сразу после 3D-переворота.
+    await close.dispatchEvent("click");
     await expect(card).toHaveAttribute("aria-expanded", "false");
     await waitForAnimationsSettled(page);
 
@@ -93,5 +124,8 @@ test.describe("Стратегии", () => {
     await expect(
       page.getByRole("button", { name: "Подробнее о стратегии" }).first()
     ).toBeVisible();
+    await expect(
+      card.locator("xpath=ancestor::*[@data-flipped]")
+    ).toHaveAttribute("data-flipped", "false");
   });
 });

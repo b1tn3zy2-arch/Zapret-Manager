@@ -1760,9 +1760,9 @@ upstream-репозиторий zapret (сотни тысяч загрузок).
 
 ### Готовность дистрибутива к распространению
 
-- THIRD_PARTY_NOTICES.md — состав дистрибутива и лицензии сторонних компонентов:
-  zapret (MIT, текст лицензии уже лежит в ресурсах), Cygwin runtime 3.4.10, WinDivert 2.2
-  (LGPL v3). Версии DLL и SYS взяты из файлов сборки, а не из документации.
+- Состав дистрибутива и лицензии сторонних компонентов (файл `THIRD_PARTY_NOTICES.md` удалён 13.10):
+  zapret (MIT, текст лицензии остаётся в ресурсах как `LICENSE-zapret.txt`), Cygwin runtime 3.4.10,
+  WinDivert 2.2 (LGPL v3). Версии DLL и SYS взяты из файлов сборки, а не из документации.
 - pnpm release:check — единая последовательность локальных проверок перед сборкой:
   tsc, ESLint, Prettier, knip, i18n, метаданные, unit-тесты, cargo test, cargo check.
 - pnpm release:check:full — дополнительно E2E, сборка фронтенда, проверка ссылок
