@@ -280,20 +280,73 @@
   }
 }
 
-@keyframes card-running-pulse {
+/* Индикатор запущенной стратегии.
+
+   Раньше пульсировал сам box-shadow: это не композитное свойство, анимация
+   шла по главному потоку и конфликтовала с filter: blur() родителя, из-за
+   чего пульс то замирал, то не появлялся. Теперь это отдельный слой-ореол,
+   который двигает только opacity и transform — это compositor-only анимация.
+
+   Плюс пульс намеренно не подчиняется переключателю «Анимации»: он и есть
+   индикатор того, что обход работает, и должен гореть всегда. */
+.dashboard-footer {
+  display: flex;
+  justify-content: center;
+  padding-top: var(--space-sm);
+  padding-bottom: var(--space-xs);
+}
+
+@keyframes card-running-halo {
   0%,
   100% {
-    box-shadow: 0 0 12px rgb(var(--color-accent-primary-rgb) / 0.35);
+    opacity: 0.35;
+    transform: scale(1);
   }
 
   50% {
-    box-shadow: 0 0 28px rgb(var(--color-accent-primary-rgb) / 0.55);
+    opacity: 0.85;
+    transform: scale(1.035);
   }
 }
 
-.card-running-pulse {
-  animation: card-running-pulse 2s ease-in-out infinite;
-  border-radius: var(--radius-lg);
+@keyframes card-running-ring {
+  0% {
+    opacity: 0.7;
+    transform: scale(0.98);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(1.06);
+  }
+}
+
+.card-running-pulse::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: 0 0 18px 2px rgb(var(--color-accent-primary-rgb) / 0.45);
+  animation: card-running-halo 2.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  will-change: opacity, transform;
+}
+
+.card-running-pulse::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  border: 1px solid rgb(var(--color-accent-primary-rgb) / 0.5);
+  pointer-events: none;
+  animation: card-running-ring 2.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  will-change: opacity, transform;
+}
+
+[data-animations="off"] .card-running-pulse::after,
+[data-animations="off"] .card-running-pulse::before {
+  animation-iteration-count: infinite !important;
+  animation-duration: 2.4s !important;
 }
 
 .zapret-grain-frame-1 {

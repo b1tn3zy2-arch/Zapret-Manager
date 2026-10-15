@@ -877,6 +877,7 @@ export const ru = {
     progressSpeed: "{speed}/с · {eta}",
   },
   dashboard: {
+    version: "Версия {version}",
     subtitle: "Управление обходом блокировок",
     tray: {
       disconnected: "Отключено",
@@ -921,18 +922,12 @@ export const ru = {
     ping: {
       title: "Пинг до сервисов",
       hint: "Измеряется TCP-доступность на порту 443, обновление раз в 2 секунды",
+      hintCompact: "TCP, порт 443, раз в 2 секунды",
     },
     recentLogs: {
       title: "Последние события",
       openAll: "Все логи",
       empty: "Логов пока нет. Запустите стратегию — здесь появятся события.",
-    },
-    stats: {
-      total: "Всего стратегий",
-      idle: "Простаивают",
-      active: "Активных",
-      errors: "Ошибок за сессию",
-      uptime: "Время работы",
     },
     orb: {
       aria: "Состояние защиты: {status}",

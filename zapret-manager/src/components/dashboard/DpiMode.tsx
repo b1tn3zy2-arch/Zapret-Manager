@@ -5,7 +5,6 @@ import ConnectionStrip from "@/components/dashboard/ConnectionStrip";
 import DashboardHero from "@/components/dashboard/DashboardHero";
 import DashboardPing from "@/components/dashboard/DashboardPing";
 import DashboardRecentLogs from "@/components/dashboard/DashboardRecentLogs";
-import DashboardStats from "@/components/dashboard/DashboardStats";
 import { ROUTES } from "@/lib/constants";
 import { useDashboardStagger } from "@/hooks/useDashboardStagger";
 import { useStrategyRunner } from "@/hooks/useStrategyRunner";
@@ -38,8 +37,8 @@ export default function DpiMode() {
   const { run, stop, isStarting, isStopping } = useStrategyRunner();
   const { disconnect: disconnectVpn } = useVpn();
   const { containerVariants, itemVariants } = useDashboardStagger();
-
   const uptime = useUptime(startedAt);
+
   const strategyName = activeStrategy?.name ?? lastStrategy?.name ?? null;
   const isBusy = isStarting || isStopping;
 
@@ -96,11 +95,7 @@ export default function DpiMode() {
         </DashboardHero>
       </motion.div>
 
-      <motion.div variants={itemVariants} className="dashboard-lead">
-        <DashboardStats uptime={uptime} />
-      </motion.div>
-
-      <motion.div variants={itemVariants}>
+      <motion.div variants={itemVariants} className="dashboard-wide">
         <DashboardPing />
       </motion.div>
 

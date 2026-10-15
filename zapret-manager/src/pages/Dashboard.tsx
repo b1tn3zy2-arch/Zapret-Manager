@@ -2,6 +2,7 @@ import { useI18n } from "@/i18n";
 import { useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
+import DashboardFooter from "@/components/dashboard/DashboardFooter";
 import DpiMode from "@/components/dashboard/DpiMode";
 import ModeSwitcher from "@/components/dashboard/ModeSwitcher";
 import VpnMode from "@/components/dashboard/VpnMode";
@@ -80,6 +81,8 @@ export default function Dashboard() {
           {mode === "vpn" ? <VpnMode /> : <DpiMode />}
         </motion.div>
       </AnimatePresence>
+
+      <DashboardFooter />
     </section>
   );
 }

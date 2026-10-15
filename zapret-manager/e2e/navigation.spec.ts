@@ -42,6 +42,56 @@ test.describe("Навигация и загрузка", () => {
     expect(errors).toEqual([]);
   });
 
+  test("показывает версию приложения и убирает блок метрик", async ({
+    page,
+  }) => {
+    const errors = await bootstrap(page);
+
+    await page.goto("/");
+
+    // версия внизу главной, из живого get_system_info
+    await expect(page.getByText(/^Версия 0\.1\.0$/)).toBeVisible();
+
+    // блок метрик («Всего стратегий», «Время работы») удалён с главной
+    await expect(page.getByText("Всего стратегий")).toHaveCount(0);
+    await expect(page.getByText("Ошибок за сессию")).toHaveCount(0);
+
+    expect(errors).toEqual([]);
+  });
+
+  test("меняет стиль пинга при выключенных логах", async ({ page }) => {
+    const errors = await bootstrap(page);
+
+    await page.goto("/");
+
+    const discord = page.locator("[data-ping-host='discord.com']");
+    await expect(discord).toBeVisible();
+
+    const wideColumns = await discord.evaluate(
+      (node) => getComputedStyle(node).gridTemplateColumns.split(" ").length
+    );
+    await expect(page.getByText(/Измеряется TCP-доступность/)).toBeVisible();
+
+    // выключаем логи в настройках и возвращаемся на главную
+    await page.getByRole("button", { name: "Настройки" }).click();
+    await page.getByRole("switch", { name: "Вести логи" }).click();
+    await page.getByRole("button", { name: "Главная" }).click();
+
+    const compact = page.locator("[data-ping-host='discord.com']");
+    await expect(compact).toBeVisible();
+    await expect(page.getByText(/^TCP, порт 443/)).toBeVisible();
+
+    // в компактном режиме строка становится карточкой без сеточных колонок
+    const compactColumns = await compact.evaluate(
+      (node) => getComputedStyle(node).gridTemplateColumns.split(" ").length
+    );
+
+    expect(wideColumns).toBeGreaterThan(1);
+    expect(compactColumns).toBe(1);
+
+    expect(errors).toEqual([]);
+  });
+
   test("открывает все семь разделов", async ({ page }) => {
     const errors = await bootstrap(page);
     await page.goto("/");

@@ -875,6 +875,7 @@ export const en = {
     progressSpeed: "{speed}/s · {eta}",
   },
   dashboard: {
+    version: "Version {version}",
     subtitle: "Bypass management",
     tray: {
       disconnected: "Disconnected",
@@ -919,18 +920,12 @@ export const en = {
     ping: {
       title: "Service latency",
       hint: "TCP availability on port 443, refreshed every 2 seconds",
+      hintCompact: "TCP, port 443, every 2 seconds",
     },
     recentLogs: {
       title: "Recent events",
       openAll: "All logs",
       empty: "No logs yet. Start a strategy — events will appear here.",
-    },
-    stats: {
-      total: "Total strategies",
-      idle: "Idle",
-      active: "Active",
-      errors: "Errors this session",
-      uptime: "Uptime",
     },
     orb: {
       aria: "Protection status: {status}",

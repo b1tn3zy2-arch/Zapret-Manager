@@ -79,7 +79,9 @@ function StrategyGameCardImpl({
       onMouseLeave={handleCardLeave}
       className={cn(
         "strategy-card group relative [perspective:1000px]",
-        isRunning && !motionDisabled && "card-running-pulse"
+        // пульс — индикатор работающего обхода, он не зависит от настройки
+        // «Анимации»: выключать его вместе со всеми эффектами нельзя
+        isRunning && "card-running-pulse"
       )}
       data-flipped={flipped}
       style={{ width: "100%", aspectRatio: String(CARD_ASPECT_RATIO) }}
