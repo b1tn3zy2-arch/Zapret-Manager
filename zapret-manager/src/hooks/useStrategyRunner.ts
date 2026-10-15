@@ -1,7 +1,6 @@
 ﻿import { translateKey } from "@/i18n/core";
 import { invoke } from "@tauri-apps/api/core";
-import { listen, type UnlistenFn } from "@tauri-apps/api/event";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 import { launchStrategy } from "@/lib/strategyLaunch";
 import { useGamesInjector } from "@/hooks/useGamesInjector";
@@ -11,21 +10,12 @@ import { useSettingsStore } from "@/stores/useSettingsStore";
 import { useVpnStore } from "@/stores/useVpnStore";
 import { recordStrategyScore } from "@/lib/bypassScore";
 import { toErrorMessage } from "@/lib/utils";
-import type { LogLevel } from "@/types";
 
 interface ProcessStatus {
   running: boolean;
   winwsPids: number[];
   startedAt: number | null;
   uptime: number | null;
-}
-
-interface IncomingLogLine {
-  timestamp: number;
-  level: string;
-  source: string;
-  message: string;
-  strategyId: string;
 }
 
 const UAC_CANCELLED_MARKER = "РѕС‚РјРµРЅС‘РЅ";
@@ -50,7 +40,6 @@ export function useStrategyRunner(): UseStrategyRunnerResult {
     (state) => state.setInjectedGames
   );
   const setStrategyError = useStrategiesStore((state) => state.setError);
-  const addLogs = useLogsStore((state) => state.addLogs);
   const addLog = useLogsStore((state) => state.addLog);
   const games = useSettingsStore((state) => state.settings.games);
   const engine = useSettingsStore(
@@ -63,58 +52,6 @@ export function useStrategyRunner(): UseStrategyRunnerResult {
   );
   const { restoreAll: restore } = useGamesInjector();
   const busy = useRef(false);
-
-  useEffect(() => {
-    const unlisteners: UnlistenFn[] = [];
-    let disposed = false;
-
-    const register = (promise: Promise<UnlistenFn>) => {
-      promise
-        .then((unlisten) => {
-          if (disposed) {
-            unlisten();
-            return;
-          }
-          unlisteners.push(unlisten);
-        })
-        .catch(() => undefined);
-    };
-
-    register(
-      listen<IncomingLogLine[]>("strategy-log", (event) => {
-        addLogs(
-          event.payload.map((line) => ({
-            timestamp: line.timestamp,
-            level: line.level as LogLevel,
-            source: "strategy" as const,
-            message: line.message,
-            strategyId: line.strategyId === "" ? undefined : line.strategyId,
-          }))
-        );
-      })
-    );
-
-    register(
-      listen<string>("strategy-stopped", (event) => {
-        setStatus(event.payload, "idle");
-        setPid(event.payload, undefined);
-        setInjectedGames(event.payload, null);
-      })
-    );
-
-    register(
-      listen<string>("strategy-started", (event) => {
-        setStatus(event.payload, "running");
-      })
-    );
-
-    return () => {
-      disposed = true;
-      for (const unlisten of unlisteners) {
-        unlisten();
-      }
-    };
-  }, [addLogs, setInjectedGames, setPid, setStatus]);
 
   const run = useCallback(
     async (strategyId: string, path: string) => {

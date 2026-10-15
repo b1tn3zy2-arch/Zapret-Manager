@@ -20,7 +20,12 @@ export async function mockTauri(
 
   await page.addInitScript(
     ({ strategiesFolder, updateAvailable, wireguard, firstRunFlag }) => {
-      const listeners = new Map<number, (event: unknown) => void>();
+      const listeners = new Map<
+        number,
+        { event: string; handler: (event: unknown) => void }
+      >();
+      /** колбэки из transformCallback: привязываются к событию позже */
+      const callbacks = new Map<number, (event: unknown) => void>();
       let nextListenerId = 1;
 
       const handlers: Record<string, (args: unknown) => unknown> = {
@@ -123,8 +128,12 @@ export async function mockTauri(
         list_update_backups: () => [],
         rollback_update: () => 0,
         run_strategy: () => {
-          for (const handler of listeners.values()) {
-            handler({
+          for (const entry of listeners.values()) {
+            if (entry.event !== "strategy-log") {
+              continue;
+            }
+
+            entry.handler({
               event: { id: 1, event: "strategy-log", windowLabel: "main" },
               id: 1,
               payload: [
@@ -138,8 +147,12 @@ export async function mockTauri(
           return { pid: 4242, logPath: "C:\\temp\\log.txt" };
         },
         run_strategy_native: () => {
-          for (const handler of listeners.values()) {
-            handler({
+          for (const entry of listeners.values()) {
+            if (entry.event !== "strategy-log") {
+              continue;
+            }
+
+            entry.handler({
               event: { id: 1, event: "strategy-log", windowLabel: "main" },
               id: 1,
               payload: [
@@ -158,8 +171,12 @@ export async function mockTauri(
           return { pid: 4242, logPath: "C:\\temp\\log.txt" };
         },
         run_strategy_auto: () => {
-          for (const handler of listeners.values()) {
-            handler({
+          for (const entry of listeners.values()) {
+            if (entry.event !== "strategy-log") {
+              continue;
+            }
+
+            entry.handler({
               event: { id: 1, event: "strategy-log", windowLabel: "main" },
               id: 1,
               payload: [
@@ -402,8 +419,7 @@ export async function mockTauri(
         "plugin:window|inner_size": () => ({ width: 1280, height: 800 }),
         "plugin:window|current_monitor": () => null,
         "plugin:window|available_monitors": () => [],
-        "plugin:event|listen": () => 1,
-        "plugin:event|unlisten": () => null,
+
         "plugin:path|resolve_directory": () => "C:\\Users\\e2e\\AppData",
         "plugin:path|resolve_file": () =>
           "C:\\Users\\e2e\\AppData\\config.json",
@@ -426,11 +442,19 @@ export async function mockTauri(
 
       Object.assign(handlers, coreHandlers);
 
-      const eventApi = {
+      const eventApi: {
+        listen: (
+          event: string,
+          handler: (value: unknown) => void
+        ) => Promise<number>;
+        unlisten: (id: number) => Promise<void>;
+        unregisterListener: (event: string, id: number) => Promise<void>;
+        emit: (event: string, payload?: unknown) => Promise<null>;
+      } = {
         listen: async (event: string, handler: (value: unknown) => void) => {
           const id = nextListenerId;
           nextListenerId += 1;
-          listeners.set(id, handler);
+          listeners.set(id, { event, handler });
 
           if (
             event === "tauri://resize" ||
@@ -446,11 +470,34 @@ export async function mockTauri(
         unlisten: async (id: number) => {
           listeners.delete(id);
         },
-        unregisterListener: async (id: number) => {
+        // Tauri передаёт (event, eventId): первый аргумент — имя события,
+        // а не идентификатор подписки. Раньше подписки не снимались вообще,
+        // и каждое монтирование добавляло ещё одну.
+        unregisterListener: async (_event: string, id: number) => {
           listeners.delete(id);
         },
         emit: async () => null,
       };
+
+      // Раньше plugin:event|listen был заглушкой: подписки не регистрировались,
+      // а события рассылались всем слушателям разом. Из-за этого слушатель,
+      // подписанный на tray-notify, получал strategy-log и падал на чужом
+      // payload, что превращало успешный запуск стратегии в ошибку.
+      handlers["plugin:event|listen"] = (args: unknown) => {
+        const { event, handler } = args as {
+          event: string;
+          handler: number;
+        };
+        const callback = callbacks.get(handler);
+
+        if (callback === undefined) {
+          return 0;
+        }
+
+        return eventApi.listen(event, callback);
+      };
+
+      handlers["plugin:event|unlisten"] = () => null;
 
       (
         window as unknown as Record<string, unknown>
@@ -476,7 +523,7 @@ export async function mockTauri(
         transformCallback: (callback: (value: unknown) => void) => {
           const id = nextListenerId;
           nextListenerId += 1;
-          listeners.set(id, callback);
+          callbacks.set(id, callback);
 
           return id;
         },

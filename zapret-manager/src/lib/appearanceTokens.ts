@@ -42,3 +42,14 @@ export function applyAnimationSpeed(percent: number): number {
 
   return clamped;
 }
+
+/**
+ * Длительность с учётом пользовательской скорости анимаций.
+ *
+ * Раньше длительности переключения главной панели и появления карточек были
+ * жёстко заданы числами и игнорировали настройку «скорость анимаций»: панель
+ * переключалась одинаково и медленно, независимо от выбранной скорости.
+ */
+export function speedMs(ms: number): number {
+  return ms * getAnimationSpeedFactor();
+}

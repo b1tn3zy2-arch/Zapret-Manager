@@ -243,6 +243,14 @@
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
+  /* Индикатор работающей стратегии — это не украшение, а признак того, что
+     обход идёт. Общее правило отключения анимаций не должно его гасить. */
+  [data-animations="off"] .strategy-card-halo,
+  [data-animations="off"] .strategy-card-halo-pulse {
+    animation-iteration-count: infinite !important;
+    animation-duration: calc(2.8s * var(--duration-scale, 1)) !important;
+  }
+
   [data-animations="off"] *,
   [data-animations="off"] *::before,
   [data-animations="off"] *::after {
@@ -324,6 +332,19 @@
 
    Плюс пульс намеренно не подчиняется переключателю «Анимации»: он и есть
    индикатор того, что обход работает, и должен гореть всегда. */
+.dashboard-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: left;
+  padding-top: var(--space-sm);
+  padding-bottom: var(--space-xs);
+}
+
+.dashboard-footer p {
+  margin: 0;
+}
+
 @keyframes strategy-card-halo-breathe {
   0%,
   100% {

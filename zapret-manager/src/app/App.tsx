@@ -19,6 +19,7 @@ import { useSettingsSync } from "@/hooks/useSettingsSync";
 import { useInstalledGamesStartup } from "@/hooks/useInstalledGames";
 import { useStartupMetrics } from "@/hooks/useStartupMetrics";
 import { useStrategies } from "@/hooks/useStrategies";
+import { useStrategyEvents } from "@/hooks/useStrategyEvents";
 import { useTray } from "@/hooks/useTray";
 import { useTrayNotifications } from "@/hooks/useTrayNotifications";
 import { useUpdater } from "@/hooks/useUpdater";
@@ -61,6 +62,7 @@ export default function App() {
   useAutoUpdateCheck();
   useAppearance();
   useStrategies();
+  useStrategyEvents();
   useVpnSync();
   useVpnStats();
   useAutoVpnConnect();

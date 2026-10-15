@@ -10,8 +10,10 @@ export interface ParsedNotify {
 
 const KINDS: NotificationKind[] = ["success", "error", "warning", "info"];
 
-export function parseNotify(raw: string): ParsedNotify | null {
-  if (!raw.startsWith(NOTIFY_PREFIX)) {
+export function parseNotify(raw: unknown): ParsedNotify | null {
+  // payload может оказаться чем угодно: раньше нестроковое значение роняло
+  // слушателя события, а вместе с ним весь запуск стратегии
+  if (typeof raw !== "string" || !raw.startsWith(NOTIFY_PREFIX)) {
     return null;
   }
 

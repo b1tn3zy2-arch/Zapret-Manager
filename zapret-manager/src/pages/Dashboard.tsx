@@ -8,6 +8,7 @@ import ModeSwitcher from "@/components/dashboard/ModeSwitcher";
 import VpnMode from "@/components/dashboard/VpnMode";
 import { Heading, Text } from "@/components/ui";
 import { useMotionPreference } from "@/hooks/useMotionPreference";
+import { speedMs } from "@/lib/appearanceTokens";
 import {
   ANIMATION,
   MODE_CROSSFADE_MS,
@@ -65,14 +66,19 @@ export default function Dashboard() {
         </div>
       </motion.header>
 
-      <AnimatePresence mode="wait" initial={false}>
+      {/* popLayout вместо wait: раньше уходящая панель доигрывала 400 мс,
+          и только потом появлялась новая — переключение выглядело как рывок.
+          Теперь они перекрещиваются, а каскад появления карточек не повторяется
+          при каждом переключении. */}
+      <AnimatePresence mode="popLayout" initial={false}>
         <motion.div
           key={mode}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+          layout={false}
+          initial={{ opacity: 0, y: reducedMotion ? 0 : 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: reducedMotion ? 0 : -6 }}
           transition={{
-            duration: reducedMotion ? 0 : MODE_CROSSFADE_MS / 1000,
+            duration: reducedMotion ? 0 : speedMs(MODE_CROSSFADE_MS) / 1000,
             ease: ANIMATION.easeOutExpo,
           }}
           className="flex flex-col"

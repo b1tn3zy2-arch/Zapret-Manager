@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import type { Variants } from "framer-motion";
 
 import { useMotionPreference } from "@/hooks/useMotionPreference";
+import { speedMs } from "@/lib/appearanceTokens";
 import {
   ANIMATION,
   DASHBOARD_ITEM_DURATION_MS,
@@ -32,7 +33,7 @@ export function useDashboardStagger(): DashboardStaggerVariants {
     const containerVariants: Variants = {
       hidden: {},
       visible: {
-        transition: { staggerChildren: DASHBOARD_STAGGER_MS / 1000 },
+        transition: { staggerChildren: speedMs(DASHBOARD_STAGGER_MS) / 1000 },
       },
     };
 
@@ -42,7 +43,7 @@ export function useDashboardStagger(): DashboardStaggerVariants {
         opacity: 1,
         y: 0,
         transition: {
-          duration: DASHBOARD_ITEM_DURATION_MS / 1000,
+          duration: speedMs(DASHBOARD_ITEM_DURATION_MS) / 1000,
           ease: ANIMATION.easeOutExpo,
         },
       },

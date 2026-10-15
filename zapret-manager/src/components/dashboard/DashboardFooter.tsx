@@ -23,7 +23,7 @@ export default function DashboardFooter() {
     <footer className="dashboard-footer">
       <Text
         variant="caption"
-        className="text-text-tertiary text-center font-mono"
+        className="text-text-tertiary text-left font-mono"
       >
         {t("dashboard.version", { version: formatVersion(version) })}
       </Text>
