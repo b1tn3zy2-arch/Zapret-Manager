@@ -20,7 +20,12 @@ import {
 } from "@/stores/selectors";
 import { selectActiveConfig, useVpnStore } from "@/stores/useVpnStore";
 
-export default function DpiMode() {
+export interface DpiModeProps {
+  /** проигрывать ли каскад появления (только при первом открытии страницы) */
+  intro?: boolean;
+}
+
+export default function DpiMode({ intro = true }: DpiModeProps) {
   const setActivePage = useAppStore((state) => state.setActivePage);
   const connectionStatus = useConnectionStatus();
   const activeStrategy = useActiveStrategy();
@@ -77,7 +82,7 @@ export default function DpiMode() {
   return (
     <motion.div
       variants={containerVariants}
-      initial="hidden"
+      initial={intro ? "hidden" : false}
       animate="visible"
       className="dashboard-layout"
     >

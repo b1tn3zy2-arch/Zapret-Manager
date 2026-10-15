@@ -32,6 +32,16 @@ static WARMUP_STARTED: Once = Once::new();
 /// Высота меню, посчитанная окном: пункты списка меняются, и окно обязано
 /// подстраиваться под них. Ноль означает «использовать константный размер».
 static CONTENT_HEIGHT: Mutex<f64> = Mutex::new(0.0);
+/// Высота, которую окну уже выставили: пересоздавать размер при каждом
+/// открытии нельзя, Windows на это отвечает заметным пересозданием окна.
+static APPLIED_HEIGHT: Mutex<f64> = Mutex::new(0.0);
+/// Момент последнего показа: пока кнопка мыши нажата (пользователь только что
+/// нажал на трей), курсор заведомо вне окна меню, и без паузы вотчер сразу
+/// его закрывал — меню дёргалось и мигало.
+static SHOWN_AT: Mutex<Option<Instant>> = Mutex::new(None);
+
+/// Пауза после показа, в течение которой вотчер не закрывает меню.
+const SHOW_GRACE: Duration = Duration::from_millis(450);
 
 pub fn mark_ready() {
     READY.store(true, Ordering::SeqCst);
@@ -100,14 +110,37 @@ pub fn show<R: Runtime>(app: &AppHandle<R>, cursor: PhysicalPosition<f64>) {
     ensure_watch_thread(app);
 
     let started = Instant::now();
-    let scale = window.scale_factor().unwrap_or(1.0);
+
+    // Монитор под курсором нужен и для масштаба: у разных мониторов разная
+    // плотность, и масштаб окна не совпадает с масштабом экрана, где меню
+    // должно появиться. Из-за этого окно приходилось в неверную точку.
+    let monitor = monitor_under_cursor(&window);
+    let scale = monitor
+        .as_ref()
+        .map(|item| item.scale_factor())
+        .unwrap_or_else(|| window.scale_factor().unwrap_or(1.0));
 
     // Размер окна подгоняется под реальное содержимое до позиционирования,
-    // иначе меню показывается с обрезанным низом.
-    let _ = window.set_size(LogicalSize::new(MENU_WIDTH, resolved_height()));
+    // иначе меню показывается с обрезанным низом. Меняем размер только когда
+    // высота действительно другая: лишний set_size приводит к заметному
+    // пересозданию окна, и меню открывается рывком.
+    let target_height = resolved_height();
+    let height_changed = APPLIED_HEIGHT
+        .lock()
+        .ok()
+        .map(|current| (*current - target_height).abs() > 0.5)
+        .unwrap_or(true);
+
+    if height_changed {
+        let _ = window.set_size(LogicalSize::new(MENU_WIDTH, target_height));
+
+        if let Ok(mut applied) = APPLIED_HEIGHT.lock() {
+            *applied = target_height;
+        }
+    }
 
     let width = MENU_WIDTH * scale;
-    let height = resolved_height() * scale;
+    let height = target_height * scale;
 
     // Монитор выбирается по позиции курсора, а не по монитору самого окна.
     // Окно меню живёт на основном мониторе, поэтому current_monitor() при
@@ -117,7 +150,7 @@ pub fn show<R: Runtime>(app: &AppHandle<R>, cursor: PhysicalPosition<f64>) {
     let mut y = cursor.y - height - CURSOR_GAP * scale;
     let mut area = None;
 
-    if let Some(monitor) = monitor_under_cursor(&window) {
+    if let Some(monitor) = monitor.as_ref() {
         let work = monitor.work_area();
         let left = f64::from(work.position.x);
         let top = f64::from(work.position.y);
@@ -133,6 +166,10 @@ pub fn show<R: Runtime>(app: &AppHandle<R>, cursor: PhysicalPosition<f64>) {
 
     let _ = window.set_position(PhysicalPosition::new(x, y));
     let _ = window.show();
+
+    if let Ok(mut shown_at) = SHOWN_AT.lock() {
+        *shown_at = Some(Instant::now());
+    }
 
     let shown = started.elapsed();
 
@@ -235,6 +272,20 @@ fn ensure_watch_thread<R: Runtime>(app: &AppHandle<R>) {
             };
 
             if !window.is_visible().unwrap_or(false) {
+                continue;
+            }
+
+            // сразу после нажатия на трей кнопка ещё зажата, а курсор
+            // находится на иконке, то есть заведомо вне окна меню. Без паузы
+            // меню закрывалось в тот же кадр и выглядело как рывок
+            let within_grace = SHOWN_AT
+                .lock()
+                .ok()
+                .and_then(|shown| *shown)
+                .map(|shown| shown.elapsed() < SHOW_GRACE)
+                .unwrap_or(false);
+
+            if within_grace {
                 continue;
             }
 
@@ -429,5 +480,52 @@ mod tests {
         assert!(resolved_height().is_finite());
 
         set_content_height(MENU_HEIGHT);
+    }
+
+    #[test]
+    fn test_grace_window_protects_freshly_shown_menu() {
+        // сразу после нажатия на трей кнопка мыши ещё зажата, а курсор на
+        // иконке: без паузы вотчер закрывал меню в тот же кадр
+        if let Ok(mut shown_at) = SHOWN_AT.lock() {
+            *shown_at = Some(Instant::now());
+        }
+
+        let within_grace = SHOWN_AT
+            .lock()
+            .ok()
+            .and_then(|shown| *shown)
+            .map(|shown| shown.elapsed() < SHOW_GRACE)
+            .unwrap_or(false);
+
+        assert!(within_grace, "только что показанное меню не защищено паузой");
+
+        if let Ok(mut shown_at) = SHOWN_AT.lock() {
+            *shown_at = None;
+        }
+
+        let after_hide = SHOWN_AT
+            .lock()
+            .ok()
+            .and_then(|shown| *shown)
+            .map(|shown| shown.elapsed() < SHOW_GRACE)
+            .unwrap_or(false);
+
+        assert!(!after_hide, "после закрытия пауза применяться не должна");
+    }
+
+    #[test]
+    fn test_applied_height_starts_unset() {
+        // размер выставляется только при изменении высоты: повторный set_size
+        // при каждом открытии заставлял Windows пересоздавать окно, и меню
+        // открывалось рывком
+        let applied = APPLIED_HEIGHT.lock().ok().map(|value| *value).unwrap_or(0.0);
+        let height = resolved_height();
+
+        let changed = (applied - height).abs() > 0.5;
+
+        assert!(
+            changed || applied > 0.0,
+            "первое открытие обязательно применить размер окна"
+        );
     }
 }

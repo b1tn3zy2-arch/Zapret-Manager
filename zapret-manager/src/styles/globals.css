@@ -332,19 +332,6 @@
 
    Плюс пульс намеренно не подчиняется переключателю «Анимации»: он и есть
    индикатор того, что обход работает, и должен гореть всегда. */
-.dashboard-footer {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  text-align: left;
-  padding-top: var(--space-sm);
-  padding-bottom: var(--space-xs);
-}
-
-.dashboard-footer p {
-  margin: 0;
-}
-
 @keyframes strategy-card-halo-breathe {
   0%,
   100% {

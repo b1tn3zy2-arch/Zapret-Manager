@@ -6,8 +6,10 @@ import UpdateBadge from "@/components/updates/UpdateBadge";
 import { useAdaptiveSidebar } from "@/hooks/useAdaptiveSidebar";
 import { useMotionPreference } from "@/hooks/useMotionPreference";
 import { useBloom } from "@/hooks/useBloom";
+import { useSystemInfo } from "@/hooks/useSystemInfo";
 import { useI18n } from "@/i18n";
 import { NAV_ITEMS, ROUTES, type AppPage } from "@/lib/constants";
+import { formatVersion } from "@/lib/updateUtils";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/stores/useAppStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
@@ -112,6 +114,12 @@ function Sidebar() {
   const logsEnabled = useSettingsStore(
     (state) => state.settings.general.enableLogs
   );
+  const { info } = useSystemInfo();
+  const version = useMemo(() => {
+    const raw = info?.appVersion ?? "";
+
+    return raw === "" ? null : formatVersion(raw);
+  }, [info?.appVersion]);
   const items = useMemo(
     () =>
       logsEnabled
@@ -192,6 +200,16 @@ function Sidebar() {
           ))}
         </ul>
       </nav>
+
+      {/* Версия внизу панели: раньше она стояла в подвале страницы и
+          пропадала при переключении разделов. */}
+      {collapsed || version === null ? null : (
+        <div className="shrink-0 px-4 pb-4">
+          <span className="text-text-tertiary font-mono text-[11px]">
+            {version}
+          </span>
+        </div>
+      )}
     </motion.aside>
   );
 }

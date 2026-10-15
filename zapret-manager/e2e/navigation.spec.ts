@@ -49,8 +49,10 @@ test.describe("Навигация и загрузка", () => {
 
     await page.goto("/");
 
-    // версия внизу главной, из живого get_system_info
-    await expect(page.getByText(/^Версия 0\.1\.0$/)).toBeVisible();
+    // версия внизу панели слева, из живого get_system_info
+    await expect(
+      page.getByRole("complementary").getByText("0.1.0", { exact: true })
+    ).toBeVisible();
 
     // блок метрик («Всего стратегий», «Время работы») удалён с главной
     await expect(page.getByText("Всего стратегий")).toHaveCount(0);

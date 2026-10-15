@@ -2,11 +2,11 @@ import { useI18n } from "@/i18n";
 import { useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
-import DashboardFooter from "@/components/dashboard/DashboardFooter";
 import DpiMode from "@/components/dashboard/DpiMode";
 import ModeSwitcher from "@/components/dashboard/ModeSwitcher";
 import VpnMode from "@/components/dashboard/VpnMode";
 import { Heading, Text } from "@/components/ui";
+import { useDashboardIntro } from "@/hooks/useDashboardIntro";
 import { useMotionPreference } from "@/hooks/useMotionPreference";
 import { speedMs } from "@/lib/appearanceTokens";
 import {
@@ -25,6 +25,7 @@ export default function Dashboard() {
   const switchStep = useVpnStore((state) => state.switchStep);
   const isSwitching = useVpnStore((state) => state.isSwitching);
   const { reduced: reducedMotion } = useMotionPreference();
+  const intro = useDashboardIntro();
 
   const handleModeChange = useCallback(
     (next: DashboardMode): void => {
@@ -66,29 +67,33 @@ export default function Dashboard() {
         </div>
       </motion.header>
 
-      {/* popLayout вместо wait: раньше уходящая панель доигрывала 400 мс,
-          и только потом появлялась новая — переключение выглядело как рывок.
-          Теперь они перекрещиваются, а каскад появления карточек не повторяется
-          при каждом переключении. */}
+      {/* Переключение режима — ровно одно затухание без сдвига и без каскада.
+
+          Раньше здесь было три источника рывка сразу:
+          1) AnimatePresence в режиме wait ждал ухода старой панели и только
+             потом показывал новую — отсюда пауза;
+          2) сдвиг по вертикали на всю высоту панели читался как прыжок;
+          3) DpiMode при каждом переключении заново проигрывал каскад появления
+             блоков, и поверх затухания шла ещё одна волна анимаций.
+          Теперь затухание одно, а каскад проигрывается только при первом
+          открытии страницы. */}
       <AnimatePresence mode="popLayout" initial={false}>
         <motion.div
           key={mode}
           layout={false}
-          initial={{ opacity: 0, y: reducedMotion ? 0 : 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: reducedMotion ? 0 : -6 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
           transition={{
             duration: reducedMotion ? 0 : speedMs(MODE_CROSSFADE_MS) / 1000,
-            ease: ANIMATION.easeOutExpo,
+            ease: ANIMATION.easeInOutExpo,
           }}
           className="flex flex-col"
           style={{ gap: "var(--space-lg)" }}
         >
-          {mode === "vpn" ? <VpnMode /> : <DpiMode />}
+          {mode === "vpn" ? <VpnMode /> : <DpiMode intro={intro} />}
         </motion.div>
       </AnimatePresence>
-
-      <DashboardFooter />
     </section>
   );
 }
