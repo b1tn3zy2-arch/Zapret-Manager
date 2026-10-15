@@ -7,7 +7,12 @@ use winapi::shared::tcpmib::MIB_TCPTABLE_OWNER_PID;
 use winapi::shared::ws2def::AF_INET;
 use winapi::um::errhandlingapi::GetLastError;
 use winapi::um::handleapi::CloseHandle;
+use winapi::um::handleapi::INVALID_HANDLE_VALUE;
 use winapi::um::iphlpapi::GetExtendedTcpTable;
+use winapi::um::tlhelp32::{
+    CreateToolhelp32Snapshot, Process32FirstW, Process32NextW, PROCESSENTRY32W,
+    TH32CS_SNAPPROCESS,
+};
 use winapi::um::processthreadsapi::{
     CreateProcessAsUserW, GetCurrentProcess, GetExitCodeProcess, GetProcessId,
     OpenProcess, OpenProcessToken, PROCESS_INFORMATION, STARTUPINFOW,
@@ -498,6 +503,65 @@ pub fn is_pid_alive(pid: u32) -> bool {
     }
 
     ok != 0 && code == STILL_ACTIVE_CODE
+}
+
+/// Возвращает прямых потомков процесса.
+///
+/// Нужна для запуска игр с античитом: `start_protected_game.exe` запускает
+/// настоящую игру и сразу завершается, поэтому судить о «работает ли игра» по
+/// PID лаунчера нельзя — кнопка «Закрыть игру» исчезала через несколько секунд.
+pub fn child_pids(parent: u32) -> Vec<u32> {
+    if parent == 0 {
+        return Vec::new();
+    }
+
+    let snapshot = unsafe { CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0) };
+
+    if snapshot == INVALID_HANDLE_VALUE {
+        return Vec::new();
+    }
+
+    let mut entry: PROCESSENTRY32W = unsafe { std::mem::zeroed() };
+    entry.dwSize = std::mem::size_of::<PROCESSENTRY32W>() as DWORD;
+    let mut result = Vec::new();
+
+    if unsafe { Process32FirstW(snapshot, &mut entry) } != 0 {
+        loop {
+            if entry.th32ParentProcessID == parent {
+                result.push(entry.th32ProcessID);
+            }
+
+            if unsafe { Process32NextW(snapshot, &mut entry) } == 0 {
+                break;
+            }
+        }
+    }
+
+    unsafe {
+        let _ = CloseHandle(snapshot);
+    }
+
+    result
+}
+
+/// Дерево процессов: сам процесс и все потомки.
+///
+/// Обход в ширину с защитой от повторов, чтобы при некорректном ParentProcessID
+/// не зациклиться.
+pub fn process_tree(pid: u32) -> Vec<u32> {
+    let mut result = Vec::new();
+    let mut queue = vec![pid];
+
+    while let Some(current) = queue.pop() {
+        if result.contains(&current) {
+            continue;
+        }
+
+        result.push(current);
+        queue.extend(child_pids(current));
+    }
+
+    result
 }
 
 fn quote_arg(arg: &str) -> String {

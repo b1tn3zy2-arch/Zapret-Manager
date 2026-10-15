@@ -119,3 +119,31 @@ fn test_collect_candidates_skips_small_executables() {
 
     assert!(candidates.is_empty());
 }
+#[test]
+fn test_collect_candidates_accepts_small_unity_launcher() {
+    // The Long Dark: в корне лежит tld.exe на 0.6 МБ и папка tld_Data.
+    // Раньше такой exe отбрасывался по порогу размера, и игра не находилась.
+    let folder = std::env::temp_dir().join("zapret-unity-test");
+    let _ = std::fs::remove_dir_all(&folder);
+    let _ = std::fs::create_dir_all(folder.join("tld_Data"));
+    let _ = std::fs::write(folder.join("tld.exe"), vec![0_u8; 2 * 1024 * 1024]);
+
+    let candidates = collect_candidates(&folder, 2);
+    let _ = std::fs::remove_dir_all(&folder);
+
+    assert_eq!(candidates.len(), 1, "Unity-игра с маленьким exe должна находиться");
+    assert!(candidates[0].ends_with("tld.exe"));
+}
+
+#[test]
+fn test_collect_candidates_still_skips_small_exe_without_unity_folder() {
+    let folder = std::env::temp_dir().join("zapret-plain-test");
+    let _ = std::fs::remove_dir_all(&folder);
+    let _ = std::fs::create_dir_all(&folder);
+    let _ = std::fs::write(folder.join("tool.exe"), vec![0_u8; 2 * 1024 * 1024]);
+
+    let candidates = collect_candidates(&folder, 2);
+    let _ = std::fs::remove_dir_all(&folder);
+
+    assert!(candidates.is_empty(), "мелкий exe без признаков игры — это не игра");
+}

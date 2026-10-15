@@ -645,5 +645,16 @@
       "eft",
       "escape from tarkov"
     ]
+  },
+  {
+    "appid": "460620",
+    "name": "The Long Dark",
+    "anticheat": "none",
+    "aliases": [
+      "the long dark",
+      "tld",
+      "thelongdark",
+      "long dark"
+    ]
   }
 ]

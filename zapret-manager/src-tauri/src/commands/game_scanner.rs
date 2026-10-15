@@ -9,7 +9,7 @@ use super::game_sources_registry::{scan_gog, scan_gog_folders, scan_ubisoft};
 use super::game_sources_stores::{scan_epic, scan_steam};
 use super::game_sources_system::{
     scan_known_folders, scan_store_folders, scan_uninstall_registry, scan_user_folders,
-    scan_user_home_games,
+    scan_user_home_games, scan_volume_roots,
 };
 use crate::error::{AppError, AppResult};
 
@@ -129,6 +129,9 @@ fn scan_steps() -> Vec<ScanStep> {
                 let mut games = scan_known_folders();
 
                 games.extend(scan_user_home_games());
+                // игры, установленные прямо в корень диска (C:\The Long Dark):
+                // раньше такой путь не проверялся ни одним источником
+                games.extend(scan_volume_roots());
 
                 games
             },

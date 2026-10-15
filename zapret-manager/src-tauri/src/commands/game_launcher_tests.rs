@@ -35,10 +35,30 @@ fn test_resolve_working_dir_falls_back_to_executable_folder() {
 }
 
 #[test]
-fn test_is_game_running_for_zero_pid() {
-    let running = is_game_running(0).unwrap_or(true);
+fn test_is_game_running_for_empty_tree() {
+    assert!(!is_game_running(Vec::new()).unwrap_or(true));
+}
 
-    assert!(!running);
+#[test]
+fn test_is_game_running_checks_every_process_of_tree() {
+    // PID 0 не существует, PID текущего процесса жив: важно, что проверяется
+    // весь список, а не только первый элемент
+    let own = std::process::id();
+    let running = is_game_running(vec![0, own]).unwrap_or(false);
+
+    assert!(running);
+}
+
+#[test]
+fn test_close_game_reports_false_for_unknown_pids() {
+    assert!(!close_game(vec![0, u32::MAX]).unwrap_or(true));
+}
+
+#[test]
+fn test_process_tree_contains_current_process() {
+    let tree = crate::winapi_helpers::process_tree(std::process::id());
+
+    assert!(tree.contains(&std::process::id()));
 }
 
 #[test]

@@ -190,6 +190,8 @@ export const GAME_OVERLAY_SCRIM =
 export const GAME_COVER_ASPECT = "3 / 4";
 export const GAME_LAUNCH_TOAST_MS = 2500;
 export const GAME_LAUNCH_CHECK_MS = 2000;
+/// Как часто сверяется, жива ли запущенная игра (по дереву процессов).
+export const GAME_LAUNCH_POLL_MS = 5000;
 
 export const RECENT_LOGS_COUNT = 5;
 

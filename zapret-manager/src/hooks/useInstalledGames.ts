@@ -18,6 +18,7 @@ export interface UseInstalledGamesResult {
   removeGame: (id: string) => void;
   updateGame: (id: string, patch: Partial<InstalledGame>) => void;
   addFolder: (folder: string) => Promise<void>;
+  rescan: () => Promise<void>;
   removeFolder: (folder: string) => Promise<void>;
 }
 
@@ -58,6 +59,13 @@ export function useInstalledGames(): UseInstalledGamesResult {
     []
   );
 
+  // Пересканирование по кнопке: раньше повторный скан можно было запустить
+  // только удалением папки, поэтому новая установленная игра не появлялась,
+  // пока приложение не перезапускали.
+  const rescan = useCallback(async () => {
+    await scanInstalledGames();
+  }, []);
+
   const addFolder = useCallback(async (folder: string) => {
     useInstalledGamesStore.getState().addFolder(folder);
     await scanInstalledGames();
@@ -81,6 +89,7 @@ export function useInstalledGames(): UseInstalledGamesResult {
       updateGame,
       addFolder,
       removeFolder,
+      rescan,
     }),
     [
       games,
@@ -94,6 +103,7 @@ export function useInstalledGames(): UseInstalledGamesResult {
       updateGame,
       addFolder,
       removeFolder,
+      rescan,
     ]
   );
 }

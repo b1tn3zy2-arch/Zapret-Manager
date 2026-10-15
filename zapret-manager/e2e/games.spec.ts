@@ -85,6 +85,46 @@ test.describe("Страница игр", () => {
     expect(errors).toEqual([]);
   });
 
+  test("пересканирует игры по кнопке", async ({ page }) => {
+    const errors = await bootstrap(page);
+
+    await openGames(page);
+
+    const before = await page.evaluate(() => {
+      const log =
+        (
+          window as unknown as {
+            __MOCK_INVOKE_LOG__?: { command: string; args?: unknown }[];
+          }
+        ).__MOCK_INVOKE_LOG__ ?? [];
+
+      return log.filter((item) => item.command === "scan_installed_games")
+        .length;
+    });
+
+    await page.getByRole("button", { name: "Пересканировать" }).click();
+
+    // повторный скан раньше был недостижим без удаления папки: новая
+    // установленная игра не появлялась до перезапуска приложения
+    await expect
+      .poll(async () =>
+        page.evaluate(() => {
+          const log =
+            (
+              window as unknown as {
+                __MOCK_INVOKE_LOG__?: { command: string; args?: unknown }[];
+              }
+            ).__MOCK_INVOKE_LOG__ ?? [];
+
+          return log.filter((item) => item.command === "scan_installed_games")
+            .length;
+        })
+      )
+      .toBeGreaterThan(before);
+
+    expect(errors).toEqual([]);
+  });
+
   test("открывает диалог ручного добавления", async ({ page }) => {
     const errors = await bootstrap(page);
 

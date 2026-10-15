@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { FolderPlus, Plus } from "lucide-react";
+import { FolderPlus, Plus, RefreshCw } from "lucide-react";
 
 import AddGameDialog from "@/components/settings/games/AddGameDialog";
 import GameBypassSettings from "@/components/settings/games/GameBypassSettings";
@@ -26,6 +26,7 @@ export default function Games() {
     removeGame,
     addFolder,
     removeFolder,
+    rescan,
   } = useInstalledGames();
   const {
     launchingId,
@@ -90,6 +91,17 @@ export default function Games() {
           }}
         >
           {t("settings.games.installed.folders.add")}
+        </Button>
+        <Button
+          size="sm"
+          variant="ghost"
+          disabled={scanning}
+          icon={<RefreshCw aria-hidden="true" className="size-4" />}
+          onClick={() => {
+            void rescan();
+          }}
+        >
+          {t("settings.games.installed.rescan")}
         </Button>
         {toast === null ? null : (
           <span role="status" className="text-text-secondary text-sm">

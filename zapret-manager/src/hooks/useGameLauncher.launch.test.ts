@@ -2,6 +2,7 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useGameLauncher } from "@/hooks/useGameLauncher";
+import { useGameRuntimeStore } from "@/stores/useGameRuntimeStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import { useStrategiesStore } from "@/stores/useStrategiesStore";
 import { useVpnStore } from "@/stores/useVpnStore";
@@ -13,7 +14,7 @@ const invokeMock = vi.fn(async (command: string, _args?: unknown) => {
   }
 
   if (command === "launch_game") {
-    return 777;
+    return [777, 778];
   }
 
   if (command === "check_strategy_status") {
@@ -69,6 +70,7 @@ function game(patch: Partial<InstalledGame> = {}): InstalledGame {
 describe("запуск игры с обходом", () => {
   beforeEach(() => {
     invokeMock.mockClear();
+    useGameRuntimeStore.getState().clearAll();
     useStrategiesStore.setState({
       strategies: [strategy()],
       error: null,
@@ -91,6 +93,54 @@ describe("запуск игры с обходом", () => {
       },
       killSwitchActive: false,
     });
+  });
+
+  it("хранит состояние запуска в сторе, а не в локальном хуке", async () => {
+    const { result } = renderHook(() => useGameLauncher());
+
+    await act(async () => {
+      await result.current.launch(game());
+    });
+
+    await waitFor(() => {
+      expect(useGameRuntimeStore.getState().isRunning("steam-portal")).toBe(
+        true
+      );
+    });
+
+    // состояние живёт в сторе с persist: новый экземпляр хука (переход на
+    // другую страницу) сразу видит запущенную игру
+    const second = renderHook(() => useGameLauncher());
+
+    // хранится всё дерево процессов, а не только PID лаунчера
+    expect(second.result.current.runningGames["steam-portal"]).toEqual([
+      777, 778,
+    ]);
+
+    second.unmount();
+  });
+
+  it("проверяет игру по всему дереву процессов", async () => {
+    const { result } = renderHook(() => useGameLauncher());
+
+    await act(async () => {
+      await result.current.launch(game());
+    });
+
+    await waitFor(() => {
+      expect(invokeMock).toHaveBeenCalledWith("launch_game", expect.anything());
+    });
+
+    const pids = useGameRuntimeStore.getState().pidsOf("steam-portal");
+
+    expect(pids.length).toBeGreaterThan(0);
+
+    useGameRuntimeStore.getState().markRunning("steam-portal", [10, 20, 30]);
+    expect(useGameRuntimeStore.getState().pidsOf("steam-portal")).toEqual([
+      10, 20, 30,
+    ]);
+
+    void result;
   });
 
   it("поднимает стратегию, если она не запущена, и стартует игру", async () => {

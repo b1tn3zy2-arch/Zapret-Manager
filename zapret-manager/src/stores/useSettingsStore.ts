@@ -220,7 +220,9 @@ export const useSettingsStore = create<SettingsStoreState>()(
             // Склейка с пресетами должна попасть и в файл, иначе правка живёт
             // только в памяти до первого автосохранения. Переписываем один раз
             // и молча: это миграция, а не ошибка пользователя.
-            if (JSON.stringify(merged.games) !== JSON.stringify(fromFile.games)) {
+            if (
+              JSON.stringify(merged.games) !== JSON.stringify(fromFile.games)
+            ) {
               await writeSettingsFile(merged).catch(() => undefined);
             }
 

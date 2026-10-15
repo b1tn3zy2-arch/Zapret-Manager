@@ -19,7 +19,7 @@ export interface InstalledGamesGridProps {
   onLaunch: (game: InstalledGame) => void;
   onRemove: (game: InstalledGame) => void;
   onCloseGame: (game: InstalledGame) => void;
-  runningGameIds: Record<string, number>;
+  runningGameIds: Record<string, number[]>;
 }
 
 export default function InstalledGamesGrid({
@@ -75,9 +75,9 @@ export default function InstalledGamesGrid({
             onLaunch={() => {
               onLaunch(game);
             }}
-            running={runningGameIds[game.id] !== undefined}
+            running={(runningGameIds[game.id]?.length ?? 0) > 0}
             onClose={
-              runningGameIds[game.id] === undefined
+              (runningGameIds[game.id]?.length ?? 0) === 0
                 ? undefined
                 : () => {
                     onCloseGame(game);

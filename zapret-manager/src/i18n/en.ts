@@ -509,6 +509,7 @@ export const en = {
         closeGame: "Close game",
         closedGame: "Game closed: {name}",
         closeGameFailed: "Could not close the game: {error}",
+        rescan: "Rescan",
         add: {
           action: "Add game",
           title: "Add a game manually",

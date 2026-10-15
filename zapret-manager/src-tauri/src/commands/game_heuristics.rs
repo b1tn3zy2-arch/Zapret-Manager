@@ -136,6 +136,32 @@ pub fn has_game_markers(directory: &Path) -> bool {
         || has_content_bundle(directory)
 }
 
+/// Папка данных Unity (`<игра>_Data`) рядом с exe — самостоятельный признак
+/// игры. У The Long Dark, например, в корне лежит tld.exe на 0.6 МБ и папка
+/// tld_Data: раньше такой exe отбрасывался по порогу размера и игра не
+/// находилась вообще.
+fn has_unity_data_folder(directory: &Path) -> bool {
+    let Ok(entries) = std::fs::read_dir(directory) else {
+        return false;
+    };
+
+    entries.filter_map(Result::ok).any(|entry| {
+        entry
+            .file_type()
+            .map(|kind| kind.is_dir())
+            .unwrap_or(false)
+            && entry
+                .file_name()
+                .to_str()
+                .map(|name| {
+                    let lowered = name.to_ascii_lowercase();
+
+                    lowered.ends_with("_data") || lowered.ends_with("_data ")
+                })
+                .unwrap_or(false)
+    })
+}
+
 fn has_content_bundle(directory: &Path) -> bool {
     let Ok(entries) = std::fs::read_dir(directory) else {
         return false;
@@ -176,12 +202,23 @@ pub fn is_candidate_executable(path: &Path) -> bool {
         return false;
     };
     let marked = has_game_markers(parent) || has_unreal_layout(path);
+    // Unity-игра: exe рядом с папкой <игра>_Data. Такие лаунчеры бывают
+    // меньше мегабайта, поэтому для них отдельный, более мягкий порог.
+    let unity = has_unity_data_folder(parent);
 
-    if !marked && !has_name_affinity(path) {
+    if !marked && !unity && !has_name_affinity(path) {
         return false;
     }
 
-    size >= if marked { MARKED_EXE_BYTES } else { MIN_EXE_BYTES }
+    let floor = if unity {
+        TRUSTED_MIN_BYTES
+    } else if marked {
+        MARKED_EXE_BYTES
+    } else {
+        MIN_EXE_BYTES
+    };
+
+    size >= floor
 }
 
 fn is_skipped_folder(folder: &Path) -> bool {

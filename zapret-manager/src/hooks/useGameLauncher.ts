@@ -6,9 +6,11 @@ import { useStrategyRunner } from "@/hooks/useStrategyRunner";
 import {
   GAME_LAUNCH_CHECK_MS,
   GAME_LAUNCH_HIDE_DELAY_MS,
+  GAME_LAUNCH_POLL_MS,
   GAME_LAUNCH_TOAST_MS,
 } from "@/lib/constants";
 import { findGameProfile, usesAnticheat } from "@/lib/installedGames";
+import { useGameRuntimeStore } from "@/stores/useGameRuntimeStore";
 import { useInstalledGamesStore } from "@/stores/useInstalledGamesStore";
 import { useLogsStore } from "@/stores/useLogsStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
@@ -27,7 +29,7 @@ export interface UseGameLauncherResult {
   launchingId: string | null;
   prompt: LaunchPrompt | null;
   toast: string | null;
-  runningGames: Record<string, number>;
+  runningGames: Record<string, number[]>;
   launch: (game: InstalledGame) => Promise<void>;
   closeGame: (game: InstalledGame) => Promise<void>;
   confirmPrompt: () => Promise<void>;
@@ -38,7 +40,7 @@ type AddLog = (entry: Pick<LogEntry, "level" | "source" | "message">) => void;
 
 export function useGameLauncher(): UseGameLauncherResult {
   const [launchingId, setLaunchingId] = useState<string | null>(null);
-  const [runningGames, setRunningGames] = useState<Record<string, number>>({});
+  const runningGames = useGameRuntimeStore((state) => state.running);
   const [prompt, setPrompt] = useState<LaunchPrompt | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const { run, stop, checkStatus } = useStrategyRunner();
@@ -53,7 +55,7 @@ export function useGameLauncher(): UseGameLauncherResult {
   const finishLaunch = useCallback(
     async (game: InstalledGame) => {
       try {
-        const pid = await invoke<number>("launch_game", {
+        const pids = await invoke<number[]>("launch_game", {
           executablePath: game.executablePath,
           launchArgs: game.launchArgs ?? null,
           workingDir: game.installPath,
@@ -62,10 +64,13 @@ export function useGameLauncher(): UseGameLauncherResult {
         addLog({
           level: "success",
           source: "user",
-          message: translateKey("log.gameLaunched", { name: game.name, pid }),
+          message: translateKey("log.gameLaunched", {
+            name: game.name,
+            pid: pids[0] ?? 0,
+          }),
         });
         setToast(translateKey("settings.games.installed.launch.active"));
-        setRunningGames((previous) => ({ ...previous, [game.id]: pid }));
+        useGameRuntimeStore.getState().markRunning(game.id, pids);
         recordLaunch(game.id);
         verifyBypass(game, addLog);
 
@@ -286,14 +291,14 @@ export function useGameLauncher(): UseGameLauncherResult {
 
   const closeGame = useCallback(
     async (game: InstalledGame) => {
-      const pid = runningGames[game.id];
+      const pids = useGameRuntimeStore.getState().pidsOf(game.id);
 
-      if (pid === undefined) {
+      if (pids.length === 0) {
         return;
       }
 
       try {
-        await invoke<boolean>("close_game", { pid });
+        await invoke<boolean>("close_game", { pids });
         addLog({
           level: "info",
           source: "user",
@@ -311,14 +316,9 @@ export function useGameLauncher(): UseGameLauncherResult {
         });
       }
 
-      setRunningGames((previous) => {
-        const next = { ...previous };
-        delete next[game.id];
-
-        return next;
-      });
+      useGameRuntimeStore.getState().markStopped(game.id);
     },
-    [addLog, runningGames]
+    [addLog]
   );
 
   useEffect(() => {
@@ -329,21 +329,16 @@ export function useGameLauncher(): UseGameLauncherResult {
     }
 
     const timer = window.setInterval(() => {
-      for (const [id, pid] of entries) {
-        void invoke<boolean>("is_game_running", { pid })
+      for (const [id, pids] of entries) {
+        void invoke<boolean>("is_game_running", { pids })
           .then((alive) => {
             if (!alive) {
-              setRunningGames((previous) => {
-                const next = { ...previous };
-                delete next[id];
-
-                return next;
-              });
+              useGameRuntimeStore.getState().markStopped(id);
             }
           })
           .catch(() => undefined);
       }
-    }, 4000);
+    }, GAME_LAUNCH_POLL_MS);
 
     return () => {
       window.clearInterval(timer);

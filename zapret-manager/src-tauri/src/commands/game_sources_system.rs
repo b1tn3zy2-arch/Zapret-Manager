@@ -7,13 +7,26 @@ use super::game_sources_stores::{scan_store_folder, to_game};
 
 pub const SYSTEM_DEPTH: usize = 2;
 pub const GAME_ROOT_DEPTH: usize = 4;
-const STORE_FOLDERS: &[(&str, GamePlatform, GameSource)] = &[
+/// Подпапки лаунчеров относительно корня диска.
+///
+/// Раньше здесь лежали относительные пути ("EA Games", "Battle.net"), которые
+/// разрешались от рабочего каталога процесса — то есть EA и Battle.net не
+/// сканировались вообще, ни на одном диске.
+const STORE_SUBFOLDERS: &[(&[&str], GamePlatform, GameSource)] = &[
     (
-        "EA Games",
+        &["Program Files\\EA Games", "Program Files (x86)\\EA Games", "EA Games"],
         GamePlatform::Ea,
         GameSource::Ea,
     ),
-    ("Battle.net", GamePlatform::BattleNet, GameSource::BattleNet),
+    (
+        &[
+            "Program Files\\Battle.net",
+            "Program Files (x86)\\Battle.net",
+            "Battle.net",
+        ],
+        GamePlatform::BattleNet,
+        GameSource::BattleNet,
+    ),
 ];
 const NON_GAME_WORDS: &[&str] = &[
     "driver",
@@ -161,15 +174,57 @@ pub fn scan_known_folders() -> Vec<InstalledGame> {
     result
 }
 
+/// Все существующие диски: корень диска — единственное место, где лежат
+/// игры, установленные «в корень», вроде C:\\The Long Dark.
+pub fn drive_roots() -> Vec<PathBuf> {
+    let mut result = Vec::new();
+
+    for letter in b'C'..=b'Z' {
+        let root = format!("{}:\\", letter as char);
+
+        if Path::new(&root).is_dir() {
+            result.push(PathBuf::from(root));
+        }
+    }
+
+    result
+}
+
+pub fn store_folder_paths() -> Vec<(PathBuf, GamePlatform, GameSource)> {
+    let mut result = Vec::new();
+
+    for root in drive_roots() {
+        for (subfolders, platform, source) in STORE_SUBFOLDERS {
+            for subfolder in *subfolders {
+                let path = root.join(subfolder);
+
+                if path.is_dir() {
+                    result.push((path, *platform, *source));
+                }
+            }
+        }
+    }
+
+    result
+}
+
 pub fn scan_store_folders() -> Vec<InstalledGame> {
     let mut result = Vec::new();
 
-    for (name, platform, source) in STORE_FOLDERS {
-        let path = PathBuf::from(name);
+    for (path, platform, source) in store_folder_paths() {
+        result.extend(scan_store_folder(&path, platform, source));
+    }
 
-        if path.is_dir() {
-            result.extend(scan_store_folder(&path, *platform, *source));
-        }
+    result
+}
+
+/// Игры, установленные прямо в корень диска (C:\\The Long Dark).
+/// Глубина 1: смотрим только содержимое корня, глубже — это уже чужие папки.
+pub fn scan_volume_roots() -> Vec<InstalledGame> {
+    let mut result = Vec::new();
+
+    for root in drive_roots() {
+        result.extend(scan_folder_depth(&root, GameSource::KnownFolder, 1));
     }
 
     result
@@ -184,7 +239,12 @@ pub fn scan_user_folders(folders: &[String]) -> Vec<InstalledGame> {
 }
 
 pub fn scan_folder(folder: &Path, source: GameSource) -> Vec<InstalledGame> {
-    collect_candidates(folder, SYSTEM_DEPTH)
+    scan_folder_depth(folder, source, SYSTEM_DEPTH)
+}
+
+/// Сканирование папки с заданной глубиной вложенности.
+pub fn scan_folder_depth(folder: &Path, source: GameSource, depth: usize) -> Vec<InstalledGame> {
+    collect_candidates(folder, depth)
         .into_iter()
         .filter_map(|executable| {
             let install_path = executable.parent()?.to_path_buf();

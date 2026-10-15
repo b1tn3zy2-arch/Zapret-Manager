@@ -508,6 +508,7 @@ export const ru = {
         closeGame: "Закрыть игру",
         closedGame: "Игра закрыта: {name}",
         closeGameFailed: "Не удалось закрыть игру: {error}",
+        rescan: "Пересканировать",
         add: {
           action: "Добавить игру",
           title: "Добавить игру вручную",
