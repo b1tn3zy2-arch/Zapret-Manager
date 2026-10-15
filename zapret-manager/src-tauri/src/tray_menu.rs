@@ -109,11 +109,15 @@ pub fn show<R: Runtime>(app: &AppHandle<R>, cursor: PhysicalPosition<f64>) {
     let width = MENU_WIDTH * scale;
     let height = resolved_height() * scale;
 
+    // Монитор выбирается по позиции курсора, а не по монитору самого окна.
+    // Окно меню живёт на основном мониторе, поэтому current_monitor() при
+    // втором экране уводил меню на него: трей на дополнительном мониторе
+    // открывался не там, где нажали.
     let mut x = cursor.x - width + 14.0 * scale;
     let mut y = cursor.y - height - CURSOR_GAP * scale;
     let mut area = None;
 
-    if let Some(monitor) = window.current_monitor().ok().flatten() {
+    if let Some(monitor) = monitor_under_cursor(&window) {
         let work = monitor.work_area();
         let left = f64::from(work.position.x);
         let top = f64::from(work.position.y);
@@ -258,6 +262,38 @@ fn cursor_inside_current<R: Runtime>(window: &tauri::WebviewWindow<R>) -> bool {
         f64::from(size.width),
         f64::from(size.height),
     )
+}
+
+/// Монитор, на котором в данный момент находится курсор.
+fn monitor_under_cursor<R: Runtime>(
+    window: &tauri::WebviewWindow<R>,
+) -> Option<tauri::Monitor> {
+    let mut point = POINT { x: 0, y: 0 };
+
+    if unsafe { GetCursorPos(&mut point) } == 0 {
+        return window.current_monitor().ok().flatten();
+    }
+
+    let px = f64::from(point.x);
+    let py = f64::from(point.y);
+
+    let monitors = window.available_monitors().ok()?;
+
+    monitors
+        .into_iter()
+        .find(|monitor| {
+            let position = monitor.position();
+            let size = monitor.size();
+            let left = f64::from(position.x);
+            let top = f64::from(position.y);
+
+            px >= left
+                && px < left + f64::from(size.width)
+                && py >= top
+                && py < top + f64::from(size.height)
+        })
+        .or_else(|| window.primary_monitor().ok().flatten())
+        .or_else(|| window.current_monitor().ok().flatten())
 }
 
 fn cursor_inside(x: f64, y: f64, width: f64, height: f64) -> bool {

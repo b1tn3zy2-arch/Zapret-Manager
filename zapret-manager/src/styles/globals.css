@@ -284,69 +284,66 @@
 
    Раньше пульсировал сам box-shadow: это не композитное свойство, анимация
    шла по главному потоку и конфликтовала с filter: blur() родителя, из-за
-   чего пульс то замирал, то не появлялся. Теперь это отдельный слой-ореол,
-   который двигает только opacity и transform — это compositor-only анимация.
+   чего пульс то замирал, то не появлялся. Теперь это отдельные слои под
+   карточкой, которые двигают только opacity и transform.
 
    Плюс пульс намеренно не подчиняется переключателю «Анимации»: он и есть
    индикатор того, что обход работает, и должен гореть всегда. */
-.dashboard-footer {
-  display: flex;
-  justify-content: center;
-  padding-top: var(--space-sm);
-  padding-bottom: var(--space-xs);
-}
-
-@keyframes card-running-halo {
+@keyframes strategy-card-halo-breathe {
   0%,
   100% {
-    opacity: 0.35;
+    opacity: 0.45;
     transform: scale(1);
   }
 
   50% {
-    opacity: 0.85;
-    transform: scale(1.035);
+    opacity: 1;
+    transform: scale(1.04);
   }
 }
 
-@keyframes card-running-ring {
+@keyframes strategy-card-halo-ring {
   0% {
-    opacity: 0.7;
-    transform: scale(0.98);
+    opacity: 0.75;
+    transform: scale(0.985);
   }
 
   100% {
     opacity: 0;
-    transform: scale(1.06);
+    transform: scale(1.07);
   }
 }
 
-.card-running-pulse::after {
-  content: "";
+.strategy-card-halo,
+.strategy-card-halo-pulse {
   position: absolute;
-  inset: -1px;
-  border-radius: inherit;
+  left: 50%;
+  top: 50%;
+  width: 100%;
+  height: 100%;
+  border-radius: 0.875rem;
   pointer-events: none;
-  box-shadow: 0 0 18px 2px rgb(var(--color-accent-primary-rgb) / 0.45);
-  animation: card-running-halo 2.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  transform: translate(-50%, -50%);
   will-change: opacity, transform;
 }
 
-.card-running-pulse::before {
-  content: "";
-  position: absolute;
-  inset: -2px;
-  border-radius: inherit;
-  border: 1px solid rgb(var(--color-accent-primary-rgb) / 0.5);
-  pointer-events: none;
-  animation: card-running-ring 2.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-  will-change: opacity, transform;
+.strategy-card-halo {
+  box-shadow:
+    0 0 0 1px rgb(var(--color-accent-primary-rgb) / 0.55),
+    0 0 22px 2px rgb(var(--color-accent-primary-rgb) / 0.35);
+  animation: strategy-card-halo-breathe 2.8s cubic-bezier(0.4, 0, 0.2, 1)
+    infinite;
 }
 
-[data-animations="off"] .card-running-pulse::after,
-[data-animations="off"] .card-running-pulse::before {
+.strategy-card-halo-pulse {
+  border: 1px solid rgb(var(--color-accent-primary-rgb) / 0.7);
+  animation: strategy-card-halo-ring 2.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+[data-animations="off"] .strategy-card-halo,
+[data-animations="off"] .strategy-card-halo-pulse {
   animation-iteration-count: infinite !important;
-  animation-duration: 2.4s !important;
+  animation-duration: 2.8s !important;
 }
 
 .zapret-grain-frame-1 {

@@ -35,6 +35,27 @@ const INSTANT_TRANSITION = { duration: 0 } as const;
 
 const MemoStrategyGameCard = memo(StrategyGameCardImpl);
 
+/**
+ * Индикатор работающей стратегии.
+ *
+ * Раньше пульсировал сам box-shadow карточки: свойство не композитное,
+ * анимация шла по главному потоку и конфликтовала с filter: blur() родителя —
+ * пульс то замирал, то пропадал совсем. Теперь это отдельные слои под карточкой,
+ * которые двигают только opacity и transform, то есть compositor-only анимация
+ * без перерисовки карточки.
+ *
+ * Намеренно не зависит от настройки «Анимации»: это индикатор того, что обход
+ * работает, и он должен гореть всегда.
+ */
+function RunningHalo() {
+  return (
+    <>
+      <span aria-hidden="true" className="strategy-card-halo" />
+      <span aria-hidden="true" className="strategy-card-halo-pulse" />
+    </>
+  );
+}
+
 function StrategyGameCardImpl({
   card,
   flipped,
@@ -77,15 +98,13 @@ function StrategyGameCardImpl({
       ref={containerRef}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleCardLeave}
-      className={cn(
-        "strategy-card group relative [perspective:1000px]",
-        // пульс — индикатор работающего обхода, он не зависит от настройки
-        // «Анимации»: выключать его вместе со всеми эффектами нельзя
-        isRunning && "card-running-pulse"
-      )}
+      className="strategy-card group relative [perspective:1000px]"
       data-flipped={flipped}
+      data-running={isRunning}
       style={{ width: "100%", aspectRatio: String(CARD_ASPECT_RATIO) }}
     >
+      {isRunning ? <RunningHalo /> : null}
+
       <motion.div
         animate={{
           scale: lifted && !motionDisabled ? GAME_CARD_HOVER_SCALE : 1,
