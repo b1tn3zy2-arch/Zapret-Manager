@@ -32,20 +32,22 @@
   --font-sans: "Inter", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
+  /* Размеры заданы в rem, а не в px: только так масштаб интерфейса влияет
+     на отступы, скругления и ширины панелей вместе с текстом. */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
 
-  --space-xs: clamp(4px, 0.3vw + 2px, 8px);
-  --space-sm: clamp(8px, 0.5vw + 4px, 12px);
-  --space-md: clamp(12px, 0.8vw + 6px, 18px);
-  --space-lg: clamp(16px, 1.2vw + 8px, 28px);
-  --space-xl: clamp(20px, 1.8vw + 12px, 44px);
+  --space-xs: clamp(0.25rem, 0.3vw + 0.125rem, 0.5rem);
+  --space-sm: clamp(0.5rem, 0.5vw + 0.25rem, 0.75rem);
+  --space-md: clamp(0.75rem, 0.8vw + 0.375rem, 1.125rem);
+  --space-lg: clamp(1rem, 1.2vw + 0.5rem, 1.75rem);
+  --space-xl: clamp(1.25rem, 1.8vw + 0.75rem, 2.75rem);
 
-  --sidebar-width-expanded: clamp(200px, 15vw, 260px);
-  --sidebar-width-collapsed: clamp(64px, 5vw, 76px);
-  --titlebar-height: clamp(34px, 3vh, 42px);
+  --sidebar-width-expanded: clamp(12.5rem, 15vw, 16.25rem);
+  --sidebar-width-collapsed: clamp(4rem, 5vw, 4.75rem);
+  --titlebar-height: clamp(2.125rem, 3vh, 2.625rem);
 
   --modal-width-sm: min(clamp(320px, 30vw, 400px), 94vw);
   --modal-width-md: min(clamp(400px, 42vw, 560px), 94vw);
@@ -100,16 +102,25 @@
     overflow: hidden;
   }
 
+  /* Масштаб интерфейса живёт здесь, на корне. Раньше он стоял на body, а
+     Tailwind считает rem от html — из-за этого масштабировался только текст,
+     заданный в em, а весь интерфейс на утилитах Tailwind оставался прежнего
+     размера. Плюс font-size на body анимировался переходом: при перетаскивании
+     ползунка каждый кадр перезапускал переход и вся страница дёргалась.
+     Значение выставляется из useAppearance, анимировать его нельзя. */
+  html {
+    font-size: calc(
+      clamp(0.875rem, 0.82rem + 0.25vw, 1.0625rem) * var(--interface-scale, 1) *
+        var(--density-scale, 1)
+    );
+  }
+
   body {
     margin: 0;
     background-color: var(--color-bg-primary);
     color: var(--color-text-primary);
     font-family: var(--font-sans);
-    font-size: clamp(0.875rem, 0.82rem + 0.25vw, 1.0625rem);
-    font-size: calc(
-      clamp(0.875rem, 0.82rem + 0.25vw, 1.0625rem) * var(--interface-scale, 1)
-    );
-    transition: font-size 260ms cubic-bezier(0.16, 1, 0.3, 1);
+    font-size: inherit;
     min-width: 800px;
     min-height: 600px;
     font-synthesis: none;
@@ -191,16 +202,40 @@
     color: var(--color-text-primary);
   }
 
-  [data-density="compact"] {
-    font-size: calc(1rem * var(--density-scale, 1));
+  /* Скорость анимаций.
+
+     Раньше здесь стояло правило на все элементы с !important, которое
+     переписывало transition-duration везде. Из-за этого (а) ломались
+     анимации Framer Motion: он пишет transform каждый кадр, а браузер
+     пытался интерполировать каждое изменение, из-за чего 3D-переворот
+     карточки визually зависал на кадр, и (б) не трогались animation-duration
+     и transition-delay, поэтому ускорение работало наполовину.
+
+     Теперь скорость масштабируется через настоящие токены: любой переход
+     или keyframe берёт длительность из переменной и умножает её на
+     --motion-scale. Правило точечное, без !important. */
+  body {
+    --duration-scale: var(--motion-scale, 1);
   }
 
-  body *,
-  body *::before,
-  body *::after {
+  :where(body) *:not(.framer-motion-ghost),
+  :where(body) *:not(.framer-motion-ghost)::before,
+  :where(body) *:not(.framer-motion-ghost)::after {
     transition-duration: calc(
-      var(--tw-duration, 200ms) * var(--motion-scale, 1)
-    ) !important;
+      var(--tw-duration, 200ms) * var(--duration-scale, 1)
+    );
+  }
+
+  :where(body) [class*="duration-"],
+  :where(body) [class*="animate-"] {
+    animation-duration: calc(
+      var(--tw-duration, 200ms) * var(--duration-scale, 1)
+    );
+  }
+
+  .strategy-card-halo,
+  .strategy-card-halo-pulse {
+    animation-duration: calc(2.8s * var(--duration-scale, 1));
   }
 
   #root {

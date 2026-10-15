@@ -1,5 +1,6 @@
 export const ru = {
   common: {
+    hint: "Подсказка",
     cancel: "Отмена",
     confirm: "Подтвердить",
     close: "Закрыть",
@@ -579,6 +580,8 @@ export const ru = {
         "Эти настройки для продвинутых пользователей. Ошибочная конфигурация может помешать запуску стратегий.",
       loggingLevel: "Уровень логирования",
       logRetention: "Хранение логов, дней",
+      logRetentionUnit: "дней",
+      logRetentionHint: "От {min} до {max} дней. Применяется к новым логам.",
       extraArgs: "Дополнительные аргументы winws",
       extraArgsHint: "Каждый аргумент передаётся winws как есть",
       addArgument: "Добавить аргумент",

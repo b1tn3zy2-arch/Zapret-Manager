@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { CircleHelp, Plus, Trash2 } from "lucide-react";
 
-import { Button, Input, Text } from "@/components/ui";
+import { Button, Input, Text, Tooltip } from "@/components/ui";
+import { cn } from "@/lib/utils";
 import { useI18n } from "@/i18n";
 
 export interface EditableListProps {
@@ -12,6 +13,8 @@ export interface EditableListProps {
   addLabel: string;
   emptyMessage: string;
   validate?: ((value: string) => string | null) | undefined;
+  /** Пояснение к полю: показывается в подсказке, а не строкой под полем */
+  hint?: string;
   type?: "text" | "number";
   disabled?: boolean;
 }
@@ -85,9 +88,12 @@ function EditableList({
   addLabel,
   emptyMessage,
   validate,
+  hint,
   type = "text",
   disabled = false,
 }: EditableListProps) {
+  const { t } = useI18n();
+
   const update = (index: number, value: string): void => {
     onChange(
       items.map((item, position) => (position === index ? value : item))
@@ -104,8 +110,26 @@ function EditableList({
 
   return (
     <fieldset className="flex flex-col gap-2" disabled={disabled}>
-      <legend className="text-text-secondary mb-1 text-xs font-medium tracking-wide uppercase">
-        {label}
+      <legend className="mb-1 flex items-center gap-1.5">
+        <span className="text-text-secondary text-xs font-medium tracking-wide uppercase">
+          {label}
+        </span>
+        {hint === undefined ? null : (
+          <Tooltip content={hint}>
+            <button
+              type="button"
+              tabIndex={0}
+              aria-label={t("common.hint")}
+              className={cn(
+                "text-text-tertiary hover:text-text-secondary rounded-full p-0.5",
+                "focus-visible:ring-accent-primary/60 transition-colors",
+                "focus-visible:ring-2 focus-visible:outline-none"
+              )}
+            >
+              <CircleHelp aria-hidden="true" className="size-3.5" />
+            </button>
+          </Tooltip>
+        )}
       </legend>
 
       {items.length === 0 ? (

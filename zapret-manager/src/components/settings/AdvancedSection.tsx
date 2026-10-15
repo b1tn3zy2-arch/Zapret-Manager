@@ -3,10 +3,11 @@ import { AlertTriangle } from "lucide-react";
 
 import DangerZone from "@/components/settings/DangerZone";
 import EditableList from "@/components/settings/EditableList";
+import LogRetentionField from "@/components/settings/LogRetentionField";
 import ResourcesSection from "@/components/settings/ResourcesSection";
 import SectionContainer from "@/components/settings/SectionContainer";
 import SettingRow from "@/components/settings/SettingRow";
-import { Button, Input, Text, Toggle } from "@/components/ui";
+import { Button, Text, Toggle } from "@/components/ui";
 import { useI18n } from "@/i18n";
 import {
   MAX_LOG_RETENTION_DAYS,
@@ -138,29 +139,11 @@ function AdvancedSection() {
 
       <SettingRow
         label={t("settings.advanced.logRetention")}
-        control={
-          <div className="w-20">
-            <Input
-              variant="filled"
-              size="sm"
-              inputMode="numeric"
-              maxLength={4}
-              value={String(advanced.logRetentionDays)}
-              aria-label={t("settings.advanced.logRetention")}
-              className="text-center"
-              onChange={(event) => {
-                const digits = event.target.value.replace(/\D/g, "");
-
-                updateAdvanced({
-                  logRetentionDays:
-                    digits === ""
-                      ? MIN_LOG_RETENTION_DAYS
-                      : Math.min(Number(digits), MAX_LOG_RETENTION_DAYS),
-                });
-              }}
-            />
-          </div>
-        }
+        description={t("settings.advanced.logRetentionHint", {
+          min: MIN_LOG_RETENTION_DAYS,
+          max: MAX_LOG_RETENTION_DAYS,
+        })}
+        control={<LogRetentionField />}
       />
 
       <div className="py-3">
@@ -173,15 +156,13 @@ function AdvancedSection() {
           placeholder="--dpi-desync=fake"
           addLabel={t("settings.advanced.addArgument")}
           emptyMessage={t("settings.advanced.noArgs")}
+          hint={t("settings.advanced.extraArgsHint")}
           validate={(value) =>
             value !== "" && value.startsWith(" ")
               ? t("settings.advanced.leadingSpace")
               : null
           }
         />
-        <Text variant="caption" size="sm" className="text-text-tertiary mt-2">
-          {t("settings.advanced.extraArgsHint")}
-        </Text>
       </div>
 
       <SettingRow

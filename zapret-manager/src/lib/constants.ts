@@ -160,6 +160,9 @@ export const MODAL_BACKDROP_BLUR_PX = 24;
 export const MODAL_BACKDROP_SATURATE = 0.8;
 
 export const POST_PROCESSING_LAYER_Z = 9998;
+/// Подсказки рисуются выше пост-обработки: иначе виньетка, зерно и сканлайны
+/// оказывались поверх подсказки и делали её нечитаемой.
+export const TOOLTIP_Z_INDEX = 10000;
 export const GRAIN_TURBULENCE_FREQUENCY = 0.8;
 export const GRAIN_TURBULENCE_OCTAVES = 4;
 export const BLOOM_DEFAULT_INTENSITY = "subtle";

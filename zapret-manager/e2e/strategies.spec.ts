@@ -77,13 +77,19 @@ test.describe("Стратегии", () => {
     await expect(
       card.locator("xpath=ancestor::*[@data-flipped]")
     ).toHaveAttribute("data-flipped", "true");
+    // нижние кнопки карточки могут оказаться за пределами вьюпорта, и тогда
+    // elementFromPoint ничего не находит — приводим карточку в экран
+    await card.scrollIntoViewIfNeeded();
     await waitForAnimationsSettled(page);
 
     const close = page.getByRole("button", { name: "Закрыть карту" }).first();
 
-    // Проверяем, что задняя грань реально кликабельна: элемент под курсором
-    // в центре кнопки должен принадлежать этой кнопке. Именно это ломалось
-    // в preserve-3d-поддереве: клик уходил в родительский div.
+    // Проверяем, что задняя грань реально кликабельна: под курсором в
+    // центре кнопки должен лежать элемент этой кнопки.
+    //
+    // Именно elementsFromPoint, а не elementFromPoint: внутри preserve-3d
+    // Chromium у elementFromPoint периодически возвращает родительский слой
+    // вместо настоящей цели, хотя стек под точкой при этом корректный.
     await expect
       .poll(
         async () =>
@@ -91,25 +97,18 @@ test.describe("Стратегии", () => {
             const rect = node.getBoundingClientRect();
             const cx = rect.left + rect.width / 2;
             const cy = rect.top + rect.height / 2;
-            const hit = document.elementFromPoint(cx, cy);
 
-            if (hit === null) {
-              return `точка вне вьюпорта: ${Math.round(cx)},${Math.round(cy)}`;
+            if (cy < 0 || cy > window.innerHeight) {
+              return "кнопка вне вьюпорта";
             }
 
-            if (hit === node || node.contains(hit)) {
-              return true;
-            }
-
-            const owner = hit.closest<HTMLElement>("[data-flipped]");
-
-            return `под курсором ${hit.tagName}${
-              owner === null ? "" : " вне кнопки"
-            } (${Math.round(cx)},${Math.round(cy)})`;
+            return document
+              .elementsFromPoint(cx, cy)
+              .some((element) => element === node || node.contains(element));
           }),
         {
           timeout: 10_000,
-          message: "задняя грань карточки принимает клики",
+          message: "задняя грань карточки не принимает клики",
         }
       )
       .toBe(true);

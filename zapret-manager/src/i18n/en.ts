@@ -1,5 +1,6 @@
 export const en = {
   common: {
+    hint: "Hint",
     cancel: "Cancel",
     confirm: "Confirm",
     close: "Close",
@@ -579,6 +580,8 @@ export const en = {
         "These settings are for advanced users. A wrong configuration may prevent strategies from starting.",
       loggingLevel: "Logging level",
       logRetention: "Log retention, days",
+      logRetentionUnit: "days",
+      logRetentionHint: "From {min} to {max} days. Applies to new log files.",
       extraArgs: "Extra winws arguments",
       extraArgsHint: "Each argument is passed to winws as is",
       addArgument: "Add argument",

@@ -1,4 +1,4 @@
-import { forwardRef } from "react";
+import { forwardRef, useCallback, useRef, useState } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -9,22 +9,66 @@ export interface SliderProps {
   step: number;
   ariaLabel: string;
   formatValue?: (value: number) => string;
+  /**
+   * Значение во время перетаскивания. Если передан — слайдер не пишет в стейт
+   * на каждом кадре, а держит превью локально и коммитит по отпусканию.
+   * Именно из-за записи в стор на каждый кадр перетаскивание дёргалось:
+   * 100+ ререндеров и 100+ пересчётов стилей за одно движение мыши.
+   */
   onChange: (value: number) => void;
+  onCommit?: (value: number) => void;
   className?: string;
 }
 
+/**
+ * Ползунок на нативном input[type=range].
+ *
+ * Нативный input оставлен сознательно: он даёт клавиатуру, экранные читалки и
+ * правильное поведение по шагу. Вся отрисовка — на compositor-свойствах:
+ * заливка едет через scaleX с transform-origin слева, поэтому не вызывает
+ * layout, и никакого CSS-перехода на width, который раньше рассинхронизировал
+ * thumb с заливкой и давал дёрганье.
+ */
 export const Slider = forwardRef<HTMLInputElement, SliderProps>(function Slider(
-  { value, min, max, step, ariaLabel, formatValue, onChange, className },
+  {
+    value,
+    min,
+    max,
+    step,
+    ariaLabel,
+    formatValue,
+    onChange,
+    onCommit,
+    className,
+  },
   ref
 ) {
   const range = max - min;
-  const percent = range === 0 ? 0 : ((value - min) / range) * 100;
+  // Во время перетаскивания показываем локальное значение, иначе input
+  // возвращался к старому значению из стора и thumb дёргался назад
+  const [dragging, setDragging] = useState<number | null>(null);
+  const commitRef = useRef(onCommit);
+
+  commitRef.current = onCommit;
+
+  const shown = dragging ?? value;
+  const percent = range === 0 ? 0 : (shown - min) / range;
+
+  const finish = useCallback(() => {
+    setDragging((current) => {
+      if (current !== null) {
+        commitRef.current?.(current);
+      }
+
+      return null;
+    });
+  }, []);
 
   return (
     <div className={cn("flex flex-col gap-1.5", className)}>
       <div className="flex items-baseline justify-between gap-3">
         <span className="text-text-secondary text-xs tabular-nums">
-          {formatValue === undefined ? String(value) : formatValue(value)}
+          {formatValue === undefined ? String(shown) : formatValue(shown)}
         </span>
       </div>
 
@@ -35,8 +79,8 @@ export const Slider = forwardRef<HTMLInputElement, SliderProps>(function Slider(
         />
         <span
           aria-hidden="true"
-          className="bg-accent-primary absolute h-1 rounded-full transition-[width] duration-200 ease-out"
-          style={{ width: `${percent}%` }}
+          className="bg-accent-primary absolute inset-x-0 h-1 origin-left rounded-full will-change-transform"
+          style={{ transform: `scaleX(${percent.toFixed(4)})` }}
         />
 
         <input
@@ -45,10 +89,20 @@ export const Slider = forwardRef<HTMLInputElement, SliderProps>(function Slider(
           min={min}
           max={max}
           step={step}
-          value={value}
+          value={shown}
           aria-label={ariaLabel}
+          onPointerDown={() => {
+            setDragging(value);
+          }}
+          onPointerUp={finish}
+          onPointerCancel={finish}
+          onKeyUp={finish}
+          onBlur={finish}
           onChange={(event) => {
-            onChange(Number(event.target.value));
+            const next = Number(event.target.value);
+
+            setDragging(next);
+            onChange(next);
           }}
           className={cn(
             "relative w-full cursor-pointer appearance-none bg-transparent",
