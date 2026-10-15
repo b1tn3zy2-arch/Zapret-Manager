@@ -144,6 +144,8 @@ export const en = {
       "Strategy config was not parsed — running legacy .bat through cmd.exe",
     injectGamesFailed: "Game domain injection failed",
     stoppingVpn: "Stopping VPN before starting the strategy",
+    gameProfileApplying:
+      "Restarting the bypass with the launched game's settings",
     strategyStarted: "Strategy started, PID {pid}",
     launchCancelled: "Launch cancelled: access not granted",
     launchFailed: "Could not start: {error}",

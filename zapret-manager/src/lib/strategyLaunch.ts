@@ -5,6 +5,7 @@ import { useSettingsStore } from "@/stores/useSettingsStore";
 import type { GameSettings, InjectionReport } from "@/types";
 
 export interface NativeGamePayload {
+  id: string;
   name: string;
   domains: string[];
   ips: string[];
@@ -14,10 +15,13 @@ export interface NativeGamePayload {
 export interface StrategyRunResult {
   pid: number;
   logPath: string;
+  /** id игр, чьи домены и порты попали в конфиг запущенной стратегии */
+  gamesInjected: string[];
 }
 
 function toNativeGames(games: readonly GameSettings[]): NativeGamePayload[] {
   return enabledGames(games).map((game) => ({
+    id: game.id,
     name: game.name,
     domains: game.domains,
     ips: game.ipRanges,
@@ -39,7 +43,9 @@ export async function launchStrategy(
   const engine = settings.advanced.strategyEngine;
 
   if (engine === "legacy") {
-    for (const game of enabledGames(settings.games)) {
+    const active = enabledGames(settings.games);
+
+    for (const game of active) {
       await invoke<InjectionReport>("inject_outlast", {
         strategyPath: path,
         domains: game.domains,
@@ -49,12 +55,19 @@ export async function launchStrategy(
       });
     }
 
-    return invoke<StrategyRunResult>("run_strategy", { strategyId, path });
+    const result = await invoke<Omit<StrategyRunResult, "gamesInjected">>(
+      "run_strategy",
+      { strategyId, path }
+    );
+
+    return { ...result, gamesInjected: active.map((game) => game.id) };
   }
 
-  return invoke<StrategyRunResult>("run_strategy_auto", {
-    strategyId,
-    path,
-    games: toNativeGames(settings.games),
-  });
+  const games = toNativeGames(settings.games);
+  const result = await invoke<Omit<StrategyRunResult, "gamesInjected">>(
+    "run_strategy_auto",
+    { strategyId, path, games }
+  );
+
+  return { ...result, gamesInjected: games.map((game) => game.id) };
 }

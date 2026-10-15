@@ -21,6 +21,7 @@ import {
   INTERFACE_SCALE_MAX,
   INTERFACE_SCALE_MIN,
 } from "@/lib/appearanceTokens";
+import { mergeBuiltinGames } from "@/lib/defaultGames";
 import { isValidRepo } from "@/lib/updateUtils";
 import type { AppSettings, GameSettings } from "@/types";
 
@@ -238,5 +239,8 @@ export function validateSettings(data: unknown): AppSettings {
     );
   }
 
-  return result.data;
+  // Склейка с пресетами встроенных игр — именно здесь, а не в запасной ветке
+  // разбора. Иначе сохранённый settings.json переживает обновление приложения
+  // и новые домены/порты игр до него не доезжают (см. mergeBuiltinGame).
+  return { ...result.data, games: mergeBuiltinGames(result.data.games) };
 }

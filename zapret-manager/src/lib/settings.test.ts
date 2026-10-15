@@ -89,14 +89,19 @@ describe("validateSettings", () => {
     expect(outlast).toBeDefined();
     expect(outlast?.enabled).toBe(true);
     expect(outlast?.builtin).toBe(true);
-    expect(outlast?.domains).toEqual(["outlasttrials.com"]);
+    // перенесённые значения сохраняются и дополняются актуальным пресетом,
+    // иначе обход остался бы без домена rbg-services.com и портов GameLift
+    expect(outlast?.domains).toContain("outlasttrials.com");
+    expect(outlast?.domains).toContain("rbg-services.com");
     expect(outlast?.ipRanges).toEqual(["203.0.113.0/24"]);
-    expect(outlast?.ports).toEqual([27015]);
+    expect(outlast?.ports).toContain(27015);
+    expect(outlast?.ports).toContain(7777);
+    expect(outlast?.ports).toContain(7830);
     expect(outlast?.autoRestore).toBe(false);
     expect(settings.games.length).toBe(DEFAULT_SETTINGS.games.length);
   });
 
-  it("не трогает готовый список игр", () => {
+  it("сохраняет свою игру и дополняет список встроенными", () => {
     const settings = validateSettings({
       games: [
         {
@@ -116,7 +121,15 @@ describe("validateSettings", () => {
       outlastTrials: { enabled: true, domains: ["legacy.com"] },
     });
 
-    expect(settings.games).toHaveLength(1);
+    const ids = settings.games.map((game) => game.id);
+
+    expect(ids).toContain("my-game");
+    expect(ids).toContain("outlast-trials");
+    expect(
+      settings.games.find((game) => game.id === "outlast-trials")?.enabled
+    ).toBe(false);
+    // своя игра + все встроенные пресеты
+    expect(settings.games).toHaveLength(DEFAULT_SETTINGS.games.length + 1);
     expect(settings.games[0]?.id).toBe("my-game");
   });
 });

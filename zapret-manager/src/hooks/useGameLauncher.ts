@@ -8,7 +8,7 @@ import {
   GAME_LAUNCH_HIDE_DELAY_MS,
   GAME_LAUNCH_TOAST_MS,
 } from "@/lib/constants";
-import { gameBypass, usesAnticheat } from "@/lib/installedGames";
+import { findGameProfile, usesAnticheat } from "@/lib/installedGames";
 import { useInstalledGamesStore } from "@/stores/useInstalledGamesStore";
 import { useLogsStore } from "@/stores/useLogsStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
@@ -41,7 +41,7 @@ export function useGameLauncher(): UseGameLauncherResult {
   const [runningGames, setRunningGames] = useState<Record<string, number>>({});
   const [prompt, setPrompt] = useState<LaunchPrompt | null>(null);
   const [toast, setToast] = useState<string | null>(null);
-  const { run, checkStatus } = useStrategyRunner();
+  const { run, stop, checkStatus } = useStrategyRunner();
   const addLog = useLogsStore((state) => state.addLog);
   const strategies = useStrategiesStore((state) => state.strategies);
   const lastStrategyId = useSettingsStore(
@@ -93,88 +93,124 @@ export function useGameLauncher(): UseGameLauncherResult {
     [addLog]
   );
 
-  const ensureStrategy = useCallback(async (): Promise<boolean> => {
-    if (strategies.some((item) => item.status === "running")) {
-      return true;
-    }
+  const ensureStrategy = useCallback(
+    async (requiredGameId: string | null): Promise<boolean> => {
+      const running = strategies.find((item) => item.status === "running");
 
-    const target = pickStrategy(strategies, lastStrategyId);
+      if (running !== undefined) {
+        // Обход уже работает. Если он был запущен без доменов и портов этой
+        // игры, её трафик не проходит через обход — перезапускаем с ними.
+        if (
+          requiredGameId === null ||
+          useStrategiesStore.getState().injectedGameIds.includes(requiredGameId)
+        ) {
+          return true;
+        }
 
-    if (target === undefined) {
-      setPrompt({ kind: "noStrategy", game: null });
+        addLog({
+          level: "info",
+          source: "strategy",
+          message: translateKey("log.gameProfileApplying"),
+        });
 
-      return false;
-    }
+        try {
+          await stop(running.id, running.path);
+        } catch {
+          // даже если остановка не удалась, запускаем профиль заново:
+          // это пересоздаст процесс обхода с нужными доменами и портами
+        }
+      }
 
-    addLog({
-      level: "info",
-      source: "user",
-      message: translateKey("settings.games.installed.launch.strategyStarting"),
-    });
+      const target = pickStrategy(strategies, lastStrategyId);
 
-    try {
-      await run(target.id, target.path);
-    } catch (caught) {
+      if (target === undefined) {
+        setPrompt({ kind: "noStrategy", game: null });
+
+        return false;
+      }
+
+      addLog({
+        level: "info",
+        source: "user",
+        message: translateKey(
+          "settings.games.installed.launch.strategyStarting"
+        ),
+      });
+
+      try {
+        await run(target.id, target.path);
+      } catch (caught) {
+        addLog({
+          level: "error",
+          source: "user",
+          message: translateKey(
+            "settings.games.installed.launch.strategyFailed",
+            {
+              error: caught instanceof Error ? caught.message : String(caught),
+            }
+          ),
+        });
+
+        return false;
+      }
+
+      const storeRunning = useStrategiesStore
+        .getState()
+        .strategies.some(
+          (item) => item.id === target.id && item.status === "running"
+        );
+
+      if (storeRunning) {
+        return true;
+      }
+
+      const status = await checkStatus(target.id).catch(() => null);
+
+      if (status?.running === true) {
+        useStrategiesStore.getState().setStatus(target.id, "running");
+        useStrategiesStore
+          .getState()
+          .setPid(target.id, status.winwsPids[0] ?? 0);
+
+        return true;
+      }
+
+      await run(target.id, target.path).catch(() => undefined);
+
+      const retry = await checkStatus(target.id).catch(() => null);
+
+      if (retry?.running === true) {
+        useStrategiesStore.getState().setStatus(target.id, "running");
+        useStrategiesStore
+          .getState()
+          .setPid(target.id, retry.winwsPids[0] ?? 0);
+
+        return true;
+      }
+
       addLog({
         level: "error",
         source: "user",
         message: translateKey(
           "settings.games.installed.launch.strategyFailed",
           {
-            error: caught instanceof Error ? caught.message : String(caught),
+            error: translateKey(
+              "settings.games.installed.launch.strategyNotRunning"
+            ),
           }
         ),
       });
 
       return false;
-    }
-
-    const storeRunning = useStrategiesStore
-      .getState()
-      .strategies.some(
-        (item) => item.id === target.id && item.status === "running"
-      );
-
-    if (storeRunning) {
-      return true;
-    }
-
-    const status = await checkStatus(target.id).catch(() => null);
-
-    if (status?.running === true) {
-      useStrategiesStore.getState().setStatus(target.id, "running");
-      useStrategiesStore.getState().setPid(target.id, status.winwsPids[0] ?? 0);
-
-      return true;
-    }
-
-    await run(target.id, target.path).catch(() => undefined);
-
-    const retry = await checkStatus(target.id).catch(() => null);
-
-    if (retry?.running === true) {
-      useStrategiesStore.getState().setStatus(target.id, "running");
-      useStrategiesStore.getState().setPid(target.id, retry.winwsPids[0] ?? 0);
-
-      return true;
-    }
-
-    addLog({
-      level: "error",
-      source: "user",
-      message: translateKey("settings.games.installed.launch.strategyFailed", {
-        error: translateKey(
-          "settings.games.installed.launch.strategyNotRunning"
-        ),
-      }),
-    });
-
-    return false;
-  }, [addLog, checkStatus, lastStrategyId, run, strategies]);
+    },
+    [addLog, checkStatus, lastStrategyId, run, stop, strategies]
+  );
 
   const start = useCallback(
     async (game: InstalledGame): Promise<void> => {
-      const bypass = gameBypass(game, gamesSettings);
+      // Профиль ищем и по gameSettingsId, и по названию: у ручных игр
+      // идентификатора нет, а домены встроенного пресета им всё равно нужны.
+      const bypass = findGameProfile(game, gamesSettings);
 
       if (bypass !== undefined && !bypass.enabled) {
         updateGameSettings(bypass.id, { enabled: true });
@@ -190,7 +226,9 @@ export function useGameLauncher(): UseGameLauncherResult {
         });
       }
 
-      if (!(await ensureStrategy())) {
+      // Профиль включается до запуска обхода: иначе его домены и порты
+      // не попадут в конфиг winws, и игра не сможет зайти в матч.
+      if (!(await ensureStrategy(bypass?.id ?? null))) {
         return;
       }
 

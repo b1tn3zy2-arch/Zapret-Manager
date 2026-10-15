@@ -72,9 +72,10 @@ describe("запуск игры с обходом", () => {
     useStrategiesStore.setState({
       strategies: [strategy()],
       error: null,
+      injectedGameIds: [],
     });
     useSettingsStore.setState((state) => ({
-      settings: { ...state.settings, lastStrategyId: "alt-1" },
+      settings: { ...state.settings, lastStrategyId: "alt-1", games: [] },
     }));
     useVpnStore.setState({
       activeConfigId: "cfg-1",
@@ -126,6 +127,147 @@ describe("запуск игры с обходом", () => {
       launchArgs: null,
       workingDir: expect.any(String),
     });
+  });
+
+  it("перезапускает работающий обход, если он запущен без доменов игры", async () => {
+    useStrategiesStore.setState({
+      strategies: [strategy({ status: "running" })],
+      injectedGameIds: [],
+    });
+    useSettingsStore.setState((state) => ({
+      settings: {
+        ...state.settings,
+        games: [
+          {
+            id: "portal",
+            name: "Portal 2",
+            icon: "Gamepad2",
+            enabled: false,
+            builtin: false,
+            domains: ["portal2.example"],
+            ipRanges: [],
+            ports: [27015],
+            autoRestore: true,
+            createBackup: true,
+            createdAt: 0,
+          },
+        ],
+      },
+    }));
+
+    const { result } = renderHook(() => useGameLauncher());
+
+    await act(async () => {
+      await result.current.launch(game({ gameSettingsId: "portal" }));
+    });
+
+    // обход сначала останавливается и стартует заново с профилем игры
+    expect(invokeMock).toHaveBeenCalledWith("stop_strategy", {
+      strategyId: "alt-1",
+    });
+    expect(invokeMock).toHaveBeenCalledWith(
+      "run_strategy_auto",
+      expect.objectContaining({
+        games: [
+          expect.objectContaining({
+            id: "portal",
+            domains: ["portal2.example"],
+            ports: [27015],
+          }),
+        ],
+      })
+    );
+    expect(invokeMock).toHaveBeenCalledWith("launch_game", {
+      executablePath: expect.any(String),
+      launchArgs: null,
+      workingDir: expect.any(String),
+    });
+  });
+
+  it("не перезапускает обход, если профиль игры уже применён", async () => {
+    useStrategiesStore.setState({
+      strategies: [strategy({ status: "running" })],
+      injectedGameIds: ["portal"],
+    });
+    useSettingsStore.setState((state) => ({
+      settings: {
+        ...state.settings,
+        games: [
+          {
+            id: "portal",
+            name: "Portal 2",
+            icon: "Gamepad2",
+            enabled: true,
+            builtin: false,
+            domains: ["portal2.example"],
+            ipRanges: [],
+            ports: [27015],
+            autoRestore: true,
+            createBackup: true,
+            createdAt: 0,
+          },
+        ],
+      },
+    }));
+
+    const { result } = renderHook(() => useGameLauncher());
+
+    await act(async () => {
+      await result.current.launch(game({ gameSettingsId: "portal" }));
+    });
+
+    expect(invokeMock).not.toHaveBeenCalledWith("stop_strategy", {
+      strategyId: "alt-1",
+    });
+    expect(invokeMock.mock.calls[0]?.[0]).toBe("launch_game");
+  });
+
+  it("находит профиль по названию, когда игра добавлена вручную", async () => {
+    useStrategiesStore.setState({
+      strategies: [strategy()],
+      injectedGameIds: [],
+    });
+    useSettingsStore.setState((state) => ({
+      settings: {
+        ...state.settings,
+        games: [
+          {
+            id: "outlast-trials",
+            name: "Outlast Trials",
+            icon: "Gamepad2",
+            enabled: false,
+            builtin: true,
+            domains: ["rbg-services.com"],
+            ipRanges: [],
+            ports: [7777, 7830],
+            autoRestore: true,
+            createBackup: true,
+            createdAt: 0,
+          },
+        ],
+      },
+    }));
+
+    const { result } = renderHook(() => useGameLauncher());
+
+    await act(async () => {
+      await result.current.launch(
+        game({
+          id: "manual-outlast",
+          name: "The Outlast Trials",
+          source: "userFolder",
+          platform: "custom",
+          manual: true,
+        })
+      );
+    });
+
+    expect(invokeMock).toHaveBeenCalledWith(
+      "run_strategy_auto",
+      expect.objectContaining({
+        games: [expect.objectContaining({ id: "outlast-trials" })],
+      })
+    );
   });
 
   it("без стратегии показывает подсказку и не запускает игру", async () => {

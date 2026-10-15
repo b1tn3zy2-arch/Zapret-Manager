@@ -10,7 +10,7 @@ import {
   DEFAULT_STRATEGY_UPDATES,
   DEFAULT_VPN,
 } from "@/lib/defaults";
-import { getDefaultGames } from "@/lib/defaultGames";
+import { getDefaultGames, mergeBuiltinGames } from "@/lib/defaultGames";
 import { readSettingsFile, writeSettingsFile } from "@/lib/storage";
 import { toErrorMessage } from "@/lib/utils";
 import type {
@@ -45,10 +45,12 @@ function mergeSettings(fromFile: AppSettings): AppSettings {
       ...fromFile.strategyUpdates,
       ignoredVersions: fromFile.strategyUpdates?.ignoredVersions ?? [],
     },
+    // games всегда проходят через mergeBuiltinGames: иначе копия из файла или
+    // из localStorage осталась бы без новых доменов и портов встроенных игр
     games:
       fromFile.games === undefined
         ? getDefaultGames()
-        : fromFile.games.map((game) => ({ ...game })),
+        : mergeBuiltinGames(fromFile.games),
     vpn: { ...DEFAULT_VPN, ...fromFile.vpn },
     advanced: { ...DEFAULT_ADVANCED, ...fromFile.advanced },
   };

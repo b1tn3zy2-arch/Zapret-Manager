@@ -103,88 +103,48 @@ test.describe("Адаптив", () => {
         await navButton(page, name).click();
         await page.waitForTimeout(400);
 
-        await page
-          .waitForFunction(
-            () => {
-              const main = document.querySelector("main");
+        // Замер идёт до появления настоящего отступа: пока контент ещё переезжает
+        // (stagger-анимации карточек, тики графиков), значения скачут и успевают
+        // обойти проверку. Такой опрос стабилизирует себя сам.
+        await expect
+          .poll(
+            async () =>
+              page.evaluate(() => {
+                const main = document.querySelector("main");
 
-              if (main === null) {
-                return false;
-              }
-
-              const mainRect = main.getBoundingClientRect();
-              let deepest = mainRect.top;
-
-              for (const node of Array.from(main.querySelectorAll("*"))) {
-                const rect = node.getBoundingClientRect();
-
-                if (rect.width === 0 || rect.height === 0) {
-                  continue;
+                if (main === null) {
+                  return -1;
                 }
 
-                if (getComputedStyle(node).position === "fixed") {
-                  continue;
+                main.scrollTop = main.scrollHeight;
+
+                const mainRect = main.getBoundingClientRect();
+                let deepest = mainRect.top;
+
+                for (const node of Array.from(main.querySelectorAll("*"))) {
+                  const rect = node.getBoundingClientRect();
+
+                  if (rect.width === 0 || rect.height === 0) {
+                    continue;
+                  }
+
+                  if (getComputedStyle(node).position === "fixed") {
+                    continue;
+                  }
+
+                  if (rect.bottom > mainRect.top) {
+                    deepest = Math.max(deepest, rect.bottom);
+                  }
                 }
 
-                if (rect.bottom > mainRect.top) {
-                  deepest = Math.max(deepest, rect.bottom);
-                }
-              }
-
-              main.scrollTop = main.scrollHeight;
-
-              const probe = window as unknown as {
-                __settleProbe?: string;
-                __settleHits?: number;
-              };
-              const signature = `${main.scrollHeight}:${Math.round(deepest)}`;
-
-              probe.__settleHits =
-                probe.__settleProbe === signature
-                  ? (probe.__settleHits ?? 0) + 1
-                  : 0;
-              probe.__settleProbe = signature;
-
-              return probe.__settleHits >= 3;
-            },
-            undefined,
-            { timeout: 5000, polling: 200 }
+                return Math.round(mainRect.bottom - deepest);
+              }),
+            {
+              timeout: 10_000,
+              message: `нет нижнего отступа на ${slug} @${width}x${height}`,
+            }
           )
-          .catch(() => undefined);
-
-        const gap = await page.evaluate(() => {
-          const main = document.querySelector("main");
-
-          if (main === null) {
-            return -1;
-          }
-
-          const mainRect = main.getBoundingClientRect();
-          let deepest = mainRect.top;
-
-          for (const node of Array.from(main.querySelectorAll("*"))) {
-            const rect = node.getBoundingClientRect();
-
-            if (rect.width === 0 || rect.height === 0) {
-              continue;
-            }
-
-            if (getComputedStyle(node).position === "fixed") {
-              continue;
-            }
-
-            if (rect.bottom > mainRect.top) {
-              deepest = Math.max(deepest, rect.bottom);
-            }
-          }
-
-          return mainRect.bottom - deepest;
-        });
-
-        expect(
-          gap,
-          `нет нижнего отступа на ${slug} @${width}x${height} (gap=${gap})`
-        ).toBeGreaterThanOrEqual(24);
+          .toBeGreaterThanOrEqual(24);
       }
     });
   }

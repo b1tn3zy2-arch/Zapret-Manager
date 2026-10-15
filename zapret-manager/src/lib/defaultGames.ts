@@ -1,3 +1,8 @@
+import {
+  MAX_GAME_PORTS,
+  MAX_GAMES,
+  MAX_INJECTED_ENTRIES,
+} from "@/lib/settingsLimits";
 import type { GameSettings } from "@/types";
 
 const STEAM_DOMAINS = [
@@ -130,10 +135,116 @@ export const BUILTIN_GAMES: readonly GameSettings[] = [
 ];
 
 export function getDefaultGames(): GameSettings[] {
-  return BUILTIN_GAMES.map((item) => ({
-    ...item,
-    domains: [...item.domains],
-    ipRanges: [...item.ipRanges],
-    ports: [...item.ports],
-  }));
+  return mergeBuiltinGames([]);
+}
+
+function findBuiltin(id: string): GameSettings | undefined {
+  return BUILTIN_GAMES.find((item) => item.id === id);
+}
+
+/**
+ * Склеивает сохранённую копию встроенной игры с актуальным пресетом.
+ *
+ * Зачем: settings.json переживает обновления приложения. Без склейки копия,
+ * сохранённая до появления новых доменов или портов, навсегда оставалась бы
+ * старой — и обход не покрывал бы реальный трафик игры. Именно так Outlast
+ * остался без rbg-services.com и портов GameLift 7777-7830.
+ *
+ * Настройки пользователя (enabled/autoRestore/createBackup) сохраняются,
+ * добавленные им домены и порты не теряются. Встроенные значения при этом
+ * всегда присутствуют: если пользователь удалит домен из встроенной игры,
+ * он вернётся при следующей загрузке — это осознанный компромисс в пользу
+ * рабочего обхода, отмеченный в интерфейсе подсказкой про обновление.
+ */
+export function mergeBuiltinGame(game: GameSettings): GameSettings {
+  const builtin = findBuiltin(game.id);
+
+  if (builtin === undefined) {
+    return game;
+  }
+
+  return {
+    ...game,
+    domains: unionValues(builtin.domains, game.domains, MAX_INJECTED_ENTRIES),
+    ipRanges: unionValues(
+      builtin.ipRanges,
+      game.ipRanges,
+      MAX_INJECTED_ENTRIES
+    ),
+    ports: unionPorts(builtin.ports, game.ports),
+  };
+}
+
+function unionValues(
+  base: readonly string[],
+  extra: readonly string[],
+  limit: number
+): string[] {
+  const seen = new Set<string>();
+  const result: string[] = [];
+
+  for (const value of [...base, ...extra]) {
+    const key = value.trim();
+
+    if (key === "" || seen.has(key)) {
+      continue;
+    }
+
+    seen.add(key);
+    result.push(key);
+
+    if (result.length >= limit) {
+      break;
+    }
+  }
+
+  return result;
+}
+
+function unionPorts(
+  base: readonly number[],
+  extra: readonly number[]
+): number[] {
+  const unique = new Set<number>();
+
+  for (const port of [...base, ...extra]) {
+    if (Number.isInteger(port) && port > 0 && port <= 65535) {
+      unique.add(port);
+    }
+  }
+
+  return [...unique]
+    .sort((left, right) => left - right)
+    .slice(0, MAX_GAME_PORTS);
+}
+
+/**
+ * Полный проход по сохранённым играм: склейка встроенных + добавление тех
+ * встроенных игр, которых в файле ещё нет (новые пресеты релиза).
+ * Новые игры добавляются выключенными, чтобы включение обхода не менялось
+ * само по себе после обновления.
+ */
+export function mergeBuiltinGames(
+  games: readonly GameSettings[]
+): GameSettings[] {
+  const merged = games.map(mergeBuiltinGame);
+  const known = new Set(merged.map((game) => game.id));
+
+  for (const builtin of BUILTIN_GAMES) {
+    if (known.has(builtin.id) || merged.length >= MAX_GAMES) {
+      continue;
+    }
+
+    merged.push(
+      mergeBuiltinGame({
+        ...builtin,
+        enabled: false,
+        domains: [...builtin.domains],
+        ipRanges: [...builtin.ipRanges],
+        ports: [...builtin.ports],
+      })
+    );
+  }
+
+  return merged;
 }

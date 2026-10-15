@@ -12,6 +12,8 @@ import type {
 export interface StrategiesStoreState {
   strategies: Strategy[];
   activeStrategyId: string | null;
+  /** id игр, чьи домены и порты попали в конфиг работающей стратегии */
+  injectedGameIds: string[];
   loading: boolean;
   error: string | null;
   lastScanAt: number | null;
@@ -20,6 +22,10 @@ export interface StrategiesStoreState {
   updateStrategy: (id: string, patch: Partial<Strategy>) => void;
   removeStrategy: (id: string) => void;
   setActiveStrategy: (id: string | null) => void;
+  setInjectedGames: (
+    id: string | null,
+    gameIds: readonly string[] | null
+  ) => void;
   setStatus: (id: string, status: StrategyStatus) => void;
   setPid: (id: string, pid?: number) => void;
   setError: (id: string, error?: string) => void;
@@ -32,6 +38,7 @@ export const useStrategiesStore = create<StrategiesStoreState>()(
   immer((set) => ({
     strategies: [],
     activeStrategyId: null,
+    injectedGameIds: [],
     loading: false,
     error: null,
     lastScanAt: null,
@@ -117,6 +124,11 @@ export const useStrategiesStore = create<StrategiesStoreState>()(
         }
 
         state.activeStrategyId = id;
+      }),
+
+    setInjectedGames: (id, gameIds) =>
+      set((state) => {
+        state.injectedGameIds = id === null ? [] : [...new Set(gameIds)];
       }),
 
     setStatus: (id, status) =>

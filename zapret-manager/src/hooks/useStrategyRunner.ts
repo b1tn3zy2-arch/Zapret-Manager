@@ -46,6 +46,9 @@ export function useStrategyRunner(): UseStrategyRunnerResult {
 
   const setStatus = useStrategiesStore((state) => state.setStatus);
   const setPid = useStrategiesStore((state) => state.setPid);
+  const setInjectedGames = useStrategiesStore(
+    (state) => state.setInjectedGames
+  );
   const setStrategyError = useStrategiesStore((state) => state.setError);
   const addLogs = useLogsStore((state) => state.addLogs);
   const addLog = useLogsStore((state) => state.addLog);
@@ -95,6 +98,7 @@ export function useStrategyRunner(): UseStrategyRunnerResult {
       listen<string>("strategy-stopped", (event) => {
         setStatus(event.payload, "idle");
         setPid(event.payload, undefined);
+        setInjectedGames(event.payload, null);
       })
     );
 
@@ -110,7 +114,7 @@ export function useStrategyRunner(): UseStrategyRunnerResult {
         unlisten();
       }
     };
-  }, [addLogs, setPid, setStatus]);
+  }, [addLogs, setInjectedGames, setPid, setStatus]);
 
   const run = useCallback(
     async (strategyId: string, path: string) => {
@@ -141,6 +145,7 @@ export function useStrategyRunner(): UseStrategyRunnerResult {
 
         setStatus(strategyId, "running");
         setPid(strategyId, result.pid);
+        setInjectedGames(strategyId, result.gamesInjected);
         setLastStrategyId(strategyId);
         void recordStrategyScore(strategyId);
 
@@ -184,7 +189,14 @@ export function useStrategyRunner(): UseStrategyRunnerResult {
         setIsStarting(false);
       }
     },
-    [addLog, setLastStrategyId, setPid, setStatus, setStrategyError]
+    [
+      addLog,
+      setInjectedGames,
+      setLastStrategyId,
+      setPid,
+      setStatus,
+      setStrategyError,
+    ]
   );
 
   const stop = useCallback(
@@ -202,6 +214,7 @@ export function useStrategyRunner(): UseStrategyRunnerResult {
 
         setStatus(strategyId, "idle");
         setPid(strategyId, undefined);
+        setInjectedGames(strategyId, null);
         addLog({
           level: killed > 0 ? "warn" : "info",
           source: "strategy",
@@ -226,7 +239,16 @@ export function useStrategyRunner(): UseStrategyRunnerResult {
         setIsStopping(false);
       }
     },
-    [addLog, autoRestore, engine, hasEnabledGames, restore, setPid, setStatus]
+    [
+      addLog,
+      autoRestore,
+      engine,
+      hasEnabledGames,
+      restore,
+      setInjectedGames,
+      setPid,
+      setStatus,
+    ]
   );
 
   const checkStatus = useCallback(

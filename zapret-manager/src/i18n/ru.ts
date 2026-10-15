@@ -143,6 +143,7 @@ export const ru = {
       "Конфиг стратегии не распознан — запускаю legacy .bat через cmd.exe",
     injectGamesFailed: "Инъекция домен игр не удалась",
     stoppingVpn: "Останавливаю VPN перед запуском стратегии",
+    gameProfileApplying: "Обход перезапускаю с настройками запущенной игры",
     strategyStarted: "Стратегия запущена, PID {pid}",
     launchCancelled: "Запуск отменён: доступ не предоставлен",
     launchFailed: "Не удалось запустить: {error}",

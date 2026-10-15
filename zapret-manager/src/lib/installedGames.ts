@@ -99,6 +99,39 @@ export function gameBypass(
   return settings.find((item) => item.id === game.gameSettingsId);
 }
 
+/**
+ * Профиль обхода для игры: сначала по идентификатору из базы известных игр,
+ * затем по нормализованному названию. Второй путь нужен ручным играм и играм,
+ * которые сканер не сопоставил с базой: без него они запускались вообще без
+ * доменов и портов в обходе.
+ */
+export function findGameProfile(
+  game: InstalledGame,
+  settings: readonly GameSettings[]
+): GameSettings | undefined {
+  const direct = gameBypass(game, settings);
+
+  if (direct !== undefined) {
+    return direct;
+  }
+
+  const name = normalizeGameTitle(game.name);
+
+  if (name === "") {
+    return undefined;
+  }
+
+  return settings.find((item) => normalizeGameTitle(item.name) === name);
+}
+
+function normalizeGameTitle(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9а-яё]+/giu, " ")
+    .replace(/\b(the|a)\b/gu, " ")
+    .trim();
+}
+
 export function isBypassEnabled(
   game: InstalledGame,
   settings: readonly GameSettings[]
