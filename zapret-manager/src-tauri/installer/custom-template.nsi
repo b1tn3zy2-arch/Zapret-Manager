@@ -664,6 +664,10 @@ Section WebView2
 SectionEnd
 
 Section Install
+  ; Без этого установщик при повторной установке пропускает уже существующие
+  ; файлы (в NSIS SetOverwrite по умолчанию выключен) и обновление приложения
+  ; молча оставляет старую сборку на месте.
+  SetOverwrite on
   SetOutPath $INSTDIR
 
   !ifmacrodef NSIS_HOOK_PREINSTALL
