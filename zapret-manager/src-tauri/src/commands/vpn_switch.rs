@@ -19,6 +19,7 @@ use crate::commands::vpn_wireguard::{
 };
 use crate::error::{AppError, AppResult};
 use crate::process_manager::ProcessManager;
+use crate::winapi_helpers::HiddenWindow;
 
 const HANDSHAKE_DEFAULT_SEC: u64 = 15;
 const HANDSHAKE_FRESH_SEC: u64 = 60;
@@ -39,6 +40,7 @@ async fn install_tunnel(config: &Path) -> AppResult<()> {
 
     let output = tokio::process::Command::new(wireguard)
         .args(install_tunnel_arguments(config))
+        .hidden()
         .output()
         .await
         .map_err(|error| AppError::custom(format!("Не удалось запустить WireGuard: {error}")))?;
@@ -60,6 +62,7 @@ async fn remove_tunnel(tunnel: &str) -> AppResult<()> {
 
     let _ = tokio::process::Command::new(wireguard)
         .args(uninstall_tunnel_arguments(tunnel))
+        .hidden()
         .output()
         .await;
 

@@ -455,8 +455,15 @@ export async function mockTauri(
         window as unknown as Record<string, unknown>
       ).__TAURI_EVENT_PLUGIN_INTERNALS__ = eventApi;
 
+      const recorded: { command: string; args?: unknown }[] = [];
+
+      (window as unknown as Record<string, unknown>).__MOCK_INVOKE_LOG__ =
+        recorded;
+
       (window as unknown as Record<string, unknown>).__TAURI_INTERNALS__ = {
         invoke: async (command: string, args?: unknown) => {
+          recorded.push({ command, args });
+
           const handler = handlers[command];
 
           if (handler === undefined) {

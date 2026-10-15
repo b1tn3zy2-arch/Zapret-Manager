@@ -10,7 +10,7 @@ use crate::error::{AppError, AppResult};
 #[cfg(windows)]
 use std::os::windows::process::CommandExt;
 
-const CREATE_NO_WINDOW: u32 = 0x0800_0000;
+use crate::winapi_helpers::CREATE_NO_WINDOW;
 const CORE_DIR: &str = "vpn-core";
 const CORE_EXE: &str = "xray.exe";
 const CONFIG_FILE: &str = "config.json";

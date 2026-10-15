@@ -8,7 +8,7 @@ use crate::constants::WINWS_PROCESS_NAME;
 #[cfg(windows)]
 use std::os::windows::process::CommandExt;
 
-const CREATE_NO_WINDOW: u32 = 0x0800_0000;
+use crate::winapi_helpers::CREATE_NO_WINDOW;
 
 #[cfg(test)]
 pub(crate) static WINWS_TEST_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());

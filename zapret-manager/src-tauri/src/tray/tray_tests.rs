@@ -103,7 +103,6 @@ fn test_event_names_are_distinct() {
         EVENT_CONNECT_VPN,
         EVENT_DISCONNECT_VPN,
         EVENT_CHECK_UPDATES,
-        EVENT_QUIT,
         EVENT_TRAY_LEFT_CLICK,
     ];
     let mut unique = names.to_vec();

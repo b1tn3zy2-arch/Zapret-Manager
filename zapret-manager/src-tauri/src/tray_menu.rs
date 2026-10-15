@@ -1,9 +1,9 @@
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::Once;
+use std::sync::{Mutex, Once};
 use std::time::{Duration, Instant};
 
 use tauri::{
-    AppHandle, Emitter, Manager, PhysicalPosition, Runtime, Window, WindowEvent,
+    AppHandle, Emitter, LogicalSize, Manager, PhysicalPosition, Runtime, Window, WindowEvent,
 };
 use winapi::shared::windef::{HWND, POINT};
 use winapi::um::winuser::{
@@ -17,6 +17,9 @@ pub const EVENT_MENU_CORNER: &str = "tray-menu-corner";
 
 const MENU_WIDTH: f64 = 236.0;
 const MENU_HEIGHT: f64 = 332.0;
+/// Границы, в которые укладывается высота, посчитанная окном меню.
+const MENU_MIN_HEIGHT: f64 = 180.0;
+const MENU_MAX_HEIGHT: f64 = 720.0;
 const CURSOR_GAP: f64 = 10.0;
 const WATCH_INTERVAL_MS: u64 = 60;
 const WARMUP_DELAY_MS: u64 = 2000;
@@ -26,9 +29,47 @@ const SLOW_SHOW_MS: u128 = 100;
 static READY: AtomicBool = AtomicBool::new(false);
 static WATCH_STARTED: Once = Once::new();
 static WARMUP_STARTED: Once = Once::new();
+/// Высота меню, посчитанная окном: пункты списка меняются, и окно обязано
+/// подстраиваться под них. Ноль означает «использовать константный размер».
+static CONTENT_HEIGHT: Mutex<f64> = Mutex::new(0.0);
 
 pub fn mark_ready() {
     READY.store(true, Ordering::SeqCst);
+}
+
+/// Принимает высоту, измеренную в окне меню, и сразу применяет её.
+pub fn set_content_height(height: f64) {
+    if !height.is_finite() {
+        return;
+    }
+
+    let clamped = height.clamp(MENU_MIN_HEIGHT, MENU_MAX_HEIGHT);
+
+    if let Ok(mut slot) = CONTENT_HEIGHT.lock() {
+        if (*slot - clamped).abs() < 0.5 {
+            return;
+        }
+
+        *slot = clamped;
+    }
+}
+
+fn content_height() -> f64 {
+    CONTENT_HEIGHT
+        .lock()
+        .map(|value| *value)
+        .unwrap_or(0.0)
+        .clamp(MENU_MIN_HEIGHT, MENU_MAX_HEIGHT)
+}
+
+fn resolved_height() -> f64 {
+    let measured = content_height();
+
+    if measured > 0.0 {
+        measured
+    } else {
+        MENU_HEIGHT
+    }
 }
 
 pub fn is_ready() -> bool {
@@ -60,8 +101,13 @@ pub fn show<R: Runtime>(app: &AppHandle<R>, cursor: PhysicalPosition<f64>) {
 
     let started = Instant::now();
     let scale = window.scale_factor().unwrap_or(1.0);
+
+    // Размер окна подгоняется под реальное содержимое до позиционирования,
+    // иначе меню показывается с обрезанным низом.
+    let _ = window.set_size(LogicalSize::new(MENU_WIDTH, resolved_height()));
+
     let width = MENU_WIDTH * scale;
-    let height = MENU_HEIGHT * scale;
+    let height = resolved_height() * scale;
 
     let mut x = cursor.x - width + 14.0 * scale;
     let mut y = cursor.y - height - CURSOR_GAP * scale;
@@ -326,5 +372,26 @@ mod tests {
         mark_ready();
 
         assert!(is_ready());
+    }
+
+    #[test]
+    fn test_content_height_clamps_and_applies() {
+        assert!(resolved_height() >= MENU_MIN_HEIGHT);
+
+        set_content_height(409.0);
+        assert!((resolved_height() - 409.0).abs() < 0.5);
+
+        // пункт «Выход» живёт в самом низу списка: обрезанная высота означает
+        // недоступную кнопку выхода, поэтому границы обязаны быть широкими
+        set_content_height(10_000.0);
+        assert!((resolved_height() - MENU_MAX_HEIGHT).abs() < 0.5);
+
+        set_content_height(1.0);
+        assert!((resolved_height() - MENU_MIN_HEIGHT).abs() < 0.5);
+
+        set_content_height(f64::NAN);
+        assert!(resolved_height().is_finite());
+
+        set_content_height(MENU_HEIGHT);
     }
 }

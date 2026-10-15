@@ -27,7 +27,6 @@ pub const EVENT_QUICK_RUN: &str = "tray-quick-run";
 pub const EVENT_CONNECT_VPN: &str = "tray-connect-vpn";
 pub const EVENT_DISCONNECT_VPN: &str = "tray-disconnect-vpn";
 pub const EVENT_CHECK_UPDATES: &str = "tray-check-updates";
-pub const EVENT_QUIT: &str = "tray-quit";
 pub const EVENT_TRAY_LEFT_CLICK: &str = "tray-left-click";
 
 pub const NAVIGATION_EVENTS: [&str; 4] = [

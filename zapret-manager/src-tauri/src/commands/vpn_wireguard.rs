@@ -2,6 +2,7 @@ use std::path::PathBuf;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::error::{AppError, AppResult};
+use crate::winapi_helpers::HiddenWindow;
 
 pub const WIREGUARD_EXE: &str = "wireguard.exe";
 pub const WG_EXE: &str = "wg.exe";
@@ -91,6 +92,7 @@ pub fn installed_tunnels() -> Option<Vec<String>> {
 
     let output = std::process::Command::new(wg)
         .args(["show", "interfaces"])
+        .hidden()
         .output()
         .ok()?;
 
@@ -189,6 +191,7 @@ pub fn parse_wg_show_output(output: &str) -> HandshakeInfo {
 pub async fn query_handshake(wg: &std::path::Path, interface: &str) -> AppResult<HandshakeInfo> {
     let output = tokio::process::Command::new(wg)
         .args(show_arguments(interface))
+        .hidden()
         .output()
         .await
         .map_err(|error| AppError::custom(format!("Не удалось запустить wg.exe: {error}")))?;

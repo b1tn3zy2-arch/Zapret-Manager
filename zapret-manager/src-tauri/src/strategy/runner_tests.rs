@@ -9,7 +9,7 @@ use crate::strategy::config::StrategyConfig;
 #[cfg(windows)]
 use std::os::windows::process::CommandExt;
 
-const CREATE_NO_WINDOW: u32 = 0x0800_0000;
+use crate::winapi_helpers::CREATE_NO_WINDOW;
 
 const SAMPLE_BAT: &str = "@echo off\r\n\
 set \"BIN=%~dp0bin\\\"\r\n\

@@ -2,6 +2,7 @@ use std::path::{Path, PathBuf};
 
 use crate::error::{AppError, AppResult};
 use crate::winapi_helpers::shell_execute_runas;
+use crate::winapi_helpers::HiddenWindow;
 
 pub const RULE_PREFIX: &str = "ZapretManager KillSwitch";
 
@@ -198,6 +199,7 @@ async fn query_default_outbound() -> AppResult<String> {
             "-Command",
             POLICY_QUERY_SCRIPT,
         ])
+        .hidden()
         .output()
         .await
         .map_err(|error| {

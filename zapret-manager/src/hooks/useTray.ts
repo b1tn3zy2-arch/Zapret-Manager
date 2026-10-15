@@ -119,9 +119,6 @@ export function useTray(): UseTrayResult {
           })
           .catch(() => undefined);
       }),
-      listen("tray-quit", () => {
-        void invoke("quit_app").catch(() => undefined);
-      }),
       listen("tray-connect-vpn", () => {
         navigate("settings");
       }),

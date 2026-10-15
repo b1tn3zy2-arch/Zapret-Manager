@@ -27,6 +27,39 @@ use winapi::um::winnt::{
 
 use crate::error::{AppError, AppResult};
 
+/// Флаг «не создавать окно консоли».
+///
+/// Без него каждый запуск консольной утилиты (wg.exe, wireguard.exe,
+/// powershell, taskkill) на долю секунды мелькает чёрным окном поверх всего.
+#[cfg(windows)]
+pub const CREATE_NO_WINDOW: u32 = 0x0800_0000;
+
+/// Единая точка для скрытия окна у дочерних процессов.
+///
+/// Смысл в том, чтобы флаг нельзя было забыть: раньше константа
+/// дублировалась в трёх модулях, и половина вызовов `Command::new` оставалась
+/// без неё — именно это и вызывало мигание консоли раз в 5 секунд.
+#[cfg(windows)]
+pub trait HiddenWindow {
+    fn hidden(&mut self) -> &mut Self;
+}
+
+#[cfg(windows)]
+impl HiddenWindow for std::process::Command {
+    fn hidden(&mut self) -> &mut Self {
+        use std::os::windows::process::CommandExt;
+        self.creation_flags(CREATE_NO_WINDOW)
+    }
+}
+
+#[cfg(windows)]
+impl HiddenWindow for tokio::process::Command {
+    fn hidden(&mut self) -> &mut Self {
+        // у tokio свой собственный метод creation_flags, трейт не нужен
+        self.creation_flags(CREATE_NO_WINDOW)
+    }
+}
+
 const ERROR_CANCELLED: DWORD = 1223;
 const STILL_ACTIVE_CODE: DWORD = 259;
 const SW_HIDE_VALUE: i32 = 0;

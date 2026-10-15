@@ -162,10 +162,59 @@ export default function TrayMenuRoot() {
     });
   }, [isVpn]);
 
+  const frameRef = useRef<HTMLDivElement | null>(null);
+  const shellRef = useRef<HTMLDivElement | null>(null);
+
+  // Окно трея фиксированного размера, а пункт «Выход» находится в самом низу
+  // списка. Без передачи реальной высоты контента он просто обрезался и не
+  // нажимался.
+  //
+  // Замер идёт через ResizeObserver, а не по rAF или useEffect: список меняется
+  // асинхронно (статус стратегии, VPN-строка приходит событием трея), и замер
+  // по кадрам успевал отставать на кадр — окно оставалось на 8-23 px ниже
+  // нужного, то есть «Выход» снова уходил под край.
+  useEffect(() => {
+    const frame = frameRef.current;
+    const shell = shellRef.current;
+
+    if (frame === null || shell === null) {
+      return;
+    }
+
+    const report = () => {
+      const paddingBottom =
+        Number.parseFloat(getComputedStyle(frame).paddingBottom) || 0;
+      const height = Math.ceil(
+        shell.getBoundingClientRect().bottom -
+          frame.getBoundingClientRect().top +
+          paddingBottom
+      );
+
+      if (height > 0) {
+        void invoke("tray_menu_set_height", { height }).catch(() => undefined);
+      }
+    };
+
+    const observer = new ResizeObserver(report);
+
+    observer.observe(shell);
+
+    // ResizeObserver не реагирует на трансформации, поэтому после входной
+    // анимации (масштаб оболочки) размер пересчитывается ещё раз
+    shell.addEventListener("animationend", report);
+    report();
+
+    return () => {
+      observer.disconnect();
+      shell.removeEventListener("animationend", report);
+    };
+  }, [snapshot, isActive, isVpn]);
+
   return (
     <>
-      <div className="flex h-full w-full p-2">
+      <div ref={frameRef} className="flex h-full w-full items-start p-2">
         <div
+          ref={shellRef}
           key={animationKey}
           data-corner={corner}
           className={cn(

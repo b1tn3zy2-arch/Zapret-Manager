@@ -41,9 +41,12 @@ pub fn toggle_tray_window(app: tauri::AppHandle) {
     crate::tray::toggle_window(&app);
 }
 
-#[tauri::command]
-pub async fn quit_app(app: tauri::AppHandle) -> AppResult<()> {
-    crate::window_behavior::begin_quit(&app);
+/// Единая процедура завершения приложения.
+///
+/// Раньше пункт «Выход» в меню трея выходил через app.exit(0) напрямую и не
+/// трогал процессы: winws.exe оставались висеть после закрытия приложения.
+pub async fn shutdown(app: &tauri::AppHandle) -> AppResult<()> {
+    crate::window_behavior::begin_quit(app);
 
     let state = app.state::<crate::process_manager::ProcessManager>();
 
@@ -51,10 +54,15 @@ pub async fn quit_app(app: tauri::AppHandle) -> AppResult<()> {
 
     let killed = crate::commands::runner::kill_winws_for_shutdown().await;
 
-    tracing::info!("Выход из трея: остановлено процессов winws.exe {killed}");
+    tracing::info!("Выход из приложения: остановлено процессов winws.exe {killed}");
     app.exit(0);
 
     Ok(())
+}
+
+#[tauri::command]
+pub async fn quit_app(app: tauri::AppHandle) -> AppResult<()> {
+    shutdown(&app).await
 }
 
 #[tauri::command]
@@ -112,8 +120,16 @@ pub fn tray_menu_ready() {
     crate::tray_menu::mark_ready();
 }
 
+/// Сообщение от окна трея о реальной высоте меню: списокitems меняется
+/// (VPN-сервер, статус стратегии), и окно обязано подстроиться, иначе нижние
+/// пункты вместе с «Выход» снова окажутся за краем.
 #[tauri::command]
-pub fn tray_menu_action(app: tauri::AppHandle, action: String) -> AppResult<()> {
+pub fn tray_menu_set_height(height: f64) {
+    crate::tray_menu::set_content_height(height);
+}
+
+#[tauri::command]
+pub async fn tray_menu_action(app: tauri::AppHandle, action: String) -> AppResult<()> {
     crate::tray_menu::hide(&app);
 
     match action.as_str() {
@@ -155,12 +171,7 @@ pub fn tray_menu_action(app: tauri::AppHandle, action: String) -> AppResult<()> 
 
             Ok(())
         }
-        "quit" => {
-            crate::window_behavior::begin_quit(&app);
-            app.exit(0);
-
-            Ok(())
-        }
+        "quit" => shutdown(&app).await,
         other => Err(AppError::custom(format!("Неизвестное действие меню: {other}"))),
     }
 }
