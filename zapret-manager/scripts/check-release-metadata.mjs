@@ -1,4 +1,4 @@
-import { readFileSync, existsSync } from "node:fs";
+import { readFileSync, existsSync, statSync, readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -78,6 +78,49 @@ for (const [name, content] of [
 if (warnings.length > 0) {
   for (const warning of warnings) {
     console.warn(`Предупреждение: ${warning}`);
+  }
+}
+
+/**
+ * Отдаваемые файлы в release/ не должны быть старее свежей сборки.
+ *
+ * Раньше каталог наполнялся отдельной командой release:artifacts, и её легко
+ * забыть вызвать: сборка собирала новые установщики в
+ * src-tauri/target/release/bundle, а release/ оставался с прошлого раза.
+ * Установка такого установщика молча оставляла старую сборку, и правки
+ * в приложении не появлялись вообще.
+ */
+const bundleToStaged = [
+  ["src-tauri/target/release/bundle/nsis", "release"],
+  ["src-tauri/target/release/bundle/msi", "release"],
+];
+
+for (const [bundleDir, stageDir] of bundleToStaged) {
+  const bundlePath = join(root, bundleDir);
+  const stagePath = join(root, stageDir);
+
+  if (!existsSync(bundlePath) || !existsSync(stagePath)) {
+    continue;
+  }
+
+  for (const name of readdirSync(bundlePath)) {
+    if (!/\.(exe|msi)$/i.test(name)) {
+      continue;
+    }
+
+    const fresh = statSync(join(bundlePath, name)).mtimeMs;
+    const stagedPath = join(stagePath, name);
+
+    if (!existsSync(stagedPath)) {
+      problems.push(`${name} собран, но не отдан в release/ — запусти release:artifacts`);
+      continue;
+    }
+
+    if (statSync(stagedPath).mtimeMs < fresh) {
+      problems.push(
+        `${name} в release/ старее свежей сборки — запусти release:artifacts, иначе установится старый битд`
+      );
+    }
   }
 }
 
