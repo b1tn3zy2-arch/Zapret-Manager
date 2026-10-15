@@ -208,10 +208,26 @@ export const useSettingsStore = create<SettingsStoreState>()(
         try {
           const fromFile = await readSettingsFile();
 
-          set((state) => {
-            if (fromFile !== null) {
-              state.settings = mergeSettings(fromFile);
+          if (fromFile !== null) {
+            const merged = mergeSettings(fromFile);
+
+            set((state) => {
+              state.settings = merged;
+              state.loaded = true;
+              state.loading = false;
+            });
+
+            // Склейка с пресетами должна попасть и в файл, иначе правка живёт
+            // только в памяти до первого автосохранения. Переписываем один раз
+            // и молча: это миграция, а не ошибка пользователя.
+            if (JSON.stringify(merged.games) !== JSON.stringify(fromFile.games)) {
+              await writeSettingsFile(merged).catch(() => undefined);
             }
+
+            return true;
+          }
+
+          set((state) => {
             state.loaded = true;
             state.loading = false;
           });

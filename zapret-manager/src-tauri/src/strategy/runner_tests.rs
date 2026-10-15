@@ -34,6 +34,7 @@ fn game() -> GameRequest {
         ],
         ips: Vec::new(),
         ports: vec![7780],
+        id: Some("outlast-trials".to_string()),
     }
 }
 

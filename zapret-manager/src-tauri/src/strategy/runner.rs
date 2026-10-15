@@ -24,6 +24,10 @@ pub struct GameRequest {
     pub name: String,
     pub domains: Vec<String>,
     pub ips: Vec<String>,
+    /// id пресета из настроек: попадает только в лог, чтобы было видно,
+    /// профиль какой именно игры подставлен в конфиг winws
+    #[serde(default)]
+    pub id: Option<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -83,8 +87,20 @@ pub fn prepare_run(
     let (domains, ips, ports) = flatten_games(games);
 
     if !games.is_empty() {
-        let names: Vec<&str> = games.iter().map(|game| game.name.as_str()).collect();
+        let names: Vec<String> = games
+            .iter()
+            .map(|game| match game.id.as_deref() {
+                Some(id) if !id.is_empty() => format!("{} [{}]", game.name, id),
+                _ => game.name.clone(),
+            })
+            .collect();
         tracing::info!("Инъекция игр: {}", names.join(", "));
+        tracing::info!(
+            "Игры в конфиге: {} доменов, {} портов (udp: {:?})",
+            domains.len(),
+            ports.len(),
+            ports
+        );
     }
 
     let games_payload = games_hostlist::generate(
