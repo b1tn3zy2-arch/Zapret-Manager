@@ -124,8 +124,8 @@ pub fn tray_menu_ready() {
 /// (VPN-сервер, статус стратегии), и окно обязано подстроиться, иначе нижние
 /// пункты вместе с «Выход» снова окажутся за краем.
 #[tauri::command]
-pub fn tray_menu_set_height(height: f64) {
-    crate::tray_menu::set_content_height(height);
+pub fn tray_menu_set_height(app: tauri::AppHandle, height: f64) {
+    crate::tray_menu::set_content_height(&app, height);
 }
 
 #[tauri::command]

@@ -6,6 +6,7 @@ import { Button, Tooltip } from "@/components/ui";
 export interface MonitorControlsProps {
   isPaused: boolean;
   isSaving: boolean;
+  hint: string;
   onTogglePause: () => void;
   onSnapshot: () => void;
   onClear: () => void;
@@ -14,6 +15,7 @@ export interface MonitorControlsProps {
 function MonitorControls({
   isPaused,
   isSaving,
+  hint,
   onTogglePause,
   onSnapshot,
   onClear,
@@ -21,20 +23,22 @@ function MonitorControls({
   const { t } = useI18n();
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <Button
-        size="sm"
-        variant={isPaused ? "primary" : "secondary"}
-        onClick={onTogglePause}
-        icon={
-          isPaused ? (
-            <Play aria-hidden="true" className="size-3.5" strokeWidth={2} />
-          ) : (
-            <Pause aria-hidden="true" className="size-3.5" strokeWidth={2} />
-          )
-        }
-      >
-        {isPaused ? t("common.resume") : t("common.pause")}
-      </Button>
+      <Tooltip content={hint}>
+        <Button
+          size="sm"
+          variant={isPaused ? "primary" : "secondary"}
+          onClick={onTogglePause}
+          icon={
+            isPaused ? (
+              <Play aria-hidden="true" className="size-3.5" strokeWidth={2} />
+            ) : (
+              <Pause aria-hidden="true" className="size-3.5" strokeWidth={2} />
+            )
+          }
+        >
+          {isPaused ? t("common.resume") : t("common.pause")}
+        </Button>
+      </Tooltip>
 
       <Tooltip content={t("monitor.controls.snapshot")}>
         <Button

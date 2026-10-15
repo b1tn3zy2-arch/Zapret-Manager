@@ -16,9 +16,10 @@ import { useSettingsStore } from "@/stores/useSettingsStore";
 
 const ACTIVE_INDICATOR_ID = "sidebar-active-indicator";
 const SIDEBAR_TRANSITION = {
-  duration: 0.25,
+  duration: 0.28,
   ease: [0.16, 1, 0.3, 1],
 } as const;
+const INDICATOR_STATIC = { duration: 0 } as const;
 
 interface NavButtonProps {
   readonly label: string;
@@ -27,6 +28,7 @@ interface NavButtonProps {
   readonly collapsed: boolean;
   readonly onSelect: () => void;
   readonly showUpdateBadge?: boolean | undefined;
+  readonly reducedMotion: boolean;
 }
 
 function NavButtonImpl({
@@ -36,6 +38,7 @@ function NavButtonImpl({
   collapsed,
   onSelect,
   showUpdateBadge = false,
+  reducedMotion,
 }: NavButtonProps) {
   const bloom = useBloom("primary", -1);
 
@@ -60,11 +63,15 @@ function NavButtonImpl({
         {active ? (
           <motion.span
             layoutId={ACTIVE_INDICATOR_ID}
-            transition={SIDEBAR_TRANSITION}
+            transition={reducedMotion ? INDICATOR_STATIC : SIDEBAR_TRANSITION}
             {...(bloom.boxShadow === ""
               ? {}
               : { style: { boxShadow: bloom.boxShadow } })}
-            className="bg-accent-primary absolute top-1/2 left-0 h-6 w-[3px] -translate-y-1/2 rounded-r-full shadow-[0_0_8px_var(--color-accent-primary)]"
+            // Центрирование только через раскладку: Tailwind-класс
+            // -translate-y-1/2 выставляет CSS-свойство translate, а framer
+            // двигает индикатор через transform. Вместе они давали двойной
+            // сдвиг — зелёная полоска прыгала между пунктами при переключении.
+            className="bg-accent-primary absolute inset-y-0 left-0 my-auto h-6 w-[3px] rounded-r-full shadow-[0_0_8px_var(--color-accent-primary)]"
           />
         ) : null}
 
@@ -196,6 +203,7 @@ function Sidebar() {
               collapsed={collapsed}
               onSelect={selectHandlers[item.route]}
               showUpdateBadge={item.route === ROUTES.settings}
+              reducedMotion={prefersReducedMotion}
             />
           ))}
         </ul>

@@ -775,7 +775,14 @@ export const en = {
       aria: "Chart: {label}, {value}",
       frozen: "Paused — chart is frozen",
     },
+    totals: "Session totals",
+    live: "Now",
+    speed: {
+      in: "inbound",
+      out: "outbound",
+    },
     ping: {
+      section: "Service latency",
       aria: "Latency to service {label}",
       waiting: "waiting for response…",
       measurementsOne: "{count} sample per minute",

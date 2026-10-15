@@ -47,20 +47,62 @@ pub fn mark_ready() {
     READY.store(true, Ordering::SeqCst);
 }
 
-/// Принимает высоту, измеренную в окне меню, и сразу применяет её.
-pub fn set_content_height(height: f64) {
-    if !height.is_finite() {
+/// Принимает высоту, измеренную в окне меню.
+///
+/// Высота запоминается, но размер подвижного окна меняется только когда меню
+/// не видно. Раньше размер применялся сразу, и окно подстраивалось уже
+/// открытым: содержимое измеряется после показа, поэтому меню дёргалось и
+/// меняло высоту прямо на глазах.
+pub fn set_content_height<R: Runtime>(app: &AppHandle<R>, height: f64) {
+    let Some(clamped) = store_content_height(height) else {
+        return;
+    };
+
+    let Some(window) = menu_window(app) else {
+        return;
+    };
+
+    if window.is_visible().unwrap_or(false) {
         return;
     }
 
+    apply_height(&window, clamped);
+}
+
+/// Запоминает измеренную высоту содержимого и возвращает её, если значение
+/// изменилось.
+fn store_content_height(height: f64) -> Option<f64> {
+    if !height.is_finite() {
+        return None;
+    }
+
     let clamped = height.clamp(MENU_MIN_HEIGHT, MENU_MAX_HEIGHT);
+    let mut slot = CONTENT_HEIGHT.lock().ok()?;
 
-    if let Ok(mut slot) = CONTENT_HEIGHT.lock() {
-        if (*slot - clamped).abs() < 0.5 {
-            return;
-        }
+    if (*slot - clamped).abs() < 0.5 {
+        return None;
+    }
 
-        *slot = clamped;
+    *slot = clamped;
+
+    Some(clamped)
+}
+
+/// Приводит размер окна к измеренной высоте содержимого.
+fn apply_height<R: Runtime>(window: &tauri::WebviewWindow<R>, height: f64) {
+    let changed = APPLIED_HEIGHT
+        .lock()
+        .map(|current| (*current - height).abs() > 0.5)
+        .unwrap_or(true);
+
+    if !changed {
+        return;
+    }
+
+    let _ = window.set_size(LogicalSize::new(MENU_WIDTH, height));
+
+    if let Ok(mut applied) = APPLIED_HEIGHT.lock() {
+        *applied = height;
     }
 }
 
@@ -121,23 +163,11 @@ pub fn show<R: Runtime>(app: &AppHandle<R>, cursor: PhysicalPosition<f64>) {
         .unwrap_or_else(|| window.scale_factor().unwrap_or(1.0));
 
     // Размер окна подгоняется под реальное содержимое до позиционирования,
-    // иначе меню показывается с обрезанным низом. Меняем размер только когда
-    // высота действительно другая: лишний set_size приводит к заметному
-    // пересозданию окна, и меню открывается рывком.
+    // иначе меню показывается с обрезанным низом. Пока окно скрыто, размер
+    // обновляется свободно; видимое окно не трогаем — пересоздание и
+    // перерисовка видимого меню читаются как рывок.
     let target_height = resolved_height();
-    let height_changed = APPLIED_HEIGHT
-        .lock()
-        .ok()
-        .map(|current| (*current - target_height).abs() > 0.5)
-        .unwrap_or(true);
-
-    if height_changed {
-        let _ = window.set_size(LogicalSize::new(MENU_WIDTH, target_height));
-
-        if let Ok(mut applied) = APPLIED_HEIGHT.lock() {
-            *applied = target_height;
-        }
-    }
+    apply_height(&window, target_height);
 
     let width = MENU_WIDTH * scale;
     let height = target_height * scale;
@@ -465,21 +495,21 @@ mod tests {
     fn test_content_height_clamps_and_applies() {
         assert!(resolved_height() >= MENU_MIN_HEIGHT);
 
-        set_content_height(409.0);
+        store_content_height(409.0);
         assert!((resolved_height() - 409.0).abs() < 0.5);
 
         // пункт «Выход» живёт в самом низу списка: обрезанная высота означает
         // недоступную кнопку выхода, поэтому границы обязаны быть широкими
-        set_content_height(10_000.0);
+        store_content_height(10_000.0);
         assert!((resolved_height() - MENU_MAX_HEIGHT).abs() < 0.5);
 
-        set_content_height(1.0);
+        store_content_height(1.0);
         assert!((resolved_height() - MENU_MIN_HEIGHT).abs() < 0.5);
 
-        set_content_height(f64::NAN);
+        store_content_height(f64::NAN);
         assert!(resolved_height().is_finite());
 
-        set_content_height(MENU_HEIGHT);
+        store_content_height(MENU_HEIGHT);
     }
 
     #[test]

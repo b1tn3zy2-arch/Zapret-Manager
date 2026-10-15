@@ -18,6 +18,11 @@ export interface PingSparklineProps {
   height?: number;
   capacity?: number;
   className?: string;
+  /**
+   * Показывать заглушку «нет данных». В компактных чипах монитора она
+   * перекрывала саму строку и читалась как ошибка интерфейса.
+   */
+  showEmptyState?: boolean;
 }
 
 const ENDPOINT_RADIUS = 2.6;
@@ -49,6 +54,7 @@ function PingSparkline({
   height = SPARKLINE_HEIGHT,
   capacity = PING_HISTORY_SIZE,
   className,
+  showEmptyState = true,
 }: PingSparklineProps) {
   const { t } = useI18n();
   const { reduced: reducedMotion } = useMotionPreference();
@@ -213,7 +219,7 @@ function PingSparkline({
     <div className={cn("relative", className)} style={{ height }}>
       <canvas ref={canvasRef} aria-hidden="true" className="block size-full" />
 
-      {hasData ? null : (
+      {hasData || !showEmptyState ? null : (
         <div className="border-glass-border absolute inset-0 flex items-center justify-center rounded border border-dashed">
           <span className="text-text-tertiary text-[10px]">
             {t("common.noData")}

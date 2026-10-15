@@ -77,7 +77,8 @@ export default function TrayMenuRoot() {
   const { t } = useI18n();
   const [snapshot, setSnapshot] = useState<TraySnapshot | null>(null);
   const [corner, setCorner] = useState("top-right");
-  const [animationKey, setAnimationKey] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const animationFrame = useRef<number | undefined>(undefined);
   const blurTimer = useRef<number | undefined>(undefined);
 
   useEffect(() => {
@@ -87,7 +88,17 @@ export default function TrayMenuRoot() {
 
     void listen<TraySnapshot>("tray-menu-open", (event) => {
       setSnapshot(event.payload);
-      setAnimationKey((value) => value + 1);
+
+      // Анимация входа перезапускается сменой флага, а не пересозданием
+      // меню: key remount пересобирал DOM, ResizeObserver заново измерял
+      // высоту, и уже открытое окно подстраивалось на глазах.
+      setIsAnimating(false);
+      cancelAnimationFrame(animationFrame.current ?? 0);
+      animationFrame.current = requestAnimationFrame(() => {
+        animationFrame.current = requestAnimationFrame(() => {
+          setIsAnimating(true);
+        });
+      });
     }).then((stop) => {
       unlisteners.push(stop);
     });
@@ -215,8 +226,8 @@ export default function TrayMenuRoot() {
       <div ref={frameRef} className="flex h-full w-full items-start p-2">
         <div
           ref={shellRef}
-          key={animationKey}
           data-corner={corner}
+          data-animating={isAnimating ? "true" : "false"}
           className={cn(
             "tray-menu-shell border-glass-border bg-bg-secondary/95 flex w-full flex-col",
             "rounded-lg border p-1.5 shadow-2xl backdrop-blur-xl"

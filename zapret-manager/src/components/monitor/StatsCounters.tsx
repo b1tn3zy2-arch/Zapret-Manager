@@ -12,7 +12,7 @@ export interface StatsCountersProps {
   stats: NetworkStats | null;
 }
 
-interface CounterProps {
+interface StatProps {
   icon: LucideIcon;
   label: string;
   value: number;
@@ -20,58 +20,68 @@ interface CounterProps {
   tone: string;
 }
 
-function Counter({ icon: Icon, label, value, format, tone }: CounterProps) {
+function Stat({ icon: Icon, label, value, format, tone }: StatProps) {
   return (
-    <GlassPanel padding="md" className="flex flex-col gap-1">
-      <span className={`flex items-center gap-2 ${tone}`}>
-        <Icon aria-hidden="true" className="size-4" strokeWidth={2} />
+    <div className="flex flex-col gap-1">
+      <dt className="text-text-tertiary flex items-center gap-1.5 text-xs">
+        <Icon aria-hidden="true" className="size-3.5" strokeWidth={2} />
+        {label}
+      </dt>
+      <dd>
         <AnimatedNumber
           value={value}
           duration={MONITOR_COUNT_UP_DURATION_MS}
           format={format}
-          className="text-2xl font-bold tabular-nums"
+          className={`text-lg leading-none font-semibold tabular-nums ${tone}`}
         />
-      </span>
-      <span className="text-text-secondary text-xs">{label}</span>
-    </GlassPanel>
+      </dd>
+    </div>
   );
 }
 
+/**
+ * Итоги сессии — компактной полосой в одну панель.
+ *
+ * Раньше это были четыре отдельные крупные карточки: они занимали целый экран
+ * ради четырёх чисел и визуально спорили с графиками за внимание.
+ */
 function StatsCounters({ stats }: StatsCountersProps) {
   const { t } = useI18n();
   const packets = (stats?.packetsIn ?? 0) + (stats?.packetsOut ?? 0);
 
   return (
-    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-      <Counter
-        icon={ArrowDown}
-        label={t("monitor.counters.downloaded")}
-        value={stats?.bytesIn ?? 0}
-        format={formatBytes}
-        tone="text-accent-primary"
-      />
-      <Counter
-        icon={ArrowUp}
-        label={t("monitor.counters.uploaded")}
-        value={stats?.bytesOut ?? 0}
-        format={formatBytes}
-        tone="text-accent-secondary"
-      />
-      <Counter
-        icon={Package}
-        label={t("monitor.counters.packets")}
-        value={packets}
-        format={formatCount}
-        tone="text-text-primary"
-      />
-      <Counter
-        icon={Network}
-        label={t("monitor.counters.connections")}
-        value={stats?.connections ?? 0}
-        format={(value) => String(Math.round(value))}
-        tone="text-accent-secondary"
-      />
-    </div>
+    <GlassPanel padding="md">
+      <dl className="grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-4">
+        <Stat
+          icon={ArrowDown}
+          label={t("monitor.counters.downloaded")}
+          value={stats?.bytesIn ?? 0}
+          format={formatBytes}
+          tone="text-accent-primary"
+        />
+        <Stat
+          icon={ArrowUp}
+          label={t("monitor.counters.uploaded")}
+          value={stats?.bytesOut ?? 0}
+          format={formatBytes}
+          tone="text-accent-secondary"
+        />
+        <Stat
+          icon={Package}
+          label={t("monitor.counters.packets")}
+          value={packets}
+          format={formatCount}
+          tone="text-text-primary"
+        />
+        <Stat
+          icon={Network}
+          label={t("monitor.counters.connections")}
+          value={stats?.connections ?? 0}
+          format={(value) => String(Math.round(value))}
+          tone="text-text-primary"
+        />
+      </dl>
+    </GlassPanel>
   );
 }
 

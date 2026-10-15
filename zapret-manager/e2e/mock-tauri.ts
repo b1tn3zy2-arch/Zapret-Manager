@@ -5,6 +5,11 @@ export interface MockOptions {
   readonly available?: boolean;
   readonly vpnInstalled?: boolean;
   readonly firstRun?: boolean;
+  /**
+   * Синтетический сетевой трафик: монитор обязан показывать реальные цифры
+   * из событий, а не нули. Без этого метрики страницы нечем было проверить.
+   */
+  readonly networkStats?: boolean;
 }
 
 export const MOCK_FOLDER = "C:\\zapret-e2e\\strategies";
@@ -17,9 +22,16 @@ export async function mockTauri(
   const available = options.available ?? false;
   const vpnInstalled = options.vpnInstalled ?? true;
   const firstRun = options.firstRun ?? false;
+  const networkStats = options.networkStats ?? false;
 
   await page.addInitScript(
-    ({ strategiesFolder, updateAvailable, wireguard, firstRunFlag }) => {
+    ({
+      strategiesFolder,
+      updateAvailable,
+      wireguard,
+      firstRunFlag,
+      networkStats,
+    }) => {
       const listeners = new Map<
         number,
         { event: string; handler: (event: unknown) => void }
@@ -27,6 +39,29 @@ export async function mockTauri(
       /** колбэки из transformCallback: привязываются к событию позже */
       const callbacks = new Map<number, (event: unknown) => void>();
       let nextListenerId = 1;
+
+      let networkTimer: number | null = null;
+
+      const stopNetworkTimer = (): void => {
+        if (networkTimer !== null) {
+          window.clearInterval(networkTimer);
+          networkTimer = null;
+        }
+      };
+
+      const dispatch = (event: string, payload: unknown): void => {
+        for (const entry of listeners.values()) {
+          if (entry.event !== event) {
+            continue;
+          }
+
+          entry.handler({
+            event: { id: 1, event, windowLabel: "main" },
+            id: 1,
+            payload,
+          });
+        }
+      };
 
       const handlers: Record<string, (args: unknown) => unknown> = {
         scan_strategies: () =>
@@ -211,8 +246,30 @@ export async function mockTauri(
           ping: [20, 25, 22],
           labels: ["10:00", "10:01", "10:02"],
         }),
-        start_monitoring: () => true,
-        stop_monitoring: () => true,
+        start_monitoring: () => {
+          if (networkStats) {
+            stopNetworkTimer();
+            networkTimer = window.setInterval(() => {
+              dispatch("network-stats", {
+                bytesIn: 5_242_880,
+                bytesOut: 1_048_576,
+                speedIn: 102_400,
+                speedOut: 51_200,
+                packetsIn: 4000,
+                packetsOut: 2000,
+                connections: 42,
+                timestamp: Date.now(),
+              });
+            }, 50);
+          }
+
+          return true;
+        },
+        stop_monitoring: () => {
+          stopNetworkTimer();
+
+          return true;
+        },
         is_monitoring: () => false,
         fetch_network_info: () => ({
           ip: "203.0.113.10",
@@ -556,6 +613,7 @@ export async function mockTauri(
       updateAvailable: available,
       wireguard: vpnInstalled,
       firstRunFlag: firstRun,
+      networkStats,
     }
   );
 }

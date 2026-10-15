@@ -95,6 +95,51 @@ test.describe("Меню трея", () => {
     expect(reportedHeight).toBeGreaterThanOrEqual(contentBottom);
   });
 
+  test("меню не пересоздаётся при каждом открытии", async ({ page }) => {
+    // Раньше на каждое открытие менялся key оболочки, и всё меню пересоздавалось:
+    // анимация начиналась заново, ResizeObserver заново измерял высоту, и уже
+    // открытое окно подстраивалось на глазах — отсюда рывок.
+    await bootstrap(page);
+    await page.goto("/?view=tray");
+    await waitForAnimationsSettled(page);
+    await expect(page.locator(".tray-menu-shell")).toBeVisible();
+
+    await page.evaluate(() => {
+      const shell = document.querySelector(".tray-menu-shell") as
+        (Element & { __probe?: number }) | null;
+
+      if (shell !== null) {
+        shell.__probe = 1;
+      }
+    });
+
+    await page.evaluate(() => {
+      const internals = (window as unknown as Record<string, unknown>)
+        .__TAURI_EVENT_PLUGIN_INTERNALS__ as
+        | { emit: (event: string, payload?: unknown) => Promise<null> }
+        | undefined;
+
+      return internals?.emit("tray-menu-open", {
+        state: "connected",
+        activeStrategy: "Fake TLS Auto",
+        vpnName: null,
+      });
+    });
+
+    await page.waitForTimeout(400);
+
+    const survived = await page.evaluate(() => {
+      const shell = document.querySelector(".tray-menu-shell") as
+        (Element & { __probe?: number }) | null;
+
+      return shell?.__probe === 1;
+    });
+
+    expect(survived).toBe(true);
+
+    await expect(page.getByRole("button", { name: "Выход" })).toBeVisible();
+  });
+
   test("клик по пункту не роняет окно меню", async ({ page }) => {
     const collector = await bootstrap(page);
     await page.goto("/?view=tray");

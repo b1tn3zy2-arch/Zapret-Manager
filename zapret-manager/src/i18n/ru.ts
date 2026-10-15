@@ -777,7 +777,14 @@ export const ru = {
       aria: "График: {label}, {value}",
       frozen: "Пауза — график заморожен",
     },
+    totals: "Итого за сессию",
+    live: "Сейчас",
+    speed: {
+      in: "входящий",
+      out: "исходящий",
+    },
     ping: {
+      section: "Пинг до сервисов",
       aria: "Пинг до сервиса {label}",
       waiting: "ожидание ответа…",
       measurementsOne: "{count} замер за минуту",

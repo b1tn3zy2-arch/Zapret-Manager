@@ -80,37 +80,38 @@ export default function Monitor() {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="flex flex-col gap-6"
+      className="flex flex-col gap-4"
     >
-      <motion.header variants={itemVariants} className="flex flex-col gap-2">
-        <Heading level={1}>{t("monitor.title")}</Heading>
-        <Text variant="body" size="lg" className="text-text-secondary">
-          {t("monitor.subtitle")}
-        </Text>
+      <motion.header
+        variants={itemVariants}
+        className="flex flex-wrap items-start justify-between gap-3"
+      >
+        <div className="flex flex-col gap-1">
+          <Heading level={1}>{t("monitor.title")}</Heading>
+          <Text variant="body" size="lg" className="text-text-secondary">
+            {t("monitor.subtitle")}
+          </Text>
+        </div>
+
+        <MonitorControls
+          isPaused={isPaused}
+          isSaving={isSaving}
+          hint={t("monitor.hint")}
+          onTogglePause={togglePause}
+          onSnapshot={() => {
+            void handleSnapshot();
+          }}
+          onClear={clearBuffer}
+        />
       </motion.header>
 
-      <motion.div variants={itemVariants} className="flex flex-col gap-3">
+      <motion.div variants={itemVariants} className="flex flex-col gap-4">
         <TrafficStatus
           stats={stats}
           isPaused={isPaused}
           error={error}
           activeStrategy={activeStrategy}
         />
-
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <MonitorControls
-            isPaused={isPaused}
-            isSaving={isSaving}
-            onTogglePause={togglePause}
-            onSnapshot={() => {
-              void handleSnapshot();
-            }}
-            onClear={clearBuffer}
-          />
-          <Text variant="caption" size="sm" className="text-text-tertiary">
-            {t("monitor.hint")}
-          </Text>
-        </div>
 
         <StatsCounters stats={stats} />
       </motion.div>
