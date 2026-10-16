@@ -199,6 +199,35 @@ describe("ServerCard", () => {
     expect(screen.getByAltText("NL")).toBeTruthy();
   });
 
+  // Сервер из хранилища может достаться без полей транспорта и шифрования:
+  // жёсткое обращение к ним роняло весь интерфейс при переходе в VPN.
+  it("не падает на сервере без полей транспорта", () => {
+    const legacy = {
+      id: "srv_old",
+      name: "Старый",
+      protocol: "vless",
+      host: "old.example.com",
+      port: 443,
+      link: "vless://uuid@old.example.com:443#Old",
+    } as unknown as SubscriptionServer;
+
+    render(
+      <div role="list">
+        <ServerCard
+          server={legacy}
+          isActive={false}
+          ping={null}
+          onSelect={vi.fn()}
+          onRemove={vi.fn()}
+        />
+      </div>
+    );
+
+    expect(screen.getByText("Старый")).toBeTruthy();
+    expect(screen.getByText("vless")).toBeTruthy();
+    expect(screen.getByText("n/a")).toBeTruthy();
+  });
+
   it("открывает меню действий и удаляет сервер", async () => {
     const onRemove = vi.fn();
     const onSelect = vi.fn();

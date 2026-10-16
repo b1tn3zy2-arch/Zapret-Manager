@@ -195,8 +195,11 @@ function ServerCardImpl({
 }: ServerCardProps) {
   const { t } = useI18n();
   const country = guessCountryCode(server.host);
-  const transport = server.transport.trim().toUpperCase();
-  const security = server.security.trim().toUpperCase();
+  // Поля transport и security появились вместе с тегами в строке. Серверы,
+  // сохранённые прошлой сборкой, лежат в хранилище без них, и жёсткое
+  // обращение роняло весь интерфейс при переходе в режим VPN.
+  const transport = (server.transport ?? "").trim().toUpperCase();
+  const security = (server.security ?? "").trim().toUpperCase();
   const meta = [transport, security]
     .filter((value) => value !== "")
     .join(" · ");

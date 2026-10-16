@@ -28,6 +28,46 @@ export interface VpnCoreStoreState {
   setError: (value: string | null) => void;
 }
 
+interface PersistedVpnCoreState {
+  subscriptionUrl: string;
+  servers: SubscriptionServer[];
+  hiddenServerIds: string[];
+  activeServerId: string | null;
+}
+
+/**
+ * Списки, сохранённые прошлой сборкой, не содержат полей транспорта и
+ * шифрования: их добавили вместе с тегами в строке сервера. Такие записи
+ * выбрасываются, иначе список ломал интерфейс при переходе в режим VPN.
+ */
+export function migratePersistedState(
+  persisted: Partial<PersistedVpnCoreState> | undefined
+): PersistedVpnCoreState | undefined {
+  if (persisted === undefined || persisted.servers === undefined) {
+    return persisted as PersistedVpnCoreState | undefined;
+  }
+
+  const servers = (persisted.servers ?? []).filter(
+    (server) =>
+      typeof server?.transport === "string" &&
+      typeof server?.security === "string"
+  );
+  const activeServerId = servers.some(
+    (server) => server.id === persisted.activeServerId
+  )
+    ? (persisted.activeServerId ?? null)
+    : null;
+
+  return {
+    subscriptionUrl: persisted.subscriptionUrl ?? "",
+    servers,
+    activeServerId,
+    hiddenServerIds: (persisted.hiddenServerIds ?? []).filter((id) =>
+      servers.some((server) => server.id === id)
+    ),
+  };
+}
+
 export const useVpnCoreStore = create<VpnCoreStoreState>()(
   persist(
     (set) => ({
@@ -74,12 +114,23 @@ export const useVpnCoreStore = create<VpnCoreStoreState>()(
     }),
     {
       name: "zapret-manager:vpn-core",
+      version: 2,
       partialize: (state) => ({
         subscriptionUrl: state.subscriptionUrl,
         servers: state.servers,
         hiddenServerIds: state.hiddenServerIds,
         activeServerId: state.activeServerId,
       }),
+      /**
+       * Списки, сохранённые прошлой сборкой, не содержат полей транспорта и
+       * шифрования: их добавили вместе с тегами в строке сервера. Такие записи
+       * выбрасываются, чтобы список не ломал интерфейс и обновился из подписки
+       * целиком.
+       */
+      migrate: (persisted) =>
+        migratePersistedState(
+          persisted as Partial<PersistedVpnCoreState> | undefined
+        ),
     }
   )
 );

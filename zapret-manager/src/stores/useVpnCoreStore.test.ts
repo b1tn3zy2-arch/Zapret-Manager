@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { useVpnCoreStore } from "@/stores/useVpnCoreStore";
+import {
+  migratePersistedState,
+  useVpnCoreStore,
+} from "@/stores/useVpnCoreStore";
 import type { SubscriptionServer } from "@/types";
 
 function server(id: string): SubscriptionServer {
@@ -74,5 +77,46 @@ describe("useVpnCoreStore: удаление серверов", () => {
     useVpnCoreStore.getState().setServers([server("a"), server("b")]);
 
     expect(useVpnCoreStore.getState().activeServerId).toBe("b");
+  });
+});
+
+describe("migratePersistedState", () => {
+  // Серверы, сохранённые прошлой сборкой, не содержат полей транспорта и
+  // шифрования. Такие записи роняли рендер списка и весь интерфейс.
+  it("выбрасывает серверы без новых полей", () => {
+    const legacy = [
+      {
+        id: "old",
+        name: "Old",
+        protocol: "vless",
+        host: "a",
+        port: 443,
+        link: "l",
+      },
+      { ...server("new"), id: "new", name: "New" },
+    ] as unknown as SubscriptionServer[];
+
+    const migrated = migratePersistedState({
+      subscriptionUrl: "https://sub.example.com/list",
+      servers: legacy,
+      hiddenServerIds: ["old"],
+      activeServerId: "old",
+    });
+
+    expect(migrated?.servers.map((item) => item.id)).toEqual(["new"]);
+    expect(migrated?.activeServerId).toBeNull();
+    expect(migrated?.hiddenServerIds).toEqual([]);
+  });
+
+  it("сохраняет полные серверы и активный сервер", () => {
+    const migrated = migratePersistedState({
+      subscriptionUrl: "https://sub.example.com/list",
+      servers: [server("a"), server("b")],
+      hiddenServerIds: [],
+      activeServerId: "b",
+    });
+
+    expect(migrated?.servers).toHaveLength(2);
+    expect(migrated?.activeServerId).toBe("b");
   });
 });

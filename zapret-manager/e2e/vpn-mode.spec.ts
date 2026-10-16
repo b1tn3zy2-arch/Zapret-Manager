@@ -30,6 +30,40 @@ async function loadServers(page: Page): Promise<void> {
 }
 
 test.describe("Режим VPN", () => {
+  // Список серверов пережил перезапуск приложения: в нём лежат записи,
+  // сохранённые прошлой сборкой, без полей транспорта и шифрования. Раньше
+  // переход в режим VPN на таком списке ронял весь интерфейс.
+  test("переживает список, сохранённый прошлой сборкой", async ({ page }) => {
+    await page.addInitScript(() => {
+      window.localStorage.setItem(
+        "zapret-manager:vpn-core",
+        JSON.stringify({
+          state: {
+            subscriptionUrl: "https://sub.example.com/list",
+            servers: [
+              {
+                id: "srv_legacy",
+                name: "Старый сервер",
+                protocol: "vless",
+                host: "legacy.example.com",
+                port: 443,
+                link: "vless://uuid@legacy.example.com:443#Legacy",
+              },
+            ],
+            activeServerId: "srv_legacy",
+          },
+          version: 1,
+        })
+      );
+    });
+
+    const { errors } = await bootstrap(page);
+    await openVpn(page);
+
+    await expect(page.getByText("Нажмите для подключения")).toBeVisible();
+    expect(errors).toEqual([]);
+  });
+
   test("загружает все серверы подписки, а не один", async ({ page }) => {
     // Лимит в один сервер делал подписку бесполезной: показывался только
     // первый узел из списка.
