@@ -256,3 +256,17 @@ fn test_vmess_payload_roundtrip() {
 
     assert_eq!(value.get("add").and_then(|v| v.as_str()), Some("h"));
 }
+#[test]
+fn test_subscription_user_agent_is_known_client() {
+    // Неизвестный User-Agent у многих провайдеров означает один пробный узел
+    // вместо всего списка локаций. Своё имя приложения здесь не годится.
+    let agent = SUBSCRIPTION_USER_AGENT.to_lowercase();
+
+    assert!(!agent.contains("zapretmanager"));
+    assert!(
+        ["v2rayng", "hiddify", "nekoray", "clash", "sing-box", "streisand"]
+            .iter()
+            .any(|known| agent.contains(known)),
+        "подписка запрашивается от неизвестного клиента: {SUBSCRIPTION_USER_AGENT}"
+    );
+}

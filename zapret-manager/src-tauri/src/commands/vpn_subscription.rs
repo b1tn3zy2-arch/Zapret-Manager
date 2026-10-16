@@ -6,6 +6,15 @@ use serde::Serialize;
 use crate::error::{AppError, AppResult};
 
 const MAX_SUBSCRIPTION_BYTES: usize = 4 * 1024 * 1024;
+
+/// User-Agent для запроса подписки.
+///
+/// Подписки раздают не весь список: многие провайдеры для незнакомого клиента
+/// отдают один пробный узел вместо всех локаций. С запросом
+/// «ZapretManager/0.1» список приходил из одной строки, и два запроса подряд
+/// давали разные серверы. Поэтому запрос идёт от имени обычного VPN-клиента,
+/// как это делают v2rayNG, Hiddify и остальные.
+const SUBSCRIPTION_USER_AGENT: &str = "v2rayNG/1.9.0";
 /// Сколько серверов принимаем из одной подписки.
 ///
 /// Раньше стоял лимит в один сервер: подписка с сотней локаций показывала
@@ -370,7 +379,8 @@ pub async fn fetch_subscription(url: &str) -> AppResult<Vec<SubscriptionServer>>
 
     let client = reqwest::Client::builder()
         .timeout(std::time::Duration::from_secs(20))
-        .user_agent("ZapretManager/0.1 (subscription)")
+        .user_agent(SUBSCRIPTION_USER_AGENT)
+        .default_headers(reqwest::header::HeaderMap::new())
         .build()
         .map_err(|error| AppError::custom(format!("HTTP клиент не создан: {error}")))?;
 

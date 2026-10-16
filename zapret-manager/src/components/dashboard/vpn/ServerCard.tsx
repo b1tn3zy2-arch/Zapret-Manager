@@ -1,8 +1,7 @@
 import { memo } from "react";
-import { Globe, Link2, Trash2 } from "lucide-react";
+import { Globe, Trash2 } from "lucide-react";
 
 import CountryFlag from "@/components/dashboard/CountryFlag";
-import { Badge } from "@/components/ui";
 import { useI18n } from "@/i18n";
 import { guessCountryCode } from "@/lib/vpnEndpoint";
 import { formatPing, getPingColor } from "@/lib/pingUtils";
@@ -16,6 +15,10 @@ export interface ServerCardProps {
   onSelect: (server: SubscriptionServer) => void;
   onRemove: (server: SubscriptionServer) => void;
 }
+
+const FLAG_SIZE = 28;
+/** Ширина колонки пинга: без неё бейдж и корзина «плавают» по строкам. */
+const PING_COLUMN = "w-16";
 
 function ServerCardImpl({
   server,
@@ -31,7 +34,7 @@ function ServerCardImpl({
     <div
       role="listitem"
       className={cn(
-        "group flex items-center gap-3 rounded-lg border p-3 transition-colors",
+        "flex items-center gap-4 rounded-lg border px-3 py-2.5 transition-colors",
         "hover:bg-glass-hover duration-200",
         isActive
           ? "border-accent-primary bg-glass-bg"
@@ -52,42 +55,43 @@ function ServerCardImpl({
         {country === null ? (
           <span
             aria-hidden="true"
-            className="text-text-tertiary border-glass-border bg-glass-bg flex size-8 shrink-0 items-center justify-center rounded-full border"
+            className="text-text-tertiary border-glass-border bg-glass-bg flex shrink-0 items-center justify-center rounded-md border"
+            style={{ width: FLAG_SIZE, height: FLAG_SIZE }}
           >
             <Globe className="size-4" strokeWidth={2} />
           </span>
         ) : (
-          <CountryFlag countryCode={country} size={32} />
+          <CountryFlag countryCode={country} size={FLAG_SIZE} />
         )}
 
         <span className="flex min-w-0 flex-1 flex-col">
           <span className="text-text-primary truncate text-sm font-semibold">
             {server.name}
           </span>
-          <span className="text-text-tertiary flex items-center gap-1.5 truncate font-mono text-[11px]">
+          <span className="text-text-tertiary truncate font-mono text-xs">
             {server.host}:{server.port}
           </span>
         </span>
-
-        <Badge variant="neutral" size="sm">
-          {server.protocol.toUpperCase()}
-        </Badge>
       </button>
 
       <span
-        className="shrink-0 font-mono text-xs tabular-nums"
+        className={cn(
+          "border-glass-border shrink-0 rounded-md border px-2 py-0.5",
+          "text-text-secondary text-[11px] font-medium tracking-wide uppercase"
+        )}
+      >
+        {server.protocol.toUpperCase()}
+      </span>
+
+      <span
+        className={cn(
+          PING_COLUMN,
+          "shrink-0 text-right font-mono text-xs font-semibold tabular-nums"
+        )}
         style={{ color: getPingColor(ping) }}
       >
         {formatPing(ping)}
       </span>
-
-      {isActive ? (
-        <Link2
-          aria-hidden="true"
-          className="text-accent-primary size-4 shrink-0"
-          strokeWidth={2}
-        />
-      ) : null}
 
       <button
         type="button"
