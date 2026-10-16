@@ -424,3 +424,20 @@
 html[data-animations="off"] .sidebar-active-indicator {
   transition: none;
 }
+
+/* Хроматический оверлей карточки стратегии.
+
+   Живёт вне 3D-контекста карточки: filter внутри preserve-3d заставляет
+   браузер схлопнуть объём, и переворот перестаёт быть объёмным. */
+.strategy-card-chromatic {
+  opacity: 0;
+  transition: opacity 200ms ease-out;
+}
+
+.group:hover .strategy-card-chromatic {
+  opacity: 1;
+}
+
+[data-animations="off"] .strategy-card-chromatic {
+  transition: none;
+}

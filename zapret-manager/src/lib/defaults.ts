@@ -70,7 +70,7 @@ export const DEFAULT_ADVANCED: AdvancedSettings = {
   strategyStopTimeoutSec: 10,
   winwsExtraArgs: [],
   disableUpdateCheck: false,
-  strategyEngine: "native",
+  strategyEngine: "auto",
 };
 
 export const DEFAULT_LOG_BUFFER_SIZE = 10_000;

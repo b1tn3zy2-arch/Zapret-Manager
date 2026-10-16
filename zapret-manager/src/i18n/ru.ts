@@ -596,7 +596,8 @@ export const ru = {
       engine: {
         title: "Движок стратегий",
         description:
-          "Встроенный движок запускает winws.exe напрямую без .bat и cmd.exe. Legacy запускает .bat как раньше",
+          "Авто выбирает движок по стратегии. Встроенный запускает winws.exe напрямую без .bat и cmd.exe, Legacy запускает .bat как раньше",
+        auto: "Авто",
         native: "Встроенный",
         legacy: "Legacy .bat",
       },
@@ -722,6 +723,7 @@ export const ru = {
       runningBadge: "Запущена",
       runAria: "Запустить {name}",
       stopAria: "Остановить {name}",
+      gamesHint: "Игры в этой стратегии",
       outlastHint:
         "Домены Outlast Trials будут добавлены в конфиги при запуске",
     },
@@ -751,8 +753,10 @@ export const ru = {
       resetFilters: "Сбросить фильтры",
     },
     engine: {
+      auto: "Авто",
       native: "Native",
       legacy: ".bat",
+      effectiveHint: "Для этой стратегии сработает движок: {engine}",
       configMissing: "Не распознано",
       configMissingHint:
         "Конфиг стратегии не распознан — запуск пойдёт через legacy .bat",

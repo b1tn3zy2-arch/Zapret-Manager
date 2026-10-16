@@ -169,8 +169,11 @@ const advancedSchema = z.object({
     .default(DEFAULT_ADVANCED.strategyStopTimeoutSec),
   winwsExtraArgs: z.array(z.string()).default(DEFAULT_ADVANCED.winwsExtraArgs),
   disableUpdateCheck: z.boolean().default(DEFAULT_ADVANCED.disableUpdateCheck),
+  // auto: движок выбирается по самой стратегии — нативный, если конфиг
+  // разбирается, иначе старый. Раньше режима не было, и выбор «нативный»
+  // молча переключался на старый для стратегий без разбораемого конфига.
   strategyEngine: z
-    .enum(["native", "legacy"])
+    .enum(["auto", "native", "legacy"])
     .default(DEFAULT_ADVANCED.strategyEngine),
 });
 

@@ -47,7 +47,7 @@ export interface VpnSettings {
   lastConnectedAt: number | null;
 }
 
-export type StrategyEngine = "native" | "legacy";
+export type StrategyEngine = "auto" | "native" | "legacy";
 
 export interface AdvancedSettings {
   loggingLevel: LogLevel;

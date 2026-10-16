@@ -1,7 +1,7 @@
 import { useI18n } from "@/i18n";
 import { useCallback, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import { Gamepad2, Info } from "lucide-react";
+import { AnimatePresence } from "framer-motion";
+import { Info } from "lucide-react";
 
 import CardStatsBars from "@/components/strategies/game/CardStatsBars";
 import PlayOverlay from "@/components/strategies/game/PlayOverlay";
@@ -9,15 +9,12 @@ import RarityBadge from "@/components/strategies/game/RarityBadge";
 import RarityParticles from "@/components/strategies/game/RarityParticles";
 import StrategyPoster from "@/components/strategies/game/StrategyPoster";
 import EngineBadge from "@/components/strategies/EngineBadge";
+import GameBadges from "@/components/strategies/GameBadges";
 import { useBloom } from "@/hooks/useBloom";
-import { useChromatic } from "@/hooks/useChromatic";
 import { capitalizeService } from "@/lib/format";
 import { getRarityColor } from "@/lib/rarity";
 import { cn } from "@/lib/utils";
-import {
-  selectHasEnabledGame,
-  useSettingsStore,
-} from "@/stores/useSettingsStore";
+
 import type { StrategyCard } from "@/types";
 
 export interface StrategyCardFrontProps {
@@ -50,11 +47,9 @@ export default function StrategyCardFront({
   const { t } = useI18n();
   const { strategy, rarity } = card;
   const palette = getRarityColor(rarity);
-  const outlastEnabled = useSettingsStore(selectHasEnabledGame);
   const bloomColor = rarity === "legendary" ? "primary" : "secondary";
   const bloomDelta = rarity === "legendary" ? 1 : -1;
   const bloom = useBloom(bloomColor, bloomDelta);
-  const chromatic = useChromatic(!motionDisabled);
   const showOverlay = isHovered || isRunning;
   const [pointerGlow, setPointerGlow] = useState("transparent");
 
@@ -104,16 +99,12 @@ export default function StrategyCardFront({
         className="pointer-events-none absolute inset-0 transition-opacity duration-200"
         style={{ background: pointerGlow, opacity: isHovered ? 1 : 0 }}
       />
-      {chromatic.isEnabled ? (
-        <motion.span
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-          style={{
-            boxShadow: `inset 0 0 0 1px ${palette.border}`,
-            filter: chromatic.filter,
-          }}
-        />
-      ) : null}
+      {/*
+        filter нельзя оставлять внутри 3D-поддерева: слой с фильтром
+        схлопывает preserve-3d, и переворот перестаёт быть объёмным.
+        Поэтому обводка рисуется рамкой, а цветной оттенок живёт в
+        оверлее самой карточки, вне 3D.
+      */}
 
       <span className="absolute inset-x-0 top-0 flex items-start justify-between gap-2 p-3">
         <RarityBadge rarity={rarity} compact />
@@ -133,7 +124,7 @@ export default function StrategyCardFront({
               event.stopPropagation();
               onFlip();
             }}
-            className="bg-bg-primary/60 text-text-secondary hover:text-text-primary rounded-md p-1 opacity-0 backdrop-blur transition-opacity group-hover:opacity-100"
+            className="bg-bg-primary/90 text-text-secondary hover:text-text-primary rounded-md p-1 opacity-0 transition-opacity group-hover:opacity-100"
           >
             <Info aria-hidden="true" className="size-3.5" />
           </button>
@@ -147,19 +138,19 @@ export default function StrategyCardFront({
         <span className="text-text-tertiary truncate font-mono text-[10px]">
           {strategy.filename}
         </span>
-        <span className="border-glass-border bg-bg-primary/40 block rounded-lg border p-2 backdrop-blur">
+        <span className="border-glass-border bg-bg-primary/85 block rounded-lg border p-2">
           <CardStatsBars stats={card.stats} />
         </span>
         <span className="flex flex-wrap gap-1">
           {strategy.services.map((service) => (
             <span
               key={service}
-              className="text-text-secondary border-glass-border bg-bg-primary/50 rounded-full border px-2 py-0.5 text-[10px] backdrop-blur"
+              className="text-text-secondary border-glass-border bg-bg-primary/85 rounded-full border px-2 py-0.5 text-[10px]"
             >
               {capitalizeService(service)}
             </span>
           ))}
-          {outlastEnabled ? <OutlastBadge /> : null}
+          <GameBadges compact />
           <EngineBadge strategy={strategy} />
         </span>
       </span>
@@ -183,13 +174,5 @@ export default function StrategyCardFront({
         ) : null}
       </AnimatePresence>
     </div>
-  );
-}
-
-function OutlastBadge() {
-  return (
-    <span className="text-accent-primary border-accent-primary/40 bg-bg-primary/50 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium backdrop-blur">
-      <Gamepad2 aria-hidden="true" className="size-2.5" />+ Outlast
-    </span>
   );
 }

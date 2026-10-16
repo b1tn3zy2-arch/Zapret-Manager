@@ -64,6 +64,19 @@ export async function launchStrategy(
   }
 
   const games = toNativeGames(settings.games);
+
+  if (engine === "native") {
+    // Жёсткий режим: конфиг должен разбираться, иначе запуск падает с
+    // понятной ошибкой вместо тихого отката на старый движок.
+    const result = await invoke<Omit<StrategyRunResult, "gamesInjected">>(
+      "run_strategy_native",
+      { strategyId, path, games }
+    );
+
+    return { ...result, gamesInjected: games.map((game) => game.id) };
+  }
+
+  // auto: движок выбирается по самой стратегии
   const result = await invoke<Omit<StrategyRunResult, "gamesInjected">>(
     "run_strategy_auto",
     { strategyId, path, games }

@@ -106,7 +106,7 @@ function AdvancedSection() {
             aria-label={t("settings.advanced.engine.title")}
             className="flex items-center gap-2"
           >
-            {(["native", "legacy"] as const).map((value) => {
+            {(["auto", "native", "legacy"] as const).map((value) => {
               const active = advanced.strategyEngine === value;
 
               return (
@@ -126,9 +126,11 @@ function AdvancedSection() {
                   )}
                 >
                   {t(
-                    value === "native"
-                      ? "settings.advanced.engine.native"
-                      : "settings.advanced.engine.legacy"
+                    value === "auto"
+                      ? "settings.advanced.engine.auto"
+                      : value === "native"
+                        ? "settings.advanced.engine.native"
+                        : "settings.advanced.engine.legacy"
                   )}
                 </button>
               );

@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
@@ -293,3 +294,16 @@ export const selectSettings = (state: SettingsStoreState): AppSettings =>
 
 export const selectHasEnabledGame = (state: SettingsStoreState): boolean =>
   state.settings.games.some((game) => game.enabled);
+
+/**
+ * Игры, которые действительно подмешиваются в стратегию при запуске.
+ *
+ * Фильтрация идёт через useMemo, а не внутри селектора: селектор zustand
+ * обязан возвращать стабильную ссылку, иначе React уходит в бесконечный
+ * рендер («getSnapshot should be cached»).
+ */
+export function useEnabledGames(): GameSettings[] {
+  const games = useSettingsStore((state) => state.settings.games);
+
+  return useMemo(() => games.filter((game) => game.enabled), [games]);
+}

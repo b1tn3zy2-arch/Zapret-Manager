@@ -595,8 +595,9 @@ export const en = {
       engine: {
         title: "Strategy engine",
         description:
-          "The built-in engine runs winws.exe directly without .bat or cmd.exe. Legacy runs .bat as before",
-        native: "Built-in",
+          "Auto picks the engine per strategy. Native runs winws.exe directly without .bat and cmd.exe, Legacy runs .bat as before",
+        auto: "Auto",
+        native: "Native",
         legacy: "Legacy .bat",
       },
       verify: "Check configs",
@@ -721,6 +722,7 @@ export const en = {
       runningBadge: "Running",
       runAria: "Run {name}",
       stopAria: "Stop {name}",
+      gamesHint: "Games in this strategy",
       outlastHint: "Outlast Trials domains will be added to configs on launch",
     },
     status: {
@@ -749,8 +751,10 @@ export const en = {
       resetFilters: "Reset filters",
     },
     engine: {
+      auto: "Auto",
       native: "Native",
       legacy: ".bat",
+      effectiveHint: "This strategy will run on: {engine}",
       configMissing: "Not parsed",
       configMissingHint:
         "Strategy config was not parsed — it will run through legacy .bat",

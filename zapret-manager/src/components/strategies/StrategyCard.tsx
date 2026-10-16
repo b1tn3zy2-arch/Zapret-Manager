@@ -1,19 +1,17 @@
-import { Gamepad2, Play, RefreshCw, Square } from "lucide-react";
+import { Play, RefreshCw, Square } from "lucide-react";
 
 import EngineBadge from "@/components/strategies/EngineBadge";
+import GameBadges from "@/components/strategies/GameBadges";
 import { useI18n } from "@/i18n";
 import type { TranslationKey } from "@/i18n/types";
-import { Badge, Button, Card, Spinner, Tooltip } from "@/components/ui";
+import { Badge, Button, Card, Spinner } from "@/components/ui";
 import {
   capitalizeService,
   formatFileSize,
   formatRelativeTime,
 } from "@/lib/format";
 import { serviceColor } from "@/lib/serviceColors";
-import {
-  selectHasEnabledGame,
-  useSettingsStore,
-} from "@/stores/useSettingsStore";
+
 import { TECHNIQUE_LABELS, type Strategy, type StrategyStatus } from "@/types";
 
 const STATUS_VARIANTS = {
@@ -52,7 +50,6 @@ export default function StrategyCard({
   const { status } = strategy;
   const isBusy = status === "starting" || status === "stopping";
   const isRunning = status === "running";
-  const outlastEnabled = useSettingsStore(selectHasEnabledGame);
 
   const modified =
     strategy.modifiedAt === undefined
@@ -155,15 +152,7 @@ export default function StrategyCard({
 
         <EngineBadge strategy={strategy} />
 
-        {outlastEnabled ? (
-          <Tooltip content={t("strategies.card.outlastHint")}>
-            <span>
-              <Badge variant="accent">
-                <Gamepad2 aria-hidden="true" className="size-3" />+ Outlast
-              </Badge>
-            </span>
-          </Tooltip>
-        ) : null}
+        <GameBadges />
       </div>
 
       {strategy.error !== undefined ? (

@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import StrategyCardBack from "@/components/strategies/game/StrategyCardBack";
 import StrategyCardFront from "@/components/strategies/game/StrategyCardFront";
 import { useCardTilt } from "@/hooks/useCardTilt";
+import { useChromatic } from "@/hooks/useChromatic";
 import {
   ANIMATION,
   CARD_ASPECT_RATIO,
@@ -73,14 +74,14 @@ function StrategyGameCardImpl({
   const isBusy =
     strategy.status === "starting" || strategy.status === "stopping";
   const [isHovered, setIsHovered] = useState(false);
+  const chromatic = useChromatic(!motionDisabled);
 
   const {
     containerRef,
     handleMouseMove,
     handleMouseLeave,
-    rotateX,
-    rotateY,
-    isInteractive,
+    rotateX: rotateXTilt,
+    rotateY: rotateYTilt,
   } = useCardTilt({
     disabled: tiltDisabled || flipped,
     glowColor: palette.glow,
@@ -105,6 +106,30 @@ function StrategyGameCardImpl({
     >
       {isRunning ? <RunningHalo /> : null}
 
+      {/*
+        Цветной оверлей лежит вне 3D-контекста: слой с filter внутри
+        preserve-3d схлопывает объём, и переворот перестаёт быть объёмным.
+      */}
+      {chromatic.isEnabled ? (
+        <span
+          aria-hidden="true"
+          className="strategy-card-chromatic pointer-events-none absolute inset-0 rounded-xl"
+          style={{
+            boxShadow: `inset 0 0 0 1px ${palette.border}`,
+            filter: chromatic.filter,
+          }}
+        />
+      ) : null}
+
+      {/*
+        Наклон и переворот объединены на одном элементе.
+
+        Раньше наклон и переворот жили на двух вложенных элементах с
+        preserve-3d у каждого. Второй 3D-контекст посередине создавал
+        лишнюю поверхность композиции, и на слабых видеокартах переворот
+        дёргался. Один transform с preserve-3d рисуется целиком на
+        композиторе.
+      */}
       <motion.div
         animate={{
           scale: lifted && !motionDisabled ? GAME_CARD_HOVER_SCALE : 1,
@@ -112,10 +137,12 @@ function StrategyGameCardImpl({
         }}
         transition={{ duration: ANIMATION.normal, ease: ANIMATION.easeOutExpo }}
         style={{
-          rotateX,
-          rotateY,
+          rotateX: rotateXTilt,
+          rotateY: rotateYTilt,
           transformStyle: "preserve-3d",
-          willChange: isInteractive ? "transform" : "auto",
+          // will-change задаётся один раз и не переключается: иначе браузер
+          // создаёт и уничтожает слой прямо в кадре начала анимации
+          willChange: "transform",
           borderRadius: "0.75rem",
           boxShadow: lifted
             ? `0 24px 48px rgb(0 0 0 / 0.45), 0 0 44px -10px ${palette.glow}`
@@ -123,6 +150,15 @@ function StrategyGameCardImpl({
         }}
         className="relative h-full w-full rounded-xl"
       >
+        {/*
+          Переворот живёт на внутреннем слое, а не на том же элементе, что и
+          наклон. На одном элементе Framer Motion не может одновременно
+          вести transform из animate и из motion-значений в style: анимация
+          перезаписывала наклон, и кнопки внутри карточки начинали «плавать»
+          под курсором. Второй 3D-контекст здесь обязателен: обе грани
+          должны лежать в одном пространстве с переворотом, иначе задняя
+          грань схлопывается в плоскость и перестаёт попадать под курсор.
+        */}
         <motion.div
           className="relative h-full w-full [transform-style:preserve-3d]"
           animate={{ rotateY: flipped ? 180 : 0 }}
