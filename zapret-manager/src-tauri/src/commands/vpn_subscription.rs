@@ -33,6 +33,10 @@ pub struct SubscriptionServer {
     pub host: String,
     pub port: u16,
     pub link: String,
+    /// Транспорт из ссылки (type=ws, type=tcp, type=grpc и так далее).
+    pub transport: String,
+    /// Шифрование канала (security=reality, security=tls, пусто — без TLS).
+    pub security: String,
 }
 
 pub fn decode_subscription(body: &str) -> String {
@@ -175,6 +179,18 @@ fn build(
         name.trim().to_string()
     };
 
+    let query = parse_query_map(link);
+    let transport = query
+        .get("type")
+        .map(|value| value.trim().to_lowercase())
+        .filter(|value| !value.is_empty())
+        .unwrap_or_else(|| "tcp".to_string());
+    let security = query
+        .get("security")
+        .map(|value| value.trim().to_lowercase())
+        .filter(|value| !value.is_empty() && value != "none")
+        .unwrap_or_default();
+
     SubscriptionServer {
         id: hash_link(link),
         name: clean_name,
@@ -182,6 +198,8 @@ fn build(
         host: host.to_string(),
         port,
         link: link.to_string(),
+        transport,
+        security,
     }
 }
 

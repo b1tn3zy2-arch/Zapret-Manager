@@ -51,6 +51,10 @@ export interface SubscriptionServer {
   host: string;
   port: number;
   link: string;
+  /** Транспорт из ссылки: tcp, ws, grpc и так далее. */
+  transport: string;
+  /** Шифрование канала: reality, tls; пустая строка — без TLS. */
+  security: string;
 }
 
 export interface XrayStatus {

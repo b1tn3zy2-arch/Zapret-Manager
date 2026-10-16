@@ -993,6 +993,16 @@ export const ru = {
       subscriptionCount: "Серверов в подписке: {count}",
       refreshSubscription: "Обновить подписку",
       refreshAll: "Обновить подписку и пинги",
+      serverMenu: "Действия с сервером {name}",
+
+      serverMenuConnect: "Подключиться",
+
+      serverMenuCopy: "Копировать ссылку",
+
+      serverMenuCopied: "Скопировано",
+
+      serverMenuDelete: "Удалить",
+
       removeServer: "Удалить сервер {name}",
 
       clearAllTitle: "Удалить все серверы?",

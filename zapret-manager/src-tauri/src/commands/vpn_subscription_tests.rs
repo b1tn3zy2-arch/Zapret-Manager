@@ -270,3 +270,21 @@ fn test_subscription_user_agent_is_known_client() {
         "подписка запрашивается от неизвестного клиента: {SUBSCRIPTION_USER_AGENT}"
     );
 }
+
+#[test]
+fn test_parses_transport_and_security() {
+    let link = "vless://uuid@example.com:443?type=ws&security=reality&sni=example.com#WS";
+    let server = parse_link(link).expect("ws + reality");
+
+    assert_eq!(server.transport, "ws");
+    assert_eq!(server.security, "reality");
+}
+
+#[test]
+fn test_defaults_transport_to_tcp_and_ignores_none_security() {
+    let link = "trojan://pass@example.com:443?security=none#Plain";
+    let server = parse_link(link).expect("trojan");
+
+    assert_eq!(server.transport, "tcp");
+    assert_eq!(server.security, "");
+}

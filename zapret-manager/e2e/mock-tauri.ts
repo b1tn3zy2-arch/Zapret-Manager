@@ -354,6 +354,8 @@ export async function mockTauri(
               host: "alpha.example.com",
               port: 443,
               link: "vless://uuid@alpha.example.com:443#Alpha",
+              transport: "tcp",
+              security: "reality",
             },
             {
               id: "srv_beta",
@@ -362,6 +364,8 @@ export async function mockTauri(
               host: "beta.example.com",
               port: 8443,
               link: "trojan://pass@beta.example.com:8443#Beta",
+              transport: "ws",
+              security: "tls",
             },
             {
               id: "srv_gamma",
@@ -370,6 +374,8 @@ export async function mockTauri(
               host: "gamma.example.com",
               port: 443,
               link: "vmess://eyJ2IjoiMiJ9#Gamma",
+              transport: "tcp",
+              security: "",
             },
           ],
         }),

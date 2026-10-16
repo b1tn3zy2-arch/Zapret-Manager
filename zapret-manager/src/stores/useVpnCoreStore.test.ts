@@ -11,6 +11,8 @@ function server(id: string): SubscriptionServer {
     host: `${id}.example.com`,
     port: 443,
     link: `vless://uuid@${id}.example.com:443#${id}`,
+    transport: "tcp",
+    security: "reality",
   };
 }
 

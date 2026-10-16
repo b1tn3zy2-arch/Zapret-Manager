@@ -15,6 +15,8 @@ const SERVER: SubscriptionServer = {
   host: "node.amsterdam.nl",
   port: 443,
   link: "vless://uuid@node.amsterdam.nl:443?security=tls#Amsterdam",
+  transport: "tcp",
+  security: "tls",
 };
 
 describe("ModeSwitcher", () => {
@@ -177,7 +179,7 @@ describe("ActionsRow", () => {
 });
 
 describe("ServerCard", () => {
-  it("показывает имя, endpoint, протокол и флаг страны", () => {
+  it("показывает имя, теги протокола и транспорта и флаг страны", () => {
     render(
       <div role="list">
         <ServerCard
@@ -191,13 +193,38 @@ describe("ServerCard", () => {
     );
 
     expect(screen.getByText("Амстердам 🇳🇱")).toBeTruthy();
-    expect(screen.getByText("node.amsterdam.nl:443")).toBeTruthy();
-    expect(screen.getByText("VLESS")).toBeTruthy();
+    expect(screen.getByText("TCP · TLS")).toBeTruthy();
+    expect(screen.getByText("vless")).toBeTruthy();
     expect(screen.getByText("61 мс")).toBeTruthy();
     expect(screen.getByAltText("NL")).toBeTruthy();
   });
 
-  it("показывает прочерк при отсутствии пинга", () => {
+  it("открывает меню действий и удаляет сервер", async () => {
+    const onRemove = vi.fn();
+    const onSelect = vi.fn();
+
+    render(
+      <div role="list">
+        <ServerCard
+          server={SERVER}
+          isActive={false}
+          ping={42}
+          onSelect={onSelect}
+          onRemove={onRemove}
+        />
+      </div>
+    );
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Действия с сервером Амстердам 🇳🇱" })
+    );
+
+    // по референсу сервер прячется под меню «⋯», а не под отдельной корзиной
+    await userEvent.click(screen.getByRole("button", { name: "Удалить" }));
+    expect(onRemove).toHaveBeenCalledWith(SERVER);
+  });
+
+  it("показывает n/a с красной точкой при отсутствии пинга", () => {
     render(
       <div role="list">
         <ServerCard
@@ -210,7 +237,7 @@ describe("ServerCard", () => {
       </div>
     );
 
-    expect(screen.getByText("—")).toBeTruthy();
+    expect(screen.getByText("n/a")).toBeTruthy();
   });
 
   it("выбирает сервер по клику", async () => {

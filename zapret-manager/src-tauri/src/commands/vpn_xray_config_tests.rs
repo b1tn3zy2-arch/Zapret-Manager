@@ -228,6 +228,8 @@ fn test_unknown_protocol_rejected() {
         host: "example.com".to_string(),
         port: 443,
         link: "http://example.com".to_string(),
+        transport: "tcp".to_string(),
+        security: String::new(),
     };
 
     assert!(build_config(&fake, 10808, 10809).is_err());

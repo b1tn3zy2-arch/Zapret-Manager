@@ -52,7 +52,11 @@ test.describe("Режим VPN", () => {
     await openVpn(page);
     await loadServers(page);
 
-    await page.getByRole("button", { name: "Удалить сервер Beta" }).click();
+    // удаление спрятано в меню «⋯», как на референсе
+    await page
+      .getByRole("button", { name: "Действия с сервером Beta" })
+      .click();
+    await page.getByRole("button", { name: "Удалить", exact: true }).click();
     await expect(page.getByText("Beta", { exact: true })).toHaveCount(0);
     await expect(servers(page)).toHaveCount(2);
 

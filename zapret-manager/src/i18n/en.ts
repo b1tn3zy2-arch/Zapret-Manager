@@ -990,6 +990,16 @@ export const en = {
       subscriptionCount: "Servers in subscription: {count}",
       refreshSubscription: "Refresh subscription",
       refreshAll: "Refresh subscription and pings",
+      serverMenu: "Server actions {name}",
+
+      serverMenuConnect: "Connect",
+
+      serverMenuCopy: "Copy link",
+
+      serverMenuCopied: "Copied",
+
+      serverMenuDelete: "Remove",
+
       removeServer: "Remove server {name}",
 
       clearAllTitle: "Remove all servers?",
