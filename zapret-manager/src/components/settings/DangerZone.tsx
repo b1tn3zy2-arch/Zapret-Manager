@@ -3,7 +3,7 @@ import { Trash2 } from "lucide-react";
 
 import { Button, Input, Modal, Text } from "@/components/ui";
 import { useI18n } from "@/i18n";
-import { deleteAllBackups } from "@/hooks/useSystemInfo";
+import { deleteAllBackups, deleteAllLogs } from "@/hooks/useSystemInfo";
 import { toErrorMessage } from "@/lib/utils";
 import { useLogsStore } from "@/stores/useLogsStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
@@ -16,6 +16,8 @@ function DangerZone() {
   const { t } = useI18n();
   const folder = useSettingsStore((state) => state.settings.strategiesFolder);
   const resetToDefaults = useSettingsStore((state) => state.resetToDefaults);
+  const saveToFile = useSettingsStore((state) => state.saveToFile);
+  const loadFromFile = useSettingsStore((state) => state.loadFromFile);
   const clearLogs = useLogsStore((state) => state.clearLogs);
   const addLog = useLogsStore((state) => state.addLog);
 
@@ -38,7 +40,20 @@ function DangerZone() {
     }
 
     if (danger === "reset") {
+      // Сброс обязан уйти в settings.json: раньше менялась только память,
+      // и при следующем запуске приложение подхватывало старый файл обратно.
       resetToDefaults();
+      const saved = await saveToFile();
+
+      if (!saved) {
+        addLog({
+          level: "error",
+          source: "user",
+          message: t("settings.common.resetFailed"),
+        });
+      }
+
+      await loadFromFile();
       addLog({
         level: "warn",
         source: "user",
@@ -47,12 +62,25 @@ function DangerZone() {
     }
 
     if (danger === "logs") {
-      clearLogs();
-      addLog({
-        level: "warn",
-        source: "user",
-        message: t("settings.common.logsCleared"),
-      });
+      // Файлы журналов удаляются с диска: иначе winws-логи и журнал
+      // приложения возвращались при следующем старте.
+      try {
+        const removed = await deleteAllLogs();
+        clearLogs();
+        addLog({
+          level: "warn",
+          source: "user",
+          message: t("settings.common.logsRemoved", { count: removed }),
+        });
+      } catch (caught) {
+        addLog({
+          level: "error",
+          source: "user",
+          message: t("settings.common.logsRemoveFailed", {
+            error: toErrorMessage(caught),
+          }),
+        });
+      }
     }
 
     if (danger === "backups" && folder !== "") {

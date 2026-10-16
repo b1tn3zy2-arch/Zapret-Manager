@@ -246,6 +246,39 @@ pub fn delete_all_backups(strategies_dir: String) -> AppResult<usize> {
     remove_backups(std::path::Path::new(&strategies_dir))
 }
 
+/// Удаляет файлы журналов из %TEMP%\zapret-manager\logs.
+///
+/// «Очистить логи» в настройках чистила только память приложения: файлы
+/// winws и журнал приложения оставались на диске и снова показывались при
+/// следующем запуске.
+pub fn remove_logs(dir: &std::path::Path) -> AppResult<usize> {
+    if !dir.exists() {
+        return Ok(0);
+    }
+
+    let mut removed = 0usize;
+
+    for entry in std::fs::read_dir(dir)?.flatten() {
+        let path = entry.path();
+        let deleted = if path.is_dir() {
+            std::fs::remove_dir_all(&path).is_ok()
+        } else {
+            std::fs::remove_file(&path).is_ok()
+        };
+
+        if deleted {
+            removed += 1;
+        }
+    }
+
+    Ok(removed)
+}
+
+#[tauri::command]
+pub fn delete_all_logs() -> AppResult<usize> {
+    remove_logs(&logs_dir())
+}
+
 #[cfg(test)]
 #[path = "system_tests.rs"]
 mod tests;

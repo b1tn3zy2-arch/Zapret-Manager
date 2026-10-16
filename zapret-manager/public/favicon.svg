@@ -1,14 +1,19 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="14" fill="#0a0a0f" />
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <!-- Фон прозрачный: иконка приложения и значок в браузере рисуются
+       одним вектором, см. scripts/build-icons.mjs -->
   <path
-    d="M32 12 L50 19 V33 C50 43 42 50 32 54 C22 50 14 43 14 33 V19 Z"
+    d="M512 96 L832 208 V448 C832 624 704 768 512 856 C320 768 192 624 192 448 V208 Z"
     fill="none"
-    stroke="#00ff88"
-    stroke-width="3.5"
+    stroke="#00e676"
+    stroke-width="56"
     stroke-linejoin="round"
+    stroke-linecap="round"
   />
   <path
-    d="M33 22 L24 35 H31 L28 45 L38 31 H31 Z"
-    fill="#00ff88"
+    d="M556 264 L376 512 H488 L456 760 L648 488 H512 Z"
+    fill="#00e676"
+    stroke="#00e676"
+    stroke-width="18"
+    stroke-linejoin="round"
   />
 </svg>

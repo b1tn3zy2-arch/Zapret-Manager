@@ -36,7 +36,9 @@
     "release:local": "node scripts/release-local.mjs",
     "bump": "node scripts/bump-version.mjs",
     "screenshots": "node scripts/capture-screenshots.mjs",
-    "cargo:check": "cargo check --manifest-path src-tauri/Cargo.toml"
+    "cargo:check": "cargo check --manifest-path src-tauri/Cargo.toml",
+    "icons:build": "node scripts/build-icons.mjs",
+    "icons:tauri": "tauri icon src-tauri/icons/icon-source.png"
   },
   "dependencies": {
     "@fontsource/inter": "5.3.0",

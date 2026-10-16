@@ -930,6 +930,18 @@ Section Uninstall
     SetShellVarContext current
     RmDir /r "$APPDATA\${BUNDLEID}"
     RmDir /r "$LOCALAPPDATA\${BUNDLEID}"
+
+    ; Логи, распакованные ресурсы и временные файлы приложения лежат в
+    ; %TEMP%\zapret-manager. Без этого папка переживала удаление и занимала
+    ; место, а свежий запуск снова её наполнял.
+    RmDir /r "$TEMP\zapret-manager"
+    Delete "$TEMP\MicrosoftEdgeWebview2Setup.exe"
+    Delete "$TEMP\MicrosoftEdgeWebView2RuntimeInstaller.exe"
+
+    ; Автозапуск мог быть включён уже после установки, через настройки
+    ; приложения, и его запись оставалась в ветке Run.
+    DeleteRegValue HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "${PRODUCTNAME}"
+    DeleteRegValue HKLM "Software\Microsoft\Windows\CurrentVersion\Run" "${PRODUCTNAME}"
   ${EndIf}
 
   !ifmacrodef NSIS_HOOK_POSTUNINSTALL

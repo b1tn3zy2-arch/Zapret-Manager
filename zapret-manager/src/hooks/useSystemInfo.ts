@@ -65,3 +65,8 @@ export async function verifyConfigs(
 export async function deleteAllBackups(strategiesDir: string): Promise<number> {
   return secureInvoke<number>("delete_all_backups", { strategiesDir });
 }
+
+/** Удаляет файлы журналов с диска и возвращает их количество. */
+export async function deleteAllLogs(): Promise<number> {
+  return secureInvoke<number>("delete_all_logs");
+}

@@ -112,7 +112,9 @@ for (const [bundleDir, stageDir] of bundleToStaged) {
     const stagedPath = join(stagePath, name);
 
     if (!existsSync(stagedPath)) {
-      problems.push(`${name} собран, но не отдан в release/ — запусти release:artifacts`);
+      problems.push(
+        `${name} собран, но не отдан в release/ — запусти release:artifacts`
+      );
       continue;
     }
 
