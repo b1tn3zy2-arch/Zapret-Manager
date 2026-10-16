@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, type LucideIcon } from "lucide-react";
-import { memo, useMemo } from "react";
+import { memo, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import UpdateBadge from "@/components/updates/UpdateBadge";
 import { useAdaptiveSidebar } from "@/hooks/useAdaptiveSidebar";
@@ -14,12 +14,8 @@ import { cn } from "@/lib/utils";
 import { useAppStore } from "@/stores/useAppStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 
-const ACTIVE_INDICATOR_ID = "sidebar-active-indicator";
-const SIDEBAR_TRANSITION = {
-  duration: 0.28,
-  ease: [0.16, 1, 0.3, 1],
-} as const;
-const INDICATOR_STATIC = { duration: 0 } as const;
+/** Отступ полоски-индикатора внутри строки: (44 - 24) / 2. */
+const INDICATOR_TOP = 10;
 
 interface NavButtonProps {
   readonly label: string;
@@ -28,7 +24,6 @@ interface NavButtonProps {
   readonly collapsed: boolean;
   readonly onSelect: () => void;
   readonly showUpdateBadge?: boolean | undefined;
-  readonly reducedMotion: boolean;
 }
 
 function NavButtonImpl({
@@ -38,10 +33,7 @@ function NavButtonImpl({
   collapsed,
   onSelect,
   showUpdateBadge = false,
-  reducedMotion,
 }: NavButtonProps) {
-  const bloom = useBloom("primary", -1);
-
   return (
     <li className="relative">
       <motion.button
@@ -60,21 +52,6 @@ function NavButtonImpl({
           collapsed ? "justify-center" : "px-3"
         )}
       >
-        {active ? (
-          <motion.span
-            layoutId={ACTIVE_INDICATOR_ID}
-            transition={reducedMotion ? INDICATOR_STATIC : SIDEBAR_TRANSITION}
-            {...(bloom.boxShadow === ""
-              ? {}
-              : { style: { boxShadow: bloom.boxShadow } })}
-            // Центрирование только через раскладку: Tailwind-класс
-            // -translate-y-1/2 выставляет CSS-свойство translate, а framer
-            // двигает индикатор через transform. Вместе они давали двойной
-            // сдвиг — зелёная полоска прыгала между пунктами при переключении.
-            className="bg-accent-primary absolute inset-y-0 left-0 my-auto h-6 w-[3px] rounded-r-full shadow-[0_0_8px_var(--color-accent-primary)]"
-          />
-        ) : null}
-
         <Icon
           aria-hidden="true"
           strokeWidth={2}
@@ -135,6 +112,33 @@ function Sidebar() {
     [logsEnabled]
   );
   const setActivePage = useAppStore((state) => state.setActivePage);
+  const bloom = useBloom("primary", -1);
+  const listRef = useRef<HTMLUListElement | null>(null);
+  const [indicatorOffset, setIndicatorOffset] = useState(0);
+
+  // Позиция полоски берётся из раскладки, а не из индекса пункта: список
+  // меняется (настройка логов включает и отключает «Логи»), и индекс перестал
+  // бы совпадать с реальным положением строки.
+  useLayoutEffect(() => {
+    const list = listRef.current;
+
+    if (list === null) {
+      return;
+    }
+
+    const active = list.querySelector<HTMLElement>('[aria-current="page"]');
+
+    if (active === null) {
+      return;
+    }
+
+    // Положение берём относительно списка: у пункта собственный
+    // позиционированный родитель, поэтому offsetTop считал бы от него и
+    // уводил полоску мимо цели.
+    setIndicatorOffset(
+      active.getBoundingClientRect().top - list.getBoundingClientRect().top
+    );
+  }, [activePage, items.length, collapsed]);
 
   const selectHandlers = useMemo(() => {
     const handlers = {} as Record<AppPage, () => void>;
@@ -156,7 +160,11 @@ function Sidebar() {
     <motion.aside
       animate={{ width }}
       initial={false}
-      transition={prefersReducedMotion ? { duration: 0 } : SIDEBAR_TRANSITION}
+      transition={
+        prefersReducedMotion
+          ? { duration: 0 }
+          : { type: "tween", duration: 0.26, ease: [0.16, 1, 0.3, 1] }
+      }
       className="flex shrink-0 flex-col overflow-visible"
     >
       <div
@@ -193,7 +201,7 @@ function Sidebar() {
       </div>
 
       <nav aria-label={t("sidebar.mainNav")} className="flex-1 px-3">
-        <ul className="flex flex-col gap-1">
+        <ul ref={listRef} className="relative flex flex-col gap-1">
           {items.map((item) => (
             <NavButton
               key={item.route}
@@ -203,9 +211,26 @@ function Sidebar() {
               collapsed={collapsed}
               onSelect={selectHandlers[item.route]}
               showUpdateBadge={item.route === ROUTES.settings}
-              reducedMotion={prefersReducedMotion}
             />
           ))}
+
+          {/*
+            Индикатор — один элемент на весь список, а не отдельная полоска в
+            каждой кнопке. Общая анимация layoutId рисовала два элемента и
+            прогоняла их через проекцию раскладки: полоска перелетывала нужный
+            пункт и возвращалась назад. Теперь позиция задаётся одним
+            transform и переходом CSS — движение гарантированно ровное.
+          */}
+          <span
+            aria-hidden="true"
+            data-testid="sidebar-active-indicator"
+            className="sidebar-active-indicator bg-accent-primary"
+            style={{
+              top: INDICATOR_TOP,
+              transform: `translateY(${indicatorOffset}px)`,
+              ...(bloom.boxShadow === "" ? {} : { boxShadow: bloom.boxShadow }),
+            }}
+          />
         </ul>
       </nav>
 

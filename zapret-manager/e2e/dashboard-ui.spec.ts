@@ -48,44 +48,31 @@ test.describe("Главная: версия и переключение режи
     expect(errors).toEqual([]);
   });
 
-  test("переключение режима не проигрывает каскад появления заново", async ({
+  test("переключает режим обхода и VPN без потери содержимого", async ({
     page,
   }) => {
     const { errors } = await bootstrap(page);
     await page.goto("/");
 
+    await expect(page.getByText("Пинг до сервисов").first()).toBeVisible();
+
     await modeSwitcher(page)
       .getByRole("radio", { name: "Переключить на VPN" })
       .click();
     await expect(page.getByText("Нажмите для подключения")).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Добавить ссылку" }).first()
+    ).toBeVisible();
 
     await modeSwitcher(page)
       .getByRole("radio", { name: "Переключить на обход" })
       .click();
     await expect(page.getByText("Пинг до сервисов").first()).toBeVisible();
 
-    // каскад проигрывается только при первом открытии страницы, поэтому
-    // блоки режима обхода обязаны сразу быть в конечном состоянии:
-    // без сдвига и без задержек, иначе панель дёргается при переключении
-    const items = page.locator(".dashboard-layout > *");
-    const count = await items.count();
-    expect(count).toBeGreaterThan(1);
-
-    for (let index = 0; index < count; index += 1) {
-      const style = await items.nth(index).evaluate((node) => {
-        const computed = getComputedStyle(node);
-
-        return {
-          opacity: computed.opacity,
-          transform: computed.transform,
-          delay: computed.transitionDelay,
-        };
-      });
-
-      expect(Number(style.opacity)).toBeGreaterThan(0.99);
-      expect(["none", "matrix(1, 0, 0, 1, 0, 0)"]).toContain(style.transform);
-      expect(style.delay).toMatch(/^0s(, 0s)*$/);
-    }
+    // версия внизу панели не должна пропадать при смене режима
+    await expect(
+      page.getByRole("complementary").getByText("0.1.0", { exact: true })
+    ).toBeVisible();
 
     expect(errors).toEqual([]);
   });

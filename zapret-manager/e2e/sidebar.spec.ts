@@ -62,4 +62,57 @@ test.describe("Панель слева", () => {
 
     expect(errors).toEqual([]);
   });
+
+  test("индикатор один на весь список и едет transform-переходом", async ({
+    page,
+  }) => {
+    // Анимация общего элемента (layoutId) рисовала два элемента и прогоняла
+    // их через проекцию раскладки: полоска перелетала нужный пункт и
+    // возвращалась назад. Теперь элемент один, а позиция задаётся одним
+    // transform с обычным CSS-переходом.
+    const { errors } = await bootstrap(page);
+    await page.goto("/");
+    await sidebar(page, "Монитор").click();
+
+    const indicator = page.getByTestId("sidebar-active-indicator");
+
+    await expect(indicator).toHaveCount(1);
+    await expect(page.locator(ACTIVE_INDICATOR)).toHaveCount(1);
+
+    const style = await indicator.evaluate((node) => {
+      const computed = getComputedStyle(node);
+
+      return {
+        translate: computed.translate,
+        position: computed.position,
+        transitionProperty: computed.transitionProperty,
+        transitionDuration: computed.transitionDuration,
+      };
+    });
+
+    expect(style.position).toBe("absolute");
+    // transform двигает полоску, CSS-свойство translate не участвует:
+    // вместе с transform они давали двойной сдвиг
+    expect(style.translate).toBe("none");
+    expect(style.transitionProperty).toContain("transform");
+    expect(Number.parseFloat(style.transitionDuration)).toBeGreaterThan(0);
+
+    // после перехода полоска точно совпадает с активным пунктом
+    await expect
+      .poll(async () => {
+        const [mark, item] = await Promise.all([
+          indicator.boundingBox(),
+          sidebar(page, "Монитор").boundingBox(),
+        ]);
+
+        return Math.abs(
+          (mark?.y ?? 0) +
+            (mark?.height ?? 0) / 2 -
+            ((item?.y ?? 0) + (item?.height ?? 0) / 2)
+        );
+      })
+      .toBeLessThan(1);
+
+    expect(errors).toEqual([]);
+  });
 });
