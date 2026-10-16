@@ -2,7 +2,10 @@ import { invoke } from "@tauri-apps/api/core";
 
 import { GAME_SCAN_START_DELAY_MS } from "@/lib/constants";
 import { mergeScannedGames } from "@/lib/installedGames";
-import { useInstalledGamesStore } from "@/stores/useInstalledGamesStore";
+import {
+  filterHiddenGames,
+  useInstalledGamesStore,
+} from "@/stores/useInstalledGamesStore";
 import type { InstalledGame } from "@/types";
 
 let started = false;
@@ -17,7 +20,12 @@ export async function scanInstalledGames(): Promise<InstalledGame[]> {
     const scanned = await invoke<InstalledGame[]>("scan_installed_games", {
       userFolders: store.folders,
     });
-    const merged = mergeScannedGames(scanned.map(normalizeGame), store.games);
+    // игры, которые пользователь убрал с экрана, остаются убранными и после
+    // пересканирования — иначе карточка возвращалась бы через пару секунд
+    const merged = filterHiddenGames(
+      mergeScannedGames(scanned.map(normalizeGame), store.games),
+      store.hiddenIds
+    );
 
     store.setGames(merged);
 

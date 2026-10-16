@@ -427,7 +427,6 @@ export const en = {
       enableFor: "Injection for {name}",
       deleteNamed: "Delete game {name}",
       toggleEditor: "Show game settings",
-      hint: "Built-in games cannot be deleted, but their lists can be edited",
       name: "Name",
       domains: "Domains",
       addDomain: "Add domain",
@@ -513,6 +512,12 @@ export const en = {
           cancel: "Cancel",
         },
         removeManual: "Remove from list",
+        removeGame: "Hide game card",
+        removeTitle: "Hide game?",
+        removeBody:
+          "{name} will disappear from the Games page. The game itself is not deleted — bring it back with “Restore hidden” or by rescanning after a reset.",
+        removeConfirm: "Hide",
+        restoreHidden: "Restore hidden: {count}",
         closeGame: "Close game",
         closedGame: "Game closed: {name}",
         closeGameFailed: "Could not close the game: {error}",
@@ -587,7 +592,10 @@ export const en = {
       loggingLevel: "Logging level",
       logRetention: "Log retention, days",
       logRetentionUnit: "days",
-      logRetentionHint: "From {min} to {max} days. Applies to new log files.",
+      logRetentionHint:
+        "From {min} to {max} days. Files older than the limit are removed on startup and whenever the value changes.",
+      logRetentionPruned: "Removed {count} log files older than {days} days",
+      logRetentionFailed: "Could not apply log retention: {error}",
       extraArgs: "Extra winws arguments",
       extraArgsHint: "Each argument is passed to winws as is",
       addArgument: "Add argument",
@@ -615,6 +623,10 @@ export const en = {
       resetAll: "Reset all settings",
       clearLogs: "Clear all logs",
       deleteBackups: "Delete all backups",
+      uninstallApp: "Uninstall app completely",
+      uninstallTitle: "Uninstall the app?",
+      uninstallHint:
+        "The app, its settings, logs, unpacked resources and cache will be removed. The app will close.",
     },
     importExport: {
       exported: "Settings exported to file",

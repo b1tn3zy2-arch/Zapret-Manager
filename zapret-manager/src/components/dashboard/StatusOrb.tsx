@@ -103,11 +103,16 @@ function StatusOrb({ status, size }: StatusOrbProps) {
       })}
     >
       {isActive && bloom.boxShadow !== "" ? (
-        <span
-          aria-hidden="true"
-          className="absolute inset-2 rounded-full"
-          style={{ boxShadow: bloom.boxShadow }}
-        />
+        <>
+          <span
+            aria-hidden="true"
+            className="absolute inset-2 rounded-full"
+            style={{ boxShadow: bloom.boxShadow }}
+          />
+          {!reduced ? (
+            <span className="bloom-flow absolute inset-2 rounded-full" />
+          ) : null}
+        </>
       ) : null}
       {isActive && !reduced ? (
         <>

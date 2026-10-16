@@ -16,6 +16,27 @@ pub const STEAM_SEARCH_URL: &str =
     "https://store.steampowered.com/api/storesearch/?term={term}&l=english&cc=US";
 pub const MAX_COVER_BYTES: u64 = 4 * 1024 * 1024;
 
+/// Типовые файлы обложек, которые лаунчеры кладут прямо в папку игры.
+/// Проверяются по имени без учёта регистра, в этом же порядке.
+pub const FOLDER_COVER_NAMES: [&str; 12] = [
+    "library_600x900.jpg",
+    "library_600x900_2x.jpg",
+    "library_hero.jpg",
+    "libraryheader.jpg",
+    "cover.jpg",
+    "cover.png",
+    "boxart.jpg",
+    "boxfront.jpg",
+    "capsule.jpg",
+    "header.jpg",
+    "logo.png",
+    "box.jpg",
+];
+
+pub const FOLDER_COVER_EXTENSIONS: [&str; 5] = ["jpg", "jpeg", "png", "webp", "bmp"];
+/// Сколько кандидатов смотрим в папке, прежде чем выбрать самый крупный.
+const FOLDER_COVER_SCAN_LIMIT: usize = 64;
+
 #[tauri::command]
 pub async fn game_cover(
     app: AppHandle,
@@ -302,6 +323,115 @@ fn covers_dir(app: &AppHandle) -> AppResult<PathBuf> {
     Ok(dir)
 }
 
+/// Обложка из папки самой игры.
+///
+/// Сначала ищем типовые файлы лаунчеров (`library_600x900.jpg` у Steam и т. п.),
+/// а если их нет — любое изображение в корне папки, самое крупное из просмотренных.
+/// Файл копируется в кэш обложек приложения, поэтому карточка не читает диск заново
+/// при каждом открытии страницы.
+#[tauri::command]
+pub fn game_folder_cover(app: AppHandle, dir: String) -> AppResult<Option<String>> {
+    let root = PathBuf::from(dir.trim());
+
+    if !root.is_dir() {
+        return Ok(None);
+    }
+
+    let cached = covers_dir(&app)?.join(format!("{}.index", sha_name(&root)));
+
+    if let Ok(entry) = std::fs::read_to_string(&cached) {
+        let name = entry.trim().to_string();
+
+        if !name.is_empty() {
+            if let Some(data) = read_file_as_data_uri(&covers_dir(&app)?.join(&name))? {
+                return Ok(Some(data));
+            }
+        }
+    }
+
+    let Some(source) = pick_folder_cover(&root) else {
+        let _ = std::fs::remove_file(&cached);
+
+        return Ok(None);
+    };
+
+    let extension = source
+        .extension()
+        .and_then(|value| value.to_str())
+        .unwrap_or("jpg")
+        .to_ascii_lowercase();
+    let name = format!("{}.{}", sha_name(&source), extension);
+
+    match std::fs::copy(&source, covers_dir(&app)?.join(&name)) {
+        Ok(_) => {
+            let _ = std::fs::write(&cached, &name);
+        }
+        Err(_) => return read_file_as_data_uri(&source),
+    }
+
+    read_file_as_data_uri(&covers_dir(&app)?.join(&name))
+}
+
+/// Выбор файла обложки в папке игры: сначала имена из [`FOLDER_COVER_NAMES`],
+/// затем самое крупное изображение среди первых [`FOLDER_COVER_SCAN_LIMIT`].
+pub fn pick_folder_cover(dir: &Path) -> Option<PathBuf> {
+    let entries = std::fs::read_dir(dir).ok()?.flatten().map(|entry| entry.path());
+
+    let mut named: Vec<(usize, PathBuf)> = Vec::new();
+    let mut extras: Vec<(u64, PathBuf)> = Vec::new();
+
+    for (index, path) in entries.enumerate() {
+        if !path.is_file() {
+            continue;
+        }
+
+        let Some(extension) = path
+            .extension()
+            .and_then(|value| value.to_str())
+            .map(|value| value.to_ascii_lowercase())
+        else {
+            continue;
+        };
+
+        if !FOLDER_COVER_EXTENSIONS.contains(&extension.as_str()) {
+            continue;
+        }
+
+        let stem = path
+            .file_stem()
+            .map(|value| value.to_string_lossy().to_string())
+            .unwrap_or_default();
+
+        match FOLDER_COVER_NAMES.iter().position(|known| {
+            Path::new(known)
+                .file_stem()
+                .map(|candidate| candidate.to_string_lossy().eq_ignore_ascii_case(&stem))
+                .unwrap_or(false)
+        }) {
+            Some(position) => named.push((position, path)),
+            None => {
+                if index < FOLDER_COVER_SCAN_LIMIT {
+                    let size = path.metadata().map(|meta| meta.len()).unwrap_or(0);
+
+                    extras.push((size, path));
+                }
+            }
+        }
+    }
+
+    // типовые имена важнее «просто большого файла», а среди них порядок
+    // задан самим списком: вертикальная обложка важнее логотипа
+    named.sort_by_key(|(position, _)| *position);
+
+    if let Some((_, first)) = named.into_iter().next() {
+        return Some(first);
+    }
+
+    extras.sort_by_key(|(size, _)| std::cmp::Reverse(*size));
+
+    extras.into_iter().next().map(|(_, path)| path)
+}
+
 fn sha_name(path: &Path) -> String {
     use sha2::Digest;
 
@@ -316,6 +446,46 @@ fn sha_name(path: &Path) -> String {
 #[path = "game_covers_tests.rs"]
 mod tests;
 #[tauri::command]
-pub fn game_exe_icon(path: String) -> Option<String> {
-    super::game_icons::exe_icon_data_uri(std::path::Path::new(&path))
+pub fn game_exe_icon(app: AppHandle, path: String) -> AppResult<Option<String>> {
+    let source = PathBuf::from(path.trim());
+
+    if !source.is_file() {
+        return Ok(None);
+    }
+
+    // распаковка ресурсов exe заметно дороже чтения файла, поэтому результат
+    // кладём в кэш обложек: ключ учитывает путь, размер и время изменения,
+    // иначе переустановленная игра получила бы старую иконку
+    let stamp = std::fs::metadata(&source)
+        .ok()
+        .and_then(|meta| {
+            let modified = meta
+                .modified()
+                .ok()?
+                .duration_since(std::time::UNIX_EPOCH)
+                .ok()?
+                .as_secs();
+
+            Some((meta.len(), modified))
+        })
+        .unwrap_or((0, 0));
+    let key = sha_name(Path::new(&format!("{source:?}:{stamp:?}")));
+    let cached = covers_dir(&app)?.join(format!("{key}.png"));
+
+    if cached.is_file() {
+        return read_file_as_data_uri(&cached);
+    }
+
+    let Some(data) = super::game_icons::exe_icon_data_uri(&source) else {
+        return Ok(None);
+    };
+
+    if let Some(bytes) = data
+        .split_once("base64,")
+        .and_then(|(_, payload)| BASE64.decode(payload).ok())
+    {
+        let _ = std::fs::write(&cached, &bytes);
+    }
+
+    Ok(Some(data))
 }

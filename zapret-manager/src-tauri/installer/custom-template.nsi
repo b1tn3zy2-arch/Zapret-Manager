@@ -820,6 +820,14 @@ Function un.onInit
   ${IfNot} ${Errors}
     StrCpy $UpdateMode 1
   ${EndIf}
+
+  ; Zapret Manager: кнопка «Полностью удалить приложение» в настройках запускает
+  ; деинсталлятор сам. Без этого флага молчаливое удаление оставило бы настройки,
+  ; логи и распакованные ресурсы в профиле.
+  ${GetOptions} $CMDLINE "/DELETEAPPDATA" $0
+  ${IfNot} ${Errors}
+    StrCpy $DeleteAppDataCheckboxState 1
+  ${EndIf}
 FunctionEnd
 
 Section Uninstall
@@ -830,9 +838,18 @@ Section Uninstall
 
   !insertmacro CheckIfAppIsRunning "$INSTDIR\${MAINBINARYNAME}.exe" "${PRODUCTNAME}"
 
+  ; Zapret Manager: полное удаление запускается из работающего приложения, и
+  ; его .exe ещё занят — Windows не даст стереть файл. Закрываем приложение и
+  ; оставшиеся процессы обхода, иначе удаление молча расставит флаги перезагрузки.
+  ; Это молчаливый режим: диалог «приложение запущено» пользователю не нужен.
+  ${If} ${Silent}
+    ExecWait '"$SYSDIR\taskkill.exe" /F /IM ${MAINBINARYNAME}.exe'
+    ExecWait '"$SYSDIR\taskkill.exe" /F /IM winws.exe'
+  ${EndIf}
+
   ; Delete the app directory and its content from disk
   ; Copy main executable
-  Delete "$INSTDIR\${MAINBINARYNAME}.exe"
+  Delete /REBOOTOK "$INSTDIR\${MAINBINARYNAME}.exe"
 
   ; Delete resources
   {{#each resources}}

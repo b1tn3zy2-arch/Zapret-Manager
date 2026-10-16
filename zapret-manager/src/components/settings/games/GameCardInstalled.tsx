@@ -29,7 +29,8 @@ export interface GameCardInstalledProps {
   onLaunch: () => void;
   onClose?: (() => void) | undefined;
   running?: boolean;
-  onRemove?: (() => void) | undefined;
+  removeLabel: string;
+  onRemove: () => void;
 }
 
 function GameCardInstalled({
@@ -44,6 +45,7 @@ function GameCardInstalled({
   onLaunch,
   onClose,
   running = false,
+  removeLabel,
   onRemove,
 }: GameCardInstalledProps) {
   const { t } = useI18n();
@@ -102,7 +104,7 @@ function GameCardInstalled({
         />
         <span
           className={cn(
-            "absolute top-2 left-2 rounded-full px-2 py-0.5 text-[11px] font-medium backdrop-blur",
+            "bg-bg-primary/85 text-text-secondary absolute top-2 left-2 rounded-full px-2 py-0.5 text-[11px] font-medium",
             "bg-bg-primary/70 text-text-secondary"
           )}
         >
@@ -132,14 +134,16 @@ function GameCardInstalled({
           {onRemove === undefined ? null : (
             <button
               type="button"
-              aria-label={t("settings.games.installed.removeManual")}
+              aria-label={removeLabel}
               onClick={(event) => {
                 event.stopPropagation();
                 onRemove();
               }}
               className={cn(
                 "text-text-secondary hover:text-accent-danger rounded-md p-1 transition-colors",
-                "hover:bg-glass-hover opacity-0 group-hover:opacity-100"
+                "hover:bg-glass-hover opacity-0 group-hover:opacity-100",
+                "focus-visible:ring-accent-primary/60 focus-visible:opacity-100",
+                "focus-visible:ring-2 focus-visible:outline-none"
               )}
             >
               <X aria-hidden="true" className="size-4" />

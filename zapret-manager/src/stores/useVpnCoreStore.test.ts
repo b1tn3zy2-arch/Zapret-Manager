@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 
 import {
   migratePersistedState,
@@ -20,6 +20,17 @@ function server(id: string): SubscriptionServer {
 }
 
 describe("useVpnCoreStore: удаление серверов", () => {
+  beforeEach(() => {
+    // стор живёт на уровне модуля, а скрытые идентификаторы накапливались
+    // между тестами и выбрасывали серверы из чужих сценариев
+    useVpnCoreStore.setState({
+      subscriptionUrl: "",
+      servers: [],
+      hiddenServerIds: [],
+      activeServerId: null,
+    });
+  });
+
   it("удаляет сервер из списка", () => {
     const store = useVpnCoreStore.getState();
 
@@ -53,6 +64,33 @@ describe("useVpnCoreStore: удаление серверов", () => {
     useVpnCoreStore.getState().removeServer("a");
 
     expect(useVpnCoreStore.getState().activeServerId).toBeNull();
+  });
+
+  it("добавляет серверы к существующим, не затирая список", () => {
+    // Вторая подписка не должна убирать первую: раньше любой импорт
+    // заменял список целиком.
+    const store = useVpnCoreStore.getState();
+
+    store.setServers([server("a")]);
+    useVpnCoreStore.getState().addServers([server("b"), server("c")]);
+
+    expect(useVpnCoreStore.getState().servers.map((item) => item.id)).toEqual([
+      "a",
+      "b",
+      "c",
+    ]);
+  });
+
+  it("не добавляет дубли и не возвращает удалённые", () => {
+    const store = useVpnCoreStore.getState();
+
+    store.setServers([server("a")]);
+    useVpnCoreStore.getState().removeServer("b");
+    useVpnCoreStore.getState().addServers([server("a"), server("b")]);
+
+    expect(useVpnCoreStore.getState().servers.map((item) => item.id)).toEqual([
+      "a",
+    ]);
   });
 
   it("очистка подписки снимает и скрытые серверы", () => {

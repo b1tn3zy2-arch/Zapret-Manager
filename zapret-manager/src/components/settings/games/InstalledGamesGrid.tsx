@@ -1,5 +1,4 @@
-import { motion } from "framer-motion";
-
+import CardEntrance from "@/components/shared/CardEntrance";
 import GameCardInstalled from "@/components/settings/games/GameCardInstalled";
 import { usePostProcessing } from "@/contexts/postProcessing";
 import { useI18n } from "@/i18n";
@@ -45,19 +44,13 @@ export default function InstalledGamesGrid({
       data-testid="installed-games-grid"
     >
       {games.map((game, index) => (
-        <motion.div
+        <CardEntrance
           key={game.id}
-          initial={
-            motionDisabled
-              ? false
-              : { opacity: 0, y: 16, filter: `blur(${blurPx}px)` }
-          }
-          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-          transition={{
-            duration: 0.3,
-            delay: motionDisabled ? 0 : Math.min(index * 0.03, 0.3),
-            ease: [0.16, 1, 0.3, 1],
-          }}
+          index={index}
+          maxDelaySeconds={0.3}
+          duration={0.3}
+          blurPx={blurPx}
+          disabled={motionDisabled}
         >
           <GameCardInstalled
             game={game}
@@ -83,15 +76,12 @@ export default function InstalledGamesGrid({
                     onCloseGame(game);
                   }
             }
-            onRemove={
-              game.manual === true
-                ? () => {
-                    onRemove(game);
-                  }
-                : undefined
-            }
+            removeLabel={t("settings.games.installed.removeGame")}
+            onRemove={() => {
+              onRemove(game);
+            }}
           />
-        </motion.div>
+        </CardEntrance>
       ))}
     </div>
   );

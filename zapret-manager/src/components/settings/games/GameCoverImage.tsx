@@ -1,6 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { useEffect, useState } from "react";
 
+import { coverHueFromName } from "@/lib/gameUtils";
 import { cn } from "@/lib/utils";
 import type { InstalledGame } from "@/types";
 
@@ -17,6 +18,7 @@ interface CoverSource {
 
 interface CoverFallbackProps {
   name: string;
+  pending: boolean;
   className?: string | undefined;
 }
 
@@ -62,7 +64,9 @@ function decodePngSize(
 
 export function GameCoverImage({ game, className, alt }: GameCoverImageProps) {
   const [sources, setSources] = useState<Record<string, CoverSource>>({});
+  const [misses, setMisses] = useState<Record<string, boolean>>({});
   const source = sources[game.id] ?? null;
+  const pending = source === null && misses[game.id] !== true;
 
   useEffect(() => {
     let active = true;
@@ -75,52 +79,98 @@ export function GameCoverImage({ game, className, alt }: GameCoverImageProps) {
       );
     };
 
-    void invoke<string | null>("game_cover", {
-      appid: game.appid ?? null,
-      cover: game.coverUrl ?? null,
-    })
-      .then(async (value) => {
-        if (!active) {
-          return;
-        }
+    const attempt = async (
+      command: string,
+      args: Record<string, unknown>
+    ): Promise<string | null> =>
+      invoke<string | null>(command, args).catch(() => null);
 
-        if (value !== null) {
-          store({ src: value, kind: "cover" });
+    /**
+     * Порядок источников выбран из соображений «скорость и надёжность»:
+     * 1) обложка, уже известная приложению (точное совпадение);
+     * 2) картинка из папки игры — работает офлайн и не врёт по названию;
+     * 3) иконка exe — тоже офлайн;
+     * 4) поиск в Steam по названию — единственный вариант, который ходит в
+     *    сеть, поэтому идёт последним и не блокирует остальные.
+     */
+    void (async () => {
+      const known = await attempt("game_cover", {
+        appid: game.appid ?? null,
+        cover: game.coverUrl ?? null,
+      });
 
-          return;
-        }
+      if (!active) {
+        return;
+      }
 
-        const steamCover = await invoke<string | null>("game_steam_cover", {
-          name: game.name,
-        }).catch(() => null);
+      if (known !== null) {
+        store({ src: known, kind: "cover" });
 
-        if (!active) {
-          return;
-        }
+        return;
+      }
 
-        if (steamCover !== null) {
-          store({ src: steamCover, kind: "cover" });
+      const fromFolder = await attempt("game_folder_cover", {
+        dir: game.installPath,
+      });
 
-          return;
-        }
+      if (!active) {
+        return;
+      }
 
-        const icon = await invoke<string | null>("game_exe_icon", {
-          path: game.executablePath,
-        }).catch(() => null);
+      if (fromFolder !== null) {
+        store({ src: fromFolder, kind: "cover" });
 
-        if (active && icon !== null) {
-          store({ src: icon, kind: "icon" });
-        }
-      })
-      .catch(() => undefined);
+        return;
+      }
+
+      const icon = await attempt("game_exe_icon", {
+        path: game.executablePath,
+      });
+
+      if (!active) {
+        return;
+      }
+
+      if (icon !== null) {
+        store({ src: icon, kind: "icon" });
+
+        return;
+      }
+
+      const fromSteam = await attempt("game_steam_cover", {
+        name: game.name,
+      });
+
+      if (!active) {
+        return;
+      }
+
+      if (fromSteam !== null) {
+        store({ src: fromSteam, kind: "cover" });
+
+        return;
+      }
+
+      // ни один источник ничего не дал — карточка покажет буквы, а не пустоту
+      setMisses((previous) => ({ ...previous, [game.id]: true }));
+    })();
 
     return () => {
       active = false;
     };
-  }, [game.appid, game.coverUrl, game.executablePath, game.id, game.name]);
+  }, [
+    game.appid,
+    game.coverUrl,
+    game.executablePath,
+    game.id,
+    game.installPath,
+    game.name,
+  ]);
 
   if (source === null) {
-    return <CoverFallback name={game.name} className={className} />;
+    return (
+      <CoverFallback name={game.name} pending={pending} className={className} />
+    );
   }
 
   if (source.kind === "icon") {
@@ -166,19 +216,40 @@ export function GameCoverImage({ game, className, alt }: GameCoverImageProps) {
   );
 }
 
-function CoverFallback({ name, className }: CoverFallbackProps) {
+/**
+ * Заглушка на время поиска картинки: спокойный фон без названия, чтобы карточка
+ * не мигала буквами и потом не подменялась картинкой.
+ *
+ * Если все источники ничего не нашли, показываем не пустой градиент, а обложку,
+ * собранную из названия: цвет подбирается по хэшу имени, поэтому у игры всегда
+ * есть узнаваемая картинка, а не серое место.
+ */
+function CoverFallback({ name, pending, className }: CoverFallbackProps) {
+  const hue = coverHueFromName(name);
+
   return (
     <span
       aria-hidden="true"
       className={cn(
-        "from-accent-primary/25 via-accent-secondary/20 to-bg-secondary flex size-full items-end",
-        "bg-gradient-to-br p-3",
+        "flex size-full items-center justify-center",
+        pending ? "bg-glass-bg" : "",
         className
       )}
+      style={
+        pending
+          ? undefined
+          : {
+              background: `linear-gradient(150deg, hsl(${hue} 58% 32%) 0%, hsl(${(hue + 38) % 360} 52% 14%) 78%)`,
+            }
+      }
     >
-      <span className="text-text-secondary text-sm font-semibold">
-        {name.slice(0, 2).toUpperCase()}
-      </span>
+      {pending ? (
+        <span className="bg-glass-hover/60 block h-5 w-10 animate-pulse rounded" />
+      ) : (
+        <span className="text-text-primary/80 text-2xl font-bold tracking-wide">
+          {name.slice(0, 2).toUpperCase()}
+        </span>
+      )}
     </span>
   );
 }

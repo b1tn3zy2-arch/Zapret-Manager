@@ -182,3 +182,57 @@ fn test_is_domain_like_allows_zapret_syntax() {
     assert!(!is_domain_like("a;b"));
     assert!(!is_domain_like("value with = sign"));
 }
+
+#[test]
+fn test_retention_seconds_respects_bounds() {
+    assert_eq!(retention_seconds(0), 86_400);
+    assert_eq!(retention_seconds(1), 86_400);
+    assert_eq!(retention_seconds(7), 7 * 86_400);
+    assert_eq!(retention_seconds(365), 365 * 86_400);
+    assert_eq!(retention_seconds(100_000), 365 * 86_400);
+}
+
+#[test]
+fn test_prune_log_dir_keeps_fresh_and_drops_old() {
+    let dir = temp_dir("zapret-system-prune");
+
+    let fresh = dir.join("fresh.log");
+    std::fs::write(&fresh, b"fresh log").unwrap();
+
+    let old = dir.join("old.log");
+    std::fs::write(&old, b"old log").unwrap();
+
+    // отсечка в будущем означает «уже старше срока» — свежий файл тоже под нож,
+    // поэтому проверяем наоборот: отсечка в прошлом не трогает ничего
+    let past = std::time::SystemTime::now() - std::time::Duration::from_secs(86_400);
+
+    assert_eq!(prune_log_dir(&dir, past), 0);
+    assert!(fresh.exists());
+    assert!(old.exists());
+
+    let future = std::time::SystemTime::now() + std::time::Duration::from_secs(86_400);
+
+    assert_eq!(prune_log_dir(&dir, future), 2);
+    assert!(!fresh.exists());
+    assert!(!old.exists());
+
+    let _ = std::fs::remove_dir_all(&dir);
+}
+
+#[test]
+fn test_prune_log_dir_ignores_missing_dir() {
+    let missing = std::env::temp_dir().join("zapret-system-prune-missing");
+
+    assert_eq!(
+        prune_log_dir(&missing, std::time::SystemTime::now()),
+        0
+    );
+}
+
+#[test]
+fn test_uninstaller_path_reports_missing_installer() {
+    // cargo test запускает битник рядом с исходниками, деинсталлятора там нет
+    let error = uninstaller_path().expect_err("ожидаем ошибку без установщика");
+
+    assert!(error.to_string().contains("portable"));
+}

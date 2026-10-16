@@ -28,7 +28,7 @@ fn test_adler32_known_value() {
 }
 
 #[test]
-fn test_pick_group_entry_prefers_largest() {
+fn test_group_entries_prefers_largest_first() {
     let mut bytes = vec![0u8; 6];
     bytes[4] = 2;
 
@@ -37,19 +37,44 @@ fn test_pick_group_entry_prefers_largest() {
     // entry 1: 48x48, id 9
     bytes.extend_from_slice(&[48, 48, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 9, 0]);
 
-    let entry = pick_group_entry(&bytes).expect("entry");
+    let entries = group_entries(&bytes).expect("entries");
 
-    assert_eq!(entry.width, 48);
-    assert_eq!(entry.nid, 9);
+    assert_eq!(entries.len(), 2);
+    assert_eq!(entries[0].width, 48);
+    assert_eq!(entries[0].nid, 9);
+    assert_eq!(entries[1].width, 16);
+    assert_eq!(entries[1].nid, 7);
+}
+
+/// Нулевой байт размера в группе означает 256 px — самый крупный кадр, какой
+/// вообще бывает в exe. Он обязан попадать в список первым.
+#[test]
+fn test_group_entries_accepts_256_and_puts_it_first() {
+    let mut bytes = vec![0u8; 6];
+    bytes[4] = 2;
+
+    bytes.extend_from_slice(&[32, 32, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 3, 0]);
+    bytes.extend_from_slice(&[0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 4, 0]);
+
+    let entries = group_entries(&bytes).expect("entries");
+
+    assert_eq!(entries.len(), 2);
+    assert_eq!(entries[0].width, 256);
+    assert_eq!(entries[0].height, 256);
+    assert_eq!(entries[0].nid, 4);
 }
 
 #[test]
-fn test_pick_group_entry_skips_oversized() {
+fn test_group_entries_truncated_input_is_safe() {
     let mut bytes = vec![0u8; 6];
-    bytes[4] = 1;
-    bytes.extend_from_slice(&[0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 5, 0]);
+    bytes[4] = 4;
 
-    assert!(pick_group_entry(&bytes).is_none());
+    bytes.extend_from_slice(&[16, 16, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 7, 0]);
+
+    let entries = group_entries(&bytes).expect("entries");
+
+    assert_eq!(entries.len(), 1);
+    assert!(group_entries(&[0, 0, 0]).is_none());
 }
 
 #[test]

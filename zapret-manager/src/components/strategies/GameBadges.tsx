@@ -31,9 +31,11 @@ export default function GameBadges({ compact = false }: GameBadgesProps) {
   const rest = games.length - visible.length;
 
   const chip = cn(
-    "text-accent-primary border-accent-primary/40 bg-bg-primary/50 inline-flex items-center gap-1",
+    "text-accent-primary border-accent-primary/40 bg-bg-primary/85 inline-flex items-center gap-1",
     "rounded-full border px-2 py-0.5 font-medium",
-    compact ? "text-[10px] backdrop-blur" : "text-xs"
+    // без backdrop-blur: этот фильтр лежит внутри 3D-контекста карточки и
+    // схлопывает preserve-3d, из-за чего переворот теряет объём
+    compact ? "text-[10px]" : "text-xs"
   );
 
   const hint = games.map((game) => game.name).join(", ");

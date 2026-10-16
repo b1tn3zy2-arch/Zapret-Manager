@@ -1,16 +1,21 @@
 import { useState } from "react";
-import { Trash2 } from "lucide-react";
+import { PowerOff, Trash2 } from "lucide-react";
 
 import { Button, Input, Modal, Text } from "@/components/ui";
 import { useI18n } from "@/i18n";
-import { deleteAllBackups, deleteAllLogs } from "@/hooks/useSystemInfo";
+import {
+  deleteAllBackups,
+  deleteAllLogs,
+  fullUninstall,
+  quitApp,
+} from "@/hooks/useSystemInfo";
 import { toErrorMessage } from "@/lib/utils";
 import { useLogsStore } from "@/stores/useLogsStore";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 
 const DANGER_CONFIRM = "DELETE";
 
-export type DangerAction = "reset" | "logs" | "backups";
+export type DangerAction = "reset" | "logs" | "backups" | "uninstall";
 
 function DangerZone() {
   const { t } = useI18n();
@@ -102,6 +107,27 @@ function DangerZone() {
       }
     }
 
+    if (danger === "uninstall") {
+      // Деинсталлятор закрывает приложение и удаляет всё, включая профиль.
+      // Портативная сборка установщика не имеет — тогда сообщаем честно.
+      try {
+        await fullUninstall();
+        await quitApp();
+      } catch (caught) {
+        addLog({
+          level: "error",
+          source: "user",
+          message: toErrorMessage(caught),
+        });
+
+        close();
+
+        return;
+      }
+
+      return;
+    }
+
     close();
   };
 
@@ -147,14 +173,32 @@ function DangerZone() {
           >
             {t("settings.advanced.deleteBackups")}
           </Button>
+          <Button
+            size="sm"
+            variant="danger"
+            onClick={() => {
+              open("uninstall");
+            }}
+            icon={<PowerOff aria-hidden="true" className="size-4" />}
+          >
+            {t("settings.advanced.uninstallApp")}
+          </Button>
         </div>
       </div>
 
       <Modal
         open={danger !== null}
         onClose={close}
-        title={t("settings.advanced.danger")}
-        description={t("settings.common.deleteConfirmPlaceholder")}
+        title={t(
+          danger === "uninstall"
+            ? "settings.advanced.uninstallTitle"
+            : "settings.advanced.danger"
+        )}
+        description={t(
+          danger === "uninstall"
+            ? "settings.advanced.uninstallHint"
+            : "settings.common.deleteConfirmPlaceholder"
+        )}
         size="sm"
         footer={
           <>

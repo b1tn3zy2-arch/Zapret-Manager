@@ -1,5 +1,4 @@
-import { motion } from "framer-motion";
-
+import CardEntrance from "@/components/shared/CardEntrance";
 import StrategyCard from "@/components/strategies/StrategyCard";
 import { StrategyGameCardItem } from "@/components/strategies/game/StrategyGameCard";
 import { usePostProcessing } from "@/contexts/postProcessing";
@@ -56,24 +55,12 @@ function StrategyCollection({
   return (
     <div className="cards-container card-grid">
       {cards.map((card, index) => (
-        <motion.div
+        <CardEntrance
           key={card.strategy.id}
-          initial={
-            motionDisabled
-              ? false
-              : {
-                  opacity: 0,
-                  y: 24,
-                  scale: 0.97,
-                  filter: `blur(${blurPx}px)`,
-                }
-          }
-          animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-          transition={{
-            duration: 0.45,
-            delay: motionDisabled ? 0 : Math.min(index * 0.04, 0.5),
-            ease: [0.16, 1, 0.3, 1],
-          }}
+          index={index}
+          maxDelaySeconds={0.5}
+          blurPx={blurPx}
+          disabled={motionDisabled}
         >
           <StrategyGameCardItem
             card={card}
@@ -86,7 +73,7 @@ function StrategyCollection({
             onStop={onStop}
             onOpenFolder={onOpenFolder}
           />
-        </motion.div>
+        </CardEntrance>
       ))}
     </div>
   );

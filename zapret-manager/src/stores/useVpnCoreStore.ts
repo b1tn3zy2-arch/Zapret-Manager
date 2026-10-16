@@ -21,6 +21,8 @@ export interface VpnCoreStoreState {
   setSubscriptionUrl: (url: string) => void;
   clearSubscription: () => void;
   setServers: (servers: SubscriptionServer[]) => void;
+  /** Добавляет серверы к текущим, не затирая уже загруженные. */
+  addServers: (servers: SubscriptionServer[]) => void;
   removeServer: (id: string) => void;
   setActiveServer: (id: string | null) => void;
   setStatus: (status: XrayStatus | null) => void;
@@ -98,6 +100,23 @@ export const useVpnCoreStore = create<VpnCoreStoreState>()(
               ? state.activeServerId
               : null,
         })),
+      addServers: (incoming) =>
+        set((state) => {
+          const known = new Set(state.servers.map((server) => server.id));
+          const added = incoming.filter(
+            (server) =>
+              !known.has(server.id) &&
+              !state.hiddenServerIds.includes(server.id)
+          );
+
+          if (added.length === 0) {
+            return state;
+          }
+
+          const servers = [...state.servers, ...added];
+
+          return { servers };
+        }),
       removeServer: (id) =>
         set((state) => ({
           hiddenServerIds: state.hiddenServerIds.includes(id)

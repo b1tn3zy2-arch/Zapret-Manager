@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use serde::Serialize;
 use tauri::AppHandle;
 use tauri_plugin_opener::OpenerExt;
@@ -15,6 +17,15 @@ pub const FOLDER_BACKUPS: &str = "backups";
 pub const BACKUP_DIR_NAME: &str = "backup";
 
 const MAX_CHECKED_FILES: usize = 64;
+
+/// Те же границы, что и в настройках приложения, — чтобы Rust и интерфейс
+/// не разошлись в том, что считается допустимым сроком хранения.
+const MIN_LOG_RETENTION_DAYS: u32 = 1;
+const MAX_LOG_RETENTION_DAYS: u32 = 365;
+
+/// Деинсталлятор NSIS лежит рядом с exe и удаляет настройки только по флагу.
+const UNINSTALLER_FILE: &str = "uninstall.exe";
+const UNINSTALLER_DELETE_APPDATA: &str = "/DELETEAPPDATA";
 
 pub const UNKNOWN_VERSION: &str = "неизвестно";
 
@@ -277,6 +288,108 @@ pub fn remove_logs(dir: &std::path::Path) -> AppResult<usize> {
 #[tauri::command]
 pub fn delete_all_logs() -> AppResult<usize> {
     remove_logs(&logs_dir())
+}
+
+/// Сколько секунд живёт файл при таком сроке хранения.
+fn retention_seconds(days: u32) -> u64 {
+    u64::from(days.clamp(MIN_LOG_RETENTION_DAYS, MAX_LOG_RETENTION_DAYS))
+        * 24 * 60 * 60
+}
+
+/// Удаление файлов журнала, которые старше отсечки.
+///
+/// Чистятся обе папки: журнал приложения (`%APPDATA%\com.zapretmanager.app\logs`,
+/// он переживает перезапуск) и временные логи запусков (`%TEMP%\zapret-manager\logs`).
+/// Настройка «хранить логи N дней» была чистым украшением — файлы копились, пока
+/// сам журнал не переполнялся на 1 МБ и не уходил в ротацию.
+pub fn prune_log_dir(dir: &std::path::Path, cutoff: std::time::SystemTime) -> usize {
+    if !dir.is_dir() {
+        return 0;
+    }
+
+    let Ok(entries) = std::fs::read_dir(dir) else {
+        return 0;
+    };
+
+    entries
+        .flatten()
+        .filter(|entry| entry.path().is_file())
+        .filter(|entry| {
+            entry
+                .metadata()
+                .and_then(|meta| meta.modified())
+                .map(|modified| modified < cutoff)
+                .unwrap_or(false)
+        })
+        .filter(|entry| std::fs::remove_file(entry.path()).is_ok())
+        .count()
+}
+
+/// Применяет срок хранения журналов. Возвращает число удалённых файлов.
+#[tauri::command]
+pub fn prune_logs(retention_days: u32) -> AppResult<usize> {
+    let Some(cutoff) = std::time::SystemTime::now()
+        .checked_sub(std::time::Duration::from_secs(retention_seconds(retention_days)))
+    else {
+        return Ok(0);
+    };
+
+    let mut removed = prune_log_dir(&logs_dir(), cutoff);
+
+    // журнал приложения живёт в профиле; без APPDATA его просто не бывает
+    if let Ok(app_dir) = crate::security::app_log_dir() {
+        removed += prune_log_dir(&app_dir, cutoff);
+    }
+
+    Ok(removed)
+}
+
+/// Путь к деинсталлятору рядом с приложением.
+///
+/// Ищем `uninstall.exe`, который кладёт рядом NSIS-установщик Taurи. Portable-сборка
+/// установщика не имеет, и об этом честно сообщаем, а не делаем вид, что удалили.
+pub fn uninstaller_path() -> AppResult<PathBuf> {
+    let dir = std::env::current_exe()?.parent().map(PathBuf::from);
+
+    let Some(dir) = dir else {
+        return Err(AppError::custom("Не удалось определить папку приложения"));
+    };
+
+    let path = dir.join(UNINSTALLER_FILE);
+
+    if !path.is_file() {
+        return Err(AppError::custom(
+            "Приложение установлено без установщика (portable). Удалите папку вручную.",
+        ));
+    }
+
+    Ok(path)
+}
+
+/// Полное удаление приложения: запускает деинсталлятор в тихом режиме вместе с
+/// удалением настроек, логов и кэша.
+///
+/// Деинсталлятор закрывает само приложение и winws.exe сам: работающий `.exe`
+/// Windows не даёт удалить, поэтому приложение обязано уйти раньше. Пользователь
+/// ждёт этого от кнопки, а не диалога «приложение запущено, закрыть?».
+#[tauri::command]
+pub fn full_uninstall() -> AppResult<()> {
+    use crate::winapi_helpers::HiddenWindow;
+
+    let uninstaller = uninstaller_path()?;
+
+    std::process::Command::new(&uninstaller)
+        .arg("/S")
+        .arg(UNINSTALLER_DELETE_APPDATA)
+        .hidden()
+        .spawn()
+        .map_err(|error| {
+            AppError::custom(format!("Не удалось запустить удаление: {error}"))
+        })?;
+
+    tracing::info!("Запущено полное удаление приложения");
+
+    Ok(())
 }
 
 #[cfg(test)]

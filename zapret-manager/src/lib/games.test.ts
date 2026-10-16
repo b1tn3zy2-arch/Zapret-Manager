@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { BUILTIN_GAMES, getDefaultGames } from "@/lib/defaultGames";
 import {
   countFilled,
+  coverHueFromName,
   enabledGames,
   formatGameStats,
   generateGameId,
@@ -211,5 +212,24 @@ describe("файл игры", () => {
       ipRanges: [],
       ports: [27015],
     });
+  });
+});
+
+describe("цвет запасной обложки игры", () => {
+  it("стабилен для одного и того же названия", () => {
+    expect(coverHueFromName("Portal 2")).toBe(coverHueFromName("Portal 2"));
+  });
+
+  it("даёт разные оттенки для разных игр", () => {
+    expect(coverHueFromName("Portal 2")).not.toBe(coverHueFromName("Doom"));
+  });
+
+  it("всегда попадает в круг оттенков", () => {
+    for (const name of ["A", "Outlast Trials", "The Long Dark", ""]) {
+      const hue = coverHueFromName(name);
+
+      expect(hue).toBeGreaterThanOrEqual(0);
+      expect(hue).toBeLessThan(360);
+    }
   });
 });

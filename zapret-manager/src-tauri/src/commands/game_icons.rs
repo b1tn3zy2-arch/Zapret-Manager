@@ -12,7 +12,11 @@ use winapi::um::winuser::{DestroyIcon, RT_GROUP_ICON, RT_ICON};
 
 const LOAD_LIBRARY_AS_DATAFILE: u32 = 0x0000_0002;
 
-const MAX_ICON_DIM: usize = 128;
+/// Максимальный размер иконки, которую готовы отдать в интерфейс. Раньше было
+/// 128: на карточке 300+ px такая иконка заметно мылилась. 256 — это размер,
+/// который Windows кладёт в exe последних лет, и он уже не раздувается при
+/// последующем масштабировании.
+const MAX_ICON_DIM: usize = 256;
 
 pub fn exe_icon_data_uri(path: &Path) -> Option<String> {
     if !path.is_file() {
@@ -45,10 +49,24 @@ fn resource_icon(path: &Path) -> Option<(usize, usize, Vec<u8>)> {
 
     let result = (|| {
         let group = resource_bytes(module, RT_GROUP_ICON, 1)?;
-        let entry = pick_group_entry(&group)?;
-        let image = resource_bytes(module, RT_ICON, u32::from(entry.nid))?;
+        let candidates = group_entries(&group)?;
 
-        decode_icon_image(&image, entry.width, entry.height)
+        // Современные exe кладут в RT_ICON картинку в формате PNG, которую
+        // наш распаковщик DIB не читает. Поэтому идём от крупных к мелким и
+        // берём первую, которую реально удалось распаковать: иначе на таких
+        // играх мы молча получали бы иконку 32×32 из кэша оболочки вместо
+        // нормальной 256×256 или 48×48 из ресурсов.
+        for entry in candidates {
+            let Some(image) = resource_bytes(module, RT_ICON, u32::from(entry.nid)) else {
+                continue;
+            };
+
+            if let Some(decoded) = decode_icon_image(&image, entry.width, entry.height) {
+                return Some(decoded);
+            }
+        }
+
+        None
     })();
 
     unsafe { FreeLibrary(module) };
@@ -95,19 +113,20 @@ fn make_int_resource(value: u32) -> Vec<u16> {
     vec![(value & 0xffff) as u16, (value >> 16) as u16]
 }
 
-struct GroupEntry {
+pub struct GroupEntry {
     width: usize,
     height: usize,
     nid: u16,
 }
 
-fn pick_group_entry(bytes: &[u8]) -> Option<GroupEntry> {
+/// Все подходящие кадры группы, от крупных к мелким.
+pub fn group_entries(bytes: &[u8]) -> Option<Vec<GroupEntry>> {
     if bytes.len() < 6 {
         return None;
     }
 
     let count = read_u16(bytes, 4)? as usize;
-    let mut best: Option<GroupEntry> = None;
+    let mut entries: Vec<GroupEntry> = Vec::new();
 
     for index in 0..count {
         let offset = 6 + index * 14;
@@ -124,23 +143,25 @@ fn pick_group_entry(bytes: &[u8]) -> Option<GroupEntry> {
             0 => 256,
             value => usize::from(value),
         };
-        let nid = read_u16(bytes, offset + 12)?;
 
         if width > MAX_ICON_DIM || height > MAX_ICON_DIM {
             continue;
         }
 
-        let better = best
-            .as_ref()
-            .map(|current| width * height > current.width * current.height)
-            .unwrap_or(true);
+        let Some(nid) = read_u16(bytes, offset + 12) else {
+            continue;
+        };
 
-        if better {
-            best = Some(GroupEntry { width, height, nid });
-        }
+        entries.push(GroupEntry { width, height, nid });
     }
 
-    best
+    entries.sort_by(|left, right| {
+        (right.width * right.height)
+            .cmp(&(left.width * left.height))
+            .then_with(|| left.nid.cmp(&right.nid))
+    });
+
+    Some(entries)
 }
 
 fn decode_icon_image(bytes: &[u8], width: usize, height: usize) -> Option<(usize, usize, Vec<u8>)> {

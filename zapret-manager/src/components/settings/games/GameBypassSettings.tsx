@@ -217,9 +217,6 @@ export default function GameBypassSettings({
           >
             {t("settings.games.reset")}
           </Button>
-          <Text variant="caption" size="sm" className="text-text-tertiary">
-            {t("settings.games.hint")}
-          </Text>
         </>
       ) : null}
     </section>

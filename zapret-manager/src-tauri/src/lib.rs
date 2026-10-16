@@ -10,6 +10,7 @@ mod strategy;
 pub mod tray;
 mod tray_menu;
 mod window_behavior;
+mod window_ext;
 mod winapi_helpers;
 
 pub use error::{AppError, AppResult};
@@ -69,6 +70,7 @@ pub fn run() {
             commands::game_launcher::close_game,
             commands::game_covers::game_cover,
             commands::game_covers::game_steam_cover,
+            commands::game_covers::game_folder_cover,
             commands::game_covers::import_game_cover,
             commands::game_covers::game_exe_icon,
             commands::updater::check_for_updates,
@@ -86,6 +88,8 @@ commands::system::get_system_info,
             commands::system::system_toasts_enabled,
             commands::system::delete_all_backups,
             commands::system::delete_all_logs,
+            commands::system::prune_logs,
+            commands::system::full_uninstall,
             commands::user_files::open_external_url,
             commands::user_files::read_user_text_file,
             commands::user_files::write_user_text_file,
@@ -136,6 +140,13 @@ commands::resources_commands::read_license_text,
             let handle = app.handle().clone();
             let state = handle.state::<process_manager::ProcessManager>();
             window_behavior::register(&handle);
+
+            // системное меню окна вылезает по правому клику на шапке и по
+            // Alt+Пробел; у приложения своё меню, поэтому гасим лишнее
+            if let Some(window) = app.get_webview_window(tray::WINDOW_LABEL) {
+                window_ext::suppress_system_menu(&window);
+            }
+
             tray::register(&handle);
             tauri::async_runtime::block_on(async {
                 commands::runner::cleanup_orphans(&handle, &state).await;

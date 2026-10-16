@@ -39,9 +39,18 @@ export function useVpnCore(): UseVpnCoreResult {
 
       try {
         const result = await commands.importVpnSource(text);
+        const sourceUrl = result.subscriptionUrl ?? "";
 
-        store.setServers(result.servers);
-        store.setSubscriptionUrl(result.subscriptionUrl ?? "");
+        // Повторная загрузка той же подписки обновляет список, а новая
+        // ссылка добавляется к уже загруженным серверам. Раньше любой импорт
+        // затирал список целиком, и вторая подписка убирала первую.
+        if (sourceUrl !== "" && sourceUrl === store.subscriptionUrl) {
+          store.setServers(result.servers);
+        } else {
+          store.addServers(result.servers);
+        }
+
+        store.setSubscriptionUrl(sourceUrl);
         addLog({
           level: "success",
           source: "vpn",

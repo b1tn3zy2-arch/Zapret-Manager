@@ -359,14 +359,13 @@
 
 .strategy-card-halo,
 .strategy-card-halo-pulse {
+  /* inset вместо left/top + translate: анимация ниже задаёт transform целиком
+     и затирала бы центрирующий translate(-50%, -50%), из-за чего свечение
+     съезжало на пол-карточки вниз-вправо */
   position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   border-radius: 0.875rem;
   pointer-events: none;
-  transform: translate(-50%, -50%);
   will-change: opacity, transform;
 }
 
@@ -440,4 +439,136 @@ html[data-animations="off"] .sidebar-active-indicator {
 
 [data-animations="off"] .strategy-card-chromatic {
   transition: none;
+}
+
+/* Переливающееся свечение (bloom).
+
+   Раньше свечение было статичным box-shadow: цвет горел ровно до наведения и
+   выглядел как залитая заливка. Теперь по элементу ходит мягкое пятно, а край
+   слегка «дышит».
+
+   Двигаются только зарегистрированные свойства --bloom-x/--bloom-y, поэтому
+   браузер умеет интерполировать их между кадрами, а не перерисовывает весь
+   элемент с нуля. Регистрация через @property обязательна: без неё переменная
+   без типа считается строкой и анимация проскакивает крайними значениями. */
+@property --bloom-x {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 12%;
+}
+
+@property --bloom-y {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 50%;
+}
+
+@property --bloom-breathe {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0.55;
+}
+
+.bloom-flow {
+  --bloom-color: var(--color-accent-primary);
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: var(--bloom-breathe);
+  background: radial-gradient(
+    58% 58% at var(--bloom-x) var(--bloom-y),
+    var(--bloom-color) 0%,
+    transparent 72%
+  );
+  animation:
+    bloom-flow-drift calc(7s * var(--duration-scale, 1))
+      cubic-bezier(0.45, 0, 0.55, 1) infinite,
+    bloom-flow-breathe calc(3.4s * var(--duration-scale, 1)) ease-in-out
+      infinite;
+  will-change: opacity;
+  mix-blend-mode: screen;
+}
+
+@keyframes bloom-flow-drift {
+  0% {
+    --bloom-x: 12%;
+    --bloom-y: 6%;
+  }
+
+  25% {
+    --bloom-x: 88%;
+    --bloom-y: 18%;
+  }
+
+  50% {
+    --bloom-x: 74%;
+    --bloom-y: 92%;
+  }
+
+  75% {
+    --bloom-x: 16%;
+    --bloom-y: 76%;
+  }
+
+  100% {
+    --bloom-x: 12%;
+    --bloom-y: 6%;
+  }
+}
+
+@keyframes bloom-flow-breathe {
+  0%,
+  100% {
+    --bloom-breathe: 0.45;
+  }
+
+  50% {
+    --bloom-breathe: 0.75;
+  }
+}
+
+/* Кольцо по краю: даёт ощущение движения, а не просто пятна внутри. */
+.bloom-flow-edge {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  padding: 1px;
+  background: conic-gradient(
+    from var(--bloom-angle),
+    transparent 0deg,
+    var(--bloom-color) 60deg,
+    transparent 140deg,
+    transparent 360deg
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.75;
+  animation: bloom-flow-edge calc(5s * var(--duration-scale, 1)) linear infinite;
+}
+
+@property --bloom-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes bloom-flow-edge {
+  from {
+    --bloom-angle: 0deg;
+  }
+
+  to {
+    --bloom-angle: 360deg;
+  }
+}
+
+[data-animations="off"] .bloom-flow,
+[data-animations="off"] .bloom-flow-edge {
+  animation: none;
 }

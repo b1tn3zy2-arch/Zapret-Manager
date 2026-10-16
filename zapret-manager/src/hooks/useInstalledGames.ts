@@ -14,8 +14,10 @@ export interface UseInstalledGamesResult {
   progress: GameScanProgress | null;
   error: string | null;
   lastScannedAt: number | null;
+  hiddenCount: number;
   addManualGame: (game: InstalledGame) => void;
   removeGame: (id: string) => void;
+  restoreHiddenGames: () => Promise<void>;
   updateGame: (id: string, patch: Partial<InstalledGame>) => void;
   addFolder: (folder: string) => Promise<void>;
   rescan: () => Promise<void>;
@@ -25,6 +27,7 @@ export interface UseInstalledGamesResult {
 export function useInstalledGames(): UseInstalledGamesResult {
   const games = useInstalledGamesStore((state) => state.games);
   const folders = useInstalledGamesStore((state) => state.folders);
+  const hiddenIds = useInstalledGamesStore((state) => state.hiddenIds);
   const scanStatus = useInstalledGamesStore((state) => state.scanStatus);
   const progress = useInstalledGamesStore((state) => state.scanProgress);
   const error = useInstalledGamesStore((state) => state.error);
@@ -50,6 +53,11 @@ export function useInstalledGames(): UseInstalledGamesResult {
 
   const removeGame = useCallback((id: string) => {
     useInstalledGamesStore.getState().removeGame(id);
+  }, []);
+
+  const restoreHiddenGames = useCallback(async () => {
+    useInstalledGamesStore.getState().restoreHiddenGames();
+    await scanInstalledGames();
   }, []);
 
   const updateGame = useCallback(
@@ -84,8 +92,10 @@ export function useInstalledGames(): UseInstalledGamesResult {
       progress,
       error,
       lastScannedAt,
+      hiddenCount: hiddenIds.length,
       addManualGame,
       removeGame,
+      restoreHiddenGames,
       updateGame,
       addFolder,
       removeFolder,
@@ -94,12 +104,14 @@ export function useInstalledGames(): UseInstalledGamesResult {
     [
       games,
       folders,
+      hiddenIds.length,
       scanStatus,
       progress,
       error,
       lastScannedAt,
       addManualGame,
       removeGame,
+      restoreHiddenGames,
       updateGame,
       addFolder,
       removeFolder,

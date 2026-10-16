@@ -70,3 +70,21 @@ export async function deleteAllBackups(strategiesDir: string): Promise<number> {
 export async function deleteAllLogs(): Promise<number> {
   return secureInvoke<number>("delete_all_logs");
 }
+
+/** Убирает журналы старше указанного срока и возвращает их количество. */
+export async function pruneLogs(retentionDays: number): Promise<number> {
+  return secureInvoke<number>("prune_logs", { retentionDays });
+}
+
+/**
+ * Запускает деинсталлятор в тихом режиме вместе с удалением настроек,
+ * логов и кэша. Приложение должно уйти сразу после вызова.
+ */
+export async function fullUninstall(): Promise<void> {
+  await secureInvoke<null>("full_uninstall");
+}
+
+/** Завершение приложения с остановкой процессов обхода. */
+export async function quitApp(): Promise<void> {
+  await secureInvoke<null>("quit_app");
+}

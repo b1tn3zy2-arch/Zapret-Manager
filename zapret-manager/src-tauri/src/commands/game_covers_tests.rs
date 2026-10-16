@@ -71,3 +71,89 @@ fn test_pick_steam_appid_returns_none_without_match() {
 fn test_encode_term_escapes_spaces() {
     assert_eq!(encode_term("escape the backrooms"), "escape%20the%20backrooms");
 }
+
+fn temp_game_dir(name: &str) -> PathBuf {
+    let dir = std::env::temp_dir().join(format!("zapret-cover-{name}"));
+
+    let _ = std::fs::remove_dir_all(&dir);
+    std::fs::create_dir_all(&dir).expect("папка создана");
+
+    dir
+}
+
+#[test]
+fn test_pick_folder_cover_prefers_library_cover() {
+    let dir = temp_game_dir("prefer");
+
+    std::fs::write(dir.join("logo.png"), b"tiny").unwrap();
+    std::fs::write(dir.join("library_600x900.jpg"), b"cover").unwrap();
+    std::fs::write(dir.join("screenshot.jpg"), b"huge payload").unwrap();
+
+    let picked = pick_folder_cover(&dir).expect("обложка найдена");
+
+    assert_eq!(
+        picked.file_name().and_then(|name| name.to_str()),
+        Some("library_600x900.jpg")
+    );
+
+    let _ = std::fs::remove_dir_all(&dir);
+}
+
+#[test]
+fn test_pick_folder_cover_is_case_insensitive() {
+    let dir = temp_game_dir("case");
+
+    std::fs::write(dir.join("Cover.JPG"), b"cover").unwrap();
+    std::fs::write(dir.join("random.jpg"), b"whatever").unwrap();
+
+    let picked = pick_folder_cover(&dir).expect("обложка найдена");
+
+    assert_eq!(
+        picked.file_name().and_then(|name| name.to_str()),
+        Some("Cover.JPG")
+    );
+
+    let _ = std::fs::remove_dir_all(&dir);
+}
+
+#[test]
+fn test_pick_folder_cover_falls_back_to_largest_image() {
+    let dir = temp_game_dir("largest");
+
+    std::fs::write(dir.join("small.jpg"), b"12").unwrap();
+    std::fs::write(dir.join("big.png"), vec![7_u8; 512]).unwrap();
+    std::fs::write(dir.join("notes.txt"), b"ignored").unwrap();
+
+    let picked = pick_folder_cover(&dir).expect("обложка найдена");
+
+    assert_eq!(
+        picked.file_name().and_then(|name| name.to_str()),
+        Some("big.png")
+    );
+
+    let _ = std::fs::remove_dir_all(&dir);
+}
+
+#[test]
+fn test_pick_folder_cover_ignores_unsupported_files() {
+    let dir = temp_game_dir("unsupported");
+
+    std::fs::write(dir.join("config.ini"), vec![0_u8; 4096]).unwrap();
+    std::fs::write(dir.join("data.bin"), vec![0_u8; 4096]).unwrap();
+
+    assert!(pick_folder_cover(&dir).is_none());
+
+    let _ = std::fs::remove_dir_all(&dir);
+}
+
+#[test]
+fn test_pick_folder_cover_skips_subfolders() {
+    let dir = temp_game_dir("subfolders");
+
+    std::fs::create_dir_all(dir.join("Art")).unwrap();
+    std::fs::write(dir.join("Art").join("cover.jpg"), b"nested").unwrap();
+
+    assert!(pick_folder_cover(&dir).is_none());
+
+    let _ = std::fs::remove_dir_all(&dir);
+}

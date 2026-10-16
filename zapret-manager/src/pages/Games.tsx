@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { FolderPlus, Plus, RefreshCw } from "lucide-react";
+import { FolderPlus, Plus, RefreshCw, Undo2 } from "lucide-react";
 
 import AddGameDialog from "@/components/settings/games/AddGameDialog";
 import GameBypassSettings from "@/components/settings/games/GameBypassSettings";
@@ -7,13 +7,14 @@ import GameFoldersDialog from "@/components/settings/games/GameFoldersDialog";
 import GameLaunchPrompt from "@/components/settings/games/GameLaunchPrompt";
 import GameScanIndicator from "@/components/settings/games/GameScanIndicator";
 import InstalledGamesGrid from "@/components/settings/games/InstalledGamesGrid";
-import { Button, Heading, Text } from "@/components/ui";
+import { Button, Heading, Modal, Text } from "@/components/ui";
 import { useI18n } from "@/i18n";
 import { useGameLauncher } from "@/hooks/useGameLauncher";
 import { useInstalledGames } from "@/hooks/useInstalledGames";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { isBypassEnabled } from "@/lib/installedGames";
 import { useSettingsStore } from "@/stores/useSettingsStore";
+import type { InstalledGame } from "@/types";
 
 export default function Games() {
   const { t } = useI18n();
@@ -22,8 +23,10 @@ export default function Games() {
     folders,
     scanStatus,
     progress,
+    hiddenCount,
     addManualGame,
     removeGame,
+    restoreHiddenGames,
     addFolder,
     removeFolder,
     rescan,
@@ -46,6 +49,9 @@ export default function Games() {
   const [addOpen, setAddOpen] = useState(false);
   const [foldersOpen, setFoldersOpen] = useState(false);
   const [focusId, setFocusId] = useState<string | null>(null);
+  const [pendingRemove, setPendingRemove] = useState<InstalledGame | null>(
+    null
+  );
   const motionDisabled = !animationsOn || !canHover;
   const scanning = scanStatus === "scanning";
 
@@ -56,6 +62,18 @@ export default function Games() {
       ),
     [bypassGames, games]
   );
+
+  const handleRemove = (game: InstalledGame): void => {
+    // найденную игру сканер увидит снова, поэтому спрашиваем подтверждение;
+    // добавленную вручную просто убираем — вернуть её можно только вручную
+    if (game.manual === true) {
+      removeGame(game.id);
+
+      return;
+    }
+
+    setPendingRemove(game);
+  };
 
   return (
     <section className="flex flex-col gap-6 pb-8">
@@ -96,13 +114,28 @@ export default function Games() {
           size="sm"
           variant="ghost"
           disabled={scanning}
-          icon={<RefreshCw aria-hidden="true" className="size-4" />}
           onClick={() => {
             void rescan();
           }}
+          icon={<RefreshCw aria-hidden="true" className="size-4" />}
         >
           {t("settings.games.installed.rescan")}
         </Button>
+        {hiddenCount > 0 ? (
+          <Button
+            size="sm"
+            variant="ghost"
+            disabled={scanning}
+            onClick={() => {
+              void restoreHiddenGames();
+            }}
+            icon={<Undo2 aria-hidden="true" className="size-4" />}
+          >
+            {t("settings.games.installed.restoreHidden", {
+              count: hiddenCount,
+            })}
+          </Button>
+        ) : null}
         {toast === null ? null : (
           <span role="status" className="text-text-secondary text-sm">
             {toast}
@@ -125,7 +158,7 @@ export default function Games() {
             void launch(game);
           }}
           onRemove={(game) => {
-            removeGame(game.id);
+            handleRemove(game);
           }}
           onCloseGame={(game) => {
             void closeGame(game);
@@ -169,6 +202,52 @@ export default function Games() {
         }}
         onCancel={dismissPrompt}
       />
+
+      <Modal
+        open={pendingRemove !== null}
+        onClose={() => {
+          setPendingRemove(null);
+        }}
+        title={t("settings.games.installed.removeTitle")}
+        {...(pendingRemove === null
+          ? {}
+          : {
+              description: t("settings.games.installed.removeBody", {
+                name: pendingRemove.name,
+              }),
+            })}
+        size="sm"
+        footer={
+          <>
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setPendingRemove(null);
+              }}
+            >
+              {t("settings.common.cancel")}
+            </Button>
+            <Button
+              variant="danger"
+              onClick={() => {
+                if (pendingRemove !== null) {
+                  removeGame(pendingRemove.id);
+                }
+
+                setPendingRemove(null);
+              }}
+            >
+              {t("settings.games.installed.removeConfirm")}
+            </Button>
+          </>
+        }
+      >
+        <Text variant="body" size="sm" className="text-text-secondary">
+          {t("settings.games.installed.removeBody", {
+            name: pendingRemove?.name ?? "",
+          })}
+        </Text>
+      </Modal>
     </section>
   );
 }

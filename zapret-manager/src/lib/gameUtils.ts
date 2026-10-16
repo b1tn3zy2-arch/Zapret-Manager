@@ -14,6 +14,24 @@ export function slugifyGameName(name: string): string {
   return slug === "" ? "game" : slug.slice(0, 48);
 }
 
+/**
+ * Оттенок запасной обложки по названию игры.
+ *
+ * Нужен для игр, у которых нет ни обложки в базе, ни картинки в папке, ни иконки
+ * exe: вместо пустой заглушки карточка получает узнаваемый цвет, причём одна и
+ * та же игра всегда выглядит одинаково.
+ */
+export function coverHueFromName(name: string): number {
+  let hash = 0;
+
+  for (let index = 0; index < name.length; index += 1) {
+    hash = (hash * 31 + name.charCodeAt(index)) % 360;
+  }
+
+  // разводим по кругу с шагом 137°, чтобы соседние названия не сливались в один цвет
+  return (hash * 137) % 360;
+}
+
 export function generateGameId(
   name: string,
   existingIds: readonly string[]

@@ -192,8 +192,8 @@ function ResourcesSection() {
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between gap-3 text-sm">
-      <span className="text-text-tertiary">{label}</span>
-      <span className="text-text-primary truncate font-mono text-xs">
+      <span className="text-text-tertiary shrink-0">{label}</span>
+      <span className="text-text-primary min-w-0 truncate text-right font-mono text-xs">
         {value}
       </span>
     </div>

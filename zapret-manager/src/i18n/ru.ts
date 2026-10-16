@@ -426,7 +426,6 @@ export const ru = {
       enableFor: "Инъекция для {name}",
       deleteNamed: "Удалить игру {name}",
       toggleEditor: "Показать настройки игры",
-      hint: "Встроенные игры не удаляются, но их списки можно менять",
       name: "Название",
       domains: "Домены",
       addDomain: "Добавить домен",
@@ -512,6 +511,12 @@ export const ru = {
           cancel: "Отмена",
         },
         removeManual: "Убрать из списка",
+        removeGame: "Убрать игру с экрана",
+        removeTitle: "Убрать игру?",
+        removeBody:
+          "{name} пропадёт со страницы «Игры». Игра никуда не удаляется — её можно вернуть кнопкой «Вернуть скрытые» или пересканированием после сброса.",
+        removeConfirm: "Убрать",
+        restoreHidden: "Вернуть скрытые: {count}",
         closeGame: "Закрыть игру",
         closedGame: "Игра закрыта: {name}",
         closeGameFailed: "Не удалось закрыть игру: {error}",
@@ -587,7 +592,11 @@ export const ru = {
       loggingLevel: "Уровень логирования",
       logRetention: "Хранение логов, дней",
       logRetentionUnit: "дней",
-      logRetentionHint: "От {min} до {max} дней. Применяется к новым логам.",
+      logRetentionHint:
+        "От {min} до {max} дней. Старые файлы журнала удаляются при запуске и при смене значения.",
+      logRetentionPruned: "Удалено журналов старше {days} дн.: {count}",
+      logRetentionFailed:
+        "Не удалось применить срок хранения журналов: {error}",
       extraArgs: "Дополнительные аргументы winws",
       extraArgsHint: "Каждый аргумент передаётся winws как есть",
       addArgument: "Добавить аргумент",
@@ -616,6 +625,10 @@ export const ru = {
       resetAll: "Сбросить все настройки",
       clearLogs: "Очистить все логи",
       deleteBackups: "Удалить все бэкапы",
+      uninstallApp: "Полностью удалить приложение",
+      uninstallTitle: "Удалить приложение?",
+      uninstallHint:
+        "Будут удалены программа, настройки, журналы, распакованные ресурсы и кэш. Приложение закроется.",
     },
     importExport: {
       exported: "Настройки выгружены в файл",

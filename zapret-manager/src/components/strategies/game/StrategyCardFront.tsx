@@ -1,3 +1,4 @@
+import BloomFlow from "@/components/shared/BloomFlow";
 import { useI18n } from "@/i18n";
 import { useCallback, useState } from "react";
 import { AnimatePresence } from "framer-motion";
@@ -93,6 +94,7 @@ export default function StrategyCardFront({
       )}
     >
       <StrategyPoster services={strategy.services} />
+      {bloom.boxShadow === "" ? null : <BloomFlow color={palette.glow} />}
       <span className="from-bg-primary via-bg-primary/55 absolute inset-0 bg-gradient-to-t to-transparent" />
       <span
         aria-hidden="true"
@@ -103,13 +105,15 @@ export default function StrategyCardFront({
         filter нельзя оставлять внутри 3D-поддерева: слой с фильтром
         схлопывает preserve-3d, и переворот перестаёт быть объёмным.
         Поэтому обводка рисуется рамкой, а цветной оттенок живёт в
-        оверлее самой карточки, вне 3D.
+        оверлее самой карточки, вне 3D. По той же причине у бейджа «работает»
+        нет backdrop-blur: он поднимал бы отдельный слой композиции прямо
+        внутри переворачиваемой грани.
       */}
 
       <span className="absolute inset-x-0 top-0 flex items-start justify-between gap-2 p-3">
         <RarityBadge rarity={rarity} compact />
         {isRunning ? (
-          <span className="border-accent-primary/40 bg-bg-primary/70 text-accent-primary inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium backdrop-blur">
+          <span className="border-accent-primary/40 bg-bg-primary/90 text-accent-primary inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium">
             <span className="bg-accent-primary inline-block size-1.5 animate-pulse rounded-full" />
             {t("strategies.card.runningBadge")}
           </span>

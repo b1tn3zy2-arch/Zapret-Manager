@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
@@ -20,7 +20,9 @@ vi.mock("@/i18n", () => ({
   }),
 }));
 
-const mockInvoke = vi.fn(async (_command: string, _args?: unknown) => null);
+const mockInvoke = vi.fn(
+  async (_command: string, _args?: unknown): Promise<string | null> => null
+);
 
 vi.mock("@tauri-apps/api/core", () => ({
   invoke: (command: string, args?: unknown) => mockInvoke(command, args),
@@ -39,6 +41,14 @@ function game(patch: Partial<InstalledGame> = {}): InstalledGame {
     launchCount: 0,
     ...patch,
   };
+}
+
+/** игра, у которой сканер не нашёл appid — обложка ищется по папке и exe */
+function withoutAppid(): InstalledGame {
+  const value = game();
+  const { appid: _appid, ...rest } = value;
+
+  return { ...rest };
 }
 
 describe("InstalledGamesGrid", () => {
@@ -100,6 +110,82 @@ describe("InstalledGamesGrid", () => {
       appid: "620",
       cover: null,
     });
+  });
+
+  it("берёт обложку из папки игры, если у игры нет appid", async () => {
+    render(
+      <InstalledGamesGrid
+        games={[withoutAppid()]}
+        bypassByGameId={{}}
+        launchingId={null}
+        motionDisabled
+        onLaunch={vi.fn()}
+        onRemove={vi.fn()}
+        onCloseGame={vi.fn()}
+        runningGameIds={{}}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockInvoke).toHaveBeenCalledWith("game_folder_cover", {
+        dir: "D:\\Steam\\Portal",
+      });
+    });
+  });
+
+  it("не ходит в сеть, если нашлась иконка exe", async () => {
+    mockInvoke.mockImplementation(async (command: string) => {
+      if (command === "game_exe_icon") {
+        return "data:image/png;base64,iVBORw0KGgo=";
+      }
+
+      return null;
+    });
+
+    render(
+      <InstalledGamesGrid
+        games={[withoutAppid()]}
+        bypassByGameId={{}}
+        launchingId={null}
+        motionDisabled
+        onLaunch={vi.fn()}
+        onRemove={vi.fn()}
+        onCloseGame={vi.fn()}
+        runningGameIds={{}}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByRole("img", { hidden: true })).toBeInTheDocument();
+    });
+
+    expect(mockInvoke).not.toHaveBeenCalledWith(
+      "game_steam_cover",
+      expect.anything()
+    );
+  });
+
+  it("позволяет убрать найденную игру, а не только добавленную вручную", async () => {
+    const onRemove = vi.fn();
+
+    render(
+      <InstalledGamesGrid
+        games={[game()]}
+        bypassByGameId={{}}
+        launchingId={null}
+        motionDisabled
+        onLaunch={vi.fn()}
+        onRemove={onRemove}
+        onCloseGame={vi.fn()}
+        runningGameIds={{}}
+      />
+    );
+
+    await userEvent.click(
+      screen.getByLabelText("settings.games.installed.removeGame")
+    );
+
+    expect(onRemove).toHaveBeenCalledTimes(1);
   });
 
   it("передаёт игру в обработчик запуска", async () => {

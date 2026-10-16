@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
 import {
+  filterHiddenGames,
   migratePersistedGames,
   useInstalledGamesStore,
 } from "@/stores/useInstalledGamesStore";
@@ -24,6 +25,7 @@ describe("стор установленных игр", () => {
     useInstalledGamesStore.setState({
       games: [],
       folders: [],
+      hiddenIds: [],
       scanStatus: "idle",
       scanProgress: null,
       lastScannedAt: null,
@@ -86,6 +88,71 @@ describe("стор установленных игр", () => {
 
     expect(useInstalledGamesStore.getState().scanStatus).toBe("error");
   });
+
+  it("скрывает найденную игру вместо безвозвратного удаления", () => {
+    const store = useInstalledGamesStore.getState();
+
+    store.addGame(game());
+    store.removeGame("steam-portal");
+
+    const state = useInstalledGamesStore.getState();
+
+    expect(state.games).toHaveLength(0);
+    expect(state.hiddenIds).toEqual(["steam-portal"]);
+  });
+
+  it("удаляет игру, добавленную вручную, без записи в скрытые", () => {
+    const store = useInstalledGamesStore.getState();
+
+    store.addGame(game({ id: "manual-x", manual: true }));
+    store.removeGame("manual-x");
+
+    const state = useInstalledGamesStore.getState();
+
+    expect(state.games).toHaveLength(0);
+    expect(state.hiddenIds).toEqual([]);
+  });
+
+  it("не прячет одну игру дважды", () => {
+    const store = useInstalledGamesStore.getState();
+
+    store.addGame(game());
+    store.removeGame("steam-portal");
+    store.addGame(game());
+    store.removeGame("steam-portal");
+
+    expect(useInstalledGamesStore.getState().hiddenIds).toEqual([
+      "steam-portal",
+    ]);
+  });
+
+  it("возвращает скрытые игры по кнопке", () => {
+    const store = useInstalledGamesStore.getState();
+
+    store.addGame(game());
+    store.removeGame("steam-portal");
+    useInstalledGamesStore.getState().restoreHiddenGames();
+
+    expect(useInstalledGamesStore.getState().hiddenIds).toEqual([]);
+  });
+});
+
+describe("скрытые игры при пересканировании", () => {
+  it("оставляет убранные игры убранными", () => {
+    const result = filterHiddenGames(
+      [game(), game({ id: "steam-doom", name: "Doom" })],
+      ["steam-portal"]
+    );
+
+    expect(result).toHaveLength(1);
+    expect(result[0]?.name).toBe("Doom");
+  });
+
+  it("без скрытых отдаёт список как есть", () => {
+    const games = [game()];
+
+    expect(filterHiddenGames(games, [])).toBe(games);
+  });
 });
 
 describe("миграция сохранённых игр", () => {
@@ -118,5 +185,22 @@ describe("миграция сохранённых игр", () => {
 
   it("устойчив к пустому хранилищу", () => {
     expect(migratePersistedGames(undefined).games).toEqual([]);
+  });
+
+  it("подхватывает список скрытых игр и чистит мусор", () => {
+    const migrated = migratePersistedGames({
+      hiddenIds: [
+        "steam-portal",
+        "steam-portal",
+        7,
+        "  ",
+      ] as unknown as string[],
+    });
+
+    expect(migrated.hiddenIds).toEqual(["steam-portal"]);
+  });
+
+  it("для старых версий отдаёт пустой список скрытых", () => {
+    expect(migratePersistedGames({ games: [game()] }).hiddenIds).toEqual([]);
   });
 });

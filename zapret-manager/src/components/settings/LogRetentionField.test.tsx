@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+﻿import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, beforeEach } from "vitest";
 
 import LogRetentionField from "@/components/settings/LogRetentionField";
@@ -67,6 +67,35 @@ describe("поле хранения логов", () => {
     const field = screen.getByLabelText("Хранение логов, дней");
 
     expect(field.className).toContain("tabular-nums");
-    expect(field.className).toContain("w-16");
+    // ширина живёт в inline-стиле и считается от числа цифр, а не константой в CSS
+    expect((field as HTMLInputElement).parentElement?.style.width).toBe(
+      "2.62em"
+    );
+
+    fireEvent.change(field, { target: { value: "365" } });
+
+    expect((field as HTMLInputElement).parentElement?.style.width).toBe(
+      "3.28em"
+    );
+
+    fireEvent.change(field, { target: { value: "3650" } });
+
+    expect((field as HTMLInputElement).parentElement?.style.width).toBe(
+      "3.94em"
+    );
+  });
+
+  it("Escape возвращает сохранённое значение", () => {
+    render(<LogRetentionField />);
+
+    const field = screen.getByLabelText("Хранение логов, дней");
+
+    fireEvent.change(field, { target: { value: "999" } });
+    fireEvent.keyDown(field, { key: "Escape" });
+
+    expect((field as HTMLInputElement).value).toBe("30");
+    expect(useSettingsStore.getState().settings.advanced.logRetentionDays).toBe(
+      30
+    );
   });
 });
