@@ -144,8 +144,39 @@ fn test_parse_subscription_plain_lines() {
     );
     let servers = parse_subscription(body);
 
-    assert_eq!(servers.len(), 1);
+    assert_eq!(servers.len(), 2);
     assert_eq!(servers[0].name, "A");
+    assert_eq!(servers[1].name, "B");
+}
+
+#[test]
+fn test_parse_subscription_keeps_many_servers() {
+    // Ограничение в один сервер делало подписку бесполезной: показывался
+    // только первый узел, выбрать другой было невозможно.
+    let body = (0..50)
+        .map(|index| {
+            format!("vless://uuid@host{index}.example.com:443#Node {index}")
+        })
+        .collect::<Vec<String>>()
+        .join("\n");
+    let servers = parse_subscription(&body);
+
+    assert_eq!(servers.len(), 50);
+    assert_eq!(servers[0].name, "Node 0");
+    assert_eq!(servers[49].name, "Node 49");
+}
+
+#[test]
+fn test_parse_subscription_respects_server_cap() {
+    let body = (0..500)
+        .map(|index| {
+            format!("vless://uuid@host{index}.example.com:443#Node {index}")
+        })
+        .collect::<Vec<String>>()
+        .join("\n");
+    let servers = parse_subscription(&body);
+
+    assert_eq!(servers.len(), MAX_SERVERS);
 }
 
 #[test]
@@ -153,8 +184,9 @@ fn test_parse_subscription_base64_body() {
     let body = encode("vless://uuid@a.example.com:443#A\ntrojan://pass@b.example.com:8443#B");
     let servers = parse_subscription(&body);
 
-    assert_eq!(servers.len(), 1);
+    assert_eq!(servers.len(), 2);
     assert_eq!(servers[0].name, "A");
+    assert_eq!(servers[1].name, "B");
 }
 
 #[test]

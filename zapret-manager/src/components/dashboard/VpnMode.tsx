@@ -5,12 +5,13 @@ import ActionsRow from "@/components/dashboard/vpn/ActionsRow";
 import ConnectButton from "@/components/dashboard/vpn/ConnectButton";
 import EmptyState from "@/components/dashboard/vpn/EmptyState";
 import ServerList from "@/components/dashboard/vpn/ServerList";
-import VpnSettingsPanel from "@/components/dashboard/vpn/VpnSettingsPanel";
-import VpnFooter from "@/components/dashboard/vpn/Footer";
+import VpnConnectedPanel from "@/components/dashboard/vpn/VpnConnectedPanel";
 import { Button, Input, Modal, Text } from "@/components/ui";
 import { useI18n } from "@/i18n";
 import { useVpnCore } from "@/hooks/useVpnCore";
 import { useSubscriptionPings } from "@/hooks/useSubscriptionPings";
+import { useVpnTraffic, useVpnUptime } from "@/hooks/useVpnTraffic";
+import { useSettingsStore } from "@/stores/useSettingsStore";
 import { useVpnCoreStore } from "@/stores/useVpnCoreStore";
 import { validateVpnSource } from "@/lib/vpnEndpoint";
 import type { SubscriptionServer } from "@/types";
@@ -25,16 +26,26 @@ export default function VpnMode() {
   const error = useVpnCoreStore((state) => state.error);
 
   const clearSubscription = useVpnCoreStore((state) => state.clearSubscription);
+  const removeServer = useVpnCoreStore((state) => state.removeServer);
+  const vpnEnabled = useSettingsStore((state) => state.settings.vpn.enabled);
   const { loadServers, connectServer, disconnect } = useVpnCore();
   const { pings, isRefreshing, refresh } = useSubscriptionPings(servers);
 
   const [linkOpen, setLinkOpen] = useState(false);
+  const [clearOpen, setClearOpen] = useState(false);
   const [draftLink, setDraftLink] = useState("");
   const [linkError, setLinkError] = useState<string | null>(null);
 
   const connected = status?.running === true;
+  const connecting = isLoading && !connected;
   const activeServer =
     servers.find((server) => server.id === activeServerId) ?? null;
+  // Кнопка подключения работает всегда: берёт выбранный сервер, а если его нет —
+  // первый из списка. Раньше она оставалась выключенной, пока пользователь не
+  // выбрал сервер, то есть подключиться было нечем.
+  const targetServer = activeServer ?? servers[0] ?? null;
+  const traffic = useVpnTraffic(connected);
+  const uptime = useVpnUptime(status);
 
   const handleToggle = useCallback((): void => {
     if (connected) {
@@ -42,20 +53,31 @@ export default function VpnMode() {
       return;
     }
 
-    if (activeServer !== null) {
-      void connectServer(activeServer);
+    if (!vpnEnabled) {
+      return;
     }
-  }, [activeServer, connectServer, connected, disconnect]);
+
+    if (targetServer !== null) {
+      void connectServer(targetServer);
+    }
+  }, [connectServer, connected, disconnect, targetServer, vpnEnabled]);
 
   const handleSelect = useCallback(
     (server: SubscriptionServer): void => {
-      if (connected || isLoading) {
+      if (connected || isLoading || !vpnEnabled) {
         return;
       }
 
       void connectServer(server);
     },
-    [connectServer, connected, isLoading]
+    [connectServer, connected, isLoading, vpnEnabled]
+  );
+
+  const handleRemoveServer = useCallback(
+    (server: SubscriptionServer): void => {
+      removeServer(server.id);
+    },
+    [removeServer]
   );
 
   const handlePasteLink = useCallback((): void => {
@@ -93,6 +115,15 @@ export default function VpnMode() {
 
   return (
     <div className="flex flex-col gap-6">
+      {connected ? (
+        <VpnConnectedPanel
+          speedIn={traffic.speedIn}
+          speedOut={traffic.speedOut}
+          uptimeSec={uptime}
+          serverName={activeServer?.name ?? null}
+        />
+      ) : null}
+
       <GlassPanel
         variant="outlined"
         padding="lg"
@@ -101,10 +132,12 @@ export default function VpnMode() {
       >
         <ConnectButton
           connected={connected}
-          connecting={isLoading && connected}
+          connecting={connecting}
           isSwitching={isLoading}
           switchStep={null}
-          activeServerName={activeServer?.name ?? null}
+          activeServerName={targetServer?.name ?? null}
+          vpnDisabled={!vpnEnabled}
+          disabled={!vpnEnabled || servers.length === 0}
           onClick={handleToggle}
         />
 
@@ -145,13 +178,45 @@ export default function VpnMode() {
               void loadServers(subscriptionUrl);
             }
           }}
-          onClearSubscription={clearSubscription}
+          onClearSubscription={() => {
+            setClearOpen(true);
+          }}
+          onRemoveServer={handleRemoveServer}
         />
       )}
 
-      <VpnFooter status={status} />
+      <Modal
+        open={clearOpen}
+        onClose={() => {
+          setClearOpen(false);
+        }}
+        title={t("dashboard.vpn.clearAllTitle")}
+        description={t("dashboard.vpn.clearAllHint")}
+        size="sm"
+      >
+        <div className="flex justify-end gap-2">
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => {
+              setClearOpen(false);
+            }}
+          >
+            {t("common.cancel")}
+          </Button>
 
-      <VpnSettingsPanel />
+          <Button
+            size="sm"
+            variant="danger"
+            onClick={() => {
+              setClearOpen(false);
+              clearSubscription();
+            }}
+          >
+            {t("common.delete")}
+          </Button>
+        </div>
+      </Modal>
 
       <Modal
         open={linkOpen}

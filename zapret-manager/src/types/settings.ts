@@ -116,7 +116,7 @@ export interface AppSettings {
 }
 
 export type SettingsSection =
-  "general" | "appearance" | "strategies" | "updates" | "advanced";
+  "general" | "vpn" | "appearance" | "strategies" | "updates" | "advanced";
 
 export type SaveState = "idle" | "saving" | "saved" | "error";
 

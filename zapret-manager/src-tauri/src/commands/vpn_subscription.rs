@@ -6,7 +6,13 @@ use serde::Serialize;
 use crate::error::{AppError, AppResult};
 
 const MAX_SUBSCRIPTION_BYTES: usize = 4 * 1024 * 1024;
-const MAX_SERVERS: usize = 1;
+/// Сколько серверов принимаем из одной подписки.
+///
+/// Раньше стоял лимит в один сервер: подписка с сотней локаций показывала
+/// только первую, и выбрать другую было невозможно. 200 — с запасом для
+/// крупных провайдеров, при этом список не разрастается настолько, чтобы
+/// подвисать интерфейс.
+const MAX_SERVERS: usize = 200;
 const SUPPORTED_SCHEMES: [&str; 6] = ["vless", "vmess", "trojan", "ss", "socks", "socks5"];
 
 #[derive(Debug, Clone, Serialize, PartialEq, Eq)]

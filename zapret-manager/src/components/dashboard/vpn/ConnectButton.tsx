@@ -14,6 +14,10 @@ export interface ConnectButtonProps {
   isSwitching: boolean;
   switchStep: SwitchStep | null;
   activeServerName: string | null;
+  /** Кнопка не нажимается: VPN выключен, нет сервера или идёт подключение. */
+  disabled?: boolean;
+  /** VPN выключен в настройках — показываем отдельную подсказку. */
+  vpnDisabled?: boolean;
   onClick: () => void;
 }
 
@@ -23,6 +27,8 @@ export default function ConnectButton({
   isSwitching,
   switchStep,
   activeServerName,
+  disabled = false,
+  vpnDisabled = false,
   onClick,
 }: ConnectButtonProps) {
   const { t } = useI18n();
@@ -36,7 +42,9 @@ export default function ConnectButton({
       : t("dashboard.vpn.connecting")
     : connected
       ? t("dashboard.vpn.connectedTo").replace("{name}", activeServerName ?? "")
-      : t("dashboard.vpn.clickToConnect");
+      : vpnDisabled
+        ? t("dashboard.vpn.disabledHint")
+        : t("dashboard.vpn.clickToConnect");
 
   return (
     <div className="flex flex-col items-center gap-4">
@@ -48,7 +56,7 @@ export default function ConnectButton({
             : t("dashboard.vpn.connectAria")
         }
         aria-busy={isBusy}
-        disabled={isSwitching}
+        disabled={isBusy || disabled}
         onClick={onClick}
         {...(reduced
           ? {}
@@ -110,22 +118,14 @@ export default function ConnectButton({
             {...(reduced
               ? {}
               : {
-                  animate: isBusy
-                    ? { rotate: 360 }
-                    : connected
-                      ? { rotate: [0, 360] }
-                      : { rotate: 0 },
-                  transition: isBusy
-                    ? {
-                        duration: 1.6,
-                        repeat: Infinity,
-                        ease: "linear" as const,
-                      }
-                    : {
-                        duration: 24,
-                        repeat: Infinity,
-                        ease: "linear" as const,
-                      },
+                  // вращение только на время подключения: постоянно крутящаяся
+                  // иконка переставала читаться как состояние и утомляла
+                  animate: isBusy ? { rotate: 360 } : { rotate: 0 },
+                  transition: {
+                    duration: 1.6,
+                    repeat: isBusy ? Infinity : 0,
+                    ease: "linear" as const,
+                  },
                 })}
           >
             <Power

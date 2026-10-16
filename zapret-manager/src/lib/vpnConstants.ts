@@ -3,6 +3,9 @@ import type { SwitchStep, VpnState } from "@/types";
 
 export const VPN_STATS_INTERVAL_MS = 2000;
 
+/** Как часто обновляется скорость в панели подключения. */
+export const VPN_TRAFFIC_INTERVAL_MS = 1000;
+
 export const VPN_AUTO_CONNECT_DELAY_MS = 5000;
 
 export const HANDSHAKE_FRESH_SEC = 60;

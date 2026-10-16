@@ -210,6 +210,7 @@ export const ru = {
     title: "Настройки",
     subtitle: "Поведение приложения и интеграции",
     sections: {
+      vpn: "VPN",
       general: "Общие",
       appearance: "Внешний вид",
       strategies: "Стратегии",
@@ -337,6 +338,8 @@ export const ru = {
       stopTimeout: "Таймаут остановки, сек",
     },
     vpn: {
+      enabled: "VPN включён",
+      enabledHint: "Выключатель подключения на главной странице",
       title: "VPN",
       description:
         "WireGuard и AmneziaWG конфиги, подключение вместо DPI-обхода и Kill Switch",
@@ -943,6 +946,8 @@ export const ru = {
       aria: "Состояние защиты: {status}",
     },
     vpn: {
+      disabledHint: "VPN выключен в настройках",
+
       clickToConnect: "Нажмите для подключения",
       connecting: "Подключение…",
       connectedTo: "Подключено к {name}",
@@ -988,6 +993,13 @@ export const ru = {
       subscriptionCount: "Серверов в подписке: {count}",
       refreshSubscription: "Обновить подписку",
       refreshAll: "Обновить подписку и пинги",
+      removeServer: "Удалить сервер {name}",
+
+      clearAllTitle: "Удалить все серверы?",
+
+      clearAllHint:
+        "Серверы исчезнут из списка до следующего обновления подписки.",
+
       clearSubscription: "Очистить подписку",
       coreTitle: "Ядро подключения",
       coreInstalled: "Ядро Xray установлено и готово к работе",

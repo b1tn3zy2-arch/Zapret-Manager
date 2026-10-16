@@ -185,6 +185,7 @@ describe("ServerCard", () => {
           isActive={false}
           ping={61}
           onSelect={vi.fn()}
+          onRemove={vi.fn()}
         />
       </div>
     );
@@ -204,6 +205,7 @@ describe("ServerCard", () => {
           isActive={false}
           ping={null}
           onSelect={vi.fn()}
+          onRemove={vi.fn()}
         />
       </div>
     );
@@ -221,6 +223,7 @@ describe("ServerCard", () => {
           isActive={false}
           ping={null}
           onSelect={onSelect}
+          onRemove={vi.fn()}
         />
       </div>
     );
@@ -242,6 +245,7 @@ describe("ServerCard", () => {
           isActive={false}
           ping={null}
           onSelect={vi.fn()}
+          onRemove={vi.fn()}
         />
       </div>
     );

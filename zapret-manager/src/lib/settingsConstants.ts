@@ -3,6 +3,7 @@ import {
   Layers,
   RefreshCw,
   Settings,
+  Shield,
   SlidersHorizontal,
   type LucideIcon,
 } from "lucide-react";
@@ -34,6 +35,7 @@ export const SETTINGS_SAVED_INDICATOR_MS = 2000;
 
 export const SETTINGS_SECTIONS = [
   "general",
+  "vpn",
   "appearance",
   "strategies",
   "updates",
@@ -46,6 +48,7 @@ export function isSettingsSection(value: string): value is SettingsSection {
 
 export const SETTINGS_SECTION_ICONS = {
   general: SlidersHorizontal,
+  vpn: Shield,
   appearance: Settings,
   strategies: Layers,
   updates: RefreshCw,

@@ -213,6 +213,7 @@ export const en = {
     title: "Settings",
     subtitle: "App behaviour and integrations",
     sections: {
+      vpn: "VPN",
       general: "General",
       appearance: "Appearance",
       strategies: "Strategies",
@@ -339,6 +340,8 @@ export const en = {
       stopTimeout: "Stop timeout, sec",
     },
     vpn: {
+      enabled: "VPN enabled",
+      enabledHint: "Master switch for connecting on the dashboard",
       title: "VPN",
       description:
         "WireGuard and AmneziaWG configs, connecting instead of DPI bypass, and Kill Switch",
@@ -941,6 +944,8 @@ export const en = {
       aria: "Protection status: {status}",
     },
     vpn: {
+      disabledHint: "VPN is disabled in settings",
+
       clickToConnect: "Press to connect",
       connecting: "Connecting…",
       connectedTo: "Connected to {name}",
@@ -985,6 +990,13 @@ export const en = {
       subscriptionCount: "Servers in subscription: {count}",
       refreshSubscription: "Refresh subscription",
       refreshAll: "Refresh subscription and pings",
+      removeServer: "Remove server {name}",
+
+      clearAllTitle: "Remove all servers?",
+
+      clearAllHint:
+        "The servers disappear from the list until the subscription is refreshed.",
+
       clearSubscription: "Clear subscription",
       coreTitle: "Connection core",
       coreInstalled: "Xray core is installed and ready",

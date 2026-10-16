@@ -16,6 +16,49 @@ export interface ServerListProps {
   onRefreshPings: () => void;
   onRefreshSubscription: () => void;
   onClearSubscription: () => void;
+  onRemoveServer: (server: SubscriptionServer) => void;
+}
+
+/**
+ * Порядок вывода: сначала серверы с известным пингом от лучшего к худшему,
+ * серверы без замера — в конец, порядок между ними сохраняется из подписки.
+ * Активный сервер всегда остаётся на своём месте: перестановка списка во время
+ * подключения отправляла бы строку вверх или вниз под курсором.
+ */
+function sortServers(
+  servers: SubscriptionServer[],
+  pings: ReadonlyMap<string, number | null>,
+  activeServerId: string | null
+): SubscriptionServer[] {
+  return [...servers]
+    .map((server, index) => ({ server, index }))
+    .sort((left, right) => {
+      if (left.server.id === activeServerId) {
+        return right.server.id === activeServerId ? 0 : 1;
+      }
+
+      if (right.server.id === activeServerId) {
+        return -1;
+      }
+
+      const leftPing = pings.get(left.server.id);
+      const rightPing = pings.get(right.server.id);
+
+      if (leftPing === leftPing && rightPing === rightPing) {
+        return left.index - right.index;
+      }
+
+      if (leftPing === leftPing) {
+        return -1;
+      }
+
+      if (rightPing === rightPing) {
+        return 1;
+      }
+
+      return left.index - right.index;
+    })
+    .map((entry) => entry.server);
 }
 
 export default function ServerList({
@@ -27,8 +70,10 @@ export default function ServerList({
   onRefreshPings,
   onRefreshSubscription,
   onClearSubscription,
+  onRemoveServer,
 }: ServerListProps) {
   const { t } = useI18n();
+  const ordered = sortServers(servers, pings, activeServerId);
 
   return (
     <section className="flex flex-col gap-3">
@@ -65,7 +110,7 @@ export default function ServerList({
           <button
             type="button"
             onClick={onClearSubscription}
-            disabled={isRefreshing}
+            disabled={isRefreshing || servers.length === 0}
             aria-label={t("dashboard.vpn.clearSubscription")}
             className="text-text-tertiary hover:text-accent-danger hover:bg-glass-hover rounded-md p-1.5 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
           >
@@ -80,14 +125,14 @@ export default function ServerList({
         </Text>
       ) : (
         <div role="list" className="flex flex-col gap-2">
-          {servers.map((server, index) => (
+          {ordered.map((server, index) => (
             <motion.div
               key={server.id}
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{
                 duration: ANIMATION.fast,
-                delay: Math.min(index * 0.03, 0.3),
+                delay: Math.min(index * 0.02, 0.25),
               }}
             >
               <ServerCard
@@ -95,6 +140,7 @@ export default function ServerList({
                 isActive={server.id === activeServerId}
                 ping={pings.get(server.id) ?? null}
                 onSelect={onSelect}
+                onRemove={onRemoveServer}
               />
             </motion.div>
           ))}

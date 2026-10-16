@@ -8,6 +8,7 @@ import SaveIndicator, {
 import SettingsLayout from "@/components/settings/SettingsLayout";
 import StrategiesSection from "@/components/settings/StrategiesSection";
 import UpdatesSection from "@/components/settings/UpdatesSection";
+import VpnSection from "@/components/settings/VpnSection";
 import { Heading, Text } from "@/components/ui";
 import { useI18n } from "@/i18n";
 import { useAppStore } from "@/stores/useAppStore";
@@ -54,6 +55,8 @@ function renderSection(section: SettingsSection) {
   switch (section) {
     case "general":
       return <GeneralSection />;
+    case "vpn":
+      return <VpnSection />;
     case "appearance":
       return <AppearanceSection />;
     case "strategies":

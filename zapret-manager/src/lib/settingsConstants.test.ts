@@ -7,9 +7,12 @@ describe("SETTINGS_SECTIONS", () => {
     expect(SETTINGS_SECTIONS).not.toContain("about");
   });
 
-  it("содержит пять секций в ожидаемом порядке", () => {
+  // Настройки VPN переехали с главной страницы в приложение: раздел вернулся,
+  // но по-прежнему шестой в списке, а не первым.
+  it("содержит шесть секций в ожидаемом порядке", () => {
     expect(SETTINGS_SECTIONS).toEqual([
       "general",
+      "vpn",
       "appearance",
       "strategies",
       "updates",
@@ -17,8 +20,7 @@ describe("SETTINGS_SECTIONS", () => {
     ]);
   });
 
-  it("не содержит удалённые vpn и games", () => {
-    expect(SETTINGS_SECTIONS).not.toContain("vpn");
+  it("не содержит удалённые games и outlast", () => {
     expect(SETTINGS_SECTIONS).not.toContain("games");
     expect(SETTINGS_SECTIONS).not.toContain("outlast");
   });
@@ -38,7 +40,6 @@ describe("isSettingsSection", () => {
   it("отклоняет удалённые секции", () => {
     expect(isSettingsSection("about")).toBe(false);
     expect(isSettingsSection("outlast")).toBe(false);
-    expect(isSettingsSection("vpn")).toBe(false);
     expect(isSettingsSection("games")).toBe(false);
   });
 

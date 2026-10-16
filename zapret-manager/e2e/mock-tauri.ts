@@ -345,8 +345,33 @@ export async function mockTauri(
         }),
         install_vpn_core: () => true,
         import_vpn_source: () => ({
-          subscriptionUrl: null,
-          servers: [],
+          subscriptionUrl: "https://sub.example.com/list",
+          servers: [
+            {
+              id: "srv_alpha",
+              name: "Alpha",
+              protocol: "vless",
+              host: "alpha.example.com",
+              port: 443,
+              link: "vless://uuid@alpha.example.com:443#Alpha",
+            },
+            {
+              id: "srv_beta",
+              name: "Beta",
+              protocol: "trojan",
+              host: "beta.example.com",
+              port: 8443,
+              link: "trojan://pass@beta.example.com:8443#Beta",
+            },
+            {
+              id: "srv_gamma",
+              name: "Gamma",
+              protocol: "vmess",
+              host: "gamma.example.com",
+              port: 443,
+              link: "vmess://eyJ2IjoiMiJ9#Gamma",
+            },
+          ],
         }),
         tray_menu_ready: () => null,
         tray_menu_snapshot: () => ({

@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { Globe, Link2 } from "lucide-react";
+import { Globe, Link2, Trash2 } from "lucide-react";
 
 import CountryFlag from "@/components/dashboard/CountryFlag";
 import { Badge } from "@/components/ui";
@@ -14,9 +14,16 @@ export interface ServerCardProps {
   isActive: boolean;
   ping: number | null;
   onSelect: (server: SubscriptionServer) => void;
+  onRemove: (server: SubscriptionServer) => void;
 }
 
-function ServerCardImpl({ server, isActive, ping, onSelect }: ServerCardProps) {
+function ServerCardImpl({
+  server,
+  isActive,
+  ping,
+  onSelect,
+  onRemove,
+}: ServerCardProps) {
   const { t } = useI18n();
   const country = guessCountryCode(server.host);
 
@@ -24,7 +31,7 @@ function ServerCardImpl({ server, isActive, ping, onSelect }: ServerCardProps) {
     <div
       role="listitem"
       className={cn(
-        "flex items-center gap-3 rounded-lg border p-3 transition-colors",
+        "group flex items-center gap-3 rounded-lg border p-3 transition-colors",
         "hover:bg-glass-hover duration-200",
         isActive
           ? "border-accent-primary bg-glass-bg"
@@ -81,6 +88,24 @@ function ServerCardImpl({ server, isActive, ping, onSelect }: ServerCardProps) {
           strokeWidth={2}
         />
       ) : null}
+
+      <button
+        type="button"
+        onClick={() => {
+          onRemove(server);
+        }}
+        disabled={isActive}
+        aria-label={t("dashboard.vpn.removeServer").replace(
+          "{name}",
+          server.name
+        )}
+        className={cn(
+          "text-text-tertiary hover:text-accent-danger hover:bg-glass-hover",
+          "rounded-md p-1.5 transition-colors disabled:cursor-not-allowed disabled:opacity-40"
+        )}
+      >
+        <Trash2 aria-hidden="true" className="size-4" strokeWidth={2} />
+      </button>
     </div>
   );
 }

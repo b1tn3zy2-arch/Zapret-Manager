@@ -17,7 +17,10 @@ import type {
 export const DEFAULT_GAMES: GameSettings[] = getDefaultGames();
 
 export const DEFAULT_VPN: VpnSettings = {
-  enabled: false,
+  // Раздел VPN на главной странице работает на ядре Xray и не зависит от
+  // старого WireGuard-стека. По умолчанию он должен быть включён, иначе
+  // кнопка подключения была бы заблокирована сразу после установки.
+  enabled: true,
   provider: "wireguard",
   configPath: "",
   autoConnect: false,

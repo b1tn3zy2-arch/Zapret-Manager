@@ -162,15 +162,22 @@ describe("migratePersistedAppState", () => {
     expect(migrated.settingsSection).toBe("updates");
   });
 
-  it("сбрасывает удалённые секции vpn и games на general", () => {
-    expect(
-      migratePersistedAppState({ settingsSection: "vpn" as never })
-        .settingsSection
-    ).toBe("general");
+  it("сбрасывает удалённые секции games и outlast на general", () => {
+    // секция vpn снова есть в приложении, её сбрасывать нельзя
     expect(
       migratePersistedAppState({ settingsSection: "games" as never })
         .settingsSection
     ).toBe("general");
+    expect(
+      migratePersistedAppState({ settingsSection: "outlast" as never })
+        .settingsSection
+    ).toBe("general");
+  });
+
+  it("сохраняет секцию vpn", () => {
+    expect(
+      migratePersistedAppState({ settingsSection: "vpn" }).settingsSection
+    ).toBe("vpn");
   });
 
   it("сбрасывает значение не строкового типа", () => {
