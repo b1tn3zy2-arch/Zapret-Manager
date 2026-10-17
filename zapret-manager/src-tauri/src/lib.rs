@@ -10,7 +10,6 @@ mod strategy;
 pub mod tray;
 mod tray_menu;
 mod window_behavior;
-mod window_ext;
 mod winapi_helpers;
 
 pub use error::{AppError, AppResult};
@@ -141,11 +140,8 @@ commands::resources_commands::read_license_text,
             let state = handle.state::<process_manager::ProcessManager>();
             window_behavior::register(&handle);
 
-            // системное меню окна вылезает по правому клику на шапке и по
-            // Alt+Пробел; у приложения своё меню, поэтому гасим лишнее
-            if let Some(window) = app.get_webview_window(tray::WINDOW_LABEL) {
-                window_ext::suppress_system_menu(&window);
-            }
+
+
 
             tray::register(&handle);
             tauri::async_runtime::block_on(async {

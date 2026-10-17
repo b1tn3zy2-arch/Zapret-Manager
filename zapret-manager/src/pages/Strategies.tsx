@@ -163,6 +163,7 @@ export default function Strategies() {
           </Button>
 
           <Input
+            data-focus-quiet
             variant="filled"
             size="sm"
             className="max-w-xs"

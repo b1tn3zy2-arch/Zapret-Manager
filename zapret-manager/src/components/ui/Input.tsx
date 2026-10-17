@@ -100,6 +100,10 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
           disabled={disabled}
           aria-invalid={error}
           aria-describedby={hasMessage ? messageId : undefined}
+          // Рамку фокуса рисует обёртка поля через focus-within. Без этой
+          // метки на самом инпуте поверх неё ложится ещё и общее правило
+          // :focus-visible, и поле выглядит обведённым дважды.
+          data-focus-quiet
           className={cn(
             "text-text-primary min-w-0 flex-1 bg-transparent outline-none",
             "placeholder:text-text-tertiary",

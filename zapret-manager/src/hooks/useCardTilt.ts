@@ -12,6 +12,11 @@ export interface UseCardTiltOptions {
   maxTilt?: number;
   disabled?: boolean;
   glowColor?: string;
+  /**
+   * Карточка перевёрнута на 180°, поэтому наклон «в сторону курсора» на вид
+   * оказывается зеркальным. На перевороте направления меняются местами.
+   */
+  inverted?: boolean;
 }
 
 export interface UseCardTiltResult {
@@ -36,6 +41,7 @@ export function useCardTilt(
     maxTilt = 10,
     disabled = false,
     glowColor = "rgba(255, 255, 255, 0.06)",
+    inverted = false,
   } = options;
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -68,11 +74,12 @@ export function useCardTilt(
     const rect = element.getBoundingClientRect();
     const tilt = computeTilt(point.x, point.y, rect, maxTilt);
     const position = computeGlowPosition(point.x, point.y, rect);
+    const direction = inverted ? -1 : 1;
 
-    rawRotateX.set(tilt.rotateX);
-    rawRotateY.set(tilt.rotateY);
+    rawRotateX.set(tilt.rotateX * direction);
+    rawRotateY.set(tilt.rotateY * direction);
     rawGlow.set(buildGlowGradient(position.x, position.y, glowColor));
-  }, [glowColor, maxTilt, rawGlow, rawRotateX, rawRotateY]);
+  }, [glowColor, inverted, maxTilt, rawGlow, rawRotateX, rawRotateY]);
 
   const handleMouseMove = useCallback(
     (event: MouseEvent<HTMLDivElement>): void => {

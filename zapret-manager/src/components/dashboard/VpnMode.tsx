@@ -229,6 +229,7 @@ export default function VpnMode() {
       >
         <div className="flex flex-col gap-4">
           <Input
+            data-focus-quiet
             label={t("dashboard.vpn.subscriptionUrl")}
             placeholder={t("dashboard.vpn.linkPlaceholder")}
             value={draftLink}

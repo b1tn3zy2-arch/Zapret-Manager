@@ -148,10 +148,13 @@ export const useSettingsStore = create<SettingsStoreState>()(
           state.settings.games.push(game);
         }),
 
+      // Встроенные игры тоже удаляются: пользователь просил убирать их из
+      // списка. Возврат — кнопка «Сбросить список игр», которая снова берёт
+      // значения по умолчанию.
       removeGame: (id) =>
         set((state) => {
           state.settings.games = state.settings.games.filter(
-            (item) => item.builtin || item.id !== id
+            (item) => item.id !== id
           );
         }),
 

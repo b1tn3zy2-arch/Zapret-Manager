@@ -1,15 +1,16 @@
 import { useMemo } from "react";
 
 import { usePostProcessing } from "@/contexts/postProcessing";
-import { getChromaticFilter } from "@/lib/chromatic";
+import { CHROMATIC_OFFSET_PX } from "@/lib/postProcessingTokens";
 import type { EffectIntensity } from "@/types/appearance";
 
 export interface ChromaticStyles {
-  filter: string;
+  /** Амплитуда перелива каймы в пикселях; сама анимация живёт в CSS. */
+  amplitude: number;
   isEnabled: boolean;
 }
 
-const EMPTY: ChromaticStyles = { filter: "", isEnabled: false };
+const EMPTY: ChromaticStyles = { amplitude: 0, isEnabled: false };
 
 export function useChromatic(
   enabled: boolean,
@@ -18,10 +19,12 @@ export function useChromatic(
   const { chromaticAberration } = usePostProcessing();
 
   return useMemo(() => {
-    if (!enabled || !chromaticAberration) {
+    const offset = CHROMATIC_OFFSET_PX[intensity];
+
+    if (!enabled || !chromaticAberration || offset === 0) {
       return EMPTY;
     }
 
-    return { filter: getChromaticFilter(intensity), isEnabled: true };
+    return { amplitude: offset, isEnabled: true };
   }, [enabled, chromaticAberration, intensity]);
 }

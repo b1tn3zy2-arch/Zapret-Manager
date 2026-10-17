@@ -70,6 +70,7 @@ function StrategiesSection() {
         control={
           <div className="flex flex-col gap-2">
             <Input
+              data-focus-quiet
               variant="filled"
               value={folder}
               readOnly

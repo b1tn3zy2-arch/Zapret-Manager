@@ -20,6 +20,7 @@ import { useInstalledGamesStartup } from "@/hooks/useInstalledGames";
 import { useLogRetention } from "@/hooks/useLogRetention";
 import { useStartupMetrics } from "@/hooks/useStartupMetrics";
 import { useStrategies } from "@/hooks/useStrategies";
+import { useSuppressContextMenu } from "@/hooks/useSuppressContextMenu";
 import { useStrategyEvents } from "@/hooks/useStrategyEvents";
 import { useTray } from "@/hooks/useTray";
 import { useTrayNotifications } from "@/hooks/useTrayNotifications";
@@ -81,6 +82,7 @@ export default function App() {
   useStartupMetrics();
   useInstalledGamesStartup();
   useLogRetention();
+  useSuppressContextMenu();
   const CurrentPage = PAGE_COMPONENTS[activePage];
 
   const { isInitializing, progress, report, error: resourceError } = resources;

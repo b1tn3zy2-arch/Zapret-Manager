@@ -116,11 +116,11 @@ export const PING_HOSTS = [
 
 export const MONITOR_PING_HISTORY_SIZE = 60;
 
-export const MONITOR_INTERVAL_MS = 50;
+export const MONITOR_INTERVAL_MS = 100;
 export const MONITOR_STATS_REFRESH_MS = 200;
 export const MONITOR_LABEL_REFRESH_MS = 1000;
 export const MONITOR_STALL_THRESHOLD_MS = 2000;
-export const MONITOR_BUFFER_SIZE = 120;
+export const MONITOR_BUFFER_SIZE = 240;
 
 export const PING_INTERVAL_MS = 2000;
 export const PING_HISTORY_SIZE = 30;

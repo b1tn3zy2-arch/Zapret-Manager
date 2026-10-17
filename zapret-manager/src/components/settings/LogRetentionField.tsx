@@ -105,6 +105,9 @@ function LogRetentionField() {
           autoComplete="off"
           spellCheck={false}
           maxLength={MAX_DIGITS}
+          // фокус показывает рамка контейнера (focus-within), иначе поле
+          // оказывается обведено двумя кольцами
+          data-focus-quiet
           aria-label={t("settings.advanced.logRetention")}
           value={draft}
           onChange={(event) => {

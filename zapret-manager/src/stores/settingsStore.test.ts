@@ -108,13 +108,21 @@ describe("useSettingsStore: обновления", () => {
     ).toBe(false);
   });
 
-  it("не удаляет встроенные игры", () => {
+  it("удаляет и встроенные игры: вернуть их можно сбросом списка", () => {
     const store = useSettingsStore.getState();
     const before = store.settings.games.length;
 
     store.removeGame("outlast-trials");
 
-    expect(useSettingsStore.getState().settings.games).toHaveLength(before);
+    expect(useSettingsStore.getState().settings.games).toHaveLength(before - 1);
+    expect(
+      useSettingsStore
+        .getState()
+        .settings.games.some((game) => game.id === "outlast-trials")
+    ).toBe(false);
+
+    useSettingsStore.getState().resetGames();
+
     expect(
       useSettingsStore
         .getState()

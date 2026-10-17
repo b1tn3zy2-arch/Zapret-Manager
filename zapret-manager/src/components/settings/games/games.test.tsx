@@ -62,10 +62,11 @@ describe("GameCard", () => {
     expect(screen.getByText("2 домена · 0 IP · 1 порт")).toBeTruthy();
   });
 
-  it("не показывает удаление для встроенной игры", () => {
+  it("показывает удаление и для встроенной игры", () => {
     render(<GameCard game={game()} expanded={false} {...handlers} />);
 
-    expect(screen.queryByLabelText(/Удалить игру/)).toBeNull();
+    // раньше у встроенных игр кнопки удаления не было вовсе
+    expect(screen.getByLabelText("Удалить игру Outlast Trials")).toBeTruthy();
   });
 
   it("показывает удаление для своей игры", async () => {

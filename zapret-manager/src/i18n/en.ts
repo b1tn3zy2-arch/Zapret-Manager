@@ -426,6 +426,10 @@ export const en = {
       reset: "Reset game list",
       enableFor: "Injection for {name}",
       deleteNamed: "Delete game {name}",
+      deleteTitle: "Remove game from the list?",
+      deleteBody:
+        "{name} will be removed from the list together with its domains and ports. Bring it back with “Reset game list”.",
+      deleteConfirm: "Remove",
       toggleEditor: "Show game settings",
       name: "Name",
       domains: "Domains",

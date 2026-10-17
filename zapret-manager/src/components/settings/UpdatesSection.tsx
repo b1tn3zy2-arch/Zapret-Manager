@@ -90,6 +90,7 @@ function UpdatesSection() {
 
       <div className="flex flex-col gap-1">
         <Input
+          data-focus-quiet
           label={t("settings.updates.repo")}
           value={settings.githubRepo}
           error={repoError !== null}

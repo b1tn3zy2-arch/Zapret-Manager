@@ -5,7 +5,7 @@ import { ChevronDown, ChevronUp, RotateCcw } from "lucide-react";
 
 import AddGameButton from "@/components/settings/games/AddGameButton";
 import GameCard from "@/components/settings/games/GameCard";
-import { Button, Text } from "@/components/ui";
+import { Button, Modal, Text } from "@/components/ui";
 import { useI18n } from "@/i18n";
 import { useGameLibrary } from "@/hooks/useGameLibrary";
 import { parseGameFile, writeGameFile } from "@/lib/gameFile";
@@ -36,6 +36,7 @@ export default function GameBypassSettings({
   const { t } = useI18n();
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<GameSettings | null>(null);
   const { games, updateGame, addGame, removeGame, resetGames } =
     useGameLibrary();
   const addLog = useLogsStore((state) => state.addLog);
@@ -182,6 +183,15 @@ export default function GameBypassSettings({
                 updateGame(game.id, patch);
               }}
               onDelete={() => {
+                // встроенные игры возвращаются кнопкой сброса, поэтому
+                // подтверждаем: список доменов у них обширный, и потерять
+                // его по неловкому клику обидно
+                if (game.builtin === true) {
+                  setPendingDelete(game);
+
+                  return;
+                }
+
                 removeGame(game.id);
                 setExpandedId((current) =>
                   current === game.id ? null : current
@@ -219,6 +229,53 @@ export default function GameBypassSettings({
           </Button>
         </>
       ) : null}
+
+      <Modal
+        open={pendingDelete !== null}
+        onClose={() => {
+          setPendingDelete(null);
+        }}
+        title={t("settings.games.deleteTitle")}
+        {...(pendingDelete === null
+          ? {}
+          : {
+              description: t("settings.games.deleteBody", {
+                name: pendingDelete.name,
+              }),
+            })}
+        size="sm"
+        footer={
+          <>
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setPendingDelete(null);
+              }}
+            >
+              {t("settings.common.cancel")}
+            </Button>
+            <Button
+              variant="danger"
+              onClick={() => {
+                if (pendingDelete !== null) {
+                  removeGame(pendingDelete.id);
+                  setExpandedId((current) =>
+                    current === pendingDelete.id ? null : current
+                  );
+                }
+
+                setPendingDelete(null);
+              }}
+            >
+              {t("settings.games.deleteConfirm")}
+            </Button>
+          </>
+        }
+      >
+        <Text variant="body" size="sm" className="text-text-secondary">
+          {t("settings.games.deleteBody", { name: pendingDelete?.name ?? "" })}
+        </Text>
+      </Modal>
     </section>
   );
 }

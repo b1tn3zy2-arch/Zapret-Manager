@@ -24,6 +24,16 @@ interface CoverFallbackProps {
 
 const BASE64_MARKER = "base64,";
 
+/**
+ * Сколько ждём один источник, прежде чем перейти к следующему.
+ *
+ * Без предела карточка могла часами оставаться пустой: поиск в Steam — это
+ * сетевой запрос, который на плохом интернете или без сети висит минутами, и
+ * заглушка так и не показывалась. Таймаут делает поведение предсказуемым —
+ * лучше обложка из названия через пару секунд, чем пустой чёрный квадрат.
+ */
+const SOURCE_TIMEOUT_MS = 2500;
+
 function decodePngSize(
   source: string
 ): { width: number; height: number } | null {
@@ -82,8 +92,25 @@ export function GameCoverImage({ game, className, alt }: GameCoverImageProps) {
     const attempt = async (
       command: string,
       args: Record<string, unknown>
-    ): Promise<string | null> =>
-      invoke<string | null>(command, args).catch(() => null);
+    ): Promise<string | null> => {
+      const request = invoke<string | null>(command, args).catch(() => null);
+
+      let timer: number | undefined;
+
+      const timeout = new Promise<null>((resolve) => {
+        timer = window.setTimeout(() => {
+          resolve(null);
+        }, SOURCE_TIMEOUT_MS);
+      });
+
+      try {
+        return await Promise.race([request, timeout]);
+      } finally {
+        if (timer !== undefined) {
+          window.clearTimeout(timer);
+        }
+      }
+    };
 
     /**
      * Порядок источников выбран из соображений «скорость и надёжность»:
@@ -175,7 +202,10 @@ export function GameCoverImage({ game, className, alt }: GameCoverImageProps) {
 
   if (source.kind === "icon") {
     const size = decodePngSize(source.src);
-    const small = size !== null && Math.max(size.width, size.height) <= 72;
+    // Пикселизация упиралась в 72 px и превращала нормальную иконку 48 px в
+    // кашу из квадратов. Теперь огрубляем только по-настоящему мелкие (≤32 px),
+    // а между ними доверяем сглаживанию браузера.
+    const tiny = size !== null && Math.max(size.width, size.height) <= 32;
 
     return (
       <span
@@ -193,12 +223,10 @@ export function GameCoverImage({ game, className, alt }: GameCoverImageProps) {
           src={source.src}
           loading="lazy"
           decoding="async"
-          style={
-            small && size !== null ? { imageRendering: "pixelated" } : undefined
-          }
+          style={tiny ? { imageRendering: "pixelated" } : undefined}
           className={cn(
             "relative z-10 size-full object-contain drop-shadow-[0_10px_28px_rgba(0,0,0,0.6)]",
-            small ? "p-[26%]" : "p-[10%]"
+            tiny ? "p-[22%]" : "p-[8%]"
           )}
         />
       </span>

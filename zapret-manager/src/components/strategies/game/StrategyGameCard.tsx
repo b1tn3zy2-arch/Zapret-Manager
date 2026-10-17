@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { memo, useCallback, useState } from "react";
 import { motion } from "framer-motion";
 
@@ -83,7 +84,12 @@ function StrategyGameCardImpl({
     rotateX: rotateXTilt,
     rotateY: rotateYTilt,
   } = useCardTilt({
-    disabled: tiltDisabled || flipped,
+    // Наклон и следование за курсором не отключаем на перевороте: раньше
+    // карточка в момент перелистывания полностью замирала и выглядела
+    // сломанной. Направления лишь меняются местами, потому что грань
+    // повёрнута на 180°.
+    disabled: tiltDisabled,
+    inverted: flipped,
     glowColor: palette.glow,
   });
 
@@ -92,7 +98,7 @@ function StrategyGameCardImpl({
     handleMouseLeave();
   }, [handleMouseLeave]);
 
-  const lifted = isHovered && !flipped;
+  const lifted = isHovered;
 
   return (
     <motion.div
@@ -109,15 +115,18 @@ function StrategyGameCardImpl({
       {/*
         Цветной оверлей лежит вне 3D-контекста: слой с filter внутри
         preserve-3d схлопывает объём, и переворот перестаёт быть объёмным.
+        Амплитуда перелива задаётся здесь, сама анимация — в CSS.
       */}
       {chromatic.isEnabled ? (
         <span
           aria-hidden="true"
           className="strategy-card-chromatic pointer-events-none absolute inset-0 rounded-xl"
-          style={{
-            boxShadow: `inset 0 0 0 1px ${palette.border}`,
-            filter: chromatic.filter,
-          }}
+          style={
+            {
+              boxShadow: `inset 0 0 0 1px ${palette.border}`,
+              "--chromatic-amp": chromatic.amplitude,
+            } as CSSProperties
+          }
         />
       ) : null}
 

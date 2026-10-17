@@ -117,6 +117,7 @@ function LogFilters({
     <div className="flex flex-col gap-2.5">
       <div className="flex flex-wrap items-center gap-3">
         <Input
+          data-focus-quiet
           variant="filled"
           size="sm"
           className="w-full max-w-xs"

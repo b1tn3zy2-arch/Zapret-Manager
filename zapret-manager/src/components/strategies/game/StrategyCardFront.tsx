@@ -87,7 +87,7 @@ export default function StrategyCardFront({
               : bloom.boxShadow,
       }}
       className={cn(
-        "bg-bg-secondary/80 absolute inset-0 overflow-hidden rounded-xl border",
+        "bg-bg-secondary/80 @container absolute inset-0 overflow-hidden rounded-xl border",
         "backface-hidden",
         // пока карточка перевёрнута, передняя грань невидима и не должна принимать клики
         flipped && "pointer-events-none"
@@ -135,11 +135,16 @@ export default function StrategyCardFront({
         )}
       </span>
 
-      <span className="absolute inset-x-0 bottom-0 flex flex-col gap-2 p-3">
-        <span className="text-text-primary text-lg leading-tight font-bold">
+      <span className="absolute inset-x-0 bottom-0 flex max-h-full min-w-0 flex-col gap-2 overflow-hidden p-3">
+        {/*
+          Название ограничено двумя строками: на узкой карточке длинное имя
+          раньше доходило до верхнего края и налезало само на себя и на бейдж
+          редкости. Ниже шрифт уменьшается по ширине самой карточки, а не окна.
+        */}
+        <span className="text-text-primary line-clamp-2 text-lg leading-snug font-bold break-words @max-[240px]:text-base">
           {strategy.name}
         </span>
-        <span className="text-text-tertiary truncate font-mono text-[10px]">
+        <span className="text-text-tertiary w-full truncate font-mono text-[10px]">
           {strategy.filename}
         </span>
         <span className="border-glass-border bg-bg-primary/85 block rounded-lg border p-2">

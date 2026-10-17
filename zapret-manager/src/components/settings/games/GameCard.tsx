@@ -108,19 +108,22 @@ function GameCardImpl({
           onChange={onToggleEnabled}
         />
 
-        {!game.builtin ? (
-          <button
-            type="button"
-            onClick={onDelete}
-            aria-label={t("settings.games.deleteNamed").replace(
-              "{name}",
-              game.name
-            )}
-            className="text-text-tertiary hover:text-accent-danger hover:bg-glass-hover shrink-0 rounded-md p-1.5 transition-colors"
-          >
-            <Trash2 aria-hidden="true" className="size-4" strokeWidth={2} />
-          </button>
-        ) : null}
+        {/*
+          Кнопка удаления показывается всем, включая встроенные игры: раньше
+          для них её не было вовсе, и убрать лишний список доменов было
+          невозможно. Возврат — «Сбросить список игр» в этом же разделе.
+        */}
+        <button
+          type="button"
+          onClick={onDelete}
+          aria-label={t("settings.games.deleteNamed").replace(
+            "{name}",
+            game.name
+          )}
+          className="hover:bg-glass-hover focus-visible:ring-accent-primary/60 text-text-tertiary hover:text-accent-danger shrink-0 rounded-md p-1.5 transition-colors focus-visible:ring-2 focus-visible:outline-none"
+        >
+          <Trash2 aria-hidden="true" className="size-4" strokeWidth={2} />
+        </button>
 
         <button
           type="button"

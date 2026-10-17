@@ -6,8 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "build:check": "tsc && vite build && node scripts/perf-check.js",
+    "build:check": "tsc && vite build && node scripts/perf-check.js && node scripts/check-build-protection.mjs",
     "perf:check": "node scripts/perf-check.js",
+    "lint:protection": "node scripts/check-build-protection.mjs",
     "preview": "vite preview",
     "tauri": "tauri",
     "typecheck": "tsc --noEmit",

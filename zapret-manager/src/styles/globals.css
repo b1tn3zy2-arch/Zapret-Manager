@@ -427,17 +427,91 @@ html[data-animations="off"] .sidebar-active-indicator {
 /* Хроматический оверлей карточки стратегии.
 
    Живёт вне 3D-контекста карточки: filter внутри preserve-3d заставляет
-   браузер схлопнуть объём, и переворот перестаёт быть объёмным. */
+   браузер схлопнуть объём, и переворот перестаёт быть объёмным.
+
+   Раньше эффект был статичным: на наведении появлялись два отступа тени и всё.
+   Теперь отступ «дышит» — красная и голубая кайма расходятся и сходятся, а по
+   кромке идёт тонкое цветное кольцо. Анимируются зарегистрированные
+   --chromatic-shift и --chromatic-angle, поэтому браузер интерполирует их сам,
+   а не пересобирает стиль на каждом кадре из JS. */
+@property --chromatic-shift {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --chromatic-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
 .strategy-card-chromatic {
+  --chromatic-amp: 1;
   opacity: 0;
-  transition: opacity 200ms ease-out;
+  transition: opacity 220ms ease-out;
+  filter: drop-shadow(var(--chromatic-shift) 0 0 rgb(255 0 80 / 0.36))
+    drop-shadow(calc(var(--chromatic-shift) * -1) 0 0 rgb(0 200 255 / 0.36));
+  animation: chromatic-flow calc(2.6s * var(--duration-scale, 1)) ease-in-out
+    infinite;
+}
+
+.strategy-card-chromatic::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  border-radius: inherit;
+  background: conic-gradient(
+    from var(--chromatic-angle),
+    transparent 0deg 44%,
+    rgb(255 0 80 / 0.5) 52%,
+    rgb(0 200 255 / 0.5) 64%,
+    transparent 76% 360deg
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  mix-blend-mode: screen;
+  animation: chromatic-angle calc(3.4s * var(--duration-scale, 1)) linear
+    infinite;
+}
+
+@keyframes chromatic-flow {
+  0%,
+  50%,
+  100% {
+    --chromatic-shift: 0px;
+  }
+
+  25% {
+    --chromatic-shift: calc(var(--chromatic-amp) * 2.2px);
+  }
+
+  75% {
+    --chromatic-shift: calc(var(--chromatic-amp) * -2.2px);
+  }
+}
+
+@keyframes chromatic-angle {
+  from {
+    --chromatic-angle: 0deg;
+  }
+
+  to {
+    --chromatic-angle: 360deg;
+  }
 }
 
 .group:hover .strategy-card-chromatic {
   opacity: 1;
 }
 
-[data-animations="off"] .strategy-card-chromatic {
+[data-animations="off"] .strategy-card-chromatic,
+[data-animations="off"] .strategy-card-chromatic::after {
+  animation: none;
   transition: none;
 }
 

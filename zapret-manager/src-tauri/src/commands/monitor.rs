@@ -15,6 +15,16 @@ const DEFAULT_INTERVAL_MS: u64 = 100;
 const MIN_INTERVAL_MS: u64 = 50;
 const MAX_INTERVAL_MS: u64 = 5000;
 
+/// Как часто пересчитывается количество TCP-соединений.
+const CONNECTIONS_REFRESH_MS: u64 = 1000;
+
+/// Как часто сэмплер отдаёт данные интерфейсу.
+///
+/// Замер идёт часто, чтобы скорость считалась точно, но события в веб-интерфейс
+/// уходят вдвое реже: раньше поток шёл 20 раз в секунду, интерфейс тонул в
+/// обновлениях и визуально подвисал — цифры успевали показаться и замирали.
+const EMIT_INTERVAL_MS: u64 = 500;
+
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct NetworkStats {
@@ -41,6 +51,9 @@ struct Sampler {
     primed: bool,
     last_ms: u64,
     last: Totals,
+    /// Сколько TCP-соединений было на прошлом полном обходе таблицы.
+    connections: u32,
+    connections_checked_ms: u64,
 }
 
 struct MonitorInner {
@@ -145,6 +158,8 @@ pub fn sample(state: &MonitorState) -> AppResult<NetworkStats> {
             primed: false,
             last_ms: 0,
             last: Totals::default(),
+            connections: 0,
+            connections_checked_ms: 0,
         }
     });
 
@@ -152,6 +167,14 @@ pub fn sample(state: &MonitorState) -> AppResult<NetworkStats> {
 
     let totals = collect_totals(&sampler.networks);
     let timestamp = now_millis();
+
+    // Полный обход таблицы соединений заметно дороже чтения счётчиков
+    // интерфейсов, поэтому он идёт раз в секунду, а не на каждом замере.
+    // Раньше он выполнялся 20 раз в секунду и съедал заметную долю CPU.
+    if timestamp.saturating_sub(sampler.connections_checked_ms) >= CONNECTIONS_REFRESH_MS {
+        sampler.connections = count_tcp_connections();
+        sampler.connections_checked_ms = timestamp;
+    }
 
     let (speed_in, speed_out) = if sampler.primed && timestamp > sampler.last_ms {
         let elapsed = timestamp - sampler.last_ms;
@@ -167,6 +190,7 @@ pub fn sample(state: &MonitorState) -> AppResult<NetworkStats> {
     sampler.last_ms = timestamp;
     sampler.last = totals;
     sampler.primed = true;
+    let connections = sampler.connections;
     drop(guard);
 
     Ok(NetworkStats {
@@ -176,7 +200,7 @@ pub fn sample(state: &MonitorState) -> AppResult<NetworkStats> {
         speed_out,
         packets_in: totals.packets_in,
         packets_out: totals.packets_out,
-        connections: count_tcp_connections(),
+        connections,
         timestamp,
     })
 }
@@ -205,6 +229,8 @@ pub async fn start_monitoring(
     tracing::debug!("Монитор трафика запущен, интервал {interval} мс");
 
     tauri::async_runtime::spawn(async move {
+        let mut last_emit_ms: u64 = 0;
+
         loop {
             let finished = monitor.inner.stop.load(Ordering::SeqCst)
                 || monitor.inner.generation.load(Ordering::SeqCst) != generation;
@@ -218,7 +244,10 @@ pub async fn start_monitoring(
 
             match outcome {
                 Ok(Ok(stats)) => {
-                    let _ = app.emit(EVENT_NETWORK_STATS, &stats);
+                    if stats.timestamp.saturating_sub(last_emit_ms) >= EMIT_INTERVAL_MS {
+                        last_emit_ms = stats.timestamp;
+                        let _ = app.emit(EVENT_NETWORK_STATS, &stats);
+                    }
                 }
                 Ok(Err(error)) => {
                     tracing::debug!("Сбор трафика не удался: {error}");
