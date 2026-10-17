@@ -42,6 +42,13 @@ export default defineConfig({
     cssMinify: true,
     chunkSizeWarningLimit: 500,
     assetsInlineLimit: 0,
+    // Отладочные вызовы не должны попадать в сборку, которую увидит
+    // пользователь: они и размер добавляют, и подсказывают устройство кода.
+    // `drop` работает только на этапе сборки — в разработке консоль остаётся.
+    esbuild: {
+      legalComments: "none",
+      drop: process.env.TAURI_ENV_DEBUG ? [] : ["console", "debugger"],
+    },
     rollupOptions: {
       output: {
         manualChunks(id: string) {

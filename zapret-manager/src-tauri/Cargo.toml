@@ -58,6 +58,7 @@ winapi = { version = "0.3.9", features = [
   "winuser",
   "wingdi",
   "commctrl",
+  "commctrl",
   "libloaderapi",
   "fileapi",
   "iphlpapi",

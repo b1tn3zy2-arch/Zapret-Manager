@@ -92,12 +92,12 @@ export default function TrayMenuRoot() {
       // Анимация входа перезапускается сменой флага, а не пересозданием
       // меню: key remount пересобирал DOM, ResizeObserver заново измерял
       // высоту, и уже открытое окно подстраивалось на глазах.
+      // Один кадр ожидания: два добавляли к появлению ~30 мс, и меню
+      // ощущалось «думающим» перед тем, как что-то показать.
       setIsAnimating(false);
       cancelAnimationFrame(animationFrame.current ?? 0);
       animationFrame.current = requestAnimationFrame(() => {
-        animationFrame.current = requestAnimationFrame(() => {
-          setIsAnimating(true);
-        });
+        setIsAnimating(true);
       });
     }).then((stop) => {
       unlisteners.push(stop);
@@ -229,8 +229,8 @@ export default function TrayMenuRoot() {
           data-corner={corner}
           data-animating={isAnimating ? "true" : "false"}
           className={cn(
-            "tray-menu-shell border-glass-border bg-bg-secondary/95 flex w-full flex-col",
-            "rounded-lg border p-1.5 shadow-2xl backdrop-blur-xl"
+            "tray-menu-shell border-glass-border bg-bg-secondary/98 flex w-full flex-col",
+            "rounded-lg border p-1.5 shadow-2xl"
           )}
         >
           <header className="flex items-center gap-2 px-2 py-1.5">

@@ -424,6 +424,69 @@ html[data-animations="off"] .sidebar-active-indicator {
   transition: none;
 }
 
+/*
+   Хроматика по краям окна приложения.
+
+   Раньше это были неподвижные inset-тени: цвет по бокам стоял мёртвым и
+   читался как грязное пятно. Теперь по краям ходит мягкая полоса, а её
+   насыщенность задаётся настройкой интенсивности (--chromatic-strength).
+*/
+.app-chromatic {
+  --chromatic-strength: 1;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  mix-blend-mode: screen;
+}
+
+.app-chromatic::before,
+.app-chromatic::after {
+  content: "";
+  position: absolute;
+  top: -12%;
+  bottom: -12%;
+  width: 30%;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgb(255 0 80 / calc(0.26 * var(--chromatic-strength))) 30%,
+    rgb(0 200 255 / calc(0.26 * var(--chromatic-strength))) 70%,
+    transparent 100%
+  );
+  filter: blur(16px);
+  will-change: transform, opacity;
+  animation: app-chromatic-flow calc(6.5s * var(--duration-scale, 1))
+    cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+.app-chromatic::before {
+  left: -12%;
+}
+
+.app-chromatic::after {
+  right: -12%;
+  animation-delay: -3.25s;
+}
+
+@keyframes app-chromatic-flow {
+  0%,
+  100% {
+    transform: translateY(-38%);
+    opacity: 0.35;
+  }
+
+  50% {
+    transform: translateY(38%);
+    opacity: 0.85;
+  }
+}
+
+[data-animations="off"] .app-chromatic::before,
+[data-animations="off"] .app-chromatic::after {
+  animation: none;
+  opacity: 0.55;
+}
+
 /* Хроматический оверлей карточки стратегии.
 
    Живёт вне 3D-контекста карточки: filter внутри preserve-3d заставляет

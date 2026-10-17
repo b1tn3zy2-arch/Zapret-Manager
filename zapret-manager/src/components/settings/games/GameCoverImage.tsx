@@ -18,7 +18,6 @@ interface CoverSource {
 
 interface CoverFallbackProps {
   name: string;
-  pending: boolean;
   className?: string | undefined;
 }
 
@@ -74,9 +73,7 @@ function decodePngSize(
 
 export function GameCoverImage({ game, className, alt }: GameCoverImageProps) {
   const [sources, setSources] = useState<Record<string, CoverSource>>({});
-  const [misses, setMisses] = useState<Record<string, boolean>>({});
   const source = sources[game.id] ?? null;
-  const pending = source === null && misses[game.id] !== true;
 
   useEffect(() => {
     let active = true;
@@ -174,12 +171,7 @@ export function GameCoverImage({ game, className, alt }: GameCoverImageProps) {
 
       if (fromSteam !== null) {
         store({ src: fromSteam, kind: "cover" });
-
-        return;
       }
-
-      // ни один источник ничего не дал — карточка покажет буквы, а не пустоту
-      setMisses((previous) => ({ ...previous, [game.id]: true }));
     })();
 
     return () => {
@@ -195,9 +187,7 @@ export function GameCoverImage({ game, className, alt }: GameCoverImageProps) {
   ]);
 
   if (source === null) {
-    return (
-      <CoverFallback name={game.name} pending={pending} className={className} />
-    );
+    return <CoverFallback name={game.name} className={className} />;
   }
 
   if (source.kind === "icon") {
@@ -245,39 +235,27 @@ export function GameCoverImage({ game, className, alt }: GameCoverImageProps) {
 }
 
 /**
- * Заглушка на время поиска картинки: спокойный фон без названия, чтобы карточка
- * не мигала буквами и потом не подменялась картинкой.
+ * Заглушка на время поиска картинки.
  *
- * Если все источники ничего не нашли, показываем не пустой градиент, а обложку,
- * собранную из названия: цвет подбирается по хэшу имени, поэтому у игры всегда
- * есть узнаваемая картинка, а не серое место.
+ * Раньше она появлялась только после того, как ответили все источники, и игры
+ * без обложки несколько секунд — а без сети и минутами — висели чёрными
+ * квадратами. Теперь обложка из названия рисуется сразу, а настоящая картинка
+ * просто подменяет её, когда найдётся.
  */
-function CoverFallback({ name, pending, className }: CoverFallbackProps) {
+function CoverFallback({ name, className }: CoverFallbackProps) {
   const hue = coverHueFromName(name);
 
   return (
     <span
       aria-hidden="true"
-      className={cn(
-        "flex size-full items-center justify-center",
-        pending ? "bg-glass-bg" : "",
-        className
-      )}
-      style={
-        pending
-          ? undefined
-          : {
-              background: `linear-gradient(150deg, hsl(${hue} 58% 32%) 0%, hsl(${(hue + 38) % 360} 52% 14%) 78%)`,
-            }
-      }
+      className={cn("flex size-full items-center justify-center", className)}
+      style={{
+        background: `linear-gradient(150deg, hsl(${hue} 58% 32%) 0%, hsl(${(hue + 38) % 360} 52% 14%) 78%)`,
+      }}
     >
-      {pending ? (
-        <span className="bg-glass-hover/60 block h-5 w-10 animate-pulse rounded" />
-      ) : (
-        <span className="text-text-primary/80 text-2xl font-bold tracking-wide">
-          {name.slice(0, 2).toUpperCase()}
-        </span>
-      )}
+      <span className="text-text-primary/80 text-2xl font-bold tracking-wide">
+        {name.slice(0, 2).toUpperCase()}
+      </span>
     </span>
   );
 }

@@ -23,7 +23,7 @@ const MENU_MAX_HEIGHT: f64 = 720.0;
 const CURSOR_GAP: f64 = 10.0;
 const WATCH_INTERVAL_MS: u64 = 60;
 const WARMUP_DELAY_MS: u64 = 2000;
-const WARMUP_VISIBLE_MS: u64 = 16;
+const WARMUP_VISIBLE_MS: u64 = 140;
 const SLOW_SHOW_MS: u128 = 100;
 
 static READY: AtomicBool = AtomicBool::new(false);
@@ -142,6 +142,10 @@ pub fn show<R: Runtime>(app: &AppHandle<R>, cursor: PhysicalPosition<f64>) {
     let Some(window) = menu_window(app) else {
         return;
     };
+
+    // Окно меню создаётся лениво, поэтому на этапе запуска его может ещё не
+    // быть. Снимаем системное меню здесь: повторный вызов ничего не стоит.
+    crate::window_menu::suppress_context_menu(&window);
 
     if window.is_visible().unwrap_or(false) {
         let _ = window.hide();
@@ -283,9 +287,21 @@ pub fn schedule_warmup<R: Runtime>(app: AppHandle<R>) {
 
             let _ = window.set_position(PhysicalPosition::new(-1000.0, -1000.0));
             let _ = window.show();
+
+            // Прогрев нужен, чтобы окно уже было нарисовано, когда его впервые
+            // покажут пользователю. 16 мс не хватало: первый кадр успевал
+            // показать пустое прозрачное окно, и меню «моргало» при открытии.
             std::thread::sleep(Duration::from_millis(WARMUP_VISIBLE_MS));
+
             let _ = window.hide();
             tracing::debug!("tray-menu прогрет");
+
+            // Прогрев нужен и для окна приложения: вложенное окно WebView2
+            // появляется уже после первого вызова, и без повторного подкласса
+            // контекстное меню снова работало при первом клике по шапке.
+            if let Some(main) = app.get_webview_window(crate::tray::WINDOW_LABEL) {
+                crate::window_menu::retry_context_menu(&main);
+            }
         });
     });
 }

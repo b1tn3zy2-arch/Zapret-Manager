@@ -34,7 +34,10 @@ function StatRow({ icon: Icon, label, value, compact, delay }: StatRowProps) {
       <Icon aria-hidden="true" className="text-text-tertiary size-3 shrink-0" />
 
       {!compact ? (
-        <span className="text-text-tertiary w-14 shrink-0 text-[10px]">
+        // Колонка подписи шире прежних 56 px: «Стабильность» при 10 px
+        // занимает около 62 px и вылезала из своей ячейки прямо на полоску.
+        // Обрезка по многоточию оставлена на случай ещё более длинного перевода.
+        <span className="text-text-tertiary w-[4.75rem] shrink-0 truncate text-[10px]">
           {label}
         </span>
       ) : null}

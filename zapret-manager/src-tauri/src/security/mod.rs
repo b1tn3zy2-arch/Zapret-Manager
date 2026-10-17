@@ -22,6 +22,15 @@ pub fn security_event(message: &str) {
     tracing::warn!(target: SECURITY_TARGET, "{message}");
 }
 
+/// Отметка в журнале безопасности о том, что защита интерфейса включилась.
+///
+/// Подкласс окна ставится нативно и не виден ни в одном отчёте: если он не
+/// сработал, пользователь увидит системное меню и будет искать причину вслепую.
+/// Запись попадает в security.log и читается при разборе таких жалоб.
+pub fn note_protection(message: &str) {
+    tracing::warn!(target: SECURITY_TARGET, "{message}");
+}
+
 pub fn security_denied(event: &str, detail: &str) -> AppError {
     security_event(&format!("{event}: {detail}"));
 

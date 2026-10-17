@@ -214,6 +214,49 @@ pub fn configure(app: &AppHandle, animate_on_connect: bool) {
     }
 }
 
+/// Приводит трей в соответствие с реальным состоянием VPN.
+///
+/// Раньше состояние трея целиком зависело от того, что пришлёт интерфейс. Но
+/// интерфейс — это скрытое окно, и когда его таймеры приостановлены, отправка
+/// не доходит: пользователь подключал VPN и сразу открывал трей, а там всё ещё
+/// было «обход». Теперь истина берётся из состояния ядра, а окно лишь уточняет
+/// имя сервера.
+pub fn sync_vpn_state(app: &AppHandle) {
+    let connected = app
+        .try_state::<crate::commands::vpn::VpnState>()
+        .map(|state| state.active().is_some())
+        .unwrap_or(false);
+
+    let (state, active, vpn) = snapshot(app);
+
+    let Some(next) = next_state(state, connected, active.is_some()) else {
+        return;
+    };
+
+    let _ = apply_state(app, next, active, vpn);
+}
+
+/// Состояние трея после синхронизации с ядром VPN.
+///
+/// `None` означает, что менять нечего: состояние уже верное. Отдельно важна
+/// ветка отключения — без неё трей навсегда оставался в режиме «VPN активен»,
+/// пока скрытое окно интерфейса не пришлёт своё состояние.
+fn next_state(state: TrayState, vpn_connected: bool, strategy_active: bool) -> Option<TrayState> {
+    if vpn_connected {
+        return (state != TrayState::Vpn).then_some(TrayState::Vpn);
+    }
+
+    if state != TrayState::Vpn {
+        return None;
+    }
+
+    Some(if strategy_active {
+        TrayState::Connected
+    } else {
+        TrayState::Idle
+    })
+}
+
 pub fn create_tray(app: &AppHandle) -> AppResult<TrayIcon<Wry>> {
     let icon = load_icon(app, TrayState::Idle, 0)?;
 

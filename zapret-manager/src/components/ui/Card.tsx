@@ -19,6 +19,13 @@ export interface CardProps extends Omit<
   variant?: CardVariant;
   padding?: PaddingSize;
   onClick?: (() => void) | undefined;
+  /**
+   * Оживить карточку под курсором даже без обработчика клика.
+   *
+   * Раньше эффекты наведения были жёстко связаны с `onClick`, поэтому в списке
+   * стратегий, где кликабельности нет, карточка выглядела совершенно «мёртвой».
+   */
+  hover?: boolean;
   children: ReactNode;
 }
 
@@ -40,6 +47,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(function Card(
     variant = "default",
     padding = "md",
     onClick,
+    hover = false,
     className,
     children,
     ...rest
@@ -48,6 +56,8 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(function Card(
 ) {
   const interactive = variant === "interactive" && onClick !== undefined;
   const bloom = useBloom("primary", -1);
+  const lively = interactive || hover;
+  const glows = lively && bloom.boxShadow !== "";
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {
@@ -72,20 +82,16 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(function Card(
       tabIndex={interactive ? 0 : undefined}
       onClick={interactive ? onClick : undefined}
       onKeyDown={interactive ? handleKeyDown : undefined}
-      style={
-        interactive && bloom.boxShadow !== ""
-          ? { boxShadow: bloom.boxShadow }
-          : undefined
-      }
+      style={glows ? { boxShadow: bloom.boxShadow } : undefined}
       onMouseEnter={
-        interactive && bloom.boxShadowHover !== ""
+        glows && bloom.boxShadowHover !== ""
           ? (event) => {
               event.currentTarget.style.boxShadow = bloom.boxShadowHover;
             }
           : undefined
       }
       onMouseLeave={
-        interactive && bloom.boxShadow !== ""
+        glows
           ? (event) => {
               event.currentTarget.style.boxShadow = bloom.boxShadow;
             }
@@ -93,7 +99,8 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(function Card(
       }
       className={cn(
         interactive && "cursor-pointer",
-        "rounded-xl transition-[box-shadow] duration-200 ease-out",
+        "rounded-xl transition-[box-shadow,translate,border-color] duration-200 ease-out",
+        lively && "hover:border-accent-primary/40 hover:-translate-y-0.5",
         className
       )}
       {...rest}

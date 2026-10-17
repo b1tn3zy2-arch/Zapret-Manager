@@ -73,3 +73,23 @@ fn test_connecting_is_the_only_animated_state() {
         assert_eq!(state == TrayState::Connecting, state == TrayState::Connecting);
     }
 }
+#[test]
+fn test_sync_enters_vpn_state_only_on_change() {
+    assert_eq!(next_state(TrayState::Idle, true, false), Some(TrayState::Vpn));
+    assert_eq!(
+        next_state(TrayState::Connected, true, true),
+        Some(TrayState::Vpn)
+    );
+    assert_eq!(next_state(TrayState::Vpn, true, false), None);
+}
+
+#[test]
+fn test_sync_restores_strategy_state_after_disconnect() {
+    assert_eq!(
+        next_state(TrayState::Vpn, false, true),
+        Some(TrayState::Connected)
+    );
+    assert_eq!(next_state(TrayState::Vpn, false, false), Some(TrayState::Idle));
+    assert_eq!(next_state(TrayState::Connected, false, true), None);
+    assert_eq!(next_state(TrayState::Idle, false, false), None);
+}

@@ -10,6 +10,7 @@ mod strategy;
 pub mod tray;
 mod tray_menu;
 mod window_behavior;
+mod window_menu;
 mod winapi_helpers;
 
 pub use error::{AppError, AppResult};
@@ -137,11 +138,19 @@ commands::resources_commands::read_license_text,
         ])
         .setup(|app| {
             let handle = app.handle().clone();
-            let state = handle.state::<process_manager::ProcessManager>();
+let state = handle.state::<process_manager::ProcessManager>();
             window_behavior::register(&handle);
 
-
-
+            // Контекстное меню приходило из WebView2 и перехватывалось нативно:
+            // обработчик в интерфейсе его не видел, потому что клик по
+            // перетаскиваемой области шапки до JavaScript не доходит. Гасим
+            // сообщениями окон; вложенное окно веб-интерфейса появляется позже,
+            // поэтому подкласс ставится ещё раз после прогрева.
+            for label in [tray::WINDOW_LABEL, crate::tray_menu::MENU_WINDOW_LABEL] {
+                if let Some(window) = app.get_webview_window(label) {
+                    window_menu::suppress_context_menu(&window);
+                }
+            }
 
             tray::register(&handle);
             tauri::async_runtime::block_on(async {

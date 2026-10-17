@@ -205,6 +205,7 @@ pub async fn switch_to_vpn(
     match result {
         Ok(status) => {
             let _ = tauri::Emitter::emit(&app, EVENT_CONNECTED, &status);
+            crate::tray::sync_vpn_state(&app);
             Ok(status)
         }
         Err(error) => {
@@ -219,6 +220,10 @@ pub async fn disconnect_vpn(app: AppHandle, state: State<'_, VpnState>) -> AppRe
     state.begin_switch()?;
     let result = vpn_switch::disconnect(&app, &state).await;
     state.end_switch();
+
+    // после разрыва трей обязан вернуться к состоянию обхода: иначе он
+    // продолжал показывать «VPN активен» при выключенном туннеле
+    crate::tray::sync_vpn_state(&app);
 
     result
 }

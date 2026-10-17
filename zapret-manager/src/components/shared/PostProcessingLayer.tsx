@@ -2,7 +2,7 @@ import { useMemo } from "react";
 
 import AnimatedGrain from "@/components/shared/AnimatedGrain";
 import { usePostProcessing } from "@/contexts/postProcessing";
-import { getChromaticOverlay } from "@/lib/chromatic";
+import { CHROMATIC_OFFSET_PX } from "@/lib/postProcessingTokens";
 import { GRAIN_OPACITY, SCANLINE_OPACITY } from "@/lib/postProcessingTokens";
 import {
   getScanlineBackground,
@@ -22,7 +22,12 @@ function PostProcessingLayer() {
   } = usePostProcessing();
 
   const qualityScale = globalQuality === "high" ? 1 : 0.75;
-  const chromaticIntensity = intensity === "off" ? "normal" : intensity;
+  // Амплитуда каймы по краям окна задаётся настройкой интенсивности,
+  // сама анимация — в CSS (класс .app-chromatic).
+  const chromaticOffset = CHROMATIC_OFFSET_PX[intensity] || 1;
+  const chromaticStyle = {
+    "--chromatic-strength": chromaticOffset.toFixed(2),
+  } as React.CSSProperties;
 
   const grainOpacity = useMemo(
     () =>
@@ -64,8 +69,8 @@ function PostProcessingLayer() {
 
       {chromaticAberration ? (
         <div
-          className="absolute inset-0"
-          style={getChromaticOverlay(chromaticIntensity)}
+          className="app-chromatic absolute inset-0"
+          style={chromaticStyle}
         />
       ) : null}
 

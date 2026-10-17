@@ -106,7 +106,7 @@ export default function StrategyCard({
   };
 
   return (
-    <Card variant="interactive" className="flex flex-col gap-3">
+    <Card variant="interactive" hover className="flex flex-col gap-3">
       <div className="flex items-start justify-between gap-3">
         <h3 className="text-text-primary text-base font-semibold">
           {strategy.name}
