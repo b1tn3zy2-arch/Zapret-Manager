@@ -92,7 +92,7 @@ describe("validateSettings", () => {
     // перенесённые значения сохраняются и дополняются актуальным пресетом,
     // иначе обход остался бы без домена rbg-services.com и портов GameLift
     expect(outlast?.domains).toContain("outlasttrials.com");
-    expect(outlast?.domains).toContain("rbg-services.com");
+    expect(outlast?.domains).toContain("redbarrelsgames.com");
     expect(outlast?.ipRanges).toEqual(["203.0.113.0/24"]);
     expect(outlast?.ports).toContain(27015);
     expect(outlast?.ports).toContain(7777);

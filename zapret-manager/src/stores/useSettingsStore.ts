@@ -40,6 +40,10 @@ function mergeSettings(fromFile: AppSettings): AppSettings {
         ...DEFAULT_APPEARANCE.postProcessing,
         ...fromFile.appearance?.postProcessing,
       },
+      flame: {
+        ...DEFAULT_APPEARANCE.flame,
+        ...fromFile.appearance?.flame,
+      },
     },
     strategyUpdates: {
       ...DEFAULT_STRATEGY_UPDATES,

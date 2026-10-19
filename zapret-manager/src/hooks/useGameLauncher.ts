@@ -1,8 +1,19 @@
 import { invoke } from "@tauri-apps/api/core";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { translateKey } from "@/i18n/core";
 import { useStrategyRunner } from "@/hooks/useStrategyRunner";
+import {
+  analyzeGameLogs,
+  analyzeGameTraffic,
+  checkGameEndpoints,
+  detectGameEndpoints,
+  tuneGame,
+  type EndpointReport,
+  type GameEndpoint,
+  type GameTuning,
+  type TrafficReport,
+} from "@/lib/strategyLaunch";
 import {
   GAME_LAUNCH_CHECK_MS,
   GAME_LAUNCH_HIDE_DELAY_MS,
@@ -25,15 +36,35 @@ export interface LaunchPrompt {
   game: InstalledGame | null;
 }
 
+export interface GameDiagnosis {
+  gameId: string;
+  gameName: string;
+  loading: boolean;
+  code: string | null;
+  message: string | null;
+  recommendation: string | null;
+  logPaths: string[];
+  applied: string[];
+  endpoints: EndpointReport[];
+  checkingEndpoints: boolean;
+  recheckEndpoints: () => Promise<void>;
+  servers: GameEndpoint[];
+  traffic: TrafficReport | null;
+  checkTraffic: () => Promise<void>;
+}
+
 export interface UseGameLauncherResult {
   launchingId: string | null;
   prompt: LaunchPrompt | null;
   toast: string | null;
   runningGames: Record<string, number[]>;
+  diagnosis: GameDiagnosis | null;
   launch: (game: InstalledGame) => Promise<void>;
   closeGame: (game: InstalledGame) => Promise<void>;
   confirmPrompt: () => Promise<void>;
   dismissPrompt: () => void;
+  diagnose: (game: InstalledGame) => Promise<void>;
+  dismissDiagnosis: () => void;
 }
 
 type AddLog = (entry: Pick<LogEntry, "level" | "source" | "message">) => void;
@@ -43,6 +74,8 @@ export function useGameLauncher(): UseGameLauncherResult {
   const runningGames = useGameRuntimeStore((state) => state.running);
   const [prompt, setPrompt] = useState<LaunchPrompt | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [diagnosis, setDiagnosis] = useState<GameDiagnosis | null>(null);
+  const tuningsRef = useRef<Map<string, GameTuning>>(new Map());
   const { run, stop, checkStatus } = useStrategyRunner();
   const addLog = useLogsStore((state) => state.addLog);
   const strategies = useStrategiesStore((state) => state.strategies);
@@ -99,7 +132,10 @@ export function useGameLauncher(): UseGameLauncherResult {
   );
 
   const ensureStrategy = useCallback(
-    async (requiredGameId: string | null): Promise<boolean> => {
+    async (
+      requiredGameId: string | null,
+      tuning: GameTuning | null
+    ): Promise<boolean> => {
       const running = strategies.find((item) => item.status === "running");
 
       if (running !== undefined) {
@@ -143,7 +179,7 @@ export function useGameLauncher(): UseGameLauncherResult {
       });
 
       try {
-        await run(target.id, target.path);
+        await run(target.id, target.path, tuning);
       } catch (caught) {
         addLog({
           level: "error",
@@ -180,7 +216,7 @@ export function useGameLauncher(): UseGameLauncherResult {
         return true;
       }
 
-      await run(target.id, target.path).catch(() => undefined);
+      await run(target.id, target.path, tuning).catch(() => undefined);
 
       const retry = await checkStatus(target.id).catch(() => null);
 
@@ -213,9 +249,35 @@ export function useGameLauncher(): UseGameLauncherResult {
 
   const start = useCallback(
     async (game: InstalledGame): Promise<void> => {
-      // Профиль ищем и по gameSettingsId, и по названию: у ручных игр
+      // Профиль ищем по gameSettingsId и по названию: у ручных игр
       // идентификатора нет, а домены встроенного пресета им всё равно нужны.
       const bypass = findGameProfile(game, gamesSettings);
+
+      // Подгонка портов и фильтров под игру делается до старта стратегии:
+      // EAC-игры теряют UDP-группу и --ipset, GameLift получает порты.
+      let tuning: GameTuning | null = null;
+
+      try {
+        tuning = await tuneGame(game, bypass);
+        tuningsRef.current.set(game.id, tuning);
+
+        for (const note of tuning.notes) {
+          addLog({
+            level: "info",
+            source: "strategy",
+            message: `${game.name}: ${note}`,
+          });
+        }
+      } catch (caught) {
+        addLog({
+          level: "warn",
+          source: "strategy",
+          message: translateKey(
+            "settings.games.installed.launch.tuningFailed",
+            { error: caught instanceof Error ? caught.message : String(caught) }
+          ),
+        });
+      }
 
       if (bypass !== undefined && !bypass.enabled) {
         updateGameSettings(bypass.id, { enabled: true });
@@ -233,7 +295,7 @@ export function useGameLauncher(): UseGameLauncherResult {
 
       // Профиль включается до запуска обхода: иначе его домены и порты
       // не попадут в конфиг winws, и игра не сможет зайти в матч.
-      if (!(await ensureStrategy(bypass?.id ?? null))) {
+      if (!(await ensureStrategy(bypass?.id ?? null, tuning))) {
         return;
       }
 
@@ -287,6 +349,192 @@ export function useGameLauncher(): UseGameLauncherResult {
   const dismissPrompt = useCallback(() => {
     setPrompt(null);
     setLaunchingId(null);
+  }, []);
+
+  // Настоящий TLS-хендшейк к сервисам игры: показывает, подходит ли текущая
+  // стратегия, вместо догадок по логам античита.
+  const probeEndpoints = useCallback(
+    async (game: InstalledGame): Promise<void> => {
+      const profile = findGameProfile(game, gamesSettings);
+
+      if (profile === undefined) {
+        return;
+      }
+
+      setDiagnosis((current) =>
+        current === null ? current : { ...current, checkingEndpoints: true }
+      );
+
+      try {
+        const reports = await checkGameEndpoints(profile.domains);
+
+        setDiagnosis((current) =>
+          current === null
+            ? current
+            : { ...current, endpoints: reports, checkingEndpoints: false }
+        );
+
+        const blocked = reports.filter((report) => !report.ok);
+
+        if (blocked.length > 0) {
+          addLog({
+            level: "warn",
+            source: "user",
+            message: `${game.name}: ${blocked.length} из ${reports.length} сервисов недоступны (${blocked
+              .map((report) => report.host)
+              .join(", ")})`,
+          });
+        }
+      } catch (caught) {
+        setDiagnosis((current) =>
+          current === null
+            ? current
+            : {
+                ...current,
+                checkingEndpoints: false,
+                endpoints: [
+                  {
+                    host: "—",
+                    ok: false,
+                    statusCode: null,
+                    latencyMs: null,
+                    stage: "check",
+                    error:
+                      caught instanceof Error ? caught.message : String(caught),
+                    hint: translateKey(
+                      "settings.games.installed.diagnose.checkFailed"
+                    ),
+                  },
+                ],
+              }
+        );
+      }
+    },
+    [addLog, gamesSettings]
+  );
+
+  // Сервер, назначенный на матч, и разбор пакетов к нему по debug-логу winws:
+  // единственный способ отличить «обход рвёт соединение» от «пакеты не доходят».
+  const probeTraffic = useCallback(async (): Promise<void> => {
+    try {
+      const servers = await detectGameEndpoints();
+
+      setDiagnosis((current) =>
+        current === null ? current : { ...current, servers }
+      );
+
+      const target = servers[0];
+
+      if (target === undefined) {
+        return;
+      }
+
+      const report = await analyzeGameTraffic(target.ip, target.port);
+
+      setDiagnosis((current) =>
+        current === null ? current : { ...current, traffic: report }
+      );
+    } catch {
+      setDiagnosis((current) =>
+        current === null ? current : { ...current, traffic: null }
+      );
+    }
+  }, []);
+
+  const diagnose = useCallback(
+    async (game: InstalledGame): Promise<void> => {
+      const cached = tuningsRef.current.get(game.id) ?? null;
+      const profile = findGameProfile(game, gamesSettings);
+
+      setDiagnosis({
+        gameId: game.id,
+        gameName: game.name,
+        loading: true,
+        code: null,
+        message: null,
+        recommendation: null,
+        logPaths: [],
+        applied: cached?.notes ?? [],
+        endpoints: [],
+        checkingEndpoints: false,
+        recheckEndpoints: async () => undefined,
+        servers: [],
+        traffic: null,
+        checkTraffic: async () => undefined,
+      });
+
+      try {
+        const result = await analyzeGameLogs(game, cached);
+
+        setDiagnosis({
+          gameId: game.id,
+          gameName: game.name,
+          loading: false,
+          code: result.code,
+          message: result.message,
+          recommendation: result.recommendation,
+          logPaths: result.logPaths,
+          applied: result.applied,
+          endpoints: [],
+          checkingEndpoints: false,
+          recheckEndpoints: async () => undefined,
+          servers: [],
+          traffic: null,
+          checkTraffic: async () => undefined,
+        });
+        addLog({
+          level: result.code === "NO_FAILURE_MARKERS" ? "info" : "warn",
+          source: "user",
+          message: `${game.name}: ${result.message}`,
+        });
+      } catch (caught) {
+        setDiagnosis({
+          gameId: game.id,
+          gameName: game.name,
+          loading: false,
+          code: "UNKNOWN",
+          message: translateKey("settings.games.installed.diagnose.failed", {
+            error: caught instanceof Error ? caught.message : String(caught),
+          }),
+          recommendation: null,
+          logPaths: [],
+          applied: cached?.notes ?? [],
+          endpoints: [],
+          checkingEndpoints: false,
+          recheckEndpoints: async () => undefined,
+          servers: [],
+          traffic: null,
+          checkTraffic: async () => undefined,
+        });
+      }
+
+      if (profile !== undefined) {
+        setDiagnosis((current) =>
+          current === null
+            ? current
+            : {
+                ...current,
+                checkingEndpoints: true,
+                recheckEndpoints: async () => {
+                  await probeEndpoints(game);
+                },
+                servers: [],
+                traffic: null,
+                checkTraffic: async () => {
+                  await probeTraffic();
+                },
+              }
+        );
+
+        await probeEndpoints(game);
+        await probeTraffic();
+      }
+    },
+    [addLog, gamesSettings, probeEndpoints, probeTraffic]
+  );
+
+  const dismissDiagnosis = useCallback(() => {
+    setDiagnosis(null);
   }, []);
 
   const closeGame = useCallback(
@@ -350,10 +598,13 @@ export function useGameLauncher(): UseGameLauncherResult {
     prompt,
     toast,
     runningGames,
+    diagnosis,
     launch,
     closeGame,
     confirmPrompt,
     dismissPrompt,
+    diagnose,
+    dismissDiagnosis,
   };
 }
 

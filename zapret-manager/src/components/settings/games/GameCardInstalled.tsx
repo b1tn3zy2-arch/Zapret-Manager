@@ -1,6 +1,6 @@
 import { memo, useState } from "react";
 import { motion } from "framer-motion";
-import { X } from "lucide-react";
+import { Stethoscope, X } from "lucide-react";
 
 import { GameCoverImage } from "@/components/settings/games/GameCoverImage";
 import GamePlayOverlay from "@/components/settings/games/GamePlayOverlay";
@@ -31,6 +31,8 @@ export interface GameCardInstalledProps {
   running?: boolean;
   removeLabel: string;
   onRemove: () => void;
+  diagnoseLabel: string;
+  onDiagnose: () => void;
 }
 
 function GameCardInstalled({
@@ -47,6 +49,8 @@ function GameCardInstalled({
   running = false,
   removeLabel,
   onRemove,
+  diagnoseLabel,
+  onDiagnose,
 }: GameCardInstalledProps) {
   const { t } = useI18n();
   const [hovered, setHovered] = useState(false);
@@ -120,7 +124,7 @@ function GameCardInstalled({
         >
           {bypassLabel}
         </span>
-        <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-2 p-3">
+        <div className="absolute inset-x-0 bottom-0 z-20 flex items-end justify-between gap-2 p-3">
           <div className="min-w-0">
             <p className="text-text-primary truncate text-sm font-semibold">
               {name}
@@ -131,24 +135,42 @@ function GameCardInstalled({
                 : formatRelativeTime(game.lastLaunchedAt)}
             </p>
           </div>
-          {onRemove === undefined ? null : (
+          <div className="flex shrink-0 items-center gap-1">
             <button
               type="button"
-              aria-label={removeLabel}
+              aria-label={diagnoseLabel}
+              title={diagnoseLabel}
               onClick={(event) => {
                 event.stopPropagation();
-                onRemove();
+                onDiagnose();
               }}
               className={cn(
-                "text-text-secondary hover:text-accent-danger rounded-md p-1 transition-colors",
-                "hover:bg-glass-hover opacity-0 group-hover:opacity-100",
-                "focus-visible:ring-accent-primary/60 focus-visible:opacity-100",
+                "text-text-secondary hover:text-accent-primary rounded-md p-1 transition-colors",
+                "hover:bg-glass-hover focus-visible:ring-accent-primary/60",
                 "focus-visible:ring-2 focus-visible:outline-none"
               )}
             >
-              <X aria-hidden="true" className="size-4" />
+              <Stethoscope aria-hidden="true" className="size-4" />
             </button>
-          )}
+            {onRemove === undefined ? null : (
+              <button
+                type="button"
+                aria-label={removeLabel}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onRemove();
+                }}
+                className={cn(
+                  "text-text-secondary hover:text-accent-danger rounded-md p-1 transition-colors",
+                  "hover:bg-glass-hover opacity-0 group-hover:opacity-100",
+                  "focus-visible:ring-accent-primary/60 focus-visible:opacity-100",
+                  "focus-visible:ring-2 focus-visible:outline-none"
+                )}
+              >
+                <X aria-hidden="true" className="size-4" />
+              </button>
+            )}
+          </div>
         </div>
         <GamePlayOverlay
           visible={hovered}

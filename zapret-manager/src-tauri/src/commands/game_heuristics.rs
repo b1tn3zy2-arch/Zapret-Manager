@@ -405,7 +405,7 @@ pub fn is_game_candidate(folder: &Path) -> bool {
 fn source_priority(source: GameSource) -> u8 {
     match source {
         GameSource::Steam | GameSource::Epic | GameSource::Gog => 3,
-        GameSource::Ubisoft | GameSource::Ea | GameSource::BattleNet => 2,
+        GameSource::Ubisoft | GameSource::Riot | GameSource::Ea | GameSource::BattleNet => 2,
         GameSource::Registry => 1,
         GameSource::KnownFolder | GameSource::UserFolder => 0,
     }

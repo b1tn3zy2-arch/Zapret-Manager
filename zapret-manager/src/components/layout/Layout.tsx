@@ -1,10 +1,12 @@
 import type { ReactNode } from "react";
 import { useRef } from "react";
 
+import ChromaticFlame from "@/components/effects/ChromaticFlame";
 import Sidebar from "@/components/layout/Sidebar";
 import TitleBar from "@/components/layout/TitleBar";
 import NoiseOverlay from "@/components/shared/NoiseOverlay";
 import PostProcessingLayer from "@/components/shared/PostProcessingLayer";
+import { useFlame } from "@/hooks/useFlame";
 import { useFullscreen } from "@/hooks/useFullscreen";
 import { useSmoothWheelScroll } from "@/hooks/useSmoothWheelScroll";
 
@@ -14,6 +16,7 @@ export interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   const { isFullscreen } = useFullscreen();
+  const flame = useFlame();
   const scrollRef = useRef<HTMLElement>(null);
 
   useSmoothWheelScroll(scrollRef);
@@ -40,6 +43,15 @@ export default function Layout({ children }: LayoutProps) {
           {children}
         </main>
       </div>
+      {flame.enabled ? (
+        <ChromaticFlame
+          intensity={flame.intensity}
+          speed={flame.speed}
+          chromatic={flame.chromatic}
+          still={flame.still}
+          lightTheme={flame.lightTheme}
+        />
+      ) : null}
       <NoiseOverlay />
       <PostProcessingLayer />
     </div>

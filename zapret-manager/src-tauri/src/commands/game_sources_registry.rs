@@ -90,6 +90,63 @@ pub fn scan_ubisoft() -> Vec<InstalledGame> {
     result
 }
 
+/// Riot не пишет установки в реестр: League, Valorant и остальные лежат в
+/// `C:\Riot Games\<Игра>` на каждом диске, поэтому источник папковый.
+const RIOT_FOLDER: &str = "Riot Games";
+
+/// Сам клиент Riot — не игра, его запускать нечего.
+const RIOT_SKIP: &[&str] = &["riot client", "riotclient"];
+
+pub fn scan_riot() -> Vec<InstalledGame> {
+    let mut result = Vec::new();
+
+    for root in super::game_sources_system::drive_roots() {
+        let base = PathBuf::from(&root).join(RIOT_FOLDER);
+
+        if !base.is_dir() {
+            continue;
+        }
+
+        let Ok(entries) = std::fs::read_dir(&base) else {
+            continue;
+        };
+
+        for entry in entries.flatten() {
+            let folder = entry.path();
+
+            if !folder.is_dir() {
+                continue;
+            }
+
+            let name = folder
+                .file_name()
+                .map(|value| value.to_string_lossy().to_string())
+                .unwrap_or_default();
+
+            if name.is_empty() || RIOT_SKIP.iter().any(|skip| name.contains(skip)) {
+                continue;
+            }
+
+            let Some(executable) =
+                super::game_heuristics::collect_candidates(&folder, 2)
+                    .into_iter()
+                    .next()
+            else {
+                continue;
+            };
+
+            result.push(to_game(
+                GamePlatform::Riot,
+                GameSource::Riot,
+                &folder,
+                &executable,
+            ));
+        }
+    }
+
+    result
+}
+
 fn ubisoft_from_view(view: u32) -> Vec<InstalledGame> {
     let Some(root) = open_key(HKEY_CURRENT_USER, UBISOFT_KEY, view) else {
         return Vec::new();

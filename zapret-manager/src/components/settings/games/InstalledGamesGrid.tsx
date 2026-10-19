@@ -18,6 +18,7 @@ export interface InstalledGamesGridProps {
   onLaunch: (game: InstalledGame) => void;
   onRemove: (game: InstalledGame) => void;
   onCloseGame: (game: InstalledGame) => void;
+  onDiagnose: (game: InstalledGame) => void;
   runningGameIds: Record<string, number[]>;
 }
 
@@ -29,6 +30,7 @@ export default function InstalledGamesGrid({
   onLaunch,
   onRemove,
   onCloseGame,
+  onDiagnose,
   runningGameIds,
 }: InstalledGamesGridProps) {
   const { t } = useI18n();
@@ -79,6 +81,10 @@ export default function InstalledGamesGrid({
             removeLabel={t("settings.games.installed.removeGame")}
             onRemove={() => {
               onRemove(game);
+            }}
+            diagnoseLabel={t("settings.games.installed.diagnose.action")}
+            onDiagnose={() => {
+              onDiagnose(game);
             }}
           />
         </CardEntrance>

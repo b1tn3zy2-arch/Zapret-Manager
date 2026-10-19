@@ -15,7 +15,12 @@ import {
   INTERFACE_SCALE_MIN,
   INTERFACE_SCALE_STEP,
 } from "@/lib/appearanceTokens";
-import { DEFAULT_APPEARANCE, DEFAULT_POST_PROCESSING } from "@/lib/defaults";
+import {
+  DEFAULT_APPEARANCE,
+  DEFAULT_FLAME,
+  DEFAULT_POST_PROCESSING,
+} from "@/lib/defaults";
+import type { FlameIntensity, FlameSpeed } from "@/lib/flamePresets";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import type {
   EffectIntensity,
@@ -52,6 +57,24 @@ const QUALITY_OPTIONS = [
   labelKey: TranslationKey;
 }[];
 
+const FLAME_INTENSITY_OPTIONS = [
+  { value: "subtle", labelKey: "settings.appearance.flameSubtle" },
+  { value: "normal", labelKey: "settings.appearance.values.normal" },
+  { value: "strong", labelKey: "settings.appearance.values.strong" },
+] as const satisfies readonly {
+  value: FlameIntensity;
+  labelKey: TranslationKey;
+}[];
+
+const FLAME_SPEED_OPTIONS = [
+  { value: "slow", labelKey: "settings.appearance.flameSlow" },
+  { value: "normal", labelKey: "settings.appearance.values.normal" },
+  { value: "fast", labelKey: "settings.appearance.flameFast" },
+] as const satisfies readonly {
+  value: FlameSpeed;
+  labelKey: TranslationKey;
+}[];
+
 function AppearanceSection() {
   const { t } = useI18n();
   const appearance = useSettingsStore((state) => state.settings.appearance);
@@ -60,6 +83,7 @@ function AppearanceSection() {
     (state) => state.updatePostProcessing
   );
   const effects = appearance.postProcessing;
+  const flame = appearance.flame;
 
   const themeOptions = useMemo(
     () =>
@@ -82,6 +106,24 @@ function AppearanceSection() {
   const qualityOptions = useMemo(
     () =>
       QUALITY_OPTIONS.map((option) => ({
+        value: option.value,
+        label: t(option.labelKey),
+      })),
+    [t]
+  );
+
+  const flameIntensityOptions = useMemo(
+    () =>
+      FLAME_INTENSITY_OPTIONS.map((option) => ({
+        value: option.value,
+        label: t(option.labelKey),
+      })),
+    [t]
+  );
+
+  const flameSpeedOptions = useMemo(
+    () =>
+      FLAME_SPEED_OPTIONS.map((option) => ({
         value: option.value,
         label: t(option.labelKey),
       })),
@@ -282,6 +324,73 @@ function AppearanceSection() {
               options={qualityOptions}
               onChange={(globalQuality) => {
                 updatePostProcessing({ globalQuality });
+              }}
+            />
+          }
+        />
+      </SectionContainer>
+
+      <SectionContainer
+        title={t("settings.appearance.flame")}
+        description={t("settings.appearance.flameHint")}
+        onReset={() => {
+          updateAppearance({ flame: { ...DEFAULT_FLAME } });
+        }}
+        resetLabel={t("settings.common.resetSection")}
+      >
+        <SettingRow
+          label={t("settings.appearance.flame")}
+          description={t("settings.appearance.flameHint")}
+          control={
+            <Toggle
+              ariaLabel={t("settings.appearance.flame")}
+              checked={flame.enabled}
+              onChange={(enabled) => {
+                updateAppearance({ flame: { ...flame, enabled } });
+              }}
+            />
+          }
+        />
+
+        <SettingRow
+          label={t("settings.appearance.flameIntensity")}
+          description={t("settings.appearance.flameIntensityHint")}
+          control={
+            <Dropdown
+              label={t("settings.appearance.flameIntensity")}
+              value={flame.intensity}
+              options={flameIntensityOptions}
+              onChange={(intensity) => {
+                updateAppearance({ flame: { ...flame, intensity } });
+              }}
+            />
+          }
+        />
+
+        <SettingRow
+          label={t("settings.appearance.flameSpeed")}
+          description={t("settings.appearance.flameSpeedHint")}
+          control={
+            <Dropdown
+              label={t("settings.appearance.flameSpeed")}
+              value={flame.speed}
+              options={flameSpeedOptions}
+              onChange={(speed) => {
+                updateAppearance({ flame: { ...flame, speed } });
+              }}
+            />
+          }
+        />
+
+        <SettingRow
+          label={t("settings.appearance.flameChromatic")}
+          description={t("settings.appearance.flameChromaticHint")}
+          control={
+            <Toggle
+              ariaLabel={t("settings.appearance.flameChromatic")}
+              checked={flame.chromatic}
+              onChange={(chromatic) => {
+                updateAppearance({ flame: { ...flame, chromatic } });
               }}
             />
           }

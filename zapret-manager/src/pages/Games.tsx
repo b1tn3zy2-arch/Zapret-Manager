@@ -1,3 +1,4 @@
+import { invoke } from "@tauri-apps/api/core";
 import { useMemo, useState } from "react";
 import { FolderPlus, Plus, RefreshCw, Undo2 } from "lucide-react";
 
@@ -9,12 +10,22 @@ import GameScanIndicator from "@/components/settings/games/GameScanIndicator";
 import InstalledGamesGrid from "@/components/settings/games/InstalledGamesGrid";
 import { Button, Heading, Modal, Text } from "@/components/ui";
 import { useI18n } from "@/i18n";
+import type { TranslationKey } from "@/i18n/types";
 import { useGameLauncher } from "@/hooks/useGameLauncher";
 import { useInstalledGames } from "@/hooks/useInstalledGames";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { isBypassEnabled } from "@/lib/installedGames";
+import { cn } from "@/lib/utils";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 import type { InstalledGame } from "@/types";
+
+const TRAFFIC_VERDICT_KEYS: Record<string, TranslationKey> = {
+  "no-log": "settings.games.installed.diagnose.verdict.no-log",
+  "no-outbound": "settings.games.installed.diagnose.verdict.no-outbound",
+  "no-inbound": "settings.games.installed.diagnose.verdict.no-inbound",
+  tampered: "settings.games.installed.diagnose.verdict.tampered",
+  clean: "settings.games.installed.diagnose.verdict.clean",
+};
 
 export default function Games() {
   const { t } = useI18n();
@@ -36,10 +47,13 @@ export default function Games() {
     prompt,
     toast,
     runningGames,
+    diagnosis,
     launch,
     closeGame,
     confirmPrompt,
     dismissPrompt,
+    diagnose,
+    dismissDiagnosis,
   } = useGameLauncher();
   const bypassGames = useSettingsStore((state) => state.settings.games);
   const animationsOn = useSettingsStore(
@@ -163,6 +177,9 @@ export default function Games() {
           onCloseGame={(game) => {
             void closeGame(game);
           }}
+          onDiagnose={(game) => {
+            void diagnose(game);
+          }}
           runningGameIds={runningGames}
         />
       )}
@@ -202,6 +219,165 @@ export default function Games() {
         }}
         onCancel={dismissPrompt}
       />
+
+      <Modal
+        open={diagnosis !== null}
+        onClose={dismissDiagnosis}
+        title={t("settings.games.installed.diagnose.title", {
+          name: diagnosis?.gameName ?? "",
+        })}
+        size="sm"
+        footer={
+          <>
+            {diagnosis !== null && diagnosis.logPaths.length > 0 ? (
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  void invoke("open_folder", {
+                    kind: "logs",
+                    strategiesDir: diagnosis.logPaths[0] ?? "",
+                  }).catch(() => undefined);
+                }}
+              >
+                {t("settings.games.installed.diagnose.logs")}
+              </Button>
+            ) : null}
+            <Button variant="secondary" onClick={dismissDiagnosis}>
+              {t("settings.games.installed.diagnose.close")}
+            </Button>
+          </>
+        }
+      >
+        {diagnosis === null ? null : (
+          <div className="flex flex-col gap-3 text-sm">
+            <Text variant="caption">
+              {diagnosis.loading
+                ? t("settings.games.installed.diagnose.loading")
+                : (diagnosis.message ?? "")}
+            </Text>
+            {diagnosis.recommendation === null ? null : (
+              <Text>{diagnosis.recommendation}</Text>
+            )}
+            {diagnosis.applied.length > 0 ? (
+              <div className="flex flex-col gap-1">
+                <Text variant="caption" className="text-xs">
+                  {t("settings.games.installed.diagnose.applied")}
+                </Text>
+                {diagnosis.applied.map((note) => (
+                  <Text key={note} className="text-xs">
+                    • {note}
+                  </Text>
+                ))}
+              </div>
+            ) : null}
+            <div className="border-glass-border flex flex-col gap-2 border-t pt-3">
+              <div className="flex items-center justify-between gap-2">
+                <Text variant="caption" className="text-xs">
+                  {t("settings.games.installed.diagnose.endpoints")}
+                </Text>
+                <Button
+                  variant="ghost"
+                  disabled={diagnosis.checkingEndpoints}
+                  onClick={() => {
+                    void diagnosis.recheckEndpoints();
+                  }}
+                >
+                  {diagnosis.checkingEndpoints
+                    ? t("settings.games.installed.diagnose.checking")
+                    : t("settings.games.installed.diagnose.recheck")}
+                </Button>
+              </div>
+              {diagnosis.endpoints.map((endpoint) => (
+                <div
+                  key={endpoint.host}
+                  className="flex flex-col gap-0.5 text-xs"
+                >
+                  <span
+                    className={cn(
+                      "font-medium",
+                      endpoint.ok ? "text-status-success" : "text-accent-danger"
+                    )}
+                  >
+                    {endpoint.ok
+                      ? t("settings.games.installed.diagnose.reachable")
+                      : t("settings.games.installed.diagnose.blocked")}
+                    {" · "}
+                    {endpoint.host}
+                    {endpoint.latencyMs === null
+                      ? ""
+                      : ` · ${endpoint.latencyMs} ms`}
+                  </span>
+                  <span className="text-text-tertiary">{endpoint.hint}</span>
+                </div>
+              ))}
+              <div className="mt-1 flex flex-col gap-2">
+                <div className="flex items-center justify-between gap-2">
+                  <Text variant="caption" className="text-xs">
+                    {t("settings.games.installed.diagnose.traffic")}
+                  </Text>
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      void diagnosis.checkTraffic();
+                    }}
+                  >
+                    {t("settings.games.installed.diagnose.checkTraffic")}
+                  </Button>
+                </div>
+                {diagnosis.servers.length === 0 ? (
+                  <span className="text-text-tertiary text-xs">
+                    {t("settings.games.installed.diagnose.noServer")}
+                  </span>
+                ) : (
+                  diagnosis.servers.slice(0, 3).map((server) => (
+                    <span
+                      key={`${server.ip}:${server.port}`}
+                      className="text-xs"
+                    >
+                      <span className="text-text-secondary font-medium">
+                        {server.ip}:{server.port}
+                      </span>
+                      {server.region === null ? null : (
+                        <span className="text-text-tertiary">
+                          {" "}
+                          · {server.region}
+                        </span>
+                      )}
+                    </span>
+                  ))
+                )}
+                {diagnosis.traffic === null ? null : (
+                  <div className="flex flex-col gap-1">
+                    <span
+                      className={cn(
+                        "text-xs font-medium",
+                        diagnosis.traffic.verdict === "clean"
+                          ? "text-status-success"
+                          : "text-accent-danger"
+                      )}
+                    >
+                      {t(
+                        TRAFFIC_VERDICT_KEYS[diagnosis.traffic.verdict] ??
+                          "settings.games.installed.diagnose.verdict.no-log"
+                      )}
+                    </span>
+                    <span className="text-text-tertiary text-xs">
+                      {diagnosis.traffic.message}
+                    </span>
+                    <span className="text-text-tertiary text-xs">
+                      {t("settings.games.installed.diagnose.trafficCounts", {
+                        out: diagnosis.traffic.outbound,
+                        in: diagnosis.traffic.inbound,
+                        drop: diagnosis.traffic.dropped,
+                      })}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </Modal>
 
       <Modal
         open={pendingRemove !== null}

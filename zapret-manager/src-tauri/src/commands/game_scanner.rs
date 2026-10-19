@@ -5,7 +5,7 @@ use tauri::{AppHandle, Emitter};
 use super::game_heuristics::merge_games;
 use super::game_known::{anticheat_of, KnownGames};
 use super::game_model::{GameScanProgress, GameSource, InstalledGame};
-use super::game_sources_registry::{scan_gog, scan_gog_folders, scan_ubisoft};
+use super::game_sources_registry::{scan_gog, scan_gog_folders, scan_riot, scan_ubisoft};
 use super::game_sources_stores::{scan_epic, scan_steam};
 use super::game_sources_system::{
     scan_known_folders, scan_store_folders, scan_uninstall_registry, scan_user_folders,
@@ -118,6 +118,10 @@ fn scan_steps() -> Vec<ScanStep> {
         ScanStep {
             source: GameSource::Ubisoft,
             run: |_| scan_ubisoft(),
+        },
+        ScanStep {
+            source: GameSource::Riot,
+            run: |_| scan_riot(),
         },
         ScanStep {
             source: GameSource::Ea,

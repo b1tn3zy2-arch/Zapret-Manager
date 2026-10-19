@@ -1,8 +1,8 @@
-﻿import { translateKey } from "@/i18n/core";
+import { translateKey } from "@/i18n/core";
 import { invoke } from "@tauri-apps/api/core";
 import { useCallback, useRef, useState } from "react";
 
-import { launchStrategy } from "@/lib/strategyLaunch";
+import { launchStrategy, type GameTuning } from "@/lib/strategyLaunch";
 import { useGamesInjector } from "@/hooks/useGamesInjector";
 import { useLogsStore } from "@/stores/useLogsStore";
 import { useStrategiesStore } from "@/stores/useStrategiesStore";
@@ -24,7 +24,11 @@ export interface UseStrategyRunnerResult {
   isStarting: boolean;
   isStopping: boolean;
   error: string | null;
-  run: (strategyId: string, path: string) => Promise<void>;
+  run: (
+    strategyId: string,
+    path: string,
+    tuning?: GameTuning | null
+  ) => Promise<void>;
   stop: (strategyId: string, path: string) => Promise<void>;
   checkStatus: (strategyId: string) => Promise<ProcessStatus | null>;
 }
@@ -54,7 +58,11 @@ export function useStrategyRunner(): UseStrategyRunnerResult {
   const busy = useRef(false);
 
   const run = useCallback(
-    async (strategyId: string, path: string) => {
+    async (
+      strategyId: string,
+      path: string,
+      tuning: GameTuning | null = null
+    ) => {
       if (busy.current) {
         return;
       }
@@ -78,7 +86,7 @@ export function useStrategyRunner(): UseStrategyRunnerResult {
           });
         }
 
-        const result = await launchStrategy(strategyId, path);
+        const result = await launchStrategy(strategyId, path, tuning);
 
         setStatus(strategyId, "running");
         setPid(strategyId, result.pid);

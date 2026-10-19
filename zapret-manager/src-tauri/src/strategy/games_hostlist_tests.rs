@@ -39,7 +39,7 @@ fn test_generate_empty_returns_none() {
         .lock()
         .unwrap_or_else(|error| error.into_inner());
     let dir = temp_dir("empty");
-    let payload = generate(&dir, &[], &[], &[]).expect("generate");
+    let payload = generate(&dir, &[], &[], &[], None).expect("generate");
 
     assert_eq!(payload.hostlist, None);
     assert_eq!(payload.ipset, None);
@@ -59,7 +59,7 @@ fn test_generate_single_domain_deduplicates() {
         "steamcommunity.com".to_string(),
     ];
 
-    let payload = generate(&dir, &domains, &[], &[]).expect("generate");
+    let payload = generate(&dir, &domains, &[], &[], None).expect("generate");
 
     assert_eq!(payload.domains_count, 1);
     assert_eq!(payload.ipset, None);
@@ -86,7 +86,7 @@ fn test_generate_multiple_sources_deduplicates() {
     ];
     let ips = vec!["10.0.0.0/8".to_string(), "10.0.0.0/8".to_string()];
 
-    let payload = generate(&dir, &domains, &ips, &[]).expect("generate");
+    let payload = generate(&dir, &domains, &ips, &[], None).expect("generate");
 
     assert_eq!(payload.domains_count, 3);
     assert_eq!(payload.ips_count, 1);
@@ -109,7 +109,7 @@ fn test_generate_skips_invalid_entries() {
     let domains = vec!["valid.com".to_string(), "bad domain".to_string()];
     let ips = vec!["10.0.0.0/8".to_string(), "999.1.1.1".to_string()];
 
-    let payload = generate(&dir, &domains, &ips, &[]).expect("generate");
+    let payload = generate(&dir, &domains, &ips, &[], None).expect("generate");
 
     assert_eq!(payload.domains_count, 1);
     assert_eq!(payload.ips_count, 1);
@@ -123,7 +123,7 @@ fn test_cleanup_removes_generated_files() {
         .lock()
         .unwrap_or_else(|error| error.into_inner());
     let dir = temp_dir("cleanup");
-    generate(&dir, &["a.com".to_string()], &["10.0.0.0/8".to_string()], &[])
+    generate(&dir, &["a.com".to_string()], &["10.0.0.0/8".to_string()], &[], None)
         .expect("generate");
 
     assert!(dir.join(GAMES_HOSTLIST_NAME).exists());
@@ -159,7 +159,7 @@ fn test_generate_writes_anticheat_exclude_list() {
 
     let _ = std::fs::remove_dir_all(&dir);
 
-    let payload = generate(&dir, &["outlasttrials.com".to_string()], &[], &[]).unwrap();
+    let payload = generate(&dir, &["outlasttrials.com".to_string()], &[], &[], None).unwrap();
     let exclude = payload.exclude.clone().unwrap_or_default();
     let content = std::fs::read_to_string(&exclude).unwrap_or_default();
 
@@ -167,4 +167,35 @@ fn test_generate_writes_anticheat_exclude_list() {
     assert!(content.contains("battleye.com"));
 
     let _ = std::fs::remove_dir_all(&dir);
+}
+
+#[test]
+fn test_udp_fake_is_found_in_strategy_bin() {
+    // stun.bin лежит в bin рядом со стратегией, а не в каталоге игр: без этого
+    // игровая UDP-группа не добавлялась в аргументы winws вообще.
+    let strategy = temp_dir("udp-fake");
+    let bin = strategy.join("bin");
+
+    fs::create_dir_all(&bin).expect("bin");
+    fs::write(bin.join("stun.bin"), b"payload").expect("stun");
+
+    let games = temp_dir("udp-fake-games");
+    fs::create_dir_all(&games).expect("games dir");
+
+    let payload = generate(
+        &games,
+        &["outlasttrials.com".to_string()],
+        &[],
+        &[7777],
+        Some(&strategy),
+    )
+    .expect("generate");
+
+    assert_eq!(
+        payload.udp_fake.as_deref(),
+        Some(bin.join("stun.bin").as_path())
+    );
+
+    cleanup(&games);
+    fs::remove_dir_all(&strategy).ok();
 }

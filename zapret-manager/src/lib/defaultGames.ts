@@ -31,6 +31,25 @@ const GAME_LIFT_PORTS: readonly number[] = Array.from(
   (_, index) => 7777 + index
 );
 
+/**
+ * Домены, которые убираются из профиля при слиянии.
+ *
+ * Обычно слияние только дополняет список, но здесь домен приходится
+ * вычищать: `rbg-services.com` без обхода отвечает за 0.4 с, а под десинком
+ * TLS-хендшейк к нему обрывается — игра получала «не удаётся обратиться в
+ * службу поддержки Red Barrels» (f0c5). Проверено напрямую: при работающем
+ * winws домен уходит в таймаут по всем четырём IP, после удаления из
+ * хостлиста отдаёт 404 за 0.38 с при том же обходе.
+ *
+ * Тот же случай с `cloudfront.net`: подписанные ссылки на картинки новостей
+ * под десинком отваливаются с `libcurl error: 35 (SSL connect error)` —
+ * SSL-хендшейк не проходит. На игру это не влияет (виден только баннер
+ * новостей), но рвущееся соединение хуже отсутствующей картинки, поэтому
+ * домен тоже вычищается.
+ */
+const BUILTIN_DOMAIN_DROPS: Record<string, readonly string[]> = {
+  "outlast-trials": ["rbg-services.com", "cloudfront.net"],
+};
 export const BUILTIN_GAMES: readonly GameSettings[] = [
   game({
     id: "outlast-trials",
@@ -46,7 +65,6 @@ export const BUILTIN_GAMES: readonly GameSettings[] = [
       "epicgames.dev",
       "redbarrelsgames.com",
       "outlasttrials.com",
-      "rbg-services.com",
       "cloudfront.net",
     ],
     ipRanges: [],
@@ -148,7 +166,9 @@ function findBuiltin(id: string): GameSettings | undefined {
  * Зачем: settings.json переживает обновления приложения. Без склейки копия,
  * сохранённая до появления новых доменов или портов, навсегда оставалась бы
  * старой — и обход не покрывал бы реальный трафик игры. Именно так Outlast
- * остался без rbg-services.com и портов GameLift 7777-7830.
+ * больше нет: домен доступен без обхода (404 за 0.5 с), а под десинком
+ * TLS-хендшейк к нему рвётся — именно это давало f0c5 в игре. Остальное (красные
+ * баррелы, GameLift 7777-7830) остаётся.
  *
  * Настройки пользователя (enabled/autoRestore/createBackup) сохраняются,
  * добавленные им домены и порты не теряются. Встроенные значения при этом
@@ -163,9 +183,15 @@ export function mergeBuiltinGame(game: GameSettings): GameSettings {
     return game;
   }
 
+  const drop = new Set(BUILTIN_DOMAIN_DROPS[game.id] ?? []);
+
   return {
     ...game,
-    domains: unionValues(builtin.domains, game.domains, MAX_INJECTED_ENTRIES),
+    domains: unionValues(
+      builtin.domains,
+      game.domains,
+      MAX_INJECTED_ENTRIES
+    ).filter((domain) => !drop.has(domain)),
     ipRanges: unionValues(
       builtin.ipRanges,
       game.ipRanges,

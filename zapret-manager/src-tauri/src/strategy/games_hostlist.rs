@@ -122,6 +122,7 @@ pub fn generate(
     domains: &[String],
     ips: &[String],
     ports: &[u16],
+    strategy_dir: Option<&Path>,
 ) -> AppResult<GamesPayload> {
     let unique_domains =
         collect_unique(&valid_domains(domains), normalize_domain, GAMES_ENTRY_LIMIT);
@@ -179,7 +180,7 @@ pub fn generate(
     let udp_fake = if udp_ports.is_empty() {
         None
     } else {
-        resolve_udp_fake(dir)
+        resolve_udp_fake(dir, strategy_dir)
     };
 
     Ok(GamesPayload {
@@ -193,12 +194,27 @@ pub fn generate(
     })
 }
 
-fn resolve_udp_fake(dir: &Path) -> Option<PathBuf> {
-    let candidates = [
-        dir.join("bin").join("stun.bin"),
-        dir.join("stun.bin"),
-        dir.parent()?.join("bin").join("stun.bin"),
-    ];
+/// Ищет payload для поддельных UDP-пакетов игрового фильтра.
+///
+/// Раньше смотрели только в каталоге игр (`%TEMP%\zapret-manager`), где
+/// `stun.bin` не лежит: он лежит в `bin` рядом со стратегией. Из-за этого
+/// `udp_fake` был `None`, условие добавления игровой UDP-группы не
+/// выполнялось, и трафик игр вообще не проходил через обход по UDP.
+fn resolve_udp_fake(dir: &Path, strategy_dir: Option<&Path>) -> Option<PathBuf> {
+    let mut candidates: Vec<PathBuf> = Vec::new();
+
+    if let Some(strategy) = strategy_dir {
+        candidates.push(strategy.join("bin").join("stun.bin"));
+        candidates.push(strategy.join("bin").join("ACTIVE_GAME_UDP.bin"));
+        candidates.push(strategy.join("stun.bin"));
+    }
+
+    candidates.push(dir.join("bin").join("stun.bin"));
+    candidates.push(dir.join("stun.bin"));
+
+    if let Some(parent) = dir.parent() {
+        candidates.push(parent.join("bin").join("stun.bin"));
+    }
 
     candidates.into_iter().find(|path| path.is_file())
 }

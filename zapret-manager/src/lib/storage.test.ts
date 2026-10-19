@@ -31,7 +31,7 @@ describe("mergeBuiltinGame", () => {
     const merged = mergeBuiltinGame(stored);
 
     expect(merged.domains).toContain("my-custom.example");
-    expect(merged.domains).toContain("rbg-services.com");
+    expect(merged.domains).toContain("redbarrelsgames.com");
   });
 
   it("не трогает игры без встроенного пресета", () => {
@@ -58,11 +58,11 @@ describe("mergeBuiltinGame", () => {
     const stored: GameSettings = {
       ...outlast,
       domains: outlast.domains.filter(
-        (domain) => domain !== "rbg-services.com"
+        (domain) => domain !== "redbarrelsgames.com"
       ),
     };
 
-    expect(mergeBuiltinGame(stored).domains).toContain("rbg-services.com");
+    expect(mergeBuiltinGame(stored).domains).toContain("redbarrelsgames.com");
   });
 });
 
@@ -121,7 +121,7 @@ describe("устаревшая копия игры в settings.json", () => {
     const settings = validateSettings({ games: [stale] });
     const game = settings.games.find((item) => item.id === "outlast-trials");
 
-    expect(game?.domains).toContain("rbg-services.com");
+    expect(game?.domains).toContain("redbarrelsgames.com");
     expect(game?.ports).toContain(7777);
     expect(game?.ports).toContain(7830);
     expect(game?.enabled).toBe(false);

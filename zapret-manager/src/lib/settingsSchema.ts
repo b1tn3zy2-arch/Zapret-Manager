@@ -42,6 +42,8 @@ const themeSchema = z.enum(["dark", "light", "auto"]);
 const densitySchema = z.enum(["compact", "normal", "comfy"]);
 const effectIntensitySchema = z.enum(["off", "subtle", "normal", "strong"]);
 const qualitySchema = z.enum(["low", "medium", "high"]);
+const flameIntensitySchema = z.enum(["subtle", "normal", "strong"]);
+const flameSpeedSchema = z.enum(["slow", "normal", "fast"]);
 const logLevelSchema = z.enum(["debug", "info", "success", "warn", "error"]);
 const providerSchema = z.enum(["wireguard", "amnezia", "openvpn"]);
 
@@ -93,6 +95,14 @@ const generalSchema = z.object({
     .default(DEFAULT_GENERAL.showUpdateNotifications),
 });
 
+const flameSchema = z.object({
+  enabled: z.boolean().default(DEFAULT_APPEARANCE.flame.enabled),
+  intensity: flameIntensitySchema.default(DEFAULT_APPEARANCE.flame.intensity),
+  speed: flameSpeedSchema.default(DEFAULT_APPEARANCE.flame.speed),
+  chromatic: z.boolean().default(DEFAULT_APPEARANCE.flame.chromatic),
+  forceOn: z.boolean().default(DEFAULT_APPEARANCE.flame.forceOn),
+});
+
 const appearanceSchema = z.object({
   theme: themeSchema.default(DEFAULT_APPEARANCE.theme),
   density: densitySchema.default(DEFAULT_APPEARANCE.density),
@@ -109,6 +119,7 @@ const appearanceSchema = z.object({
   animations: z.boolean().default(DEFAULT_APPEARANCE.animations),
   animateTrayIcon: z.boolean().default(DEFAULT_APPEARANCE.animateTrayIcon),
   postProcessing: postProcessingSchema,
+  flame: flameSchema,
 });
 
 const strategyUpdatesSchema = z.object({

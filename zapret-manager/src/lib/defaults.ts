@@ -7,6 +7,7 @@ import type {
   AdvancedSettings,
   AppearanceSettings,
   AppSettings,
+  FlameSettings,
   GameSettings,
   GeneralSettings,
   PostProcessingSettings,
@@ -53,6 +54,14 @@ export const DEFAULT_POST_PROCESSING: PostProcessingSettings = {
   globalQuality: "high",
 };
 
+export const DEFAULT_FLAME: FlameSettings = {
+  enabled: false,
+  intensity: "normal",
+  speed: "normal",
+  chromatic: true,
+  forceOn: false,
+};
+
 export const DEFAULT_APPEARANCE: AppearanceSettings = {
   theme: "dark",
   density: "normal",
@@ -61,6 +70,7 @@ export const DEFAULT_APPEARANCE: AppearanceSettings = {
   animations: true,
   animateTrayIcon: true,
   postProcessing: DEFAULT_POST_PROCESSING,
+  flame: DEFAULT_FLAME,
 };
 
 export const DEFAULT_ADVANCED: AdvancedSettings = {

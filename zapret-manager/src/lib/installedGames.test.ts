@@ -133,7 +133,7 @@ describe("ручное добавление", () => {
 
 describe("ключи локализации", () => {
   it("покрывает все платформы и источники", () => {
-    expect(Object.keys(PLATFORM_LABEL_KEYS)).toHaveLength(8);
-    expect(Object.keys(SOURCE_LABEL_KEYS)).toHaveLength(9);
+    expect(Object.keys(PLATFORM_LABEL_KEYS)).toHaveLength(9);
+    expect(Object.keys(SOURCE_LABEL_KEYS)).toHaveLength(10);
   });
 });

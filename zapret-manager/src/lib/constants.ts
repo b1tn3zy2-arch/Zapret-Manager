@@ -160,6 +160,12 @@ export const MODAL_BACKDROP_BLUR_PX = 24;
 export const MODAL_BACKDROP_SATURATE = 0.8;
 
 export const POST_PROCESSING_LAYER_Z = 9998;
+export const FLAME_LAYER_Z = 9994;
+export const FLAME_FPS = 30;
+export const FLAME_MIN_EDGE_PX = 8;
+export const FLAME_MAX_EDGE_PX = 30;
+export const FLAME_MAX_CANVAS_PIXELS = 3_600_000;
+export const FLAME_MAX_DEVICE_PIXEL_RATIO = 2;
 /// Подсказки рисуются выше пост-обработки: иначе виньетка, зерно и сканлайны
 /// оказывались поверх подсказки и делали её нечитаемой.
 export const TOOLTIP_Z_INDEX = 10000;

@@ -1,6 +1,7 @@
 import type { PostProcessingSettings } from "./appearance";
 import type { GameSettings } from "./games";
 import type { LogLevel } from "./log";
+import type { FlameIntensity, FlameSpeed } from "@/lib/flamePresets";
 import type { VpnProvider } from "./vpn";
 
 export type ThemeMode = "dark" | "light" | "auto";
@@ -71,6 +72,14 @@ export interface GeneralSettings {
   showUpdateNotifications: boolean;
 }
 
+export interface FlameSettings {
+  enabled: boolean;
+  intensity: FlameIntensity;
+  speed: FlameSpeed;
+  chromatic: boolean;
+  forceOn: boolean;
+}
+
 export interface AppearanceSettings {
   theme: ThemeMode;
   density: DensityMode;
@@ -79,6 +88,7 @@ export interface AppearanceSettings {
   animations: boolean;
   animateTrayIcon: boolean;
   postProcessing: PostProcessingSettings;
+  flame: FlameSettings;
 }
 
 export interface NetworkInfo {

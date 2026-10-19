@@ -8,6 +8,14 @@ import { useStrategiesStore } from "@/stores/useStrategiesStore";
 import { useVpnStore } from "@/stores/useVpnStore";
 import type { InstalledGame, Strategy } from "@/types";
 
+function strategyCalls(mock: { mock: { calls: unknown[][] } }): string[] {
+  return mock.mock.calls
+    .map((call) => String(call[0]))
+    .filter(
+      (command) =>
+        command.startsWith("run_strategy") || command === "launch_game"
+    );
+}
 const invokeMock = vi.fn(async (command: string, _args?: unknown) => {
   if (command === "run_strategy_native" || command === "run_strategy") {
     return { pid: 4242, logPath: "C:\\temp\\log.txt" };
@@ -151,7 +159,7 @@ describe("запуск игры с обходом", () => {
     });
 
     await waitFor(() => {
-      expect(invokeMock.mock.calls[0]?.[0]).toMatch(/^run_strategy/);
+      expect(strategyCalls(invokeMock)[0]).toMatch(/^run_strategy/);
     });
     expect(invokeMock).toHaveBeenCalledWith("launch_game", {
       executablePath: expect.any(String),
@@ -171,7 +179,7 @@ describe("запуск игры с обходом", () => {
       await result.current.launch(game());
     });
 
-    expect(invokeMock.mock.calls[0]?.[0]).toBe("launch_game");
+    expect(strategyCalls(invokeMock)[0]).toBe("launch_game");
     expect(invokeMock).toHaveBeenCalledWith("launch_game", {
       executablePath: expect.any(String),
       launchArgs: null,
@@ -269,7 +277,7 @@ describe("запуск игры с обходом", () => {
     expect(invokeMock).not.toHaveBeenCalledWith("stop_strategy", {
       strategyId: "alt-1",
     });
-    expect(invokeMock.mock.calls[0]?.[0]).toBe("launch_game");
+    expect(strategyCalls(invokeMock)[0]).toBe("launch_game");
   });
 
   it("находит профиль по названию, когда игра добавлена вручную", async () => {

@@ -28,6 +28,13 @@ pub struct GameRequest {
     /// профиль какой именно игры подставлен в конфиг winws
     #[serde(default)]
     pub id: Option<String>,
+    /// Игра с античитом: игровую UDP-группу добавлять нельзя, иначе
+    /// EasyAntiCheat не проходит инициализацию
+    #[serde(default)]
+    pub drop_udp_filter: bool,
+    /// Игра с античитом: список игровых адресов через `--ipset` не подставляем
+    #[serde(default)]
+    pub drop_ipset: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -108,15 +115,36 @@ pub fn prepare_run(
         &domains,
         &ips,
         &ports,
+        Some(working_dir),
     )?;
+
+    // Игры с античитом идут без UDP-fake и без `--ipset`: обе опции заставляют
+    // EasyAntiCheat спотыкаться на инициализации. Хостлист при этом остаётся —
+    // именно он выводит трафик игры под обход.
+    let eac_safe = games.iter().any(|game| game.drop_udp_filter);
+    let ipset_off = games.iter().any(|game| game.drop_ipset);
+
+    if eac_safe || ipset_off {
+        tracing::warn!(
+            "античит: игровая UDP-группа и/или --ipset отключены для {}",
+            games
+                .iter()
+                .filter(|game| game.drop_udp_filter || game.drop_ipset)
+                .map(|game| game.name.as_str())
+                .collect::<Vec<&str>>()
+                .join(", ")
+        );
+    }
 
     let options = BuildOptions {
         log_path: Some(log_path),
         games_hostlist: games_payload.hostlist.as_deref(),
         games_hostlist_exclude: games_payload.exclude.as_deref(),
-        games_udp_ports: Some(games_payload.udp_ports.as_slice()),
-        games_udp_fake: games_payload.udp_fake.as_deref(),
-        games_ipset: games_payload.ipset.as_deref(),
+        games_udp_ports: (!eac_safe).then_some(games_payload.udp_ports.as_slice()),
+        games_udp_fake: (!eac_safe).then_some(games_payload.udp_fake.as_deref()).flatten(),
+        games_ipset: (!ipset_off)
+            .then_some(games_payload.ipset.as_deref())
+            .flatten(),
         extra_args: &[],
     };
 
