@@ -1,82 +1,261 @@
-import CardEntrance from "@/components/shared/CardEntrance";
-import StrategyCard from "@/components/strategies/StrategyCard";
+// Импортируем зависимости из модуля react.
+import { useEffect, useState } from "react";
+// — разделитель логических блоков —
+
+// Импортируем зависимости из модуля @/types.
+import type { Strategy, StrategyCard as Card } from "@/types";
+// Импортируем зависимости из модуля @/components/strategies/game/StrategyGameCard.
 import { StrategyGameCardItem } from "@/components/strategies/game/StrategyGameCard";
-import { usePostProcessing } from "@/contexts/postProcessing";
-import { MOTION_BLUR_MAX_PX } from "@/lib/postProcessingTokens";
-import type { Strategy, StrategyCard as Card, ViewMode } from "@/types";
+// — разделитель логических блоков —
 
+// Обрабатываем конструкцию: export.
 export interface StrategyCollectionProps {
+  // Обрабатываем конструкцию: cards.
   cards: Card[];
-  viewMode: ViewMode;
+  // Обрабатываем конструкцию: flippedId.
   flippedId: string | null;
-  tiltDisabled: boolean;
-  particlesDisabled: boolean;
+  // Обрабатываем конструкцию: motionDisabled.
   motionDisabled: boolean;
+  // Обрабатываем конструкцию: onFlip.
   onFlip: (id: string) => void;
+  // Обрабатываем конструкцию: onRun.
   onRun: (strategy: Strategy) => void;
+  // Обрабатываем конструкцию: onStop.
   onStop: (strategy: Strategy) => void;
+  // Обрабатываем конструкцию: onOpenFolder.
   onOpenFolder: () => void;
+  // Обрабатываем конструкцию: onRemove.
+  onRemove: (id: string) => void;
+  // Закрываем текущий блок.
 }
+// — разделитель логических блоков —
 
+// Сохраняем пояснение разработчика: Сколько карточек монтируется сразу, остальное — порциями в п…
+/** Сколько карточек монтируется сразу, остальное — порциями в простое. */
+// Обрабатываем конструкцию: const INITIAL_CARDS = 24.
+const INITIAL_CARDS = 24;
+// Сохраняем пояснение разработчика: Размер порции догрузки.
+/** Размер порции догрузки. */
+// Обрабатываем конструкцию: const CARDS_PER_CHUNK = 12.
+const CARDS_PER_CHUNK = 12;
+// — разделитель логических блоков —
+
+// Сохраняем пояснение разработчика:
+/**
+ // Сохраняем пояснение разработчика: * Список карточек стратегий.
+ * Список карточек стратегий.
+ // Сохраняем пояснение разработчика: *
+ *
+ // Сохраняем пояснение разработчика: * Единственный вид — сетка карточек; список/компактный режим…
+ * Единственный вид — сетка карточек; список/компактный режим убраны
+ // Сохраняем пояснение разработчика: * вместе с редкостями. Появление без blur: короткий fade + с…
+ * вместе с редкостями. Появление без blur: короткий fade + смещение,
+ // Сохраняем пояснение разработчика: * убрать его можно настройкой «Анимации».
+ * убрать его можно настройкой «Анимации».
+ // Сохраняем пояснение разработчика: *
+ *
+ // Сохраняем пояснение разработчика: * Карточки тяжёлые (3D-переворот, tilt, тултипы), а стратеги…
+ * Карточки тяжёлые (3D-переворот, tilt, тултипы), а стратегий десятки:
+ // Сохраняем пояснение разработчика: * монтирование всего списка одним куском съедало первые секу…
+ * монтирование всего списка одним куском съедало первые секунды
+ // Сохраняем пояснение разработчика: * прокрутки. Поэтому сразу рендерится первая порция, остальн…
+ * прокрутки. Поэтому сразу рендерится первая порция, остальное
+ // Сохраняем пояснение разработчика: * докатывается порциями в простое браузера — прокрутка плавн…
+ * докатывается порциями в простое браузера — прокрутка плавная с
+ // Сохраняем пояснение разработчика: * первого кадра, а список «дозревает» сам.
+ * первого кадра, а список «дозревает» сам.
+ // Сохраняем пояснение разработчика: 
+ */
+// Объявляем функцию StrategyCollection.
 function StrategyCollection({
+  // Обрабатываем конструкцию: cards.
   cards,
-  viewMode,
+  // Обрабатываем конструкцию: flippedId.
   flippedId,
-  tiltDisabled,
-  particlesDisabled,
+  // Обрабатываем конструкцию: motionDisabled.
   motionDisabled,
+  // Обрабатываем конструкцию: onFlip.
   onFlip,
+  // Обрабатываем конструкцию: onRun.
   onRun,
+  // Обрабатываем конструкцию: onStop.
   onStop,
+  // Обрабатываем конструкцию: onOpenFolder.
   onOpenFolder,
+  // Обрабатываем конструкцию: onRemove.
+  onRemove,
+  // Закрываем текущий блок.
 }: StrategyCollectionProps) {
-  const { motionBlur, intensity } = usePostProcessing();
-  const blurPx = motionBlur ? MOTION_BLUR_MAX_PX[intensity] * 2 : 0;
-
-  if (cards.length === 0) {
-    return null;
-  }
-
-  if (viewMode === "list") {
-    return (
-      <div className="cards-container strategy-list-grid">
-        {cards.map((card) => (
-          <StrategyCard
-            key={card.strategy.id}
-            strategy={card.strategy}
-            onRun={onRun}
-            onStop={onStop}
-          />
-        ))}
-      </div>
-    );
-  }
-
-  return (
-    <div className="cards-container card-grid">
-      {cards.map((card, index) => (
-        <CardEntrance
-          key={card.strategy.id}
-          index={index}
-          maxDelaySeconds={0.5}
-          blurPx={blurPx}
-          disabled={motionDisabled}
-        >
-          <StrategyGameCardItem
-            card={card}
-            flipped={flippedId === card.strategy.id}
-            tiltDisabled={tiltDisabled}
-            particlesDisabled={particlesDisabled}
-            motionDisabled={motionDisabled}
-            onFlip={onFlip}
-            onRun={onRun}
-            onStop={onStop}
-            onOpenFolder={onOpenFolder}
-          />
-        </CardEntrance>
-      ))}
-    </div>
+  // Обрабатываем конструкцию: const [limit, setLimit] = useState(() => Math.min(INITI….
+  const [limit, setLimit] = useState(
+    // Продолжаем предыдущую конструкцию.
+    () =>
+      // Обрабатываем конструкцию: Math.
+      Math.min(INITIAL_CARDS, cards.length)
+    // Закрываем выражение или список аргументов.
   );
-}
+  // — разделитель логических блоков —
 
+  // Обрабатываем конструкцию: useEffect.
+  useEffect(() => {
+    // Проверяем бизнес-условие: limit >= cards.length.
+    if (limit >= cards.length) {
+      // Завершаем функцию без возвращаемого значения.
+      return;
+      // Закрываем текущий блок.
+    }
+    // — разделитель логических блоков —
+
+    // Обрабатываем конструкцию: let cancelled = false.
+    let cancelled = false;
+    // Обрабатываем конструкцию: let idleHandle = 0.
+    let idleHandle = 0;
+    // Обрабатываем конструкцию: let timeoutHandle = 0.
+    let timeoutHandle = 0;
+    // — разделитель логических блоков —
+
+    // Обрабатываем конструкцию: const grow = (): void => { if (cancelled) { return; } s….
+    const grow = (): void => {
+      // Проверяем бизнес-условие: cancelled.
+      if (cancelled) {
+        // Завершаем функцию без возвращаемого значения.
+        return;
+        // Закрываем текущий блок.
+      }
+      // — разделитель логических блоков —
+
+      // Обрабатываем конструкцию: setLimit.
+      setLimit((current) => Math.min(current + CARDS_PER_CHUNK, cards.length));
+      // Закрываем текущий блок.
+    };
+    // — разделитель логических блоков —
+
+    // Обрабатываем конструкцию: const schedule = (): void => { if (typeof window.reques….
+    const schedule = (): void => {
+      // Проверяем бизнес-условие: typeof window.requestIdleCallback === function.
+      if (typeof window.requestIdleCallback === "function") {
+        // Обрабатываем конструкцию: idleHandle.
+        idleHandle = window.requestIdleCallback(grow, { timeout: 120 });
+        // Закрываем текущий блок.
+      } else {
+        // Обрабатываем конструкцию: timeoutHandle.
+        timeoutHandle = window.setTimeout(grow, 30);
+        // Закрываем текущий блок.
+      }
+      // Закрываем текущий блок.
+    };
+    // — разделитель логических блоков —
+
+    // Обрабатываем конструкцию: schedule.
+    schedule();
+    // — разделитель логических блоков —
+
+    // Возвращаем результат: () => { cancelled = true; if (idleHandle !== 0) { windo….
+    return () => {
+      // Обрабатываем конструкцию: cancelled.
+      cancelled = true;
+      // — разделитель логических блоков —
+
+      // Проверяем бизнес-условие: idleHandle !== 0.
+      if (idleHandle !== 0) {
+        // Обрабатываем конструкцию: window.
+        window.cancelIdleCallback(idleHandle);
+        // Закрываем текущий блок.
+      }
+      // — разделитель логических блоков —
+
+      // Обрабатываем конструкцию: window.
+      window.clearTimeout(timeoutHandle);
+      // Закрываем текущий блок.
+    };
+    // Закрываем текущий блок.
+  }, [limit, cards.length]);
+  // — разделитель логических блоков —
+
+  // Проверяем бизнес-условие: cards.length === 0.
+  if (cards.length === 0) {
+    // Возвращаем результат: null.
+    return null;
+    // Закрываем текущий блок.
+  }
+  // — разделитель логических блоков —
+
+  // Возвращаем результат: ( <div className=cards-container card-grid> {cards.slic….
+  return (
+    // Обрабатываем конструкцию: <div className=cards-container card-grid>.
+    <div className="cards-container card-grid">
+      {/* Выводим текстовое содержимое в JSX. */}
+      {cards.slice(0, limit).map((card, index) => (
+        // Обрабатываем конструкцию: <div key={card.strategy.id} className={motionDisabled ?….
+        <div
+          // Обрабатываем конструкцию: key.
+          key={card.strategy.id}
+          // Обрабатываем конструкцию: className.
+          className={motionDisabled ? undefined : "animate-fade-rise"}
+          // Обрабатываем конструкцию: style.
+          style={
+            // Обрабатываем конструкцию: motionDisabled.
+            motionDisabled
+              ? // Обрабатываем конструкцию: ?.
+                // Продолжаем предыдущую конструкцию.
+                undefined
+              : // Обрабатываем конструкцию: :.
+                // Продолжаем предыдущую конструкцию.
+                {
+                  // Сохраняем пояснение разработчика: // Ступенчатая задержка — только для первого экрана;
+                  // Ступенчатая задержка — только для первого экрана;
+                  // Сохраняем пояснение разработчика: // карточки догрузки появляются сразу, чтобы список
+                  // карточки догрузки появляются сразу, чтобы список
+                  // Сохраняем пояснение разработчика: // «дозревал» быстрее и не переливался при прокрутке.
+                  // «дозревал» быстрее и не переливался при прокрутке.
+                  // Обрабатываем конструкцию: animationDelay.
+                  animationDelay:
+                    // Обрабатываем конструкцию: index.
+                    index < INITIAL_CARDS
+                      ? // Обрабатываем конструкцию: ?.
+                        // Продолжаем предыдущую конструкцию.
+                        `${Math.min(index * 0.04, 0.5)}s`
+                      : // Обрабатываем конструкцию: :.
+                        // Продолжаем предыдущую конструкцию.
+                        "0s",
+                  // Закрываем текущий блок.
+                }
+            // Закрываем текущий блок.
+          }
+          // Продолжаем выражение.
+        >
+          {/* Выводим текстовое содержимое в JSX. */}
+          <StrategyGameCardItem
+            // Обрабатываем конструкцию: card.
+            card={card}
+            // Обрабатываем конструкцию: flipped.
+            flipped={flippedId === card.strategy.id}
+            // Обрабатываем конструкцию: motionDisabled.
+            motionDisabled={motionDisabled}
+            // Обрабатываем конструкцию: onFlip.
+            onFlip={onFlip}
+            // Обрабатываем конструкцию: onRun.
+            onRun={onRun}
+            // Обрабатываем конструкцию: onStop.
+            onStop={onStop}
+            // Обрабатываем конструкцию: onOpenFolder.
+            onOpenFolder={onOpenFolder}
+            // Обрабатываем конструкцию: onRemove.
+            onRemove={onRemove}
+            // Продолжаем выражение.
+          />
+          {/* Выводим текстовое содержимое в JSX. */}
+        </div>
+        // Закрываем выражение или список аргументов.
+      ))}
+      {/* Выводим текстовое содержимое в JSX. */}
+    </div>
+    // Закрываем выражение или список аргументов.
+  );
+  // Закрываем текущий блок.
+}
+// — разделитель логических блоков —
+
+// Обрабатываем конструкцию: export default StrategyCollection;.
 export default StrategyCollection;
+// — разделитель логических блоков —

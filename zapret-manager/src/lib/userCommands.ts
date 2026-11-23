@@ -1,34 +1,65 @@
-import { translateKey } from "@/i18n/core";
+// Импортируем зависимости из модуля @/lib/secureInvoke.
 import { secureInvoke } from "@/lib/secureInvoke";
-import { validateTextFilePath } from "@/lib/sanitize";
+// — разделитель логических блоков —
 
+// Обрабатываем конструкцию: export.
 export async function openExternalUrl(url: string): Promise<void> {
+  // Ожидаем завершение асинхронной операции await secureInvoke<void>(open_external_url, {….
   await secureInvoke<void>("open_external_url", { url });
+  // Закрываем текущий блок.
 }
+// — разделитель логических блоков —
 
-export async function readUserTextFile(path: string): Promise<string> {
-  const check = validateTextFilePath(path);
-
-  if (!check.valid) {
-    throw new Error(
-      check.message ?? translateKey("validation.invalidFilePath")
-    );
-  }
-
-  return secureInvoke<string>("read_user_text_file", { path });
-}
-
-export async function writeUserTextFile(
-  path: string,
+// Сохраняем пояснение разработчика:
+/**
+ // Сохраняем пояснение разработчика: * Сохраняет настройки через системный диалог.
+ * Сохраняет настройки через системный диалог.
+ // Сохраняем пояснение разработчика: *
+ *
+ // Сохраняем пояснение разработчика: * Путь выбирает Rust: webview не может передать произвольный…
+ * Путь выбирает Rust: webview не может передать произвольный файл.
+ // Сохраняем пояснение разработчика: * null означает отмену выбора.
+ * `null` означает отмену выбора.
+ // Сохраняем пояснение разработчика: 
+ */
+// Обрабатываем конструкцию: export.
+export async function saveSettingsFile(
+  // Обрабатываем конструкцию: title.
+  title: string,
+  // Обрабатываем конструкцию: defaultName.
+  defaultName: string,
+  // Обрабатываем конструкцию: content.
   content: string
-): Promise<void> {
-  const check = validateTextFilePath(path);
-
-  if (!check.valid) {
-    throw new Error(
-      check.message ?? translateKey("validation.invalidFilePath")
-    );
-  }
-
-  await secureInvoke<void>("write_user_text_file", { path, content });
+  // Закрываем выражение или список аргументов.
+): Promise<string | null> {
+  // Возвращаем результат: secureInvoke<string | null>(export_settings_file, { tit….
+  return secureInvoke<string | null>("export_settings_file", {
+    // Передаём поле title в объект.
+    title,
+    // Передаём поле defaultName в объект.
+    defaultName,
+    // Передаём поле content в объект.
+    content,
+    // Закрываем текущий блок.
+  });
+  // Закрываем текущий блок.
 }
+// — разделитель логических блоков —
+
+// Сохраняем пояснение разработчика:
+/**
+ // Сохраняем пояснение разработчика: * Читает настройки через системный диалог.
+ * Читает настройки через системный диалог.
+ // Сохраняем пояснение разработчика: *
+ *
+ // Сохраняем пояснение разработчика: * null означает отмену выбора.
+ * `null` означает отмену выбора.
+ // Сохраняем пояснение разработчика: 
+ */
+// Обрабатываем конструкцию: export.
+export async function pickSettingsFile(title: string): Promise<string | null> {
+  // Возвращаем результат: secureInvoke<string | null>(import_settings_file, { tit….
+  return secureInvoke<string | null>("import_settings_file", { title });
+  // Закрываем текущий блок.
+}
+// — разделитель логических блоков —

@@ -14,6 +14,8 @@ ZAPRET MANAGER - УСЛОВИЯ ИСПОЛЬЗОВАНИЯ / TERMS OF USE
 собственных условиях и содержит собственные тексты лицензий:
   • zapret (MIT License, Copyright (c) 2024 bol-van/zapret)
   • WinDivert (LGPL v3), cygwin1.dll (LGPL), Go (BSD-3-Clause)
+  • Xray-core (MPL-2.0) и geoip.dat из проекта XTLS/Xray-core
+  • Microsoft Edge WebView2 Runtime (условия Microsoft)
 Полные тексты лицензий доступны в приложении: «Настройки -> Лицензии».
 / Third-party components keep their own licenses; full texts are available
 in the app under "Settings -> Licenses".

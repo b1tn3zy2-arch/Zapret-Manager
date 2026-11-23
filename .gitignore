@@ -20,6 +20,8 @@ release/
 *.log
 .eslintcache
 .vitest/
+.temp/
+.vite/
 
 # IDE и ОС
 .idea/
@@ -35,3 +37,9 @@ desktop.ini
 lists/*-user.txt
 lists/*-user.txt.backup
 lists/ipset-*-user.txt
+# Дополнительные исключения (безопасность и стандартные артефакты)
+build/
+secrets/
+credentials.*
+__pycache__/
+.cache/

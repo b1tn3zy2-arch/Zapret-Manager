@@ -1,7 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "entry": [
-    "src/main.tsx",
     "e2e/**/*.spec.ts",
     "src/**/*.test.ts",
     "src/**/*.test.tsx",
@@ -13,12 +12,11 @@
     "@fontsource/inter",
     "@fontsource/jetbrains-mono",
     "@fontsource/unbounded",
-    "@tauri-apps/plugin-updater",
     "circle-flags",
     "simple-icons",
     "tailwindcss"
   ],
-  "ignoreBinaries": ["tailwindcss"],
+  "ignoreBinaries": [],
   "rules": {
     "types": "off"
   }

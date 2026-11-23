@@ -3,7 +3,7 @@ LangString ZM_LICENSE_TITLE ${LANG_RUSSIAN} "Условия использова
 LangString ZM_FINISH_TITLE ${LANG_RUSSIAN} "Установка завершена!"
 LangString ZM_FINISH_SUBTITLE ${LANG_RUSSIAN} "Zapret Manager готов к работе. Нажмите «Готово», чтобы закрыть установщик."
 LangString ZM_WELCOME_SUBTITLE ${LANG_RUSSIAN} "Установка займёт меньше минуты"
-LangString ZM_WELCOME_FEATURES ${LANG_RUSSIAN} "Приложение для сканирования, запуска и мониторинга стратегий обхода блокировок: Discord, YouTube, Outlast Trials.$\r$\nВ установку входят:$\r$\n• 22 встроенные стратегии обхода$\r$\n• winws.exe и WinDivert для перенаправления трафика$\r$\n• автозапуск, ярлыки и системный трей$\r$\n• переключение между DPI-стратегиями и VPN (WireGuard / AmneziaWG)"
+LangString ZM_WELCOME_FEATURES ${LANG_RUSSIAN} "Приложение для сканирования, запуска и мониторинга стратегий обхода блокировок: Discord, YouTube, Outlast Trials.$\r$\nВ установку входят:$\r$\n• 22 встроенные стратегии обхода$\r$\n• winws.exe и WinDivert для перенаправления трафика$\r$\n• встроенное ядро Xray для VPN-режима$\r$\n• автозапуск, ярлыки и системный трей$\r$\n• работа без Node.js, Rust и Visual C++ Redistributable"
 LangString ZM_WELCOME_FEATURES_TITLE ${LANG_RUSSIAN} "Что будет установлено"
 LangString ZM_LICENSE_SUMMARY ${LANG_RUSSIAN} "Условия использования Zapret Manager приведены на следующей странице. Установка означает согласие с ними."
 LangString ZM_OPTIONS_TITLE ${LANG_RUSSIAN} "Параметры установки"

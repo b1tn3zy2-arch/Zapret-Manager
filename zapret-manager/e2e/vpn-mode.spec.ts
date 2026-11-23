@@ -3,36 +3,18 @@ import type { Page } from "@playwright/test";
 
 import { bootstrap, modeSwitcher } from "./helpers";
 
-function servers(page: Page) {
-  // список серверов: на странице есть и другие списки (меню настроек)
-  return page
-    .getByRole("list")
-    .filter({ hasText: "VLESS" })
-    .getByRole("listitem");
-}
-
 async function openVpn(page: Page): Promise<void> {
   await page.goto("/");
   await modeSwitcher(page)
     .getByRole("radio", { name: "Переключить на VPN" })
     .click();
-  await expect(page.getByText("Нажмите для подключения")).toBeVisible();
-}
-
-async function loadServers(page: Page): Promise<void> {
-  await page.getByRole("button", { name: "Добавить ссылку" }).first().click();
-
-  const dialog = page.getByRole("dialog");
-  await dialog.getByRole("textbox").fill("https://sub.example.com/list");
-  await dialog.getByRole("button", { name: "Загрузить" }).click();
-
-  await expect(servers(page).first()).toBeVisible();
+  await expect(page.getByText("Умное подключение")).toBeVisible();
 }
 
 test.describe("Режим VPN", () => {
-  // Список серверов пережил перезапуск приложения: в нём лежат записи,
-  // сохранённые прошлой сборкой, без полей транспорта и шифрования. Раньше
-  // переход в режим VPN на таком списке ронял весь интерфейс.
+  // Список серверов прошлой сборки приложение больше не хранит:
+  // подписка всегда скачивается заново. Старые записи в хранилище
+  // не должны ломать интерфейс.
   test("переживает список, сохранённый прошлой сборкой", async ({ page }) => {
     await page.addInitScript(() => {
       window.localStorage.setItem(
@@ -60,70 +42,25 @@ test.describe("Режим VPN", () => {
     const { errors } = await bootstrap(page);
     await openVpn(page);
 
-    await expect(page.getByText("Нажмите для подключения")).toBeVisible();
+    await expect(page.getByText("Умное подключение")).toBeVisible();
     expect(errors).toEqual([]);
   });
 
-  test("загружает все серверы подписки, а не один", async ({ page }) => {
-    // Лимит в один сервер делал подписку бесполезной: показывался только
-    // первый узел из списка.
-    const { errors } = await bootstrap(page);
-    await openVpn(page);
-    await loadServers(page);
-
-    await expect(servers(page)).toHaveCount(3);
-    await expect(page.getByText("Alpha", { exact: true })).toBeVisible();
-    await expect(page.getByText("Beta", { exact: true })).toBeVisible();
-    await expect(page.getByText("Gamma", { exact: true })).toBeVisible();
-
-    expect(errors).toEqual([]);
-  });
-
-  test("удаляет отдельный сервер и не возвращает его при обновлении", async ({
+  test("подключается одной кнопкой к самому быстрому серверу", async ({
     page,
   }) => {
     const { errors } = await bootstrap(page);
     await openVpn(page);
-    await loadServers(page);
 
-    // удаление спрятано в меню «⋯», как на референсе
-    await page
-      .getByRole("button", { name: "Действия с сервером Beta" })
-      .click();
-    await page.getByRole("button", { name: "Удалить", exact: true }).click();
-    await expect(page.getByText("Beta", { exact: true })).toHaveCount(0);
-    await expect(servers(page)).toHaveCount(2);
+    // Списка серверов в интерфейсе нет: приложение само скачивает
+    // подписку и выбирает самый быстрый узел.
+    await expect(page.getByText("Нет VPN-конфигов")).toHaveCount(0);
 
-    // обновление подписки не должно воскресить удалённый сервер
-    await page
-      .getByRole("button", { name: "Обновить подписку и пинги" })
-      .click();
-    await expect(page.getByText("Beta", { exact: true })).toHaveCount(0);
-    await expect(servers(page)).toHaveCount(2);
+    await page.getByRole("button", { name: "Подключить VPN" }).click();
 
-    expect(errors).toEqual([]);
-  });
-
-  test("спрашивает подтверждение перед удалением всех серверов", async ({
-    page,
-  }) => {
-    const { errors } = await bootstrap(page);
-    await openVpn(page);
-    await loadServers(page);
-
-    await page.getByRole("button", { name: "Очистить подписку" }).click();
-    await expect(page.getByText("Удалить все серверы?")).toBeVisible();
-
-    await page.getByRole("button", { name: "Отмена" }).click();
-    await expect(servers(page)).toHaveCount(3);
-
-    await page.getByRole("button", { name: "Очистить подписку" }).click();
-    await page
-      .getByRole("dialog")
-      .getByRole("button", { name: "Удалить" })
-      .click();
-
-    await expect(page.getByText("Нет VPN-конфигов")).toBeVisible();
+    await expect(
+      page.getByText("Подключено: Alpha (24 ms)").first()
+    ).toBeVisible();
 
     expect(errors).toEqual([]);
   });
@@ -133,7 +70,6 @@ test.describe("Режим VPN", () => {
   }) => {
     const { errors } = await bootstrap(page);
     await openVpn(page);
-    await loadServers(page);
 
     await expect(page.getByText("Время работы")).toHaveCount(0);
 
@@ -167,7 +103,6 @@ test.describe("Режим VPN", () => {
   test("настройка VPN включает и выключает подключение", async ({ page }) => {
     const { errors } = await bootstrap(page);
     await openVpn(page);
-    await loadServers(page);
 
     await page.getByRole("button", { name: "Настройки" }).click();
     await page

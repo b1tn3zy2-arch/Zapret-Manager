@@ -1,115 +1,249 @@
+// Подключаем appDataDir — получение каталога данных приложения через Tauri API.
 import { appDataDir } from "@tauri-apps/api/path";
+// Подключаем файловые операции плагина fs: проверка, создание каталога, чтение и запись.
 import {
+  // Проверяем существование файла или каталога перед чтением и созданием.
   exists,
+  // Создаём каталог рекурсивно, если родители ещё отсутствуют.
   mkdir,
+  // Читаем текстовое содержимое конфигурационного файла.
   readTextFile,
+  // Записываем готовый текст файла на диск.
   writeTextFile,
+  // Продолжаем предыдущую конструкцию.
 } from "@tauri-apps/plugin-fs";
-
+// Закрываем список именованных импортов плагина fs.
+// — разделитель: внешние зависимости подключены, дальше идут внутренние —
+// Подключаем имя файла настроек — единственный источник пути к конфигурации.
 import { SETTINGS_FILE_NAME } from "@/lib/defaults";
+// Подключаем функции получения игр по умолчанию и объединения со встроенным каталогом.
 import { getDefaultGames, mergeBuiltinGames } from "@/lib/defaultGames";
+// Подключаем валидатор настроек: он проверяет схему до использования значений.
 import { validateSettings } from "@/lib/settingsSchema";
+// Подключаем типы настроек только для аннотаций — в рантайм они не попадут.
 import type {
+  // Расширенные настройки движка и диагностики.
   AdvancedSettings,
+  // Настройки внешнего вида и анимаций.
   AppearanceSettings,
+  // Полный объект настроек приложения.
   AppSettings,
+  // Настройки, связанные с играми.
   GameSettings,
+  // Общие настройки приложения.
   GeneralSettings,
+  // Настройки обновления стратегий.
   StrategyUpdateSettings,
+  // Настройки VPN-подключения.
   VpnSettings,
+  // Продолжаем предыдущую конструкцию.
 } from "@/types";
-async function resolveSettingsPath(): Promise<string> {
-  const root = await appDataDir();
+// Закрываем список импортируемых типов.
+// — разделитель: импорты завершены, начинаются вспомогательные функции —
+// Собираем путь к файлу настроек из уже полученного корня; синхронно и без повторного IPC.
+function settingsPath(root: string): string {
+  // Возвращаем путь вида < каталог данных >\settings.json.
   return `${root}\\${SETTINGS_FILE_NAME}`;
+  // Продолжаем предыдущую конструкцию.
 }
-
-export async function getSettingsPath(): Promise<string> {
-  return resolveSettingsPath();
-}
-
+// Закрываем тело функции settingsPath.
+// — разделитель логических блоков —
+// Type guard: отличаем обычный объект от примитивов и null.
 function isRecord(value: unknown): value is Record<string, unknown> {
+  // Объектом считаем только не-null значение typeof === "object".
   return typeof value === "object" && value !== null;
+  // Продолжаем предыдущую конструкцию.
 }
-
+// Закрываем тело type guard isRecord.
+// — разделитель логических блоков —
+// Приводим неизвестную секцию файла к типизированному объекту, не доверяя её содержимому.
 function section<T>(value: unknown): T {
+  // Берём собственные поля только если это объект, иначе подставляем пустой объект.
   return { ...(isRecord(value) ? value : {}) } as unknown as T;
+  // Продолжаем предыдущую конструкцию.
 }
-
+// Закрываем тело функции section.
+// — разделитель логических блоков —
+// Читаем строковое поле с безопасным значением по умолчанию.
 function text(value: unknown, fallback: string): string {
+  // Возвращаем исходную строку или fallback, если тип не совпал.
   return typeof value === "string" ? value : fallback;
+  // Продолжаем предыдущую конструкцию.
 }
-
+// Закрываем тело функции text.
+// — разделитель логических блоков —
+// Читаем необязательное строковое поле: отсутствие значения кодируется как null.
 function optionalText(value: unknown): string | null {
+  // Возвращаем строку либо null, чтобы сохранить различие с пустой строкой.
   return typeof value === "string" ? value : null;
+  // Продолжаем предыдущую конструкцию.
 }
-
+// Закрываем тело функции optionalText.
+// — разделитель логических блоков —
+// Фильтруем массив, оставляя только строковые элементы.
 function stringList(value: unknown): string[] {
+  // Для массива сужаем тип каждого элемента, иначе возвращаем пустой список.
   return Array.isArray(value)
-    ? value.filter((item): item is string => typeof item === "string")
-    : [];
+    ? // Продолжаем предыдущую конструкцию.
+      value.filter((item): item is string => typeof item === "string")
+    : // Продолжаем предыдущую конструкцию.
+      [];
+  // Продолжаем предыдущую конструкцию.
 }
-
+// Закрываем тело функции stringList.
+// — разделитель логических блоков —
+// Разбираем секцию игр и объединяем её со встроенным каталогом.
 function gameList(value: unknown): GameSettings[] | undefined {
+  // Если это не массив — секция отсутствует, вызывающий подставит игры по умолчанию.
   if (!Array.isArray(value)) {
+    // Возвращаем undefined как признак отсутствующей секции.
     return undefined;
+    // Продолжаем предыдущую конструкцию.
   }
-
+  // Закрываем проверку типа массива.
+  // — разделитель: массив есть, нормализуем его элементы —
+  // Оставляем объекты и приводим каждый к типу GameSettings через section.
   return mergeBuiltinGames(
+    // Продолжаем предыдущую конструкцию.
     value.filter(isRecord).map((item) => section<GameSettings>(item))
+    // Продолжаем предыдущую конструкцию.
   );
+  // Продолжаем предыдущую конструкцию.
 }
-
+// Закрываем тело функции gameList.
+// — разделитель логических блоков —
+// Собирает валидный объект AppSettings из «сырого» JSON, когда строгая валидация не прошла.
 function parseSections(parsed: Record<string, unknown>): AppSettings {
+  // Секция обновлений может отсутствовать — готовим пустой объект заранее.
   const updates = isRecord(parsed.strategyUpdates)
-    ? parsed.strategyUpdates
-    : {};
-
+    ? // Продолжаем предыдущую конструкцию.
+      parsed.strategyUpdates
+    : // Продолжаем предыдущую конструкцию.
+      {};
+  // — разделитель: все поля нормализованы, возвращаем итоговую структуру —
   return {
+    // Папка со стратегиями; пустая строка означает «использовать путь по умолчанию».
     strategiesFolder: text(parsed.strategiesFolder, ""),
+    // Идентификатор последней выбранной стратегии или null.
     lastStrategyId: optionalText(parsed.lastStrategyId),
+    // Общая секция настроек.
     general: section<GeneralSettings>(parsed.general),
+    // Секция внешнего вида.
     appearance: section<AppearanceSettings>(parsed.appearance),
+    // Секция обновлений: обычные поля плюс нормализованные списки и дата.
     strategyUpdates: {
+      // Копируем известные поля обновлений через типизированную секцию.
       ...section<StrategyUpdateSettings>(updates),
+      // Игнорируемые версии — только массив строк.
       ignoredVersions: stringList(updates.ignoredVersions),
+      // Время последней проверки допустимо только как число, иначе null.
       lastCheckAt:
+        // Продолжаем предыдущую конструкцию.
         typeof updates.lastCheckAt === "number" ? updates.lastCheckAt : null,
+      // Продолжаем предыдущую конструкцию.
     },
+    // Закрываем вложенный объект strategyUpdates.
+    // Список игр из файла либо игры по умолчанию.
     games: gameList(parsed.games) ?? getDefaultGames(),
+    // Секция настроек VPN.
     vpn: section<VpnSettings>(parsed.vpn),
+    // Расширенная секция настроек.
     advanced: section<AdvancedSettings>(parsed.advanced),
+    // Продолжаем предыдущую конструкцию.
   };
+  // Закрываем возвращаемый объект.
 }
-
+// Закрываем тело функции parseSections.
+// — разделитель логических блоков —
+// Экспортируем чтение настроек: сначала строгая валидация, затем мягкий разбор, затем null.
 export async function readSettingsFile(): Promise<AppSettings | null> {
-  const path = await resolveSettingsPath();
-
-  if (!(await exists(path))) {
-    return null;
-  }
-
-  const parsed: unknown = JSON.parse(await readTextFile(path));
-
-  if (!isRecord(parsed)) {
-    return null;
-  }
-
-  try {
-    return validateSettings(parsed);
-  } catch {
-    return parseSections(parsed);
-  }
-}
-
-export async function writeSettingsFile(settings: AppSettings): Promise<void> {
+  // Получаем корень один раз и сразу вычисляем путь — без повторного IPC.
   const root = await appDataDir();
-
-  if (!(await exists(root))) {
-    await mkdir(root, { recursive: true });
+  // Вычисляем путь к основному файлу из уже известного корня.
+  const path = settingsPath(root);
+  // Основной файл и резервная копия: если приложение упало посреди
+  // записи, `settings.json` может быть обрезан, а `.bak` — цел.
+  const candidates = [path, `${path}.bak`];
+  // — разделитель: кандидаты определены, перебираем их по приоритету —
+  // Проверяем каждый кандидат по очереди: основной файл важнее резервного.
+  for (const candidate of candidates) {
+    // Пропускаем несуществующие файлы, не создавая их.
+    if (!(await exists(candidate))) {
+      // Переходим к следующему кандидату.
+      continue;
+      // Продолжаем предыдущую конструкцию.
+    }
+    // Закрываем проверку существования.
+    // — разделитель: файл найден, пытаемся разобрать его содержимое —
+    // Битый JSON или ошибка чтения не должны прерывать перебор кандидатов.
+    try {
+      // Читаем файл как текст и сразу разбираем в неизвестное значение.
+      const parsed: unknown = JSON.parse(await readTextFile(candidate));
+      // — разделитель: JSON разобран, проверяем, что это объект —
+      // Массив, число или null не являются валидной конфигурацией.
+      if (!isRecord(parsed)) {
+        // Переходим к следующему кандидату.
+        continue;
+        // Продолжаем предыдущую конструкцию.
+      }
+      // Закрываем проверку объекта.
+      // — разделитель: объект получен, пробуем строгую валидацию —
+      // Сначала доверяем схеме: она возвращает полностью типизированный результат.
+      try {
+        // Возвращаем результат строгой валидации и завершаем функцию.
+        return validateSettings(parsed);
+        // Продолжаем предыдущую конструкцию.
+      } catch {
+        // Схема не прошла — откатываемся к мягкому разбору по полям.
+        return parseSections(parsed);
+        // Продолжаем предыдущую конструкцию.
+      }
+      // Закрываем вложенный try/catch валидации.
+    } catch {
+      // Битый JSON — пробуем следующий кандидат.
+    }
+    // Закрываем внешний try/catch чтения файла.
   }
-
-  await writeTextFile(
-    await resolveSettingsPath(),
-    JSON.stringify(settings, null, 2)
-  );
+  // Закрываем цикл перебора кандидатов.
+  // Ни один из кандидатов не дал валидных данных — конфигурации ещё нет.
+  return null;
+  // Продолжаем предыдущую конструкцию.
 }
+// Закрываем тело функции readSettingsFile.
+// — разделитель логических блоков —
+// Экспортируем запись настроек с атомарной страховкой предыдущей версии.
+export async function writeSettingsFile(settings: AppSettings): Promise<void> {
+  // Получаем корень данных один раз: он нужен и для каталога, и для пути к файлу.
+  const root = await appDataDir();
+  // — разделитель: корень известен, обеспечиваем существование каталога —
+  // Если каталог ещё не создан, создаём его вместе с родителями.
+  if (!(await exists(root))) {
+    // Рекурсивное создание защищает от отсутствия промежуточных папок.
+    await mkdir(root, { recursive: true });
+    // Продолжаем предыдущую конструкцию.
+  }
+  // Закрываем проверку каталога.
+  // — разделитель: каталог готов, вычисляем путь и сериализуем данные —
+  // Переиспользуем уже полученный корень вместо повторного вызова appDataDir.
+  const path = settingsPath(root);
+  // Сериализуем настройки с отступами, чтобы файл оставался читаемым.
+  const payload = JSON.stringify(settings, null, 2);
+  // — разделитель: данные готовы, сохраняем предыдущую версию —
+  // Перед перезаписью сохраняем предыдущую версию: она понадобится,
+  // если новая запись оборвётся (питание, kill процесса).
+  try {
+    // Читаем текущий файл целиком, чтобы скопировать его в резервный.
+    const previous = await readTextFile(path);
+    // Записываем прочитанное в .bak до основной перезаписи.
+    await writeTextFile(`${path}.bak`, previous);
+    // Продолжаем предыдущую конструкцию.
+  } catch {
+    // Файла ещё нет или он недоступен — резервная копия не нужна.
+  }
+  // Закрываем try/catch создания резервной копии.
+  // — разделитель: страховка готова, записываем новые настройки —
+  // Финальная запись основного файла; предыдущая версия уже сохранена в .bak.
+  await writeTextFile(path, payload);
+  // Продолжаем предыдущую конструкцию.
+}
+// Закрываем тело функции writeSettingsFile.

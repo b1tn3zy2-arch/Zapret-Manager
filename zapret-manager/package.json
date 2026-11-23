@@ -1,7 +1,7 @@
 {
   "name": "zapret-manager",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.0.2",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -38,7 +38,10 @@
     "bump": "node scripts/bump-version.mjs",
     "screenshots": "node scripts/capture-screenshots.mjs",
     "cargo:check": "cargo check --manifest-path src-tauri/Cargo.toml",
+    "audit:rust": "cargo audit --file src-tauri/Cargo.lock --deny warnings",
+    "audit:js": "pnpm audit --audit-level=high",
     "icons:build": "node scripts/build-icons.mjs",
+    "resources:manifest": "node scripts/generate-manifest.js",
     "icons:tauri": "tauri icon src-tauri/icons/icon-source.png"
   },
   "dependencies": {
@@ -51,10 +54,9 @@
     "@tauri-apps/plugin-autostart": "2.7.0",
     "@tauri-apps/plugin-dialog": "2.8.1",
     "@tauri-apps/plugin-fs": "2.6.0",
-    "@tauri-apps/plugin-updater": "2.13.1",
     "clsx": "2.1.1",
     "framer-motion": "14.0.0",
-    "immer": "^11.1.21",
+    "immer": "11.1.21",
     "lucide-react": "1.52.0",
     "nanoid": "6.0.1",
     "react": "19.3.0",
@@ -63,7 +65,7 @@
     "remark-gfm": "4.0.0",
     "tailwind-merge": "3.7.0",
     "tailwindcss": "4.3.3",
-    "zod": "4.6.5",
+    "zod": "4.6.6",
     "zustand": "5.0.15"
   },
   "devDependencies": {
@@ -91,7 +93,7 @@
     "simple-icons": "^16.34.0",
     "typescript": "6.0.3",
     "typescript-eslint": "8.71.0",
-    "vite": "8.3.2",
+    "vite": "8.3.5",
     "vitest": "^5.0.3"
   }
 }

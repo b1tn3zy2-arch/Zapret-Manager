@@ -12,7 +12,7 @@ test.describe("Главная: версия и переключение режи
     const sidebar = page.getByRole("complementary");
     await expect(sidebar).toBeVisible();
 
-    const version = sidebar.getByText("0.1.0", { exact: true });
+    const version = sidebar.getByText("1.0.0", { exact: true });
     await expect(version).toBeVisible();
 
     // версия — последний элемент панели, то есть именно внизу, а не в шапке
@@ -59,9 +59,9 @@ test.describe("Главная: версия и переключение режи
     await modeSwitcher(page)
       .getByRole("radio", { name: "Переключить на VPN" })
       .click();
-    await expect(page.getByText("Нажмите для подключения")).toBeVisible();
+    await expect(page.getByText("Умное подключение")).toBeVisible();
     await expect(
-      page.getByRole("button", { name: "Добавить ссылку" }).first()
+      page.getByRole("button", { name: "Подключить VPN" })
     ).toBeVisible();
 
     await modeSwitcher(page)
@@ -71,7 +71,7 @@ test.describe("Главная: версия и переключение режи
 
     // версия внизу панели не должна пропадать при смене режима
     await expect(
-      page.getByRole("complementary").getByText("0.1.0", { exact: true })
+      page.getByRole("complementary").getByText("1.0.0", { exact: true })
     ).toBeVisible();
 
     expect(errors).toEqual([]);

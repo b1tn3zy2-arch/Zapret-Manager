@@ -1,0 +1,3 @@
+9b99aaedc180557ca2131755a01d486539fb98e7f4368997cca16cd2df9fe4b2  Zapret_1.0.2_x64_ru-RU.msi
+379fad853f853544ffaff0810b094428fd76c5ce07a73383188cc687d533d4c2  Zapret_1.0.2_x64-setup.exe
+97d10a5bd57c2f63d16bf6ec2ca236dcf05a36e748d9496e5a76c852d7cd4b2f  ZapretManager_1.0.2_x64_portable.zip

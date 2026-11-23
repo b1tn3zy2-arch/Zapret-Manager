@@ -1,37 +1,58 @@
+// Подключаем translateKey — универсальную функцию локализации ключей i18n.
 import { translateKey } from "@/i18n/core";
+// Подключаем clsx для условного объединения CSS-классов.
+// Тип ClassValue описывает все допустимые формы аргументов clsx.
 import { clsx, type ClassValue } from "clsx";
+// Подключаем twMerge, чтобы разрешать конфликтующие Tailwind-классы.
 import { twMerge } from "tailwind-merge";
-
+// — разделитель: блок импортов завершён, дальше идут утилиты —
+// Экспортируем cn — единую точку сборки className для всех компонентов.
+// Функция принимает произвольное число классовых значений и возвращает строку.
 export function cn(...inputs: ClassValue[]): string {
+  // clsx разворачивает условия в список, twMerge устраняет конфликтующие классы.
   return twMerge(clsx(inputs));
+  // Продолжаем предыдущую конструкцию.
 }
-
-export function formatLogTime(timestamp: number): string {
-  const date = new Date(timestamp);
-  const hours = String(date.getHours()).padStart(2, "0");
-  const minutes = String(date.getMinutes()).padStart(2, "0");
-  const seconds = String(date.getSeconds()).padStart(2, "0");
-  const milliseconds = String(date.getMilliseconds()).padStart(3, "0");
-  return `${hours}:${minutes}:${seconds}.${milliseconds}`;
-}
-
+// Закрываем тело функции cn.
+// — разделитель логических блоков —
+// Внутренний type guard: объект несёт непустое строковое сообщение об ошибке.
 function hasMessage(value: object): value is { message: string } {
+  // Reflect.get безопасно читает message даже для объектов с нестандартным прототипом.
   const message = Reflect.get(value, "message");
+  // Подходит только строка, в которой после обрезки пробелов остались символы.
   return typeof message === "string" && message.trim() !== "";
+  // Продолжаем предыдущую конструкцию.
 }
-
+// Закрываем тело type guard hasMessage.
+// — разделитель логических блоков —
+// Экспортируем toErrorMessage: приводит любое неизвестное исключение к тексту.
 export function toErrorMessage(caught: unknown): string {
+  // Самый дешёвый случай — исключение уже является строкой.
   if (typeof caught === "string") {
+    // Возвращаем строку без изменений, сохраняя исходный текст ошибки.
     return caught;
+    // Продолжаем предыдущую конструкцию.
   }
-
+  // Закрываем ветку обработки строки.
+  // — разделитель логических блоков —
+  // Второй случай — классический Error с заполненным полем message.
   if (caught instanceof Error) {
+    // Берём сообщение из экземпляра Error.
     return caught.message;
+    // Продолжаем предыдущую конструкцию.
   }
-
+  // Закрываем ветку обработки Error.
+  // — разделитель логических блоков —
+  // Третий случай — объект, подобный ошибке (например, ошибка IPC без прототипа Error).
   if (typeof caught === "object" && caught !== null && hasMessage(caught)) {
+    // Type guard сузил тип, поэтому обращение к message здесь безопасно.
     return caught.message;
+    // Продолжаем предыдущую конструкцию.
   }
-
+  // Закрываем ветку объекта с сообщением.
+  // — разделитель логических блоков —
+  // Ни один из известных случаев не подошёл — берём локализованный fallback.
   return translateKey("errors.unknown");
+  // Продолжаем предыдущую конструкцию.
 }
+// Закрываем тело функции toErrorMessage.

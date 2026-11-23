@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Zapret",
-  "version": "0.1.0",
+  "version": "1.0.2",
   "identifier": "com.zapretmanager.app",
   "build": {
     "beforeDevCommand": "pnpm dev",
@@ -47,34 +47,30 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self'; img-src 'self' asset: data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; font-src 'self'; connect-src 'self' ipc: http://ipc.localhost; media-src 'none'; object-src 'none'; frame-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"
+      "csp": "default-src 'self'; img-src 'self' asset: data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; font-src 'self'; connect-src 'self' ipc: http://ipc.localhost; media-src 'none'; object-src 'none'; frame-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'",
+      "assetProtocol": {
+        "enable": true,
+        "scope": ["$APPDATA/cache/covers/**"]
+      }
     }
   },
   "bundle": {
     "active": true,
-    "targets": [
-      "nsis",
-      "msi"
-    ],
+    "targets": ["nsis", "msi"],
     "category": "Utility",
     "publisher": "Ivan Grafov",
     "copyright": "Copyright (c) 2026 Ivan Grafov",
     "shortDescription": "Управление стратегиями обхода блокировок",
     "longDescription": "Zapret — десктопное приложение для сканирования, запуска и мониторинга стратегий обхода блокировок zapret: Discord, YouTube, Outlast Trials. By: Ivan Grafov.",
     "licenseFile": "installer/license.txt",
-    "resources": [
-      "resources/**/*",
-      "icons/tray/*.png"
-    ],
+    "resources": ["resources/**/*", "icons/tray/*.png"],
     "windows": {
       "webviewInstallMode": {
         "type": "embedBootstrapper",
         "silent": true
       },
       "wix": {
-        "language": [
-          "ru-RU"
-        ]
+        "language": ["ru-RU"]
       },
       "nsis": {
         "installerIcon": "icons/icon.ico",
@@ -82,10 +78,7 @@
         "sidebarImage": "installer/bitmaps/welcome.bmp",
         "uninstallerIcon": "icons/icon.ico",
         "installMode": "both",
-        "languages": [
-          "Russian",
-          "English"
-        ],
+        "languages": ["Russian", "English"],
         "displayLanguageSelector": true,
         "compression": "lzma",
         "installerHooks": "installer/hooks.nsh",

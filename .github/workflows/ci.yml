@@ -43,6 +43,9 @@ jobs:
       - name: Hardcoded strings
         run: pnpm lint:i18n
 
+      - name: UI CSS contract
+        run: pnpm lint:css
+
       - name: Release metadata
         if: github.ref == 'refs/heads/main'
         run: pnpm lint:release
@@ -157,6 +160,12 @@ jobs:
 
       - name: Build installers
         run: pnpm tauri build
+
+      - name: Bundle size limits
+        run: pnpm perf:check
+
+      - name: Build protection
+        run: pnpm lint:protection
 
       - name: Check links in built bundle
         run: pnpm lint:bundle

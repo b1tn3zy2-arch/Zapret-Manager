@@ -1,160 +1,167 @@
+// Импортируем зависимости из модуля vitest.
 import { beforeEach, describe, expect, it } from "vitest";
+// — разделитель логических блоков —
 
+// Импортируем зависимости из модуля @/stores/useVpnCoreStore.
 import {
+  // Подключаем именованный импорт migratePersistedState.
   migratePersistedState,
+  // Подключаем именованный импорт useVpnCoreStore.
   useVpnCoreStore,
+  // Закрываем текущий блок.
 } from "@/stores/useVpnCoreStore";
-import type { SubscriptionServer } from "@/types";
+// — разделитель логических блоков —
 
-function server(id: string): SubscriptionServer {
-  return {
-    id,
-    name: id,
-    protocol: "vless",
-    host: `${id}.example.com`,
-    port: 443,
-    link: `vless://uuid@${id}.example.com:443#${id}`,
-    transport: "tcp",
-    security: "reality",
-  };
-}
-
-describe("useVpnCoreStore: удаление серверов", () => {
+// Обрабатываем конструкцию: describe.
+describe("useVpnCoreStore: подключение", () => {
+  // Обрабатываем конструкцию: beforeEach.
   beforeEach(() => {
-    // стор живёт на уровне модуля, а скрытые идентификаторы накапливались
-    // между тестами и выбрасывали серверы из чужих сценариев
+    // Обрабатываем конструкцию: useVpnCoreStore.
     useVpnCoreStore.setState({
-      subscriptionUrl: "",
-      servers: [],
-      hiddenServerIds: [],
+      // Обрабатываем конструкцию: activeServerId.
       activeServerId: null,
+      // Обрабатываем конструкцию: status.
+      status: null,
+      // Обрабатываем конструкцию: isLoading.
+      isLoading: false,
+      // Обрабатываем конструкцию: error.
+      error: null,
+      // Обрабатываем конструкцию: autoConnectRequest.
+      autoConnectRequest: 0,
+      // Закрываем текущий блок.
     });
+    // Закрываем текущий блок.
   });
+  // — разделитель логических блоков —
 
-  it("удаляет сервер из списка", () => {
-    const store = useVpnCoreStore.getState();
+  // Обрабатываем конструкцию: it.
+  it("помнит активный сервер", () => {
+    // Обрабатываем конструкцию: useVpnCoreStore.
+    useVpnCoreStore.getState().setActiveServer("srv-1");
+    // — разделитель логических блоков —
 
-    store.setServers([server("a"), server("b")]);
-    useVpnCoreStore.getState().removeServer("a");
-
-    expect(useVpnCoreStore.getState().servers.map((item) => item.id)).toEqual([
-      "b",
-    ]);
+    // Обрабатываем конструкцию: expect.
+    expect(useVpnCoreStore.getState().activeServerId).toBe("srv-1");
+    // Закрываем текущий блок.
   });
+  // — разделитель логических блоков —
 
-  it("не возвращает удалённый сервер после обновления подписки", () => {
-    const store = useVpnCoreStore.getState();
+  // Обрабатываем конструкцию: it.
+  it("сбрасывает активный сервер при отключении", () => {
+    // Обрабатываем конструкцию: useVpnCoreStore.
+    useVpnCoreStore.getState().setActiveServer("srv-1");
+    // Обрабатываем конструкцию: useVpnCoreStore.
+    useVpnCoreStore.getState().setActiveServer(null);
+    // — разделитель логических блоков —
 
-    store.setServers([server("a"), server("b")]);
-    useVpnCoreStore.getState().removeServer("a");
-
-    // подписка отдаёт полный список, скрытый сервер обязан остаться скрытым
-    useVpnCoreStore.getState().setServers([server("a"), server("b")]);
-
-    expect(useVpnCoreStore.getState().servers.map((item) => item.id)).toEqual([
-      "b",
-    ]);
-  });
-
-  it("сбрасывает активный сервер, если его удалили", () => {
-    const store = useVpnCoreStore.getState();
-
-    store.setServers([server("a")]);
-    useVpnCoreStore.getState().setActiveServer("a");
-    useVpnCoreStore.getState().removeServer("a");
-
+    // Обрабатываем конструкцию: expect.
     expect(useVpnCoreStore.getState().activeServerId).toBeNull();
+    // Закрываем текущий блок.
   });
+  // — разделитель логических блоков —
 
-  it("добавляет серверы к существующим, не затирая список", () => {
-    // Вторая подписка не должна убирать первую: раньше любой импорт
-    // заменял список целиком.
-    const store = useVpnCoreStore.getState();
+  // Обрабатываем конструкцию: it.
+  it("счётчик запросов на подключение одноразовый", () => {
+    // Обрабатываем конструкцию: useVpnCoreStore.
+    useVpnCoreStore.getState().requestAutoConnect();
+    // Обрабатываем конструкцию: useVpnCoreStore.
+    useVpnCoreStore.getState().requestAutoConnect();
+    // — разделитель логических блоков —
 
-    store.setServers([server("a")]);
-    useVpnCoreStore.getState().addServers([server("b"), server("c")]);
+    // Обрабатываем конструкцию: expect.
+    expect(useVpnCoreStore.getState().autoConnectRequest).toBe(2);
+    // — разделитель логических блоков —
 
-    expect(useVpnCoreStore.getState().servers.map((item) => item.id)).toEqual([
-      "a",
-      "b",
-      "c",
-    ]);
+    // Обрабатываем конструкцию: useVpnCoreStore.
+    useVpnCoreStore.getState().consumeAutoConnectRequest();
+    // — разделитель логических блоков —
+
+    // Обрабатываем конструкцию: expect.
+    expect(useVpnCoreStore.getState().autoConnectRequest).toBe(0);
+    // Закрываем текущий блок.
   });
+  // — разделитель логических блоков —
 
-  it("не добавляет дубли и не возвращает удалённые", () => {
-    const store = useVpnCoreStore.getState();
+  // Обрабатываем конструкцию: it.
+  it("хранит состояние ядра", () => {
+    // Обрабатываем конструкцию: useVpnCoreStore.
+    useVpnCoreStore.getState().setStatus({
+      // Обрабатываем конструкцию: installed.
+      installed: true,
+      // Обрабатываем конструкцию: running.
+      running: true,
+      // Обрабатываем конструкцию: activeServerId.
+      activeServerId: "srv-1",
+      // Обрабатываем конструкцию: uptimeSec.
+      uptimeSec: 12,
+      // Обрабатываем конструкцию: socksPort.
+      socksPort: 1080,
+      // Обрабатываем конструкцию: httpPort.
+      httpPort: 8080,
+      // Обрабатываем конструкцию: pid.
+      pid: 42,
+      // Закрываем текущий блок.
+    });
+    // — разделитель логических блоков —
 
-    store.setServers([server("a")]);
-    useVpnCoreStore.getState().removeServer("b");
-    useVpnCoreStore.getState().addServers([server("a"), server("b")]);
-
-    expect(useVpnCoreStore.getState().servers.map((item) => item.id)).toEqual([
-      "a",
-    ]);
+    // Обрабатываем конструкцию: expect.
+    expect(useVpnCoreStore.getState().status?.running).toBe(true);
+    // Обрабатываем конструкцию: expect.
+    expect(useVpnCoreStore.getState().status?.pid).toBe(42);
+    // Закрываем текущий блок.
   });
-
-  it("очистка подписки снимает и скрытые серверы", () => {
-    const store = useVpnCoreStore.getState();
-
-    store.setServers([server("a")]);
-    useVpnCoreStore.getState().removeServer("a");
-    useVpnCoreStore.getState().clearSubscription();
-    useVpnCoreStore.getState().setServers([server("a")]);
-
-    expect(useVpnCoreStore.getState().servers.map((item) => item.id)).toEqual([
-      "a",
-    ]);
-  });
-
-  it("не сбрасывает активный сервер, если он остался в подписке", () => {
-    const store = useVpnCoreStore.getState();
-
-    store.setServers([server("a"), server("b")]);
-    useVpnCoreStore.getState().setActiveServer("b");
-    useVpnCoreStore.getState().removeServer("a");
-    useVpnCoreStore.getState().setServers([server("a"), server("b")]);
-
-    expect(useVpnCoreStore.getState().activeServerId).toBe("b");
-  });
+  // Закрываем текущий блок.
 });
+// — разделитель логических блоков —
 
+// Обрабатываем конструкцию: describe.
 describe("migratePersistedState", () => {
-  // Серверы, сохранённые прошлой сборкой, не содержат полей транспорта и
-  // шифрования. Такие записи роняли рендер списка и весь интерфейс.
-  it("выбрасывает серверы без новых полей", () => {
-    const legacy = [
-      {
-        id: "old",
-        name: "Old",
-        protocol: "vless",
-        host: "a",
-        port: 443,
-        link: "l",
-      },
-      { ...server("new"), id: "new", name: "New" },
-    ] as unknown as SubscriptionServer[];
-
+  // Сохраняем пояснение разработчика: // Списки серверов прошлой сборки больше не нужны: подписка …
+  // Списки серверов прошлой сборки больше не нужны: подписка всегда
+  // Сохраняем пояснение разработчика: // скачивается заново, а сохранённый список только путает.
+  // скачивается заново, а сохранённый список только путает.
+  // Обрабатываем конструкцию: it.
+  it("выбрасывает сохранённые серверы", () => {
+    // Обрабатываем конструкцию: const migrated = migratePersistedState({ subscriptionUr….
     const migrated = migratePersistedState({
+      // Обрабатываем конструкцию: subscriptionUrl.
       subscriptionUrl: "https://sub.example.com/list",
-      servers: legacy,
+      // Обрабатываем конструкцию: servers.
+      servers: [{ id: "old" }],
+      // Обрабатываем конструкцию: hiddenServerIds.
       hiddenServerIds: ["old"],
+      // Обрабатываем конструкцию: activeServerId.
       activeServerId: "old",
-    });
+      // Закрываем текущий блок.
+    } as never);
+    // — разделитель логических блоков —
 
-    expect(migrated?.servers.map((item) => item.id)).toEqual(["new"]);
-    expect(migrated?.activeServerId).toBeNull();
-    expect(migrated?.hiddenServerIds).toEqual([]);
+    // Обрабатываем конструкцию: expect.
+    expect(migrated).toEqual({ activeServerId: "old" });
+    // Обрабатываем конструкцию: expect.
+    expect(migrated).not.toHaveProperty("servers");
+    // Закрываем текущий блок.
   });
+  // — разделитель логических блоков —
 
-  it("сохраняет полные серверы и активный сервер", () => {
-    const migrated = migratePersistedState({
-      subscriptionUrl: "https://sub.example.com/list",
-      servers: [server("a"), server("b")],
-      hiddenServerIds: [],
-      activeServerId: "b",
-    });
+  // Обрабатываем конструкцию: it.
+  it("сохраняет активный сервер", () => {
+    // Обрабатываем конструкцию: const migrated = migratePersistedState({ activeServerId….
+    const migrated = migratePersistedState({ activeServerId: "srv-1" });
+    // — разделитель логических блоков —
 
-    expect(migrated?.servers).toHaveLength(2);
-    expect(migrated?.activeServerId).toBe("b");
+    // Обрабатываем конструкцию: expect.
+    expect(migrated?.activeServerId).toBe("srv-1");
+    // Закрываем текущий блок.
   });
+  // — разделитель логических блоков —
+
+  // Обрабатываем конструкцию: it.
+  it("пустое состояние остаётся пустым", () => {
+    // Обрабатываем конструкцию: expect.
+    expect(migratePersistedState(undefined)).toBeUndefined();
+    // Закрываем текущий блок.
+  });
+  // Закрываем текущий блок.
 });
+// — разделитель логических блоков —

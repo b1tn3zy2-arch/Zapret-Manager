@@ -43,6 +43,14 @@ const targets = [
       );
     },
   },
+  {
+    label: "scripts/build-bitmaps.js",
+    update(content) {
+      return content
+        .replace(/"VERSION [^"]+"/, `"VERSION ${version}"`)
+        .replace(/"DPI BYPASS [^"]+"/, `"DPI BYPASS ${version}"`);
+    },
+  },
 ];
 
 const changelogPath = join(root, "..", "CHANGELOG.md");
@@ -91,5 +99,6 @@ if (!changelog.includes(`## [${version}]`)) {
 
 console.log(`Версия обновлена до ${version}`);
 console.log(
-  "Дальше: заполнить CHANGELOG, закоммитить, создать тег v" + version
+  "Дальше: pnpm installer:bitmaps, заполнить CHANGELOG, закоммитить, создать тег v" +
+    version
 );

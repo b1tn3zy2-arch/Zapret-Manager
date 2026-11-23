@@ -1,207 +1,404 @@
+/* Объявляем at-правило @import. */
 @import "tailwindcss";
+/* — разделитель логических блоков — */
 
+/* Объявляем at-правило @theme. */
 @theme {
+  /* Объявляем CSS-переменную --color-bg-primary. */
   --color-bg-primary: #0a0a0f;
+  /* Объявляем CSS-переменную --color-bg-secondary. */
   --color-bg-secondary: #14141c;
+  /* Объявляем CSS-переменную --color-bg-tertiary. */
   --color-bg-tertiary: #1c1c26;
+  /* — разделитель логических блоков — */
 
+  /* Объявляем CSS-переменную --color-accent-primary. */
   --color-accent-primary: #00ff88;
+  /* Объявляем CSS-переменную --color-accent-secondary. */
   --color-accent-secondary: #00d4ff;
+  /* Объявляем CSS-переменную --color-accent-success. */
   --color-accent-success: #22c55e;
+  /* Объявляем CSS-переменную --color-accent-danger. */
   --color-accent-danger: #ff3b5c;
+  /* Объявляем CSS-переменную --color-accent-warning. */
   --color-accent-warning: #ffb800;
+  /* — разделитель логических блоков — */
 
+  /* Объявляем CSS-переменную --color-accent-primary-rgb. */
   --color-accent-primary-rgb: 0 255 136;
+  /* Объявляем CSS-переменную --color-accent-secondary-rgb. */
   --color-accent-secondary-rgb: 0 212 255;
+  /* Объявляем CSS-переменную --color-accent-danger-rgb. */
   --color-accent-danger-rgb: 255 59 92;
+  /* Объявляем CSS-переменную --color-accent-warning-rgb. */
   --color-accent-warning-rgb: 255 184 0;
+  /* Объявляем CSS-переменную --color-accent-success-rgb. */
   --color-accent-success-rgb: 34 197 94;
+  /* Объявляем CSS-переменную --color-text-primary-rgb. */
   --color-text-primary-rgb: 255 255 255;
+  /* — разделитель логических блоков — */
 
+  /* Объявляем CSS-переменную --color-text-primary. */
   --color-text-primary: #ffffff;
+  /* Объявляем CSS-переменную --color-text-secondary. */
   --color-text-secondary: #a0a0b0;
+  /* Объявляем CSS-переменную --color-text-tertiary. */
   --color-text-tertiary: #606070;
+  /* — разделитель логических блоков — */
 
+  /* Объявляем CSS-переменную --color-glass-bg. */
   --color-glass-bg: rgba(255, 255, 255, 0.05);
+  /* Объявляем CSS-переменную --color-glass-border. */
   --color-glass-border: rgba(255, 255, 255, 0.1);
+  /* Объявляем CSS-переменную --color-glass-hover. */
   --color-glass-hover: rgba(255, 255, 255, 0.08);
+  /* — разделитель логических блоков — */
 
+  /* Объявляем CSS-переменную --color-on-accent. */
   --color-on-accent: #0a0a0f;
+  /* — разделитель логических блоков — */
 
+  /* Объявляем CSS-переменную --font-display. */
   --font-display: "Unbounded", system-ui, sans-serif;
+  /* Объявляем CSS-переменную --font-sans. */
   --font-sans: "Inter", system-ui, sans-serif;
+  /* Объявляем CSS-переменную --font-mono. */
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  /* — разделитель логических блоков — */
 
+  /* Сохраняем пояснение разработчика: /* Размеры заданы в rem, а не в px: только так масштаб интер… */
   /* Размеры заданы в rem, а не в px: только так масштаб интерфейса влияет
      на отступы, скругления и ширины панелей вместе с текстом. */
+  /* Объявляем CSS-переменную --radius-sm. */
   --radius-sm: 0.375rem;
+  /* Объявляем CSS-переменную --radius-md. */
   --radius-md: 0.625rem;
+  /* Объявляем CSS-переменную --radius-lg. */
   --radius-lg: 1rem;
+  /* Объявляем CSS-переменную --radius-xl. */
   --radius-xl: 1.5rem;
+  /* — разделитель логических блоков — */
 
+  /* Объявляем CSS-переменную --space-xs. */
   --space-xs: clamp(0.25rem, 0.3vw + 0.125rem, 0.5rem);
+  /* Объявляем CSS-переменную --space-sm. */
   --space-sm: clamp(0.5rem, 0.5vw + 0.25rem, 0.75rem);
+  /* Объявляем CSS-переменную --space-md. */
   --space-md: clamp(0.75rem, 0.8vw + 0.375rem, 1.125rem);
+  /* Объявляем CSS-переменную --space-lg. */
   --space-lg: clamp(1rem, 1.2vw + 0.5rem, 1.75rem);
+  /* Объявляем CSS-переменную --space-xl. */
   --space-xl: clamp(1.25rem, 1.8vw + 0.75rem, 2.75rem);
+  /* — разделитель логических блоков — */
 
+  /* Объявляем CSS-переменную --sidebar-width-expanded. */
   --sidebar-width-expanded: clamp(12.5rem, 15vw, 16.25rem);
+  /* Объявляем CSS-переменную --sidebar-width-collapsed. */
   --sidebar-width-collapsed: clamp(4rem, 5vw, 4.75rem);
+  /* Объявляем CSS-переменную --titlebar-height. */
   --titlebar-height: clamp(2.125rem, 3vh, 2.625rem);
+  /* — разделитель логических блоков — */
 
+  /* Объявляем CSS-переменную --modal-width-sm. */
   --modal-width-sm: min(clamp(320px, 30vw, 400px), 94vw);
+  /* Объявляем CSS-переменную --modal-width-md. */
   --modal-width-md: min(clamp(400px, 42vw, 560px), 94vw);
+  /* Объявляем CSS-переменную --modal-width-lg. */
   --modal-width-lg: min(clamp(520px, 56vw, 760px), 96vw);
+  /* Объявляем CSS-переменную --modal-width-xl. */
   --modal-width-xl: min(clamp(640px, 72vw, 980px), 96vw);
+  /* — разделитель логических блоков — */
 
+  /* Объявляем CSS-переменную --ease-out-expo. */
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  /* Объявляем CSS-переменную --ease-in-out-expo. */
   --ease-in-out-expo: cubic-bezier(0.87, 0, 0.13, 1);
+  /* — разделитель логических блоков — */
 
+  /* Объявляем CSS-переменную --animate-shimmer. */
   --animate-shimmer: shimmer 1.5s ease-in-out infinite;
+  /* Закрываем правило или вложенный блок. */
 }
+/* — разделитель логических блоков — */
 
+/* Объявляем селектор :root[data-theme=light]. */
 :root[data-theme="light"] {
+  /* Объявляем CSS-переменную --color-bg-primary. */
   --color-bg-primary: #f5f5f7;
+  /* Объявляем CSS-переменную --color-bg-secondary. */
   --color-bg-secondary: #ffffff;
+  /* Объявляем CSS-переменную --color-bg-tertiary. */
   --color-bg-tertiary: #ebebee;
+  /* — разделитель логических блоков — */
 
+  /* Объявляем CSS-переменную --color-accent-primary. */
   --color-accent-primary: #00a855;
+  /* Объявляем CSS-переменную --color-accent-success. */
   --color-accent-success: #16a34a;
+  /* Объявляем CSS-переменную --color-accent-secondary. */
   --color-accent-secondary: #0077cc;
+  /* Объявляем CSS-переменную --color-accent-danger. */
   --color-accent-danger: #cc1f3d;
+  /* Объявляем CSS-переменную --color-accent-warning. */
   --color-accent-warning: #b87400;
+  /* — разделитель логических блоков — */
 
+  /* Объявляем CSS-переменную --color-accent-primary-rgb. */
   --color-accent-primary-rgb: 0 168 85;
+  /* Объявляем CSS-переменную --color-accent-secondary-rgb. */
   --color-accent-secondary-rgb: 0 119 204;
+  /* Объявляем CSS-переменную --color-accent-danger-rgb. */
   --color-accent-danger-rgb: 204 31 61;
+  /* Объявляем CSS-переменную --color-accent-warning-rgb. */
   --color-accent-warning-rgb: 184 116 0;
+  /* Объявляем CSS-переменную --color-text-primary-rgb. */
   --color-text-primary-rgb: 26 26 31;
+  /* — разделитель логических блоков — */
 
+  /* Объявляем CSS-переменную --color-text-primary. */
   --color-text-primary: #1a1a1f;
+  /* Объявляем CSS-переменную --color-text-secondary. */
   --color-text-secondary: #5a5a6a;
+  /* Объявляем CSS-переменную --color-text-tertiary. */
   --color-text-tertiary: #85858f;
+  /* — разделитель логических блоков — */
 
+  /* Объявляем CSS-переменную --color-glass-bg. */
   --color-glass-bg: rgba(0, 0, 0, 0.035);
+  /* Объявляем CSS-переменную --color-glass-border. */
   --color-glass-border: rgba(0, 0, 0, 0.1);
+  /* Объявляем CSS-переменную --color-glass-hover. */
   --color-glass-hover: rgba(0, 0, 0, 0.06);
+  /* — разделитель логических блоков — */
 
+  /* Объявляем CSS-переменную --color-on-accent. */
   --color-on-accent: #ffffff;
+  /* Закрываем правило или вложенный блок. */
 }
+/* — разделитель логических блоков — */
 
+/* Объявляем at-правило @layer. */
 @layer base {
+  /* Описываем часть стилевого правила: *,. */
   *,
+  /* Задаём свойство *. */
   *::before,
+  /* Объявляем селектор *::after. */
   *::after {
+    /* Задаём свойство box-sizing. */
     box-sizing: border-box;
+    /* Закрываем правило или вложенный блок. */
   }
+  /* — разделитель логических блоков — */
 
+  /* Описываем часть стилевого правила: html,. */
   html,
+  /* Описываем часть стилевого правила: body,. */
   body,
+  /* Объявляем селектор #root. */
   #root {
+    /* Задаём свойство height. */
     height: 100%;
+    /* Задаём свойство overflow. */
     overflow: hidden;
+    /* Закрываем правило или вложенный блок. */
   }
+  /* — разделитель логических блоков — */
 
+  /* Сохраняем пояснение разработчика: /* Масштаб интерфейса живёт здесь, на корне. Раньше он стоял… */
   /* Масштаб интерфейса живёт здесь, на корне. Раньше он стоял на body, а
      Tailwind считает rem от html — из-за этого масштабировался только текст,
      заданный в em, а весь интерфейс на утилитах Tailwind оставался прежнего
      размера. Плюс font-size на body анимировался переходом: при перетаскивании
      ползунка каждый кадр перезапускал переход и вся страница дёргалась.
      Значение выставляется из useAppearance, анимировать его нельзя. */
+  /* Объявляем селектор html. */
   html {
+    /* Задаём свойство font-size. */
     font-size: calc(
-      clamp(0.875rem, 0.82rem + 0.25vw, 1.0625rem) * var(--interface-scale, 1) *
-        var(--density-scale, 1)
+      /* Описываем часть стилевого правила: clamp(0.875rem, 0.82rem + 0.25vw, 1.0625rem) * var(--in…. */
+        clamp(0.875rem, 0.82rem + 0.25vw, 1.0625rem) *
+        var(--interface-scale, 1) *
+        /* Описываем часть стилевого правила: var(--density-scale, 1). */
+        var(--density-scale, 1) /* Описываем часть стилевого правила: );. */
     );
+    /* Закрываем правило или вложенный блок. */
   }
+  /* — разделитель логических блоков — */
 
+  /* Объявляем селектор body. */
   body {
+    /* Задаём свойство margin. */
     margin: 0;
+    /* Задаём свойство background-color. */
     background-color: var(--color-bg-primary);
+    /* Задаём свойство color. */
     color: var(--color-text-primary);
+    /* Задаём свойство font-family. */
     font-family: var(--font-sans);
+    /* Задаём свойство font-size. */
     font-size: inherit;
+    /* Задаём свойство min-width. */
     min-width: 800px;
+    /* Задаём свойство min-height. */
     min-height: 600px;
+    /* Задаём свойство font-synthesis. */
     font-synthesis: none;
+    /* Задаём свойство text-rendering. */
     text-rendering: optimizeLegibility;
+    /* Задаём свойство -webkit-font-smoothing. */
     -webkit-font-smoothing: antialiased;
+    /* Задаём свойство -moz-osx-font-smoothing. */
     -moz-osx-font-smoothing: grayscale;
+    /* Задаём свойство user-select. */
     user-select: none;
+    /* Задаём свойство cursor. */
     cursor: default;
+    /* Закрываем правило или вложенный блок. */
   }
+  /* — разделитель логических блоков — */
 
+  /* Объявляем селектор html[data-view=tray] body. */
   html[data-view="tray"] body {
+    /* Задаём свойство min-width. */
     min-width: 0;
+    /* Задаём свойство min-height. */
     min-height: 0;
+    /* Задаём свойство background. */
     background: transparent;
+    /* Закрываем правило или вложенный блок. */
   }
+  /* — разделитель логических блоков — */
 
+  /* Описываем часть стилевого правила: h1,. */
   h1,
+  /* Описываем часть стилевого правила: h2,. */
   h2,
+  /* Описываем часть стилевого правила: h3,. */
   h3,
+  /* Описываем часть стилевого правила: h4,. */
   h4,
+  /* Описываем часть стилевого правила: h5,. */
   h5,
+  /* Объявляем селектор h6. */
   h6 {
+    /* Задаём свойство font-family. */
     font-family: var(--font-display);
+    /* Закрываем правило или вложенный блок. */
   }
+  /* — разделитель логических блоков — */
 
+  /* Описываем часть стилевого правила: input,. */
   input,
+  /* Описываем часть стилевого правила: textarea,. */
   textarea,
+  /* Объявляем селектор [data-selectable]. */
   [data-selectable] {
+    /* Задаём свойство user-select. */
     user-select: text;
+    /* Закрываем правило или вложенный блок. */
   }
+  /* — разделитель логических блоков — */
 
+  /* Описываем часть стилевого правила: input,. */
   input,
+  /* Объявляем селектор textarea. */
   textarea {
+    /* Задаём свойство font-family. */
     font-family: inherit;
+    /* Закрываем правило или вложенный блок. */
   }
+  /* — разделитель логических блоков — */
 
+  /* Объявляем селектор [data-tauri-drag-region]. */
   [data-tauri-drag-region] {
+    /* Задаём свойство -webkit-app-region. */
     -webkit-app-region: drag;
+    /* Задаём свойство app-region. */
     app-region: drag;
+    /* Задаём свойство user-select. */
     user-select: none;
+    /* Закрываем правило или вложенный блок. */
   }
+  /* — разделитель логических блоков — */
 
+  /* Объявляем селектор :focus-visible. */
   :focus-visible {
+    /* Задаём свойство outline. */
     outline: none;
+    /* Задаём свойство box-shadow. */
     box-shadow:
+      /* Описываем часть стилевого правила: 0 0 0 2px var(--color-bg-primary),. */
       0 0 0 2px var(--color-bg-primary),
-      0 0 0 4px var(--color-accent-primary);
+      /* Описываем часть стилевого правила: 0 0 0 4px var(--color-accent-primary);. */
+        0 0 0 4px var(--color-accent-primary);
+    /* Задаём свойство border-radius. */
     border-radius: inherit;
+    /* Закрываем правило или вложенный блок. */
   }
+  /* — разделитель логических блоков — */
 
+  /* Объявляем селектор [data-focus-quiet]:focus-visible. */
   [data-focus-quiet]:focus-visible {
+    /* Задаём свойство box-shadow. */
     box-shadow: none;
+    /* Закрываем правило или вложенный блок. */
   }
+  /* — разделитель логических блоков — */
 
+  /* Объявляем селектор .scroll-thin. */
   .scroll-thin {
+    /* Задаём свойство scrollbar-width. */
     scrollbar-width: thin;
+    /* Задаём свойство scrollbar-color. */
     scrollbar-color: var(--color-glass-border) transparent;
+    /* Закрываем правило или вложенный блок. */
   }
+  /* — разделитель логических блоков — */
 
+  /* Объявляем селектор .scroll-thin::-webkit-scrollbar. */
   .scroll-thin::-webkit-scrollbar {
+    /* Задаём свойство width. */
     width: 8px;
+    /* Закрываем правило или вложенный блок. */
   }
+  /* — разделитель логических блоков — */
 
+  /* Объявляем селектор .scroll-thin::-webkit-scrollbar-thumb. */
   .scroll-thin::-webkit-scrollbar-thumb {
+    /* Задаём свойство background-color. */
     background-color: var(--color-glass-border);
+    /* Задаём свойство border-radius. */
     border-radius: 999px;
+    /* Закрываем правило или вложенный блок. */
   }
+  /* — разделитель логических блоков — */
 
+  /* Объявляем селектор .scroll-thin::-webkit-scrollbar-track. */
   .scroll-thin::-webkit-scrollbar-track {
+    /* Задаём свойство background. */
     background: transparent;
+    /* Закрываем правило или вложенный блок. */
   }
+  /* — разделитель логических блоков — */
 
+  /* Объявляем селектор ::selection. */
   ::selection {
+    /* Задаём свойство background-color. */
     background-color: color-mix(
-      in srgb,
-      var(--color-accent-primary) 30%,
-      transparent
+      /* Описываем часть стилевого правила: in srgb,. */ in srgb,
+      /* Описываем часть стилевого правила: var(--color-accent-primary) 30%,. */
+        var(--color-accent-primary) 30%,
+      /* Описываем часть стилевого правила: transparent. */ transparent
+        /* Описываем часть стилевого правила: );. */
     );
+    /* Задаём свойство color. */
     color: var(--color-text-primary);
+    /* Закрываем правило или вложенный блок. */
   }
+  /* — разделитель логических блоков — */
 
+  /* Сохраняем пояснение разработчика: /* Скорость анимаций. */
   /* Скорость анимаций.
 
      Раньше здесь стояло правило на все элементы с !important, которое
@@ -214,435 +411,270 @@
      Теперь скорость масштабируется через настоящие токены: любой переход
      или keyframe берёт длительность из переменной и умножает её на
      --motion-scale. Правило точечное, без !important. */
+  /* Объявляем селектор body. */
   body {
+    /* Объявляем CSS-переменную --duration-scale. */
     --duration-scale: var(--motion-scale, 1);
+    /* Закрываем правило или вложенный блок. */
   }
+  /* — разделитель логических блоков — */
 
+  /* Задаём свойство . */
   :where(body) *:not(.framer-motion-ghost),
+  /* Задаём свойство . */
   :where(body) *:not(.framer-motion-ghost)::before,
+  /* Объявляем селектор :where(body) *:not(.framer-motion-ghost)::after. */
   :where(body) *:not(.framer-motion-ghost)::after {
+    /* Задаём свойство transition-duration. */
     transition-duration: calc(
-      var(--tw-duration, 200ms) * var(--duration-scale, 1)
+      /* Описываем часть стилевого правила: var(--tw-duration, 200ms) * var(--duration-scale, 1). */
+        var(--tw-duration, 200ms) * var(--duration-scale, 1)
+        /* Описываем часть стилевого правила: );. */
     );
+    /* Закрываем правило или вложенный блок. */
   }
+  /* — разделитель логических блоков — */
 
+  /* Задаём свойство . */
   :where(body) [class*="duration-"],
+  /* Объявляем селектор :where(body) [class*=animate-]. */
   :where(body) [class*="animate-"] {
+    /* Задаём свойство animation-duration. */
     animation-duration: calc(
-      var(--tw-duration, 200ms) * var(--duration-scale, 1)
+      /* Описываем часть стилевого правила: var(--tw-duration, 200ms) * var(--duration-scale, 1). */
+        var(--tw-duration, 200ms) * var(--duration-scale, 1)
+        /* Описываем часть стилевого правила: );. */
     );
+    /* Закрываем правило или вложенный блок. */
   }
+  /* — разделитель логических блоков — */
 
-  .strategy-card-halo,
-  .strategy-card-halo-pulse {
-    animation-duration: calc(2.8s * var(--duration-scale, 1));
-  }
-
+  /* Объявляем селектор #root. */
   #root {
+    /* Задаём свойство padding-top. */
     padding-top: env(safe-area-inset-top, 0px);
+    /* Задаём свойство padding-bottom. */
     padding-bottom: env(safe-area-inset-bottom, 0px);
+    /* Закрываем правило или вложенный блок. */
   }
+  /* — разделитель логических блоков — */
 
-  /* Индикатор работающей стратегии — это не украшение, а признак того, что
-     обход идёт. Общее правило отключения анимаций не должно его гасить. */
-  [data-animations="off"] .strategy-card-halo,
-  [data-animations="off"] .strategy-card-halo-pulse {
-    animation-iteration-count: infinite !important;
-    animation-duration: calc(2.8s * var(--duration-scale, 1)) !important;
-  }
-
+  /* Описываем часть стилевого правила: [data-animations=off] *,. */
   [data-animations="off"] *,
+  /* Задаём свойство [data-animations=off] *. */
   [data-animations="off"] *::before,
+  /* Объявляем селектор [data-animations=off] *::after. */
   [data-animations="off"] *::after {
+    /* Задаём свойство animation-duration. */
     animation-duration: 0.01ms !important;
+    /* Задаём свойство animation-iteration-count. */
     animation-iteration-count: 1 !important;
+    /* Задаём свойство transition-duration. */
     transition-duration: 0.01ms !important;
+    /* Закрываем правило или вложенный блок. */
   }
+  /* Закрываем правило или вложенный блок. */
 }
+/* — разделитель логических блоков — */
 
+/* Объявляем at-правило @layer. */
 @layer utilities {
+  /* Объявляем селектор *. */
   * {
+    /* Задаём свойство scrollbar-width. */
     scrollbar-width: none;
+    /* Закрываем правило или вложенный блок. */
   }
+  /* — разделитель логических блоков — */
 
+  /* Объявляем селектор *::-webkit-scrollbar. */
   *::-webkit-scrollbar {
+    /* Задаём свойство display. */
     display: none;
+    /* Закрываем правило или вложенный блок. */
   }
+  /* — разделитель логических блоков — */
 
+  /* Объявляем селектор .scrollbar-thin. */
   .scrollbar-thin {
+    /* Задаём свойство scrollbar-width. */
     scrollbar-width: thin;
+    /* Задаём свойство scrollbar-color. */
     scrollbar-color: var(--color-glass-border) transparent;
+    /* Закрываем правило или вложенный блок. */
   }
+  /* — разделитель логических блоков — */
 
+  /* Объявляем селектор .scrollbar-thin::-webkit-scrollbar. */
   .scrollbar-thin::-webkit-scrollbar {
+    /* Задаём свойство width. */
     width: 8px;
+    /* Задаём свойство height. */
     height: 8px;
+    /* Закрываем правило или вложенный блок. */
   }
+  /* — разделитель логических блоков — */
 
+  /* Объявляем селектор .scrollbar-thin::-webkit-scrollbar-track. */
   .scrollbar-thin::-webkit-scrollbar-track {
+    /* Задаём свойство background. */
     background: transparent;
+    /* Закрываем правило или вложенный блок. */
   }
+  /* — разделитель логических блоков — */
 
+  /* Объявляем селектор .scrollbar-thin::-webkit-scrollbar-thumb. */
   .scrollbar-thin::-webkit-scrollbar-thumb {
+    /* Задаём свойство background-color. */
     background-color: var(--color-glass-border);
+    /* Задаём свойство border-radius. */
     border-radius: 999px;
+    /* Задаём свойство border. */
     border: 2px solid transparent;
+    /* Задаём свойство background-clip. */
     background-clip: content-box;
+    /* Закрываем правило или вложенный блок. */
   }
+  /* — разделитель логических блоков — */
 
+  /* Объявляем селектор .scrollbar-thin::-webkit-scrollbar-thumb:hover. */
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    /* Задаём свойство background-color. */
     background-color: var(--color-glass-hover);
+    /* Закрываем правило или вложенный блок. */
   }
+  /* — разделитель логических блоков — */
 
+  /* Объявляем селектор *. */
   * {
+    /* Задаём свойство scrollbar-width. */
     scrollbar-width: none;
+    /* Закрываем правило или вложенный блок. */
   }
+  /* — разделитель логических блоков — */
 
+  /* Объявляем селектор *::-webkit-scrollbar. */
   *::-webkit-scrollbar {
+    /* Задаём свойство display. */
     display: none;
+    /* Закрываем правило или вложенный блок. */
   }
+  /* Закрываем правило или вложенный блок. */
 }
+/* — разделитель логических блоков — */
 
+/* Объявляем at-правило @keyframes. */
 @keyframes shimmer {
+  /* Объявляем селектор 0%. */
   0% {
+    /* Задаём свойство background-position. */
     background-position: 200% 0;
+    /* Закрываем правило или вложенный блок. */
   }
+  /* — разделитель логических блоков — */
 
+  /* Объявляем селектор 100%. */
   100% {
+    /* Задаём свойство background-position. */
     background-position: -200% 0;
+    /* Закрываем правило или вложенный блок. */
   }
+  /* Закрываем правило или вложенный блок. */
 }
+/* — разделитель логических блоков — */
 
-@keyframes zapret-grain {
+/* Сохраняем пояснение разработчика: /* Появление карточек стратегий: только opacity и translateY… */
+/* Появление карточек стратегий: только opacity и translateY. */
+/* Объявляем at-правило @keyframes. */
+@keyframes fade-rise {
+  /* Объявляем селектор from. */
   from {
-    opacity: 1;
+    /* Задаём свойство opacity. */
+    opacity: 0;
+    /* Задаём свойство transform. */
+    transform: translateY(10px);
+    /* Закрываем правило или вложенный блок. */
   }
+  /* — разделитель логических блоков — */
 
+  /* Объявляем селектор to. */
   to {
-    opacity: 0;
-  }
-}
-
-/* Индикатор запущенной стратегии.
-
-   Раньше пульсировал сам box-shadow: это не композитное свойство, анимация
-   шла по главному потоку и конфликтовала с filter: blur() родителя, из-за
-   чего пульс то замирал, то не появлялся. Теперь это отдельные слои под
-   карточкой, которые двигают только opacity и transform.
-
-   Плюс пульс намеренно не подчиняется переключателю «Анимации»: он и есть
-   индикатор того, что обход работает, и должен гореть всегда. */
-@keyframes strategy-card-halo-breathe {
-  0%,
-  100% {
-    opacity: 0.45;
-    transform: scale(1);
-  }
-
-  50% {
+    /* Задаём свойство opacity. */
     opacity: 1;
-    transform: scale(1.04);
+    /* Задаём свойство transform. */
+    transform: none;
+    /* Закрываем правило или вложенный блок. */
   }
+  /* Закрываем правило или вложенный блок. */
 }
+/* — разделитель логических блоков — */
 
-@keyframes strategy-card-halo-ring {
-  0% {
-    opacity: 0.75;
-    transform: scale(0.985);
-  }
-
-  100% {
-    opacity: 0;
-    transform: scale(1.07);
-  }
+/* Объявляем селектор .animate-fade-rise. */
+.animate-fade-rise {
+  /* Задаём свойство animation. */
+  animation: fade-rise 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+  /* Закрываем правило или вложенный блок. */
 }
+/* — разделитель логических блоков — */
 
-.strategy-card-halo,
-.strategy-card-halo-pulse {
-  /* inset вместо left/top + translate: анимация ниже задаёт transform целиком
-     и затирала бы центрирующий translate(-50%, -50%), из-за чего свечение
-     съезжало на пол-карточки вниз-вправо */
-  position: absolute;
-  inset: 0;
-  border-radius: 0.875rem;
-  pointer-events: none;
-  will-change: opacity, transform;
+/* Объявляем селектор [data-animations=off] .animate-fade-rise. */
+[data-animations="off"] .animate-fade-rise {
+  /* Задаём свойство animation. */
+  animation: none;
+  /* Закрываем правило или вложенный блок. */
 }
+/* — разделитель логических блоков — */
 
-.strategy-card-halo {
-  box-shadow:
-    0 0 0 1px rgb(var(--color-accent-primary-rgb) / 0.55),
-    0 0 22px 2px rgb(var(--color-accent-primary-rgb) / 0.35);
-  animation: strategy-card-halo-breathe 2.8s cubic-bezier(0.4, 0, 0.2, 1)
-    infinite;
+/* Объявляем селектор .strategy-card. */
+.strategy-card {
+  /* Задаём свойство forced-color-adjust. */
+  forced-color-adjust: none;
+  /* Закрываем правило или вложенный блок. */
 }
+/* — разделитель логических блоков — */
 
-.strategy-card-halo-pulse {
-  border: 1px solid rgb(var(--color-accent-primary-rgb) / 0.7);
-  animation: strategy-card-halo-ring 2.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+/* Объявляем селектор .backface-hidden. */
+.backface-hidden {
+  /* Задаём свойство backface-visibility. */
+  backface-visibility: hidden;
+  /* Закрываем правило или вложенный блок. */
 }
+/* — разделитель логических блоков — */
 
-[data-animations="off"] .strategy-card-halo,
-[data-animations="off"] .strategy-card-halo-pulse {
-  animation-iteration-count: infinite !important;
-  animation-duration: 2.8s !important;
-}
-
-.zapret-grain-frame-1 {
-  animation: zapret-grain 360ms steps(1, end) infinite;
-  opacity: 1;
-}
-
-.zapret-grain-frame-2 {
-  animation: zapret-grain 360ms steps(1, end) 120ms infinite;
-  opacity: 0;
-}
-
-.zapret-grain-frame-3 {
-  animation: zapret-grain 360ms steps(1, end) 240ms infinite;
-  opacity: 0;
-}
-
+/* Сохраняем пояснение разработчика: /* Полоска активного раздела в панели слева. */
 /* Полоска активного раздела в панели слева.
 
    Двигается одним transform по CSS-переходу: анимация общего элемента
    (layoutId) прогоняла индикатор через проекцию раскладки, и он
    перелетал нужный пункт, а затем возвращался назад. */
+/* Объявляем селектор .sidebar-active-indicator. */
 .sidebar-active-indicator {
+  /* Задаём свойство position. */
   position: absolute;
+  /* Задаём свойство left. */
   left: 0;
+  /* Задаём свойство width. */
   width: 3px;
+  /* Задаём свойство height. */
   height: 24px;
+  /* Задаём свойство border-radius. */
   border-radius: 0 9999px 9999px 0;
+  /* Задаём свойство box-shadow. */
   box-shadow: 0 0 8px var(--color-accent-primary);
+  /* Задаём свойство transition. */
   transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
+  /* Задаём свойство will-change. */
   will-change: transform;
+  /* Задаём свойство pointer-events. */
   pointer-events: none;
+  /* Закрываем правило или вложенный блок. */
 }
+/* — разделитель логических блоков — */
 
+/* Объявляем селектор html[data-animations=off] .sidebar-active-indicator. */
 html[data-animations="off"] .sidebar-active-indicator {
+  /* Задаём свойство transition. */
   transition: none;
+  /* Закрываем правило или вложенный блок. */
 }
-
-/* Хроматический оверлей карточки стратегии.
-
-   Живёт вне 3D-контекста карточки: filter внутри preserve-3d заставляет
-   браузер схлопнуть объём, и переворот перестаёт быть объёмным.
-
-   Раньше эффект был статичным: на наведении появлялись два отступа тени и всё.
-   Теперь отступ «дышит» — красная и голубая кайма расходятся и сходятся, а по
-   кромке идёт тонкое цветное кольцо. Анимируются зарегистрированные
-   --chromatic-shift и --chromatic-angle, поэтому браузер интерполирует их сам,
-   а не пересобирает стиль на каждом кадре из JS. */
-@property --chromatic-shift {
-  syntax: "<length>";
-  inherits: false;
-  initial-value: 0px;
-}
-
-@property --chromatic-angle {
-  syntax: "<angle>";
-  inherits: false;
-  initial-value: 0deg;
-}
-
-.strategy-card-chromatic {
-  --chromatic-amp: 1;
-  opacity: 0;
-  transition: opacity 220ms ease-out;
-  filter: drop-shadow(var(--chromatic-shift) 0 0 rgb(255 0 80 / 0.36))
-    drop-shadow(calc(var(--chromatic-shift) * -1) 0 0 rgb(0 200 255 / 0.36));
-  animation: chromatic-flow calc(2.6s * var(--duration-scale, 1)) ease-in-out
-    infinite;
-}
-
-.strategy-card-chromatic::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  padding: 1px;
-  border-radius: inherit;
-  background: conic-gradient(
-    from var(--chromatic-angle),
-    transparent 0deg 44%,
-    rgb(255 0 80 / 0.5) 52%,
-    rgb(0 200 255 / 0.5) 64%,
-    transparent 76% 360deg
-  );
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  mix-blend-mode: screen;
-  animation: chromatic-angle calc(3.4s * var(--duration-scale, 1)) linear
-    infinite;
-}
-
-@keyframes chromatic-flow {
-  0%,
-  50%,
-  100% {
-    --chromatic-shift: 0px;
-  }
-
-  25% {
-    --chromatic-shift: calc(var(--chromatic-amp) * 2.2px);
-  }
-
-  75% {
-    --chromatic-shift: calc(var(--chromatic-amp) * -2.2px);
-  }
-}
-
-@keyframes chromatic-angle {
-  from {
-    --chromatic-angle: 0deg;
-  }
-
-  to {
-    --chromatic-angle: 360deg;
-  }
-}
-
-.group:hover .strategy-card-chromatic {
-  opacity: 1;
-}
-
-[data-animations="off"] .strategy-card-chromatic,
-[data-animations="off"] .strategy-card-chromatic::after {
-  animation: none;
-  transition: none;
-}
-
-/* Переливающееся свечение (bloom).
-
-   Раньше свечение было статичным box-shadow: цвет горел ровно до наведения и
-   выглядел как залитая заливка. Теперь по элементу ходит мягкое пятно, а край
-   слегка «дышит».
-
-   Двигаются только зарегистрированные свойства --bloom-x/--bloom-y, поэтому
-   браузер умеет интерполировать их между кадрами, а не перерисовывает весь
-   элемент с нуля. Регистрация через @property обязательна: без неё переменная
-   без типа считается строкой и анимация проскакивает крайними значениями. */
-@property --bloom-x {
-  syntax: "<percentage>";
-  inherits: false;
-  initial-value: 12%;
-}
-
-@property --bloom-y {
-  syntax: "<percentage>";
-  inherits: false;
-  initial-value: 50%;
-}
-
-@property --bloom-breathe {
-  syntax: "<number>";
-  inherits: false;
-  initial-value: 0.55;
-}
-
-.bloom-flow {
-  --bloom-color: var(--color-accent-primary);
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  overflow: hidden;
-  opacity: var(--bloom-breathe);
-  background: radial-gradient(
-    58% 58% at var(--bloom-x) var(--bloom-y),
-    var(--bloom-color) 0%,
-    transparent 72%
-  );
-  animation:
-    bloom-flow-drift calc(7s * var(--duration-scale, 1))
-      cubic-bezier(0.45, 0, 0.55, 1) infinite,
-    bloom-flow-breathe calc(3.4s * var(--duration-scale, 1)) ease-in-out
-      infinite;
-  will-change: opacity;
-  mix-blend-mode: screen;
-}
-
-@keyframes bloom-flow-drift {
-  0% {
-    --bloom-x: 12%;
-    --bloom-y: 6%;
-  }
-
-  25% {
-    --bloom-x: 88%;
-    --bloom-y: 18%;
-  }
-
-  50% {
-    --bloom-x: 74%;
-    --bloom-y: 92%;
-  }
-
-  75% {
-    --bloom-x: 16%;
-    --bloom-y: 76%;
-  }
-
-  100% {
-    --bloom-x: 12%;
-    --bloom-y: 6%;
-  }
-}
-
-@keyframes bloom-flow-breathe {
-  0%,
-  100% {
-    --bloom-breathe: 0.45;
-  }
-
-  50% {
-    --bloom-breathe: 0.75;
-  }
-}
-
-/* Кольцо по краю: даёт ощущение движения, а не просто пятна внутри. */
-.bloom-flow-edge {
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  padding: 1px;
-  background: conic-gradient(
-    from var(--bloom-angle),
-    transparent 0deg,
-    var(--bloom-color) 60deg,
-    transparent 140deg,
-    transparent 360deg
-  );
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  opacity: 0.75;
-  animation: bloom-flow-edge calc(5s * var(--duration-scale, 1)) linear infinite;
-}
-
-@property --bloom-angle {
-  syntax: "<angle>";
-  inherits: false;
-  initial-value: 0deg;
-}
-
-@keyframes bloom-flow-edge {
-  from {
-    --bloom-angle: 0deg;
-  }
-
-  to {
-    --bloom-angle: 360deg;
-  }
-}
-
-[data-animations="off"] .bloom-flow,
-[data-animations="off"] .bloom-flow-edge {
-  animation: none;
-}
+/* — разделитель логических блоков — */

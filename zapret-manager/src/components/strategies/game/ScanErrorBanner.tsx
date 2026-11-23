@@ -1,28 +1,29 @@
-import { useI18n } from "@/i18n";
-import { TriangleAlert } from "lucide-react";
+// Импортируем зависимости из модуля @/components/shared/ErrorBanner.
+import ErrorBanner from "@/components/shared/ErrorBanner";
+// — разделитель логических блоков —
 
-import { Button, Text } from "@/components/ui";
-
+// Обрабатываем конструкцию: export.
 export interface ScanErrorBannerProps {
+  // Обрабатываем конструкцию: message.
   message: string;
+  // Обрабатываем конструкцию: onRetry.
   onRetry: () => void;
+  // Закрываем текущий блок.
 }
+// — разделитель логических блоков —
 
+// Сохраняем пояснение разработчика:
+/**
+ // Сохраняем пояснение разработчика: * Ошибка сканирования папки стратегий. Оставлено отдельным и…
+ * Ошибка сканирования папки стратегий. Оставлено отдельным именем,
+ // Сохраняем пояснение разработчика: * чтобы не менять импорты на странице стратегий.
+ * чтобы не менять импорты на странице стратегий.
+ // Сохраняем пояснение разработчика: 
+ */
+// Обрабатываем конструкцию: export.
 export function ScanErrorBanner({ message, onRetry }: ScanErrorBannerProps) {
-  const { t } = useI18n();
-  return (
-    <div className="border-accent-danger/30 bg-accent-danger/10 flex items-center gap-3 rounded-lg border px-4 py-3">
-      <TriangleAlert
-        aria-hidden="true"
-        className="text-accent-danger size-5 shrink-0"
-        strokeWidth={2}
-      />
-      <Text variant="body" size="sm" className="text-accent-danger flex-1">
-        {message}
-      </Text>
-      <Button size="sm" variant="secondary" onClick={onRetry}>
-        {t("common.retry")}
-      </Button>
-    </div>
-  );
+  // Возвращаем результат: <ErrorBanner message={message} onRetry={onRetry} />.
+  return <ErrorBanner message={message} onRetry={onRetry} />;
+  // Закрываем текущий блок.
 }
+// — разделитель логических блоков —

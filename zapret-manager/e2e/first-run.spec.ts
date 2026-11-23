@@ -57,6 +57,7 @@ test.describe("Первый запуск", () => {
     await expect(
       page.getByRole("heading", { name: "Добро пожаловать в Zapret" })
     ).toBeVisible();
+    await expect(page.getByText("Ядро Xray для VPN-режима")).toBeVisible();
 
     await dialog.getByRole("button", { name: "Начать работу" }).click();
     await expect(dialog).toBeHidden();

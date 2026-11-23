@@ -1,8 +1,10 @@
 {
   "version": "1.10.3",
-  "generatedAt": 1791748269599,
+  "generatedAt": 1792920001041,
   "files": {
-    "games/known-games.json": "sha256:bb1dee9a2fc2c8a01dc2ba9dccc045c33e8c44df6839b05a6001f83704040232",
+    "games/known-games.json": "sha256:6fe471d6f30246a93143bf3e0877bc64e9026e6f42d8ecf028bb740b371cd7c0",
+    "vpn/LICENSE-xray.txt": "sha256:1f256ecad192880510e84ad60474eab7589218784b9a50bc7ceee34c2b91f1d5",
+    "vpn/README-xray.md": "sha256:098eb24c23c68dc62b575e624222c1649cc36cf69a269ae162c8a7a8699b408c",
     "zapret/LICENSE-zapret.txt": "sha256:e4d78ab9e3c9997c4d367cd1677a3091f96b7346cf39838daa764a6445c29cfb",
     "zapret/README-zapret.md": "sha256:2b97c31909e77960cf8a59846ecd6bcc024dbbf2b8fd591fba6288c89e349e51",
     "zapret/general-00-baseline.bat": "sha256:2c0723be1d3539a70392607b9cf2ef590efcceec8e6139b1a0d2984ea1da1947",

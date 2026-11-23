@@ -1,37 +1,55 @@
+// Импортируем зависимости из модуля @/types.
 import type { Strategy, TechniqueId } from "@/types";
+// — разделитель логических блоков —
 
-export type Rarity = "common" | "rare" | "epic" | "legendary";
+// Обрабатываем конструкцию: export.
+export type SortMode = "rating" | "name" | "date";
+// — разделитель логических блоков —
 
-export type ViewMode = "cards" | "list";
+// Сохраняем пояснение разработчика: Фильтр карточек по наличию реальных замеров.
+/** Фильтр карточек по наличию реальных замеров. */
+// Обрабатываем конструкцию: export.
+export type RatingFilterMode = "all" | "measured" | "unmeasured";
+// — разделитель логических блоков —
 
-export type SortMode = "rarity-desc" | "rarity-asc" | "name" | "date";
-
+// Обрабатываем конструкцию: export.
 export interface CardStats {
+  // Обрабатываем конструкцию: speed.
   speed: number;
+  // Обрабатываем конструкцию: stability.
   stability: number;
+  // Обрабатываем конструкцию: coverage.
   coverage: number;
+  // Закрываем текущий блок.
 }
+// — разделитель логических блоков —
 
+// Обрабатываем конструкцию: export.
 export interface StrategyCard {
+  // Обрабатываем конструкцию: strategy.
   strategy: Strategy;
-  rarity: Rarity;
-  score: number;
+  // Обрабатываем конструкцию: stats.
   stats: CardStats;
+  // Закрываем текущий блок.
 }
+// — разделитель логических блоков —
 
+// Обрабатываем конструкцию: export.
 export interface CollectionSummary {
+  // Обрабатываем конструкцию: total.
   total: number;
-  common: number;
-  rare: number;
-  epic: number;
-  legendary: number;
+  // Сохраняем пояснение разработчика: Стратегий, у которых есть хотя бы один замер.
+  /** Стратегий, у которых есть хотя бы один замер. */
+  // Обрабатываем конструкцию: measured.
+  measured: number;
+  // Сохраняем пояснение разработчика: Стратегий без замеров — честное «нет данных».
+  /** Стратегий без замеров — честное «нет данных». */
+  // Обрабатываем конструкцию: unmeasured.
+  unmeasured: number;
+  // Закрываем текущий блок.
 }
+// — разделитель логических блоков —
 
+// Обрабатываем конструкцию: export.
 export type GameTechnique = TechniqueId;
-
-export const RARITY_STARS = {
-  common: 1,
-  rare: 2,
-  epic: 3,
-  legendary: 4,
-} as const satisfies Record<Rarity, number>;
+// — разделитель логических блоков —

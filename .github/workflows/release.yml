@@ -1,0 +1,108 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Версия для релиза, например v0.1.1"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Сборка и черновик релиза
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: zapret-manager
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: zapret-manager/pnpm-lock.yaml
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri -> target
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Версия и заметки из CHANGELOG
+        shell: pwsh
+        run: |
+          $version = "${{ inputs.version }}"
+          if ([string]::IsNullOrWhiteSpace($version)) {
+            $version = "${{ github.ref_name }}"
+          }
+          $version = $version.TrimStart("v")
+
+          $content = Get-Content -LiteralPath "../CHANGELOG.md" -Raw
+          $pattern = "(?ms)^## \[" + [regex]::Escape($version) + "\].*?(?=^## \[|\z)"
+          $match = [regex]::Match($content, $pattern)
+
+          if (-not $match.Success) {
+            throw "В CHANGELOG.md нет секции для версии $version"
+          }
+
+          $notes = Join-Path $PWD "release-notes.md"
+          $utf8 = New-Object System.Text.UTF8Encoding($false)
+          [System.IO.File]::WriteAllText($notes, $match.Value, $utf8)
+          [System.IO.File]::AppendAllText($env:GITHUB_ENV, "VERSION=$version`n", $utf8)
+
+      - name: Проверки и сборка (NSIS, MSI, portable, SHA256)
+        run: pnpm release:local
+
+      - name: Проверка бандла
+        run: |
+          pnpm perf:check
+          pnpm lint:protection
+          pnpm lint:bundle
+          node scripts/verify-portable.mjs
+
+      - name: Артефакты workflow
+        uses: actions/upload-artifact@v4
+        with:
+          name: zapret-release-${{ env.VERSION }}
+          path: zapret-manager/release/**/*
+          if-no-files-found: error
+          retention-days: 14
+
+      # Когда появится сертификат подписи, раскомментируйте переменные
+      # окружения и добавьте secrets в настройки репозитория.
+      # env:
+      #   TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+      #   TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+      - name: Черновик релиза
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ env.VERSION }}
+          name: Zapret Manager ${{ env.VERSION }}
+          body_path: zapret-manager/release-notes.md
+          draft: true
+          prerelease: false
+          files: |
+            zapret-manager/release/*.exe
+            zapret-manager/release/*.msi
+            zapret-manager/release/*.zip
+            zapret-manager/release/SHA256SUMS.txt

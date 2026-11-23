@@ -1,270 +1,285 @@
+// Импортируем зависимости из модуля react.
 import { useCallback, useState } from "react";
+// — разделитель логических блоков —
 
-import { GlassPanel } from "@/components/shared/GlassPanel";
-import ActionsRow from "@/components/dashboard/vpn/ActionsRow";
-import ConnectButton from "@/components/dashboard/vpn/ConnectButton";
-import EmptyState from "@/components/dashboard/vpn/EmptyState";
-import ServerList from "@/components/dashboard/vpn/ServerList";
+// Импортируем зависимости из модуля @/components/dashboard/vpn/AddSubscriptionModal.
+import AddSubscriptionModal from "@/components/dashboard/vpn/AddSubscriptionModal";
+// Импортируем зависимости из модуля @/components/dashboard/vpn/AutoConnectBlock.
+import AutoConnectBlock from "@/components/dashboard/vpn/AutoConnectBlock";
+// Импортируем зависимости из модуля @/components/dashboard/vpn/PaymentModal.
+import PaymentModal from "@/components/dashboard/vpn/PaymentModal";
+// Импортируем зависимости из модуля @/components/dashboard/vpn/SubscriptionCard.
+import SubscriptionCard from "@/components/dashboard/vpn/SubscriptionCard";
+// Импортируем зависимости из модуля @/components/dashboard/vpn/VpnConnectedPanel.
 import VpnConnectedPanel from "@/components/dashboard/vpn/VpnConnectedPanel";
-import { Button, Input, Modal, Text } from "@/components/ui";
-import { useI18n } from "@/i18n";
+// Импортируем зависимости из модуля @/hooks/useVpnCore.
 import { useVpnCore } from "@/hooks/useVpnCore";
-import { useSubscriptionPings } from "@/hooks/useSubscriptionPings";
+// Импортируем зависимости из модуля @/hooks/useSubscriptionInfo.
+import { useSubscriptionInfo } from "@/hooks/useSubscriptionInfo";
+// Импортируем зависимости из модуля @/hooks/useVpnTraffic.
 import { useVpnTraffic, useVpnUptime } from "@/hooks/useVpnTraffic";
+// Импортируем зависимости из модуля @/stores/useSettingsStore.
 import { useSettingsStore } from "@/stores/useSettingsStore";
+// Импортируем зависимости из модуля @/stores/useVpnCoreStore.
 import { useVpnCoreStore } from "@/stores/useVpnCoreStore";
-import { validateVpnSource } from "@/lib/vpnEndpoint";
-import type { SubscriptionServer } from "@/types";
+// — разделитель логических блоков —
 
+// Сохраняем пояснение разработчика:
+/**
+ // Сохраняем пояснение разработчика: * Режим VPN.
+ * Режим VPN.
+ // Сохраняем пояснение разработчика: *
+ *
+ // Сохраняем пояснение разработчика: * Серверов в интерфейсе нет: подписку добавляет пользователь…
+ * Серверов в интерфейсе нет: подписку добавляет пользователь,
+ // Сохраняем пояснение разработчика: * список всегда свежий и скачивается приложением при подключ…
+ * список всегда свежий и скачивается приложением при подключении.
+ // Сохраняем пояснение разработчика: * По порядку блоков читается главное: кнопка — действие, а к…
+ * По порядку блоков читается главное: кнопка — действие, а карточка
+ // Сохраняем пояснение разработчика: * подписки — состояние и место для добавления ссылки.
+ * подписки — состояние и место для добавления ссылки.
+ // Сохраняем пояснение разработчика: 
+ */
+// Обрабатываем конструкцию: export.
 export default function VpnMode() {
-  const { t } = useI18n();
-  const servers = useVpnCoreStore((state) => state.servers);
+  // Обрабатываем конструкцию: const status = useVpnCoreStore((state) => state.status).
   const status = useVpnCoreStore((state) => state.status);
-  const activeServerId = useVpnCoreStore((state) => state.activeServerId);
-  const subscriptionUrl = useVpnCoreStore((state) => state.subscriptionUrl);
-  const isLoading = useVpnCoreStore((state) => state.isLoading);
+  // Обрабатываем конструкцию: const activeServerName = useVpnCoreStore((state) => sta….
+  const activeServerName = useVpnCoreStore((state) => state.activeServerName);
+  // Обрабатываем конструкцию: const error = useVpnCoreStore((state) => state.error).
   const error = useVpnCoreStore((state) => state.error);
+  // Обрабатываем конструкцию: const setActiveServer = useVpnCoreStore((state) => stat….
+  const setActiveServer = useVpnCoreStore((state) => state.setActiveServer);
+  // — разделитель логических блоков —
 
-  const clearSubscription = useVpnCoreStore((state) => state.clearSubscription);
-  const removeServer = useVpnCoreStore((state) => state.removeServer);
+  // Обрабатываем конструкцию: const vpnEnabled = useSettingsStore((state) => state.se….
   const vpnEnabled = useSettingsStore((state) => state.settings.vpn.enabled);
-  const { loadServers, connectServer, disconnect } = useVpnCore();
-  const { pings, isRefreshing, refresh } = useSubscriptionPings(servers);
+  // Обрабатываем конструкцию: const { refreshStatus } = useVpnCore().
+  const { refreshStatus } = useVpnCore();
+  // Обрабатываем конструкцию: const { info, matrix, isLoading: isInfoLoading, error: ….
+  const {
+    // Обрабатываем конструкцию: info.
+    info,
+    // Обрабатываем конструкцию: matrix.
+    matrix,
+    // Обрабатываем конструкцию: isLoading.
+    isLoading: isInfoLoading,
+    // Обрабатываем конструкцию: error.
+    error: infoError,
+    // Обрабатываем конструкцию: isSaving.
+    isSaving,
+    // Обрабатываем конструкцию: isRefreshing.
+    isRefreshing,
+    // Обрабатываем конструкцию: add.
+    add,
+    // Обрабатываем конструкцию: remove.
+    remove,
+    // Обрабатываем конструкцию: refresh.
+    refresh,
+    // Обрабатываем конструкцию: reload.
+    reload,
+    // Закрываем текущий блок.
+  } = useSubscriptionInfo();
+  // — разделитель логических блоков —
 
-  const [linkOpen, setLinkOpen] = useState(false);
-  const [clearOpen, setClearOpen] = useState(false);
-  const [draftLink, setDraftLink] = useState("");
-  const [linkError, setLinkError] = useState<string | null>(null);
+  // Обрабатываем конструкцию: const [paymentOpen, setPaymentOpen] = useState(false).
+  const [paymentOpen, setPaymentOpen] = useState(false);
+  // Обрабатываем конструкцию: const [addOpen, setAddOpen] = useState(false).
+  const [addOpen, setAddOpen] = useState(false);
+  // — разделитель логических блоков —
 
+  // Обрабатываем конструкцию: const connected = status?.running === true.
   const connected = status?.running === true;
-  const connecting = isLoading && !connected;
-  const activeServer =
-    servers.find((server) => server.id === activeServerId) ?? null;
-  // Кнопка подключения работает всегда: берёт выбранный сервер, а если его нет —
-  // первый из списка. Раньше она оставалась выключенной, пока пользователь не
-  // выбрал сервер, то есть подключиться было нечем.
-  const targetServer = activeServer ?? servers[0] ?? null;
+  // Обрабатываем конструкцию: const traffic = useVpnTraffic(connected).
   const traffic = useVpnTraffic(connected);
+  // Обрабатываем конструкцию: const uptime = useVpnUptime(status).
   const uptime = useVpnUptime(status);
+  // — разделитель логических блоков —
 
-  const handleToggle = useCallback((): void => {
-    if (connected) {
-      void disconnect();
-      return;
-    }
+  // Обрабатываем конструкцию: const hasSubscription = info?.isLinked === true.
+  const hasSubscription = info?.isLinked === true;
+  // Обрабатываем конструкцию: const subscriptionActive = hasSubscription && (info?.is….
+  const subscriptionActive = hasSubscription && (info?.isActive ?? false);
+  // Обрабатываем конструкцию: const needSubscription = vpnEnabled && !subscriptionAct….
+  const needSubscription = vpnEnabled && !subscriptionActive;
+  // Сохраняем пояснение разработчика: // Тумблер VPN в настройках выключен — кнопка лишь подсказыв…
+  // Тумблер VPN в настройках выключен — кнопка лишь подсказывает, где
+  // Сохраняем пояснение разработчика: // включить, а не обещает подключение.
+  // включить, а не обещает подключение.
+  // Обрабатываем конструкцию: const vpnOff = !vpnEnabled.
+  const vpnOff = !vpnEnabled;
+  // — разделитель логических блоков —
 
-    if (!vpnEnabled) {
-      return;
-    }
-
-    if (targetServer !== null) {
-      void connectServer(targetServer);
-    }
-  }, [connectServer, connected, disconnect, targetServer, vpnEnabled]);
-
-  const handleSelect = useCallback(
-    (server: SubscriptionServer): void => {
-      if (connected || isLoading || !vpnEnabled) {
-        return;
-      }
-
-      void connectServer(server);
+  // Обрабатываем конструкцию: const handleAutoConnected = useCallback( (serverId: str….
+  const handleAutoConnected = useCallback(
+    // Объявляем функцию-обработчик или стрелочную функцию.
+    (serverId: string, serverName: string): void => {
+      // Обрабатываем конструкцию: setActiveServer.
+      setActiveServer(serverId, serverName);
+      // Обрабатываем конструкцию: void refreshStatus().
+      void refreshStatus();
+      // Закрываем текущий блок.
     },
-    [connectServer, connected, isLoading, vpnEnabled]
+    // Открываем массив.
+    [refreshStatus, setActiveServer]
+    // Закрываем выражение или список аргументов.
   );
+  // — разделитель логических блоков —
 
-  const handleRemoveServer = useCallback(
-    (server: SubscriptionServer): void => {
-      removeServer(server.id);
-    },
-    [removeServer]
-  );
-
-  const handlePasteLink = useCallback((): void => {
-    void navigator.clipboard
-      .readText()
-      .then((text) => {
-        const value = text.trim();
-
-        if (value === "") {
-          setLinkError(t("dashboard.vpn.pasteEmpty"));
-          return;
-        }
-
-        setDraftLink(value);
-        setLinkError(null);
-        setLinkOpen(true);
-      })
-      .catch(() => {
-        setLinkOpen(true);
-      });
-  }, [t]);
-
-  const handleApplyLink = useCallback((): void => {
-    const check = validateVpnSource(draftLink);
-
-    if (check !== null) {
-      setLinkError(check);
-      return;
-    }
-
-    setLinkError(null);
-    setLinkOpen(false);
-    void loadServers(draftLink.trim());
-  }, [draftLink, loadServers]);
-
+  // Возвращаем результат: ( <div className=flex flex-col gap-6> {connected ? ( <V….
   return (
+    // Обрабатываем конструкцию: <div className=flex flex-col gap-6>.
     <div className="flex flex-col gap-6">
+      {/* Выводим текстовое содержимое в JSX. */}
       {connected ? (
+        // Рендерим самозакрывающийся элемент VpnConnectedPanel.
         <VpnConnectedPanel
+          // Обрабатываем конструкцию: speedIn.
           speedIn={traffic.speedIn}
+          // Обрабатываем конструкцию: speedOut.
           speedOut={traffic.speedOut}
+          // Обрабатываем конструкцию: uptimeSec.
           uptimeSec={uptime}
-          serverName={activeServer?.name ?? null}
+          // Обрабатываем конструкцию: serverName.
+          serverName={activeServerName}
+          // Продолжаем выражение.
         />
-      ) : null}
+      ) : // Закрываем выражение или список аргументов.
+      // Продолжаем предыдущую конструкцию.
+      null}
+      {/* — разделитель логических блоков — */}
 
-      <GlassPanel
-        variant="outlined"
-        padding="lg"
-        className="flex flex-col items-center gap-5 border-0"
-        style={{ backgroundColor: "var(--color-bg-primary)" }}
-      >
-        <ConnectButton
-          connected={connected}
-          connecting={connecting}
-          isSwitching={isLoading}
-          switchStep={null}
-          activeServerName={targetServer?.name ?? null}
-          vpnDisabled={!vpnEnabled}
-          disabled={!vpnEnabled || servers.length === 0}
-          onClick={handleToggle}
+      {/* Выводим текстовое содержимое в JSX. */}
+      {/* Большая кнопка живёт прямо на фоне приложения, без стеклянной
+          // Продолжаем выражение.
+          панели: так она читается как главное действие страницы, как
+          // Продолжаем выражение.
+          hero-кнопка главной. */}
+      {/* Выводим текстовое содержимое в JSX. */}
+      <div className="flex flex-col items-center gap-5">
+        {/* Выводим текстовое содержимое в JSX. */}
+        <AutoConnectBlock
+          // Обрабатываем конструкцию: disabled.
+          disabled={!vpnEnabled || !subscriptionActive}
+          // Обрабатываем конструкцию: vpnDisabled.
+          vpnDisabled={vpnOff}
+          // Обрабатываем конструкцию: subscriptionRequired.
+          subscriptionRequired={needSubscription}
+          // Обрабатываем конструкцию: onConnected.
+          onConnected={handleAutoConnected}
+          // Продолжаем выражение.
         />
+        {/* — разделитель логических блоков — */}
 
-        <ActionsRow
-          disabled={isLoading}
-          onAddLink={() => {
-            setDraftLink(subscriptionUrl);
-            setLinkError(null);
-            setLinkOpen(true);
-          }}
-          onPasteLink={handlePasteLink}
-        />
-
+        {/* Выводим текстовое содержимое в JSX. */}
         {error !== null ? (
+          // Обрабатываем конструкцию: <p className=text-accent-danger text-center text-xs>.
           <p className="text-accent-danger text-center text-xs">{error}</p>
-        ) : null}
-      </GlassPanel>
+        ) : // Закрываем выражение или список аргументов.
+        // Продолжаем предыдущую конструкцию.
+        null}
+        {/* Выводим текстовое содержимое в JSX. */}
+      </div>
+      {/* — разделитель логических блоков — */}
 
-      {servers.length === 0 ? (
-        <EmptyState
-          disabled={isLoading}
-          onAddLink={() => {
-            setDraftLink(subscriptionUrl);
-            setLinkError(null);
-            setLinkOpen(true);
-          }}
-        />
-      ) : (
-        <ServerList
-          servers={servers}
-          activeServerId={activeServerId}
-          pings={pings}
-          isRefreshing={isRefreshing}
-          onSelect={handleSelect}
-          onRefreshPings={refresh}
-          onRefreshSubscription={() => {
-            if (subscriptionUrl !== "") {
-              void loadServers(subscriptionUrl);
+      {/* Выводим текстовое содержимое в JSX. */}
+      <SubscriptionCard
+        // Обрабатываем конструкцию: info.
+        info={info}
+        // Обрабатываем конструкцию: isLoading.
+        isLoading={isInfoLoading}
+        // Обрабатываем конструкцию: isSaving.
+        isSaving={isSaving}
+        // Обрабатываем конструкцию: isRefreshing.
+        isRefreshing={isRefreshing}
+        // Обрабатываем конструкцию: error.
+        error={infoError}
+        // Обрабатываем конструкцию: onAdd.
+        onAdd={() => {
+          // Обрабатываем конструкцию: setAddOpen.
+          setAddOpen(true);
+          // Закрываем текущий блок.
+        }}
+        // Обрабатываем конструкцию: onRemove.
+        onRemove={() => {
+          // Обрабатываем конструкцию: void remove().
+          void remove();
+          // Закрываем текущий блок.
+        }}
+        // Обрабатываем конструкцию: onRefresh.
+        onRefresh={() => {
+          // Обрабатываем конструкцию: void refresh().
+          void refresh();
+          // Закрываем текущий блок.
+        }}
+        // Обрабатываем конструкцию: onPay.
+        onPay={() => {
+          // Обрабатываем конструкцию: setPaymentOpen.
+          setPaymentOpen(true);
+          // Закрываем текущий блок.
+        }}
+        // Продолжаем выражение.
+      />
+      {/* — разделитель логических блоков — */}
+
+      {/* Выводим текстовое содержимое в JSX. */}
+      <PaymentModal
+        // Обрабатываем конструкцию: open.
+        open={paymentOpen}
+        // Обрабатываем конструкцию: matrix.
+        matrix={matrix}
+        // Обрабатываем конструкцию: onClose.
+        onClose={() => {
+          // Обрабатываем конструкцию: setPaymentOpen.
+          setPaymentOpen(false);
+          // Закрываем текущий блок.
+        }}
+        // Обрабатываем конструкцию: onPaid.
+        onPaid={() => {
+          // Обрабатываем конструкцию: void reload().
+          void reload();
+          // Закрываем текущий блок.
+        }}
+        // Обрабатываем конструкцию: onAutoAdded.
+        onAutoAdded={add}
+        // Продолжаем выражение.
+      />
+      {/* — разделитель логических блоков — */}
+
+      {/* Выводим текстовое содержимое в JSX. */}
+      <AddSubscriptionModal
+        // Обрабатываем конструкцию: open.
+        open={addOpen}
+        // Обрабатываем конструкцию: isSaving.
+        isSaving={isSaving}
+        // Обрабатываем конструкцию: error.
+        error={infoError}
+        // Обрабатываем конструкцию: onClose.
+        onClose={() => {
+          // Обрабатываем конструкцию: setAddOpen.
+          setAddOpen(false);
+          // Закрываем текущий блок.
+        }}
+        // Обрабатываем конструкцию: onSubmit.
+        onSubmit={(url) => {
+          // Обрабатываем конструкцию: void add(url).then((added) => { if (added) { setAddOpen….
+          void add(url).then((added) => {
+            // Проверяем бизнес-условие: added.
+            if (added) {
+              // Обрабатываем конструкцию: setAddOpen.
+              setAddOpen(false);
+              // Закрываем текущий блок.
             }
-          }}
-          onClearSubscription={() => {
-            setClearOpen(true);
-          }}
-          onRemoveServer={handleRemoveServer}
-        />
-      )}
-
-      <Modal
-        open={clearOpen}
-        onClose={() => {
-          setClearOpen(false);
+            // Закрываем текущий блок.
+          });
+          // Закрываем текущий блок.
         }}
-        title={t("dashboard.vpn.clearAllTitle")}
-        description={t("dashboard.vpn.clearAllHint")}
-        size="sm"
-      >
-        <div className="flex justify-end gap-2">
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => {
-              setClearOpen(false);
-            }}
-          >
-            {t("common.cancel")}
-          </Button>
-
-          <Button
-            size="sm"
-            variant="danger"
-            onClick={() => {
-              setClearOpen(false);
-              clearSubscription();
-            }}
-          >
-            {t("common.delete")}
-          </Button>
-        </div>
-      </Modal>
-
-      <Modal
-        open={linkOpen}
-        onClose={() => {
-          setLinkOpen(false);
-        }}
-        title={t("dashboard.vpn.addLinkTitle")}
-        description={t("dashboard.vpn.addLinkHint")}
-        size="sm"
-      >
-        <div className="flex flex-col gap-4">
-          <Input
-            data-focus-quiet
-            label={t("dashboard.vpn.subscriptionUrl")}
-            placeholder={t("dashboard.vpn.linkPlaceholder")}
-            value={draftLink}
-            error={linkError !== null}
-            errorMessage={linkError ?? undefined}
-            onChange={(event) => {
-              setDraftLink(event.target.value);
-            }}
-          />
-
-          {error !== null ? (
-            <Text variant="caption" size="sm" className="text-accent-danger">
-              {error}
-            </Text>
-          ) : null}
-
-          <div className="flex justify-end gap-2">
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => {
-                setLinkOpen(false);
-              }}
-            >
-              {t("licenses.close")}
-            </Button>
-
-            <Button size="sm" disabled={isLoading} onClick={handleApplyLink}>
-              {isLoading
-                ? t("dashboard.vpn.subscriptionLoading")
-                : t("dashboard.vpn.subscriptionLoad")}
-            </Button>
-          </div>
-        </div>
-      </Modal>
+        // Продолжаем выражение.
+      />
+      {/* Выводим текстовое содержимое в JSX. */}
     </div>
+    // Закрываем выражение или список аргументов.
   );
+  // Закрываем текущий блок.
 }
+// — разделитель логических блоков —

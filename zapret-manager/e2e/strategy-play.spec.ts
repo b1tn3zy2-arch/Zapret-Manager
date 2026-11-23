@@ -2,8 +2,8 @@ import { expect, test } from "@playwright/test";
 
 import { mockTauri } from "./mock-tauri";
 
-test.describe("Карточки стратегий: запуск с hover-оверлея", () => {
-  test("клик по Play запускает стратегию и не переворачивает карточку", async ({
+test.describe("Карточки стратегий: запуск с обратной стороны", () => {
+  test("кнопка Запустить на карте запускает стратегию и пишет лог", async ({
     page,
   }) => {
     await mockTauri(page);
@@ -18,35 +18,23 @@ test.describe("Карточки стратегий: запуск с hover-ове
 
     const firstCard = page.locator(".strategy-card").first();
 
-    await firstCard.hover();
-    const play = firstCard.getByRole("button", { name: /^Запустить / }).first();
+    // Кнопка «подробнее» открывает карту: запуск живут на обратной
+    // стороне, лицевая остаётся описанием.
+    await firstCard
+      .getByRole("button", { name: /^Подробнее о стратегии/ })
+      .first()
+      .click();
 
-    await expect(play).toBeVisible();
-    await play.click();
+    await firstCard
+      .getByRole("button", { name: "Запустить", exact: true })
+      .click();
 
-    await page.waitForTimeout(400);
-
-    const diag = await page.evaluate(() => {
-      const card = document.querySelector(".strategy-card");
-      const rotator = card?.firstElementChild
-        ?.firstElementChild as HTMLElement | null;
-      const transform =
-        rotator === null ? "none" : getComputedStyle(rotator).transform;
-      const back = card?.querySelector("button[aria-label='Закрыть карту']");
-      const backBox = back?.getBoundingClientRect();
-
-      return {
-        transform: transform.slice(0, 120),
-        backVisible:
-          backBox === undefined
-            ? false
-            : backBox.width > 0 && backBox.height > 0,
-        flipped180:
-          transform.includes("-1") || transform.includes("matrix3d(-"),
-      };
-    });
-
-    expect(diag.flipped180).toBe(false);
+    // Состояние запуска окон на лицевой стороне: оверлей с кнопкой
+    // остановки рисуется поверх картинки.
+    await expect(firstCard).toHaveAttribute("data-running", "true");
+    await expect(
+      firstCard.getByRole("button", { name: "Остановить стратегию" })
+    ).toBeVisible();
 
     await page
       .getByRole("navigation", { name: "Основная навигация" })

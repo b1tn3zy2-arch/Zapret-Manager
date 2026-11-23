@@ -21,26 +21,34 @@ test.describe("Стратегии", () => {
     ).toBeVisible();
   });
 
-  test("переключает вид карточек и списка", async ({ page }) => {
-    await expect(page.getByRole("button", { name: "Карты" })).toBeVisible();
+  test("меняет сортировку коллекции", async ({ page }) => {
+    // по умолчанию коллекция сортируется по алфавиту
+    const sort = page.getByRole("button", { name: "По алфавиту" });
 
-    await page.getByRole("button", { name: "Список" }).click();
-    await expect(page.getByRole("button", { name: "Карты" })).toBeVisible();
+    await expect(sort).toBeVisible();
+    await sort.click();
 
-    await page.getByRole("button", { name: "Карты" }).click();
+    await page.getByRole("option", { name: "По рейтингу" }).click();
+
+    // значение применено: триггер показывает выбранный вариант
     await expect(
-      page.getByRole("button", { name: "Подробнее о стратегии" }).first()
+      page.getByRole("button", { name: "По рейтингу" })
     ).toBeVisible();
   });
 
-  test("фильтрует коллекцию по редкости", async ({ page }) => {
-    const filter = page.getByRole("button", { name: /^Легендарная/ });
+  test("фильтрует коллекцию по замерам", async ({ page }) => {
+    // в моке замеров нет: все карты считаются «без замеров»
+    const unmeasured = page.getByRole("button", { name: /^Без замеров/ });
 
-    await filter.click();
-    await expect(filter).toHaveAttribute("aria-pressed", "true");
+    await unmeasured.click();
+    await expect(unmeasured).toHaveAttribute("aria-pressed", "true");
+    await expect(page.getByText("Нет данных").first()).toBeVisible();
 
-    await filter.click();
-    await expect(filter).toHaveAttribute("aria-pressed", "false");
+    const reset = page.getByRole("button", { name: "Сбросить", exact: true });
+
+    await reset.click();
+    await expect(unmeasured).toHaveAttribute("aria-pressed", "false");
+    await expect(reset).toHaveCount(0);
   });
 
   test("ищет стратегию по имени", async ({ page }) => {

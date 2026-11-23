@@ -2,8 +2,10 @@ import { expect, test } from "@playwright/test";
 
 import { bootstrap, settingsNav, sidebar } from "./helpers";
 
-const LANGUAGE_TRIGGER_RU = "Язык интерфейса";
-const LANGUAGE_TRIGGER_EN = "Interface language";
+// Триггеры дропдаунов показывают выбранное значение (как нативный select),
+// поэтому имя кнопки — текущий язык, а не название поля.
+const LANGUAGE_TRIGGER_RU = "Русский";
+const LANGUAGE_TRIGGER_EN = "English";
 
 test.describe("Настройки", () => {
   test("переключает светлую тему мгновенно", async ({ page }) => {
@@ -16,12 +18,13 @@ test.describe("Настройки", () => {
 
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
 
-    await page.getByRole("button", { name: "Тема" }).click();
+    // Триггер дропдауна отражает выбранное значение, как нативный select.
+    await page.getByRole("button", { name: "Тёмная", exact: true }).click();
     await page.getByRole("option", { name: "Светлая", exact: true }).click();
 
     await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
 
-    await page.getByRole("button", { name: "Тема" }).click();
+    await page.getByRole("button", { name: "Светлая", exact: true }).click();
     await page.getByRole("option", { name: "Тёмная", exact: true }).click();
 
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
@@ -36,7 +39,9 @@ test.describe("Настройки", () => {
 
     for (const section of [
       "Общие",
+      "VPN",
       "Внешний вид",
+      "Стратегии",
       "Обновления",
       "Продвинутые",
     ]) {
@@ -134,7 +139,7 @@ test.describe("Настройки", () => {
     }
   });
 
-  test("в Settings нет секций «О приложении» и «VPN»", async ({ page }) => {
+  test("в Settings нет секций «О приложении» и «Игры»", async ({ page }) => {
     await bootstrap(page);
     await page.goto("/");
     await sidebar(page, "Настройки").click();
@@ -144,11 +149,10 @@ test.describe("Настройки", () => {
     await expect(nav.getByRole("button", { name: "О приложении" })).toHaveCount(
       0
     );
-    await expect(nav.getByRole("button", { name: "VPN" })).toHaveCount(0);
     await expect(nav.getByRole("button", { name: "Игры" })).toHaveCount(0);
   });
 
-  test("показывает пять секций настроек", async ({ page }) => {
+  test("показывает шесть секций настроек", async ({ page }) => {
     const collector = await bootstrap(page);
     await page.goto("/");
     await sidebar(page, "Настройки").click();
@@ -157,6 +161,7 @@ test.describe("Настройки", () => {
 
     for (const section of [
       "Общие",
+      "VPN",
       "Внешний вид",
       "Стратегии",
       "Обновления",

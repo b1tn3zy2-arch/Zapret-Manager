@@ -275,7 +275,7 @@ function buildWelcome() {
   }
 
   canvas.fillRect(18, 276, canvas.width - 36, 1, [0x2a, 0x2a, 0x36], 1);
-  canvas.text(18, 284, "VERSION 0.1.0", 1, ACCENT, 1);
+  canvas.text(18, 284, "VERSION 1.0.2", 1, ACCENT, 1);
   canvas.text(18, 296, "WIN10+ X64", 1, MUTED, 1);
 
   return canvas;
@@ -297,7 +297,7 @@ function buildHeader() {
   canvas.logoMark(26, 28, 30);
   canvas.text(50, 14, "ZAPRET", 2, [0xff, 0xff, 0xff], 1);
   canvas.text(50, 32, "MANAGER", 2, ACCENT, 1);
-  canvas.text(50, 47, "DPI BYPASS 0.1.0", 1, MUTED, 1);
+  canvas.text(50, 47, "DPI BYPASS 1.0.2", 1, MUTED, 1);
 
   return canvas;
 }

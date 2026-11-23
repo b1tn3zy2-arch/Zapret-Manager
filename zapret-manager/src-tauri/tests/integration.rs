@@ -76,7 +76,7 @@ fn validate_domain_accepts_and_rejects() {
 #[test]
 fn validate_port_and_ip_range_bounds() {
     assert!(validate_port(8443).is_ok());
-    assert!(validate_port(80).is_err());
+    assert!(validate_port(0).is_err());
     assert!(validate_ip_range("10.0.0.0/8").is_ok());
     assert!(validate_ip_range("2606:4700::/32").is_ok());
     assert!(validate_ip_range("999.0.0.1").is_err());

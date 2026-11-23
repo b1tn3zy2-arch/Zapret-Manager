@@ -1,201 +1,374 @@
+// Подключаем модули: std::fs;.
 use std::fs;
+// Подключаем модули: std::path::PathBuf;.
 use std::path::PathBuf;
 
+// Подключаем модули: super::games_hostlist::{.
 use super::games_hostlist::{
-    cleanup, generate, normalize_domain, normalize_ip, GAMES_HOSTLIST_NAME, GAMES_IPSET_NAME,
+    // Выполняем операцию: cleanup, generate, normalize_domain, normalize_ip, GAME.
+    cleanup,
+    generate,
+    normalize_domain,
+    normalize_ip,
+    GAMES_HOSTLIST_NAME,
+    GAMES_IPSET_NAME,
+    // Закрываем блок.
 };
 
+// Объявляем функцию temp_dir.
 fn temp_dir(name: &str) -> PathBuf {
+    // Объявляем переменную dir .
     let dir = std::env::temp_dir().join(format!("zapret-games-{name}"));
+    // Объявляем переменную _ .
     let _ = fs::remove_dir_all(&dir);
+    // Выполняем операцию: dir.
     dir
+    // Закрываем блок.
 }
 
+// Применяем атрибут к следующему объявлению.
 #[test]
+// Объявляем функцию test_normalize_domain.
 fn test_normalize_domain() {
+    // Объявляем переменную _guard .
     let _guard = crate::strategy::games_hostlist::GAMES_TEST_LOCK
+        // Выполняем операцию: .lock().
         .lock()
+        // Выполняем операцию: .unwrap_or_else(|error| error.into_inner());.
         .unwrap_or_else(|error| error.into_inner());
+    // Выполняем операцию: assert_eq!(.
     assert_eq!(
+        // Выполняем операцию: normalize_domain("  Example.COM.  ").as_deref(),.
         normalize_domain("  Example.COM.  ").as_deref(),
-        Some("example.com")
+        // Выполняем операцию: Some("example.com").
+        Some("example.com") // Закрываем выражение или коллекцию.
     );
+    // Выполняем операцию: assert_eq!(normalize_domain("   "), None);.
     assert_eq!(normalize_domain("   "), None);
+    // Выполняем операцию: assert_eq!(normalize_domain("bad domain"), None);.
     assert_eq!(normalize_domain("bad domain"), None);
+    // Закрываем блок.
 }
 
+// Применяем атрибут к следующему объявлению.
 #[test]
+// Объявляем функцию test_normalize_ip.
 fn test_normalize_ip() {
+    // Объявляем переменную _guard .
     let _guard = crate::strategy::games_hostlist::GAMES_TEST_LOCK
+        // Выполняем операцию: .lock().
         .lock()
+        // Выполняем операцию: .unwrap_or_else(|error| error.into_inner());.
         .unwrap_or_else(|error| error.into_inner());
+    // Выполняем операцию: assert_eq!(normalize_ip(" 10.0.0.0/8 ").as_deref(), Som.
     assert_eq!(normalize_ip(" 10.0.0.0/8 ").as_deref(), Some("10.0.0.0/8"));
+    // Выполняем операцию: assert_eq!(normalize_ip(" "), None);.
     assert_eq!(normalize_ip(" "), None);
+    // Закрываем блок.
 }
 
+// Применяем атрибут к следующему объявлению.
 #[test]
+// Объявляем функцию test_generate_empty_returns_none.
 fn test_generate_empty_returns_none() {
+    // Объявляем переменную _guard .
     let _guard = crate::strategy::games_hostlist::GAMES_TEST_LOCK
+        // Выполняем операцию: .lock().
         .lock()
+        // Выполняем операцию: .unwrap_or_else(|error| error.into_inner());.
         .unwrap_or_else(|error| error.into_inner());
+    // Объявляем переменную dir .
     let dir = temp_dir("empty");
+    // Объявляем переменную payload .
     let payload = generate(&dir, &[], &[], &[], None).expect("generate");
 
+    // Выполняем операцию: assert_eq!(payload.hostlist, None);.
     assert_eq!(payload.hostlist, None);
+    // Выполняем операцию: assert_eq!(payload.ipset, None);.
     assert_eq!(payload.ipset, None);
+    // Выполняем операцию: assert_eq!(payload.domains_count, 0);.
     assert_eq!(payload.domains_count, 0);
+    // Выполняем операцию: assert_eq!(payload.ips_count, 0);.
     assert_eq!(payload.ips_count, 0);
+    // Закрываем блок.
 }
 
+// Применяем атрибут к следующему объявлению.
 #[test]
+// Объявляем функцию test_generate_single_domain_deduplicates.
 fn test_generate_single_domain_deduplicates() {
+    // Объявляем переменную _guard .
     let _guard = crate::strategy::games_hostlist::GAMES_TEST_LOCK
+        // Выполняем операцию: .lock().
         .lock()
+        // Выполняем операцию: .unwrap_or_else(|error| error.into_inner());.
         .unwrap_or_else(|error| error.into_inner());
+    // Объявляем переменную dir .
     let dir = temp_dir("single");
+    // Объявляем переменную domains .
     let domains = vec![
+        // Выполняем операцию: "SteamCommunity.com".to_string(),.
         "SteamCommunity.com".to_string(),
+        // Выполняем операцию: "steamcommunity.com.".to_string(),.
         "steamcommunity.com.".to_string(),
+        // Выполняем операцию: "steamcommunity.com".to_string(),.
         "steamcommunity.com".to_string(),
+        // Закрываем выражение или коллекцию.
     ];
 
+    // Объявляем переменную payload .
     let payload = generate(&dir, &domains, &[], &[], None).expect("generate");
 
+    // Выполняем операцию: assert_eq!(payload.domains_count, 1);.
     assert_eq!(payload.domains_count, 1);
+    // Выполняем операцию: assert_eq!(payload.ipset, None);.
     assert_eq!(payload.ipset, None);
 
+    // Объявляем переменную content .
     let content = fs::read_to_string(dir.join(GAMES_HOSTLIST_NAME)).expect("прочитать");
 
+    // Выполняем операцию: assert!(content.contains("# Generated by Zapret"));.
     assert!(content.contains("# Generated by Zapret"));
+    // Выполняем операцию: assert_eq!(content.matches("steamcommunity.com").count(.
     assert_eq!(content.matches("steamcommunity.com").count(), 1);
 
+    // Объявляем переменную _ .
     let _ = fs::remove_dir_all(&dir);
+    // Закрываем блок.
 }
 
+// Применяем атрибут к следующему объявлению.
 #[test]
+// Объявляем функцию test_generate_multiple_sources_deduplicates.
 fn test_generate_multiple_sources_deduplicates() {
+    // Объявляем переменную _guard .
     let _guard = crate::strategy::games_hostlist::GAMES_TEST_LOCK
+        // Выполняем операцию: .lock().
         .lock()
+        // Выполняем операцию: .unwrap_or_else(|error| error.into_inner());.
         .unwrap_or_else(|error| error.into_inner());
+    // Объявляем переменную dir .
     let dir = temp_dir("multi");
+    // Объявляем переменную domains .
     let domains = vec![
+        // Выполняем операцию: "a.com".to_string(),.
         "a.com".to_string(),
+        // Выполняем операцию: "b.com".to_string(),.
         "b.com".to_string(),
+        // Выполняем операцию: "a.com".to_string(),.
         "a.com".to_string(),
+        // Выполняем операцию: "c.com".to_string(),.
         "c.com".to_string(),
+        // Закрываем выражение или коллекцию.
     ];
+    // Объявляем переменную ips .
     let ips = vec!["10.0.0.0/8".to_string(), "10.0.0.0/8".to_string()];
 
+    // Объявляем переменную payload .
     let payload = generate(&dir, &domains, &ips, &[], None).expect("generate");
 
+    // Выполняем операцию: assert_eq!(payload.domains_count, 3);.
     assert_eq!(payload.domains_count, 3);
+    // Выполняем операцию: assert_eq!(payload.ips_count, 1);.
     assert_eq!(payload.ips_count, 1);
+    // Выполняем операцию: assert!(payload.hostlist.is_some());.
     assert!(payload.hostlist.is_some());
+    // Выполняем операцию: assert!(payload.ipset.is_some());.
     assert!(payload.ipset.is_some());
 
+    // Объявляем переменную ipset .
     let ipset = fs::read_to_string(dir.join(GAMES_IPSET_NAME)).expect("прочитать ipset");
 
+    // Выполняем операцию: assert_eq!(ipset.matches("10.0.0.0/8").count(), 1);.
     assert_eq!(ipset.matches("10.0.0.0/8").count(), 1);
 
+    // Объявляем переменную _ .
     let _ = fs::remove_dir_all(&dir);
+    // Закрываем блок.
 }
 
+// Применяем атрибут к следующему объявлению.
 #[test]
+// Объявляем функцию test_generate_skips_invalid_entries.
 fn test_generate_skips_invalid_entries() {
+    // Объявляем переменную _guard .
     let _guard = crate::strategy::games_hostlist::GAMES_TEST_LOCK
+        // Выполняем операцию: .lock().
         .lock()
+        // Выполняем операцию: .unwrap_or_else(|error| error.into_inner());.
         .unwrap_or_else(|error| error.into_inner());
+    // Объявляем переменную dir .
     let dir = temp_dir("invalid");
+    // Объявляем переменную domains .
     let domains = vec!["valid.com".to_string(), "bad domain".to_string()];
+    // Объявляем переменную ips .
     let ips = vec!["10.0.0.0/8".to_string(), "999.1.1.1".to_string()];
 
+    // Объявляем переменную payload .
     let payload = generate(&dir, &domains, &ips, &[], None).expect("generate");
 
+    // Выполняем операцию: assert_eq!(payload.domains_count, 1);.
     assert_eq!(payload.domains_count, 1);
+    // Выполняем операцию: assert_eq!(payload.ips_count, 1);.
     assert_eq!(payload.ips_count, 1);
 
+    // Объявляем переменную _ .
     let _ = fs::remove_dir_all(&dir);
+    // Закрываем блок.
 }
 
+// Применяем атрибут к следующему объявлению.
 #[test]
+// Объявляем функцию test_cleanup_removes_generated_files.
 fn test_cleanup_removes_generated_files() {
+    // Объявляем переменную _guard .
     let _guard = crate::strategy::games_hostlist::GAMES_TEST_LOCK
+        // Выполняем операцию: .lock().
         .lock()
+        // Выполняем операцию: .unwrap_or_else(|error| error.into_inner());.
         .unwrap_or_else(|error| error.into_inner());
+    // Объявляем переменную dir .
     let dir = temp_dir("cleanup");
-    generate(&dir, &["a.com".to_string()], &["10.0.0.0/8".to_string()], &[], None)
-        .expect("generate");
+    // Выполняем операцию: generate(.
+    generate(
+        // Выполняем операцию: &dir,.
+        &dir,
+        // Выполняем операцию: &["a.com".to_string()],.
+        &["a.com".to_string()],
+        // Выполняем операцию: &["10.0.0.0/8".to_string()],.
+        &["10.0.0.0/8".to_string()],
+        // Выполняем операцию: &[],.
+        &[],
+        // Выполняем операцию: None,.
+        None,
+        // Закрываем выражение или коллекцию.
+    )
+    // Выполняем операцию: .expect("generate");.
+    .expect("generate");
 
+    // Выполняем операцию: assert!(dir.join(GAMES_HOSTLIST_NAME).exists());.
     assert!(dir.join(GAMES_HOSTLIST_NAME).exists());
+    // Выполняем операцию: assert!(dir.join(GAMES_IPSET_NAME).exists());.
     assert!(dir.join(GAMES_IPSET_NAME).exists());
 
+    // Выполняем операцию: cleanup(&dir);.
     cleanup(&dir);
 
+    // Выполняем операцию: assert!(!dir.join(GAMES_HOSTLIST_NAME).exists());.
     assert!(!dir.join(GAMES_HOSTLIST_NAME).exists());
+    // Выполняем операцию: assert!(!dir.join(GAMES_IPSET_NAME).exists());.
     assert!(!dir.join(GAMES_IPSET_NAME).exists());
 
+    // Объявляем переменную _ .
     let _ = fs::remove_dir_all(&dir);
+    // Закрываем блок.
 }
 
+// Применяем атрибут к следующему объявлению.
 #[test]
+// Объявляем функцию test_cleanup_missing_files_is_noop.
 fn test_cleanup_missing_files_is_noop() {
+    // Объявляем переменную _guard .
     let _guard = crate::strategy::games_hostlist::GAMES_TEST_LOCK
+        // Выполняем операцию: .lock().
         .lock()
+        // Выполняем операцию: .unwrap_or_else(|error| error.into_inner());.
         .unwrap_or_else(|error| error.into_inner());
+    // Объявляем переменную dir .
     let dir = temp_dir("cleanup-missing");
+    // Выполняем операцию: fs::create_dir_all(&dir).expect("создать папку");.
     fs::create_dir_all(&dir).expect("создать папку");
 
+    // Выполняем операцию: cleanup(&dir);.
     cleanup(&dir);
 
+    // Объявляем переменную _ .
     let _ = fs::remove_dir_all(&dir);
+    // Закрываем блок.
 }
 
+// Применяем атрибут к следующему объявлению.
 #[test]
+// Объявляем функцию test_generate_writes_anticheat_exclude_list.
 fn test_generate_writes_anticheat_exclude_list() {
+    // Объявляем переменную _guard .
     let _guard = crate::strategy::games_hostlist::GAMES_TEST_LOCK
+        // Выполняем операцию: .lock().
         .lock()
+        // Выполняем операцию: .unwrap_or_else(|error| error.into_inner());.
         .unwrap_or_else(|error| error.into_inner());
+    // Объявляем переменную dir .
     let dir = std::env::temp_dir().join("zapret-games-exclude-test");
 
+    // Объявляем переменную _ .
     let _ = std::fs::remove_dir_all(&dir);
 
+    // Объявляем переменную payload .
     let payload = generate(&dir, &["outlasttrials.com".to_string()], &[], &[], None).unwrap();
+    // Объявляем переменную exclude .
     let exclude = payload.exclude.clone().unwrap_or_default();
+    // Объявляем переменную content .
     let content = std::fs::read_to_string(&exclude).unwrap_or_default();
 
+    // Выполняем операцию: assert!(content.contains("easyanticheat.net"));.
     assert!(content.contains("easyanticheat.net"));
+    // Выполняем операцию: assert!(content.contains("battleye.com"));.
     assert!(content.contains("battleye.com"));
 
+    // Объявляем переменную _ .
     let _ = std::fs::remove_dir_all(&dir);
+    // Закрываем блок.
 }
 
+// Применяем атрибут к следующему объявлению.
 #[test]
+// Объявляем функцию test_udp_fake_is_found_in_strategy_bin.
 fn test_udp_fake_is_found_in_strategy_bin() {
     // stun.bin лежит в bin рядом со стратегией, а не в каталоге игр: без этого
     // игровая UDP-группа не добавлялась в аргументы winws вообще.
+    // Объявляем переменную strategy .
     let strategy = temp_dir("udp-fake");
+    // Объявляем переменную bin .
     let bin = strategy.join("bin");
 
+    // Выполняем операцию: fs::create_dir_all(&bin).expect("bin");.
     fs::create_dir_all(&bin).expect("bin");
+    // Выполняем операцию: fs::write(bin.join("stun.bin"), b"payload").expect("stu.
     fs::write(bin.join("stun.bin"), b"payload").expect("stun");
 
+    // Объявляем переменную games .
     let games = temp_dir("udp-fake-games");
+    // Выполняем операцию: fs::create_dir_all(&games).expect("games dir");.
     fs::create_dir_all(&games).expect("games dir");
 
+    // Объявляем переменную payload .
     let payload = generate(
+        // Выполняем операцию: &games,.
         &games,
+        // Выполняем операцию: &["outlasttrials.com".to_string()],.
         &["outlasttrials.com".to_string()],
+        // Выполняем операцию: &[],.
         &[],
+        // Выполняем операцию: &[7777],.
         &[7777],
+        // Выполняем операцию: Some(&strategy),.
         Some(&strategy),
+        // Закрываем выражение или коллекцию.
     )
+    // Выполняем операцию: .expect("generate");.
     .expect("generate");
 
+    // Выполняем операцию: assert_eq!(.
     assert_eq!(
+        // Выполняем операцию: payload.udp_fake.as_deref(),.
         payload.udp_fake.as_deref(),
-        Some(bin.join("stun.bin").as_path())
+        // Выполняем операцию: Some(bin.join("stun.bin").as_path()).
+        Some(bin.join("stun.bin").as_path()) // Закрываем выражение или коллекцию.
     );
 
+    // Выполняем операцию: cleanup(&games);.
     cleanup(&games);
+    // Выполняем операцию: fs::remove_dir_all(&strategy).ok();.
     fs::remove_dir_all(&strategy).ok();
+    // Закрываем блок.
 }

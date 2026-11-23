@@ -41,7 +41,7 @@ test.describe("Страница игр", () => {
     expect(errors).toEqual([]);
   });
 
-  test("показывает кнопку запуска при наведении и запускает игру", async ({
+  test("показывает кнопку запуска при наведении и запускает игру с обходом", async ({
     page,
   }) => {
     const errors = await bootstrap(page);
@@ -52,13 +52,43 @@ test.describe("Страница игр", () => {
 
     await card.hover();
     await card.getByRole("button", { name: "Запустить игру" }).click();
+
+    // первый запуск: выбор способа запуска
+    await expect(page.getByText("Как запустить игру?")).toBeVisible();
+    await page.getByRole("button", { name: "С обходом" }).click();
+
     await expect(
       page.getByText("Обход активен, игра запускается")
     ).toBeVisible();
     expect(errors).toEqual([]);
   });
 
-  test("спрашивает про античит перед запуском", async ({ page }) => {
+  test("запускает без обхода и позволяет сменить способ на карточке", async ({
+    page,
+  }) => {
+    const errors = await bootstrap(page);
+
+    await openGames(page);
+
+    const card = page.locator("[data-game-id='steam-portal']");
+
+    await card.hover();
+    await card.getByRole("button", { name: "Запустить игру" }).click();
+    await page.getByRole("button", { name: "Без обхода" }).click();
+
+    await expect(page.getByText("Игра запускается без обхода")).toBeVisible();
+
+    // выбранный способ не приговор: кнопка на карточке заново
+    // открывает диалог выбора
+    await card.hover();
+    await card.getByRole("button", { name: "Изменить способ запуска" }).click();
+    await expect(page.getByText("Как запустить игру?")).toBeVisible();
+    expect(errors).toEqual([]);
+  });
+
+  test("предупреждает об античите в диалоге первого запуска", async ({
+    page,
+  }) => {
     const errors = await bootstrap(page);
 
     await openGames(page);
@@ -67,8 +97,8 @@ test.describe("Страница игр", () => {
 
     await card.hover();
     await card.getByRole("button", { name: "Запустить игру" }).click();
-    await expect(page.getByText("Игра с античитом")).toBeVisible();
-    await expect(page.getByText(/Обход может не работать/)).toBeVisible();
+    await expect(page.getByText("Как запустить игру?")).toBeVisible();
+    await expect(page.getByText(/BattlEye/)).toBeVisible();
     expect(errors).toEqual([]);
   });
 

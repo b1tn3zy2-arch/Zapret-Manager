@@ -1,0 +1,17 @@
+# Исключения RustSec с обоснованием. Проверять при каждом обновлении зависимостей.
+[advisories]
+ignore = [
+    # zip 2.x: уязвимости касаются ZipArchive::extract() на Unix (SUID/SGID,
+    # симлинки, права). Мы распаковываем вручную через by_index + File::create,
+    # symlink-записи не создаём, приложение — Windows. Исправленной 2.x нет.
+    "RUSTSEC-2026-0367",
+    "RUSTSEC-2026-0368",
+    "RUSTSEC-2026-0369",
+    # Linux-зависимости Tauri/GTK (zbus, glib): в Windows-сборку не входят,
+    # неmaintained-предупреждения и unsound в glib::VariantStrIter нам не грозят.
+    "RUSTSEC-2024-0370",
+    "RUSTSEC-2026-0370",
+    "RUSTSEC-2026-0371",
+    "RUSTSEC-2026-0372",
+    "RUSTSEC-2024-0429",
+]

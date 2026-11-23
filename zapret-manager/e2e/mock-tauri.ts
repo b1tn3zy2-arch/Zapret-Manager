@@ -10,6 +10,15 @@ export interface MockOptions {
    * из событий, а не нули. Без этого метрики страницы нечем было проверить.
    */
   readonly networkStats?: boolean;
+  /**
+   * Подписка по умолчанию добавлена: большинство сценариев живёт
+   * в состоянии «VPN доступен». Тесты gating-а выключают её опцией.
+   */
+  readonly subscriptionPresent?: boolean;
+  /** Задержка сканера игр: нужна, чтобы поймать skeleton в e2e. */
+  readonly gamesScanDelayMs?: number;
+  /** Сканер не находит ни одной игры: проверка пустого состояния. */
+  readonly emptyGames?: boolean;
 }
 
 export const MOCK_FOLDER = "C:\\zapret-e2e\\strategies";
@@ -23,6 +32,9 @@ export async function mockTauri(
   const vpnInstalled = options.vpnInstalled ?? true;
   const firstRun = options.firstRun ?? false;
   const networkStats = options.networkStats ?? false;
+  const subscriptionPresent = options.subscriptionPresent ?? true;
+  const gamesScanDelayMs = options.gamesScanDelayMs ?? 0;
+  const emptyGames = options.emptyGames ?? false;
 
   await page.addInitScript(
     ({
@@ -31,6 +43,9 @@ export async function mockTauri(
       wireguard,
       firstRunFlag,
       networkStats,
+      subscriptionPresent,
+      gamesScanDelayMs,
+      emptyGames,
     }) => {
       const listeners = new Map<
         number,
@@ -63,6 +78,167 @@ export async function mockTauri(
         }
       };
 
+      /**
+       * Аргументы команд проверяются так же, как их ждёт Rust.
+       * Мок, принимающий любые аргументы, маскирует несовпадение
+       * сигнатур: сломанный вызов выглядел бы рабочим.
+       */
+      const requireArgs = (
+        args: unknown,
+        names: readonly string[]
+      ): Record<string, unknown> => {
+        const record = (args ?? {}) as Record<string, unknown>;
+
+        for (const name of names) {
+          const value = record[name];
+
+          if (value === undefined || value === null || value === "") {
+            throw new Error(`нет аргумента ${name}`);
+          }
+        }
+
+        return record;
+      };
+
+      /**
+       * Матрица цен — те же числа, что Rust берёт с панели:
+       * своя цена за каждое количество устройств, без коэффициентов.
+       */
+      const buildTariffPrices = () => {
+        const plans = [
+          {
+            id: "1m",
+            months: 1,
+            prices: [199, 240, 299, 370, 399, 480, 499, 540, 570, 599],
+          },
+          {
+            id: "3m",
+            months: 3,
+            prices: [399, 620, 599, 975, 799, 1245, 999, 1400, 1480, 1199],
+          },
+          {
+            id: "6m",
+            months: 6,
+            prices: [699, 1150, 899, 1800, 1099, 2300, 1499, 2590, 2730, 1699],
+          },
+          {
+            id: "12m",
+            months: 12,
+            prices: [
+              1199, 2110, 1399, 3300, 1599, 4220, 2299, 4740, 5000, 2499,
+            ],
+          },
+        ];
+        const prices = [];
+
+        for (let devices = 1; devices <= 10; devices += 1) {
+          for (const plan of plans) {
+            const total = plan.prices[devices - 1] ?? 0;
+
+            prices.push({
+              planId: plan.id,
+              devices,
+              total,
+              perMonth: Math.round(total / plan.months),
+            });
+          }
+        }
+
+        return prices;
+      };
+
+      // Туннель, поднятый умным подключением: после него
+      // статус ядра должен быть «подключено».
+      let vpnConnected = false;
+
+      /**
+       * Хранилище подписки: тот же снимок, что Rust кладёт в
+       * subscription-store. По ключу `url` команда refresh-а решает,
+       * есть ли подписка.
+       */
+      interface StoredSubscription {
+        url: string;
+        title: string | null;
+        trafficUsedBytes: number;
+        trafficLimitBytes: number;
+        expiresAt: number | null;
+        serverCount: number;
+        updatedAt: number;
+      }
+
+      const GB = 1024 * 1024 * 1024;
+      /** 14 дней вперёд: карточка всегда показывает «Осталось 14 дней». */
+      const expiresAt = Math.floor(1_798_782_953);
+
+      const initialSubscription: StoredSubscription | null = subscriptionPresent
+        ? {
+            url: "https://maximavps.cloud/api/v1/client/subscribe?token=demo",
+            title: "Профиль 3 месяца",
+            trafficUsedBytes: Math.round(45.2 * GB),
+            trafficLimitBytes: Math.round(100 * GB),
+            expiresAt,
+            serverCount: 3,
+            updatedAt: 1_798_712_953,
+          }
+        : null;
+
+      let subscription: StoredSubscription | null = initialSubscription;
+
+      const subscriptionInfo = (record: StoredSubscription | null): unknown => {
+        if (record === null) {
+          return {
+            trafficUsedGb: null,
+            trafficLimitGb: null,
+            trafficPercent: null,
+            daysRemaining: null,
+            isActive: false,
+            isLinked: false,
+            title: null,
+            serverCount: null,
+            expiresAt: null,
+            lastCheckedAt: null,
+          };
+        }
+
+        const usedGb = record.trafficUsedBytes / GB;
+        const limitGb = record.trafficLimitBytes / GB;
+        const percent =
+          limitGb > 0 ? Math.min((usedGb / limitGb) * 100, 100) : null;
+
+        return {
+          trafficUsedGb: Math.round(usedGb * 100) / 100,
+          trafficLimitGb: Math.round(limitGb * 100) / 100,
+          trafficPercent: percent,
+          daysRemaining: 14,
+          isActive: true,
+          isLinked: true,
+          title: record.title,
+          serverCount: record.serverCount,
+          expiresAt: record.expiresAt,
+          lastCheckedAt: record.updatedAt,
+        };
+      };
+
+      /**
+       * Рейтинги стратегий. Замер мока никогда не набирает второй
+       * серии: записи приходят с samples=1 и нулевыми метриками,
+       * поэтому карточки честно показывают состояние «нет данных».
+       */
+      const ratingRecord = (input: { strategyId?: string }): unknown => ({
+        strategyId: input.strategyId ?? "",
+        strategyHash: "sha256-e2e",
+        networkKey: "net-e2e",
+        providerLabel: null,
+        machineKey: "machine-e2e",
+        samples: 1,
+        ratingScore: null,
+        coverage: null,
+        successRate: null,
+        medianLatencyMs: null,
+        jitterMs: null,
+        lastMeasuredAt: 1_798_712_953,
+      });
+
       const handlers: Record<string, (args: unknown) => unknown> = {
         scan_strategies: () =>
           Array.from({ length: 22 }, (_, index) => ({
@@ -78,7 +254,7 @@ export async function mockTauri(
             path: `${strategiesFolder}\\strategy-${index}.bat`,
             description: "Тестовая стратегия для e2e",
             services: index % 2 === 0 ? ["discord", "youtube"] : ["youtube"],
-            techniques: ["fragment"],
+            techniques: ["faketls"],
             fileType: "zapret",
             status: "idle",
             version: null,
@@ -99,31 +275,37 @@ export async function mockTauri(
             },
           })),
         init_resources: () => ({
-          ok: true,
-          version: "1.10.3",
           firstRun: firstRunFlag,
-          available: firstRunFlag,
+          updated: false,
+          strategiesCount: 22,
+          resourcesVersion: "1.10.3",
           extractedBytes: 0,
-          filesExtracted: 0,
-          skipped: 0,
-          updated: 0,
-          removed: 0,
-          warnings: [],
+          available: firstRunFlag,
+          vpnCoreIncluded: true,
         }),
         check_resources_integrity: () => ({
-          ok: true,
-          total: 3,
-          okCount: 3,
+          total: 33,
           missing: [],
           modified: [],
-          extra: [],
-          version: "1.10.3",
+          ok: true,
+          resourcesVersion: "1.10.3",
         }),
         list_bundled_strategies: () => [],
         get_resources_version: () => "1.10.3",
-        get_resources_layout: () => ({}),
+        get_resources_layout: () => [
+          "strategies",
+          "vpn",
+          "logs",
+          "backups",
+          "cache",
+          "manifest.json",
+        ],
         get_resources_strategies_path: () => strategiesFolder,
-        restore_bundled_strategies: () => ({ restored: 0, removed: 0 }),
+        restore_bundled_strategies: () => ({
+          restored: 0,
+          skipped: 0,
+          resourcesVersion: "1.10.3",
+        }),
         get_system_info: () => ({
           os: "Windows 11 Pro",
           osVersion: "10.0.26100",
@@ -131,29 +313,38 @@ export async function mockTauri(
           arch: "x86_64",
           tauriVersion: "2.12.1",
           rustVersion: "1.98.0",
-          appVersion: "0.1.0",
+          appVersion: "1.0.0",
           webviewVersion: "154.0.0.0",
         }),
         get_folder_path: () => strategiesFolder,
-        check_for_updates: () => ({
-          available: updateAvailable,
-          currentVersion: "1.10.3",
-          latestVersion: updateAvailable ? "1.11.0" : "1.10.3",
-          releaseName: updateAvailable ? "Release 1.11.0" : "Release 1.10.3",
-          releaseNotes: "- Что-то изменилось\n- И ещё одно",
-          publishedAt: "2026-09-01T10:00:00Z",
-          downloadUrl:
-            "https://github.com/Flowseal/zapret-discord-youtube/releases/download/v1.11.0/zapret.zip",
-          assetName: "zapret.zip",
-          size: 4_200_000,
-          isNewer: updateAvailable,
-          ignored: false,
-        }),
-        download_update: () => "C:\\temp\\zapret-1.11.0.zip",
+        check_for_updates: (args: unknown) => {
+          requireArgs(args, ["strategiesDir"]);
+
+          return {
+            available: updateAvailable,
+            currentVersion: "1.10.3",
+            latestVersion: updateAvailable ? "1.11.0" : "1.10.3",
+            releaseName: updateAvailable ? "Release 1.11.0" : "Release 1.10.3",
+            releaseNotes: "- Что-то изменилось\n- И ещё одно",
+            publishedAt: "2026-09-01T10:00:00Z",
+            downloadUrl:
+              "https://github.com/Flowseal/zapret-discord-youtube/releases/download/v1.11.0/zapret.zip",
+            assetName: "zapret.zip",
+            digest: "sha256:0123456789abcdef",
+            size: 4_200_000,
+            isNewer: updateAvailable,
+            ignored: false,
+          };
+        },
+        download_update: (args: unknown) => {
+          requireArgs(args, ["url", "version", "expectedDigest"]);
+
+          return "C:\\temp\\zapret-1.11.0.zip";
+        },
         install_update: () => ({
           installed: 3,
           removed: 0,
-          updated: 0,
+          updated: false,
           skipped: 0,
           backupPath: "C:\\temp\\backup",
         }),
@@ -161,7 +352,11 @@ export async function mockTauri(
         set_current_version: () => true,
         get_current_version: () => "1.10.3",
         list_update_backups: () => [],
-        rollback_update: () => 0,
+        rollback_update: (args: unknown) => {
+          requireArgs(args, ["backupPath", "strategiesDir"]);
+
+          return 0;
+        },
         run_strategy: () => {
           for (const entry of listeners.values()) {
             if (entry.event !== "strategy-log") {
@@ -241,10 +436,12 @@ export async function mockTauri(
         get_network_stats: () => ({
           bytesIn: 1024,
           bytesOut: 2048,
+          speedIn: 1024,
+          speedOut: 2048,
+          packetsIn: 8,
+          packetsOut: 12,
           connections: 3,
-          samples: [1, 2, 3],
-          ping: [20, 25, 22],
-          labels: ["10:00", "10:01", "10:02"],
+          timestamp: 1_700_000_000_000,
         }),
         start_monitoring: () => {
           if (networkStats) {
@@ -332,16 +529,25 @@ export async function mockTauri(
           uptimeSec: null,
           error: null,
         }),
-        get_vpn_stats: () => ({ bytesIn: 1024, bytesOut: 2048, uptimeSec: 0 }),
+        get_vpn_stats: () => ({
+          interface: null,
+          endpoint: null,
+          handshakeAt: null,
+          bytesIn: 1024,
+          bytesOut: 2048,
+          uptimeSec: 0,
+          isSwitching: false,
+          killSwitchOn: false,
+        }),
         reconcile_vpn_tunnels: () => 0,
         vpn_core_status: () => ({
-          installed: false,
-          running: false,
-          activeServerId: null,
-          uptimeSec: 0,
+          installed: true,
+          running: vpnConnected,
+          activeServerId: vpnConnected ? "alpha" : null,
+          uptimeSec: vpnConnected ? 12 : 0,
           socksPort: 12080,
           httpPort: 12081,
-          pid: null,
+          pid: vpnConnected ? 4242 : null,
         }),
         install_vpn_core: () => true,
         import_vpn_source: () => ({
@@ -428,44 +634,89 @@ export async function mockTauri(
           rejectedEntries: 0,
         }),
         restore_backup: () => 1,
-        restore_from_backup: () => 1,
+        restore_from_backup: (args: unknown) => {
+          requireArgs(args, ["strategyPath"]);
+
+          return 1;
+        },
         list_backups: () => [],
         extract_config_paths: () => [],
-        scan_installed_games: () => [
-          {
-            id: "steam-portal",
-            name: "Portal 2",
-            appid: "620",
-            platform: "steam",
-            source: "steam",
-            installPath: "C:\\Games\\Portal 2",
-            executablePath: "C:\\Games\\Portal 2\\portal2.exe",
-            coverUrl: "620.jpg",
-            gameSettingsId: null,
-            anticheat: "none",
-            launchCount: 0,
-          },
-          {
-            id: "custom-indie",
-            name: "Indie Game",
-            platform: "custom",
-            source: "userFolder",
-            installPath: "C:\\Games\\Indie",
-            executablePath: "C:\\Games\\Indie\\indie.exe",
-            anticheat: "battleye",
-            launchCount: 0,
-          },
-        ],
+        scan_installed_games: async () => {
+          if (gamesScanDelayMs > 0) {
+            await new Promise<void>((resolve) => {
+              window.setTimeout(resolve, gamesScanDelayMs);
+            });
+          }
+
+          if (emptyGames) {
+            return [];
+          }
+
+          return [
+            {
+              id: "steam-portal",
+              name: "Portal 2",
+              appid: "620",
+              launchArgs: null,
+              platform: "steam",
+              source: "steam",
+              installPath: "C:\\Games\\Portal 2",
+              executablePath: "C:\\Games\\Portal 2\\portal2.exe",
+              coverUrl: "620.jpg",
+              coverPath: null,
+              gameSettingsId: null,
+              anticheat: "none",
+              lastLaunchedAt: null,
+              launchCount: 0,
+            },
+            {
+              id: "custom-indie",
+              name: "Indie Game",
+              appid: null,
+              platform: "custom",
+              source: "userFolder",
+              installPath: "C:\\Games\\Indie",
+              executablePath: "C:\\Games\\Indie\\indie.exe",
+              launchArgs: null,
+              coverUrl: null,
+              coverPath: null,
+              gameSettingsId: null,
+              anticheat: "battleye",
+              lastLaunchedAt: null,
+              launchCount: 0,
+            },
+          ];
+        },
         game_cover: () => null,
         game_steam_cover: () => null,
         import_game_cover: () => "imported-cover.jpg",
         // бэкенд отдаёт дерево процессов: лаунчер античит�� может завершиться
-        launch_game: () => [4242, 4243],
+        launch_game: (args: unknown) => {
+          const path =
+            (args as { executablePath?: string } | undefined)?.executablePath ??
+            "";
+
+          if (path.toLowerCase().includes("missing")) {
+            throw new Error(`Файл игры не найден: ${path}`);
+          }
+
+          return [4242, 4243];
+        },
         hide_main_window: () => null,
         is_game_running: () => true,
         verify_configs: () => ({ total: 0, ok: 0, missing: [] }),
         delete_all_backups: () => 0,
-        write_log_export: () => "C:\\temp\\logs.txt",
+        export_logs_file: () => ({ path: "C:\\temp\\logs.txt", bytes: 128 }),
+        export_settings_file: () => null,
+        import_settings_file: () => null,
+        save_monitor_snapshot: () => "C:\\temp\\snapshot.png",
+        running_games: () => [],
+        close_game_by_path: (args: unknown) => {
+          requireArgs(args, ["executablePath"]);
+
+          return true;
+        },
+        game_cover_file: () => null,
         read_license_text: () => "MIT License",
         update_tray_state: () => null,
         update_tray_config: () => null,
@@ -498,6 +749,251 @@ export async function mockTauri(
         open_external_url: () => null,
         read_user_text_file: () => "{}",
         write_user_text_file: () => null,
+        // Команды, которые раньше не были смоканы. Формы ответов
+        // совпадают с настоящими структурами Rust: расхождение формы
+        // должно ломать e2e, а не проходить молча.
+        tune_strategy_for_game: (args: unknown) => {
+          const request = (args ?? {}) as {
+            gameId?: string;
+            gameName?: string;
+            basePorts?: number[];
+          };
+
+          return {
+            gameId: request.gameId ?? "game",
+            gameName: request.gameName ?? "Game",
+            requiresEacTuning: false,
+            usesGamelift: false,
+            ports: request.basePorts ?? [],
+            addedPorts: [],
+            dropUdpFilter: false,
+            dropIpset: false,
+            notes: [],
+          };
+        },
+        analyze_game_logs: () => ({
+          gameId: "game",
+          code: "no-log",
+          message: "Лог обхода не найден",
+          recommendation: "",
+          logPaths: [],
+          applied: [],
+        }),
+        analyze_traffic: () => ({
+          ip: "203.0.113.10",
+          port: 27015,
+          outbound: 0,
+          inbound: 0,
+          tampered: 0,
+          dropped: 0,
+          verdict: "no-log",
+          message: "Лог не найден",
+          logPath: null,
+        }),
+        check_game_connectivity: () => ({
+          dnsOk: true,
+          dnsAddress: "203.0.113.10",
+          dnsError: null,
+          tcp: [],
+          udpStatus: "unverifiable",
+          udpNote: "udp-unverifiable",
+          verdict: "tcp-ok",
+        }),
+        check_game_endpoints: () => [],
+        detect_game_endpoints: () => [],
+        match_known_game: () => null,
+        close_game: () => true,
+        delete_all_logs: () => 0,
+        prune_logs: () => 0,
+        full_uninstall: () => null,
+        open_folder: () => null,
+        system_toasts_enabled: () => true,
+        game_exe_icon: () => null,
+        game_folder_cover: () => null,
+        game_cover_for: () => null,
+        write_monitor_snapshot: () => 0,
+        tray_menu_set_height: () => null,
+        // Подписка: снимок без сети, добавление по HTTPS-ссылке,
+        // обновление и удаление. Формы совпадают со структурами Rust.
+        get_subscription: () => subscriptionInfo(subscription),
+        add_subscription: (args: unknown) => {
+          const request = (args ?? {}) as { url?: string };
+          const url = (request.url ?? "").trim();
+
+          if (!url.startsWith("https://")) {
+            throw new Error("Ссылка должна начинаться с https://");
+          }
+
+          // Backend принимает только подписки Maxima VPS: проверяем так же.
+          const host = new URL(url).hostname.toLowerCase();
+          const maximaHosts = [
+            "maximavps.cloud",
+            "maximacloud.online",
+            "maxima-vps.online",
+            "maxima.run",
+          ];
+          const allowed = maximaHosts.some(
+            (domain) => host === domain || host.endsWith(`.${domain}`)
+          );
+
+          if (!allowed) {
+            throw new Error("Подписка принимается только от Maxima VPS");
+          }
+
+          subscription = {
+            url,
+            title: "Профиль 3 месяца",
+            trafficUsedBytes: Math.round(45.2 * GB),
+            trafficLimitBytes: Math.round(100 * GB),
+            expiresAt,
+            serverCount: 3,
+            updatedAt: 1_798_712_953,
+          };
+
+          return subscriptionInfo(subscription);
+        },
+        refresh_subscription: () => {
+          if (subscription === null) {
+            throw new Error("Подписка не добавлена");
+          }
+
+          subscription = {
+            ...subscription,
+            updatedAt: 1_798_730_000,
+          };
+
+          return subscriptionInfo(subscription);
+        },
+        prepare_subscription_servers: () => {
+          if (subscription === null) {
+            throw new Error("Подписка не добавлена");
+          }
+
+          return subscription.serverCount;
+        },
+        remove_subscription: () => {
+          subscription = null;
+
+          return null;
+        },
+        // Оплата и личный кабинет открываются в изолированном окне
+        // приложения. Заголовок окна передаёт интерфейс («Оплата»,
+        // «Личный кабинет»).
+        open_payment_window: (args: unknown) => {
+          requireArgs(args, ["url"]);
+
+          return null;
+        },
+        // Заказ создаётся при каждом клике «Оплатить»: ссылка всегда
+        // свежая. Мок возвращает стабильный адрес, чтобы тесты
+        // сверяли его с аргументом open_payment_window.
+        create_payment_order_command: (args: unknown) => {
+          const { plan, devices, email } = requireArgs(args, [
+            "plan",
+            "devices",
+            "email",
+          ]) as { plan: string; devices: number; email: string };
+
+          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email))) {
+            throw new Error("Укажите корректный email");
+          }
+
+          return {
+            url: `https://maximacloud.online/pay/transactions/mock-${plan}-${devices}`,
+            guid: `mock-${plan}-${devices}`,
+            amount: 199,
+          };
+        },
+        // Окно оплаты в моке существует ровно на момент открытия:
+        // адрес не читается, следилка сразу останавливается.
+        payment_window_url: () => null,
+        // Автоподхват подписки из кабинета в моке ничего не находит.
+        find_subscription_in_maxima_page: () => null,
+        // Канал уведомлений («app» или «windows») уходит бэкенду.
+        set_notification_channel: (args: unknown) => {
+          requireArgs(args, ["channel"]);
+
+          return null;
+        },
+        // Рейтинги: список пуст, а после запуска замер отдаёт
+        // запись без метрик — карточка показывает состояние «нет данных».
+        measure_strategy_rating: (args: unknown) => {
+          const input =
+            (
+              (args ?? {}) as {
+                input?: { strategyId?: string; strategyPath?: string };
+              }
+            ).input ?? {};
+
+          if (
+            input.strategyId === undefined ||
+            input.strategyPath === undefined
+          ) {
+            throw new Error("нет аргумента input.strategyId");
+          }
+
+          return ratingRecord(input);
+        },
+        get_strategy_ratings: (args: unknown) => {
+          requireArgs(args, ["strategies"]);
+
+          return [];
+        },
+        reset_strategy_ratings: () => true,
+        fetch_tariff_matrix: () => ({
+          plans: [
+            {
+              id: "1m",
+              months: 1,
+              days: 31,
+              basePrice: 199,
+              highlight: "none",
+            },
+            {
+              id: "3m",
+              months: 3,
+              days: 92,
+              basePrice: 399,
+              highlight: "popular",
+            },
+            {
+              id: "6m",
+              months: 6,
+              days: 184,
+              basePrice: 699,
+              highlight: "profitable",
+            },
+            {
+              id: "12m",
+              months: 12,
+              days: 365,
+              basePrice: 1199,
+              highlight: "best",
+            },
+          ],
+          prices: buildTariffPrices(),
+          deviceCounts: [1, 3, 5, 7, 10],
+        }),
+        // Серверы теперь берёт сама Rust: подписка скачивается
+        // внутри команды, и она же выбирает самый быстрый узел.
+        auto_connect_vpn: () => {
+          vpnConnected = true;
+
+          return {
+            serverId: "srv_alpha",
+            serverName: "Alpha",
+            pingMs: 24,
+            status: {
+              installed: true,
+              running: true,
+              activeServerId: "srv_alpha",
+              uptimeSec: 0,
+              socksPort: 12080,
+              httpPort: 12081,
+              pid: 4242,
+            },
+          };
+        },
       };
 
       const coreHandlers: Record<string, (args: unknown) => unknown> = {
@@ -600,6 +1096,24 @@ export async function mockTauri(
         invoke: async (command: string, args?: unknown) => {
           recorded.push({ command, args });
 
+          const failures = (
+            window as unknown as {
+              __MOCK_FAIL_COMMANDS__?: string[] | Record<string, string>;
+            }
+          ).__MOCK_FAIL_COMMANDS__;
+
+          if (Array.isArray(failures) && failures.includes(command)) {
+            throw new Error("Нет подключения к интернету");
+          }
+
+          if (failures !== undefined && !Array.isArray(failures)) {
+            const message = failures[command];
+
+            if (typeof message === "string") {
+              throw new Error(message);
+            }
+          }
+
           const handler = handlers[command];
 
           if (handler === undefined) {
@@ -645,6 +1159,9 @@ export async function mockTauri(
       wireguard: vpnInstalled,
       firstRunFlag: firstRun,
       networkStats,
+      subscriptionPresent,
+      gamesScanDelayMs,
+      emptyGames,
     }
   );
 }

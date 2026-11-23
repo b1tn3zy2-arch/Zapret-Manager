@@ -1,403 +1,275 @@
-import Dropdown from "@/components/settings/Dropdown";
+// Импортируем зависимости из модуля @/components/ui/Dropdown.
+import Dropdown from "@/components/ui/Dropdown";
+// Импортируем зависимости из модуля @/components/settings/SectionContainer.
 import SectionContainer from "@/components/settings/SectionContainer";
+// Импортируем зависимости из модуля @/components/settings/SettingRow.
 import SettingRow from "@/components/settings/SettingRow";
+// Импортируем зависимости из модуля @/components/ui/Toggle.
 import Toggle from "@/components/ui/Toggle";
+// Импортируем зависимости из модуля @/components/ui.
 import { Slider } from "@/components/ui";
+// Импортируем зависимости из модуля react.
 import { useMemo } from "react";
+// — разделитель логических блоков —
 
+// Импортируем зависимости из модуля @/i18n.
 import { useI18n } from "@/i18n";
+// Импортируем зависимости из модуля @/i18n/types.
 import type { TranslationKey } from "@/i18n/types";
+// Импортируем зависимости из модуля @/lib/appearanceTokens.
 import {
+  // Подключаем именованный импорт ANIMATION_SPEED_MAX.
   ANIMATION_SPEED_MAX,
+  // Подключаем именованный импорт ANIMATION_SPEED_MIN.
   ANIMATION_SPEED_MIN,
+  // Подключаем именованный импорт ANIMATION_SPEED_STEP.
   ANIMATION_SPEED_STEP,
+  // Подключаем именованный импорт INTERFACE_SCALE_MAX.
   INTERFACE_SCALE_MAX,
+  // Подключаем именованный импорт INTERFACE_SCALE_MIN.
   INTERFACE_SCALE_MIN,
+  // Подключаем именованный импорт INTERFACE_SCALE_STEP.
   INTERFACE_SCALE_STEP,
+  // Закрываем текущий блок.
 } from "@/lib/appearanceTokens";
-import {
-  DEFAULT_APPEARANCE,
-  DEFAULT_FLAME,
-  DEFAULT_POST_PROCESSING,
-} from "@/lib/defaults";
-import type { FlameIntensity, FlameSpeed } from "@/lib/flamePresets";
+// Импортируем зависимости из модуля @/lib/defaults.
+import { DEFAULT_APPEARANCE } from "@/lib/defaults";
+// Импортируем зависимости из модуля @/stores/useSettingsStore.
 import { useSettingsStore } from "@/stores/useSettingsStore";
-import type {
-  EffectIntensity,
-  PostProcessingQuality,
-  ThemeMode,
-} from "@/types";
+// Импортируем зависимости из модуля @/types.
+import type { ThemeMode } from "@/types";
+// — разделитель логических блоков —
 
+// Обрабатываем конструкцию: const THEME_OPTIONS = [ { value: dark, labelKey: settin….
 const THEME_OPTIONS = [
+  // Открываем объектный литерал.
   { value: "dark", labelKey: "settings.appearance.values.dark" },
+  // Открываем объектный литерал.
   { value: "light", labelKey: "settings.appearance.values.light" },
+  // Открываем объектный литерал.
   { value: "auto", labelKey: "settings.appearance.values.auto" },
+  // Закрываем массив или список.
 ] as const satisfies readonly {
+  // Обрабатываем конструкцию: value.
   value: ThemeMode;
+  // Обрабатываем конструкцию: labelKey.
   labelKey: TranslationKey;
+  // Обрабатываем конструкцию: disabled.
   disabled?: boolean;
+  // Закрываем текущий блок.
 }[];
+// — разделитель логических блоков —
 
-const INTENSITY_OPTIONS = [
-  { value: "off", labelKey: "settings.appearance.values.off" },
-  { value: "subtle", labelKey: "settings.appearance.values.subtle" },
-  { value: "normal", labelKey: "settings.appearance.values.normal" },
-  { value: "strong", labelKey: "settings.appearance.values.strong" },
-] as const satisfies readonly {
-  value: EffectIntensity;
-  labelKey: TranslationKey;
-}[];
-
-const QUALITY_OPTIONS = [
-  { value: "low", labelKey: "settings.appearance.values.low" },
-  { value: "medium", labelKey: "settings.appearance.values.medium" },
-  { value: "high", labelKey: "settings.appearance.values.high" },
-] as const satisfies readonly {
-  value: PostProcessingQuality;
-  labelKey: TranslationKey;
-}[];
-
-const FLAME_INTENSITY_OPTIONS = [
-  { value: "subtle", labelKey: "settings.appearance.flameSubtle" },
-  { value: "normal", labelKey: "settings.appearance.values.normal" },
-  { value: "strong", labelKey: "settings.appearance.values.strong" },
-] as const satisfies readonly {
-  value: FlameIntensity;
-  labelKey: TranslationKey;
-}[];
-
-const FLAME_SPEED_OPTIONS = [
-  { value: "slow", labelKey: "settings.appearance.flameSlow" },
-  { value: "normal", labelKey: "settings.appearance.values.normal" },
-  { value: "fast", labelKey: "settings.appearance.flameFast" },
-] as const satisfies readonly {
-  value: FlameSpeed;
-  labelKey: TranslationKey;
-}[];
-
+// Объявляем функцию AppearanceSection.
 function AppearanceSection() {
+  // Обрабатываем конструкцию: const { t } = useI18n().
   const { t } = useI18n();
+  // Обрабатываем конструкцию: const appearance = useSettingsStore((state) => state.se….
   const appearance = useSettingsStore((state) => state.settings.appearance);
+  // Обрабатываем конструкцию: const updateAppearance = useSettingsStore((state) => st….
   const updateAppearance = useSettingsStore((state) => state.updateAppearance);
-  const updatePostProcessing = useSettingsStore(
-    (state) => state.updatePostProcessing
-  );
-  const effects = appearance.postProcessing;
-  const flame = appearance.flame;
+  // — разделитель логических блоков —
 
+  // Обрабатываем конструкцию: const themeOptions = useMemo( () => THEME_OPTIONS.map((….
   const themeOptions = useMemo(
+    // Объявляем функцию-обработчик или стрелочную функцию.
     () =>
+      // Обрабатываем конструкцию: THEME_OPTIONS.
       THEME_OPTIONS.map((option) => ({
+        // Обрабатываем конструкцию: value.
         value: option.value,
+        // Обрабатываем конструкцию: label.
         label: t(option.labelKey),
+        // Закрываем текущий блок.
       })),
+    // Открываем массив.
     [t]
+    // Закрываем выражение или список аргументов.
   );
+  // — разделитель логических блоков —
 
-  const intensityOptions = useMemo(
-    () =>
-      INTENSITY_OPTIONS.map((option) => ({
-        value: option.value,
-        label: t(option.labelKey),
-      })),
-    [t]
-  );
-
-  const qualityOptions = useMemo(
-    () =>
-      QUALITY_OPTIONS.map((option) => ({
-        value: option.value,
-        label: t(option.labelKey),
-      })),
-    [t]
-  );
-
-  const flameIntensityOptions = useMemo(
-    () =>
-      FLAME_INTENSITY_OPTIONS.map((option) => ({
-        value: option.value,
-        label: t(option.labelKey),
-      })),
-    [t]
-  );
-
-  const flameSpeedOptions = useMemo(
-    () =>
-      FLAME_SPEED_OPTIONS.map((option) => ({
-        value: option.value,
-        label: t(option.labelKey),
-      })),
-    [t]
-  );
-
+  // Возвращаем результат: ( <SectionContainer title={t(settings.appearance.title)….
   return (
-    <>
-      <SectionContainer
-        title={t("settings.appearance.title")}
-        description={t("settings.appearance.description")}
-        onReset={() => {
-          updateAppearance(DEFAULT_APPEARANCE);
-        }}
-        resetLabel={t("settings.common.resetSection")}
-      >
-        <SettingRow
-          label={t("settings.appearance.theme")}
-          control={
-            <Dropdown
-              label={t("settings.appearance.theme")}
-              value={appearance.theme}
-              options={themeOptions}
-              onChange={(theme) => {
-                updateAppearance({ theme });
-              }}
-            />
-          }
-        />
+    // Обрабатываем конструкцию: <SectionContainer title={t(settings.appearance.title)} ….
+    <SectionContainer
+      // Обрабатываем конструкцию: title.
+      title={t("settings.appearance.title")}
+      // Обрабатываем конструкцию: description.
+      description={t("settings.appearance.description")}
+      // Обрабатываем конструкцию: onReset.
+      onReset={() => {
+        // Обрабатываем конструкцию: updateAppearance.
+        updateAppearance(DEFAULT_APPEARANCE);
+        // Закрываем текущий блок.
+      }}
+      // Обрабатываем конструкцию: resetLabel.
+      resetLabel={t("settings.common.resetSection")}
+      // Продолжаем выражение.
+    >
+      {/* Выводим текстовое содержимое в JSX. */}
+      <SettingRow
+        // Обрабатываем конструкцию: label.
+        label={t("settings.appearance.theme")}
+        // Обрабатываем конструкцию: control.
+        control={
+          // Рендерим самозакрывающийся элемент Dropdown.
+          <Dropdown
+            // Обрабатываем конструкцию: label.
+            label={t("settings.appearance.theme")}
+            // Обрабатываем конструкцию: value.
+            value={appearance.theme}
+            // Обрабатываем конструкцию: options.
+            options={themeOptions}
+            // Обрабатываем конструкцию: onChange.
+            onChange={(theme) => {
+              // Обрабатываем конструкцию: updateAppearance.
+              updateAppearance({ theme });
+              // Закрываем текущий блок.
+            }}
+            // Продолжаем выражение.
+          />
+          // Закрываем текущий блок.
+        }
+        // Продолжаем выражение.
+      />
+      {/* — разделитель логических блоков — */}
 
-        <SettingRow
-          label={t("settings.appearance.interfaceScale")}
-          description={t("settings.appearance.interfaceScaleHint")}
-          control={
-            <Slider
-              className="w-56"
-              value={appearance.interfaceScale}
-              min={INTERFACE_SCALE_MIN}
-              max={INTERFACE_SCALE_MAX}
-              step={INTERFACE_SCALE_STEP}
-              ariaLabel={t("settings.appearance.interfaceScale")}
-              formatValue={(value) => `${value}%`}
-              onChange={(interfaceScale) => {
-                updateAppearance({ interfaceScale });
-              }}
-            />
-          }
-        />
+      {/* Выводим текстовое содержимое в JSX. */}
+      <SettingRow
+        // Обрабатываем конструкцию: label.
+        label={t("settings.appearance.interfaceScale")}
+        // Обрабатываем конструкцию: description.
+        description={t("settings.appearance.interfaceScaleHint")}
+        // Обрабатываем конструкцию: control.
+        control={
+          // Рендерим самозакрывающийся элемент Slider.
+          <Slider
+            // Обрабатываем конструкцию: className.
+            className="w-56"
+            // Обрабатываем конструкцию: value.
+            value={appearance.interfaceScale}
+            // Обрабатываем конструкцию: min.
+            min={INTERFACE_SCALE_MIN}
+            // Обрабатываем конструкцию: max.
+            max={INTERFACE_SCALE_MAX}
+            // Обрабатываем конструкцию: step.
+            step={INTERFACE_SCALE_STEP}
+            // Обрабатываем конструкцию: ariaLabel.
+            ariaLabel={t("settings.appearance.interfaceScale")}
+            // Обрабатываем конструкцию: formatValue.
+            formatValue={(value) => `${value}%`}
+            // Обрабатываем конструкцию: onChange.
+            onChange={(interfaceScale) => {
+              // Обрабатываем конструкцию: updateAppearance.
+              updateAppearance({ interfaceScale });
+              // Закрываем текущий блок.
+            }}
+            // Продолжаем выражение.
+          />
+          // Закрываем текущий блок.
+        }
+        // Продолжаем выражение.
+      />
+      {/* — разделитель логических блоков — */}
 
-        <SettingRow
-          label={t("settings.appearance.animationSpeed")}
-          description={t("settings.appearance.animationSpeedHint")}
-          control={
-            <Slider
-              className="w-56"
-              value={appearance.animationSpeed}
-              min={ANIMATION_SPEED_MIN}
-              max={ANIMATION_SPEED_MAX}
-              step={ANIMATION_SPEED_STEP}
-              ariaLabel={t("settings.appearance.animationSpeed")}
-              formatValue={(value) => `${value}%`}
-              onChange={(animationSpeed) => {
-                updateAppearance({ animationSpeed });
-              }}
-            />
-          }
-        />
+      {/* Выводим текстовое содержимое в JSX. */}
+      <SettingRow
+        // Обрабатываем конструкцию: label.
+        label={t("settings.appearance.animationSpeed")}
+        // Обрабатываем конструкцию: description.
+        description={t("settings.appearance.animationSpeedHint")}
+        // Обрабатываем конструкцию: control.
+        control={
+          // Рендерим самозакрывающийся элемент Slider.
+          <Slider
+            // Обрабатываем конструкцию: className.
+            className="w-56"
+            // Обрабатываем конструкцию: value.
+            value={appearance.animationSpeed}
+            // Обрабатываем конструкцию: min.
+            min={ANIMATION_SPEED_MIN}
+            // Обрабатываем конструкцию: max.
+            max={ANIMATION_SPEED_MAX}
+            // Обрабатываем конструкцию: step.
+            step={ANIMATION_SPEED_STEP}
+            // Обрабатываем конструкцию: ariaLabel.
+            ariaLabel={t("settings.appearance.animationSpeed")}
+            // Обрабатываем конструкцию: formatValue.
+            formatValue={(value) => `${value}%`}
+            // Обрабатываем конструкцию: onChange.
+            onChange={(animationSpeed) => {
+              // Обрабатываем конструкцию: updateAppearance.
+              updateAppearance({ animationSpeed });
+              // Закрываем текущий блок.
+            }}
+            // Продолжаем выражение.
+          />
+          // Закрываем текущий блок.
+        }
+        // Продолжаем выражение.
+      />
+      {/* — разделитель логических блоков — */}
 
-        <SettingRow
-          label={t("settings.appearance.animations")}
-          description={t("settings.appearance.animationsHint")}
-          control={
-            <Toggle
-              ariaLabel={t("settings.appearance.animations")}
-              checked={appearance.animations}
-              onChange={(animations) => {
-                updateAppearance({ animations });
-              }}
-            />
-          }
-        />
+      {/* Выводим текстовое содержимое в JSX. */}
+      <SettingRow
+        // Обрабатываем конструкцию: label.
+        label={t("settings.appearance.animations")}
+        // Обрабатываем конструкцию: description.
+        description={t("settings.appearance.animationsHint")}
+        // Обрабатываем конструкцию: control.
+        control={
+          // Рендерим самозакрывающийся элемент Toggle.
+          <Toggle
+            // Обрабатываем конструкцию: ariaLabel.
+            ariaLabel={t("settings.appearance.animations")}
+            // Обрабатываем конструкцию: checked.
+            checked={appearance.animations}
+            // Обрабатываем конструкцию: onChange.
+            onChange={(animations) => {
+              // Обрабатываем конструкцию: updateAppearance.
+              updateAppearance({ animations });
+              // Закрываем текущий блок.
+            }}
+            // Продолжаем выражение.
+          />
+          // Закрываем текущий блок.
+        }
+        // Продолжаем выражение.
+      />
+      {/* — разделитель логических блоков — */}
 
-        <SettingRow
-          label={t("settings.appearance.trayIcon")}
-          control={
-            <Toggle
-              ariaLabel={t("settings.appearance.trayIcon")}
-              checked={appearance.animateTrayIcon}
-              onChange={(animateTrayIcon) => {
-                updateAppearance({ animateTrayIcon });
-              }}
-            />
-          }
-        />
-      </SectionContainer>
-
-      <SectionContainer
-        title={t("settings.appearance.postProcessing")}
-        description={t("settings.appearance.postProcessingHint")}
-        onReset={() => {
-          updatePostProcessing(DEFAULT_POST_PROCESSING);
-        }}
-        resetLabel={t("settings.common.resetSection")}
-      >
-        <SettingRow
-          label={t("settings.appearance.bloom")}
-          description={t("settings.appearance.bloomHint")}
-          control={
-            <Dropdown
-              label={t("settings.appearance.bloom")}
-              value={effects.bloom}
-              options={intensityOptions}
-              onChange={(bloom) => {
-                updatePostProcessing({ bloom });
-              }}
-            />
-          }
-        />
-
-        <SettingRow
-          label={t("settings.appearance.vignette")}
-          description={t("settings.appearance.vignetteHint")}
-          control={
-            <Dropdown
-              label={t("settings.appearance.vignette")}
-              value={effects.vignette}
-              options={intensityOptions}
-              onChange={(vignette) => {
-                updatePostProcessing({ vignette });
-              }}
-            />
-          }
-        />
-
-        <SettingRow
-          label={t("settings.appearance.filmGrain")}
-          description={t("settings.appearance.filmGrainHint")}
-          control={
-            <Toggle
-              ariaLabel={t("settings.appearance.filmGrain")}
-              checked={effects.filmGrain}
-              onChange={(filmGrain) => {
-                updatePostProcessing({ filmGrain });
-              }}
-            />
-          }
-        />
-
-        <SettingRow
-          label={t("settings.appearance.scanlines")}
-          description={t("settings.appearance.scanlinesHint")}
-          control={
-            <Toggle
-              ariaLabel={t("settings.appearance.scanlines")}
-              checked={effects.scanlines}
-              onChange={(scanlines) => {
-                updatePostProcessing({ scanlines });
-              }}
-            />
-          }
-        />
-
-        <SettingRow
-          label={t("settings.appearance.chromatic")}
-          description={t("settings.appearance.chromaticHint")}
-          control={
-            <Toggle
-              ariaLabel={t("settings.appearance.chromatic")}
-              checked={effects.chromaticAberration}
-              onChange={(chromaticAberration) => {
-                updatePostProcessing({ chromaticAberration });
-              }}
-            />
-          }
-        />
-
-        <SettingRow
-          label={t("settings.appearance.motionBlur")}
-          description={t("settings.appearance.motionBlurHint")}
-          control={
-            <Toggle
-              ariaLabel={t("settings.appearance.motionBlur")}
-              checked={effects.motionBlur}
-              onChange={(motionBlur) => {
-                updatePostProcessing({ motionBlur });
-              }}
-            />
-          }
-        />
-
-        <SettingRow
-          label={t("settings.appearance.quality")}
-          description={t("settings.appearance.qualityHint")}
-          control={
-            <Dropdown
-              label={t("settings.appearance.quality")}
-              value={effects.globalQuality}
-              options={qualityOptions}
-              onChange={(globalQuality) => {
-                updatePostProcessing({ globalQuality });
-              }}
-            />
-          }
-        />
-      </SectionContainer>
-
-      <SectionContainer
-        title={t("settings.appearance.flame")}
-        description={t("settings.appearance.flameHint")}
-        onReset={() => {
-          updateAppearance({ flame: { ...DEFAULT_FLAME } });
-        }}
-        resetLabel={t("settings.common.resetSection")}
-      >
-        <SettingRow
-          label={t("settings.appearance.flame")}
-          description={t("settings.appearance.flameHint")}
-          control={
-            <Toggle
-              ariaLabel={t("settings.appearance.flame")}
-              checked={flame.enabled}
-              onChange={(enabled) => {
-                updateAppearance({ flame: { ...flame, enabled } });
-              }}
-            />
-          }
-        />
-
-        <SettingRow
-          label={t("settings.appearance.flameIntensity")}
-          description={t("settings.appearance.flameIntensityHint")}
-          control={
-            <Dropdown
-              label={t("settings.appearance.flameIntensity")}
-              value={flame.intensity}
-              options={flameIntensityOptions}
-              onChange={(intensity) => {
-                updateAppearance({ flame: { ...flame, intensity } });
-              }}
-            />
-          }
-        />
-
-        <SettingRow
-          label={t("settings.appearance.flameSpeed")}
-          description={t("settings.appearance.flameSpeedHint")}
-          control={
-            <Dropdown
-              label={t("settings.appearance.flameSpeed")}
-              value={flame.speed}
-              options={flameSpeedOptions}
-              onChange={(speed) => {
-                updateAppearance({ flame: { ...flame, speed } });
-              }}
-            />
-          }
-        />
-
-        <SettingRow
-          label={t("settings.appearance.flameChromatic")}
-          description={t("settings.appearance.flameChromaticHint")}
-          control={
-            <Toggle
-              ariaLabel={t("settings.appearance.flameChromatic")}
-              checked={flame.chromatic}
-              onChange={(chromatic) => {
-                updateAppearance({ flame: { ...flame, chromatic } });
-              }}
-            />
-          }
-        />
-      </SectionContainer>
-    </>
+      {/* Выводим текстовое содержимое в JSX. */}
+      <SettingRow
+        // Обрабатываем конструкцию: label.
+        label={t("settings.appearance.trayIcon")}
+        // Обрабатываем конструкцию: control.
+        control={
+          // Рендерим самозакрывающийся элемент Toggle.
+          <Toggle
+            // Обрабатываем конструкцию: ariaLabel.
+            ariaLabel={t("settings.appearance.trayIcon")}
+            // Обрабатываем конструкцию: checked.
+            checked={appearance.animateTrayIcon}
+            // Обрабатываем конструкцию: onChange.
+            onChange={(animateTrayIcon) => {
+              // Обрабатываем конструкцию: updateAppearance.
+              updateAppearance({ animateTrayIcon });
+              // Закрываем текущий блок.
+            }}
+            // Продолжаем выражение.
+          />
+          // Закрываем текущий блок.
+        }
+        // Продолжаем выражение.
+      />
+      {/* Выводим текстовое содержимое в JSX. */}
+    </SectionContainer>
+    // Закрываем выражение или список аргументов.
   );
+  // Закрываем текущий блок.
 }
+// — разделитель логических блоков —
 
+// Обрабатываем конструкцию: export default AppearanceSection;.
 export default AppearanceSection;
+// — разделитель логических блоков —

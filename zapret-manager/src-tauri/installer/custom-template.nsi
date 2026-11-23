@@ -72,6 +72,8 @@ Var UpdateMode
 Var NoShortcutMode
 Var WixMode
 Var OldMainBinaryName
+; Zapret Manager: preserves an explicit /D=<path> across MULTIUSER_INIT.
+Var ZMCustomInstallDir
 
 Name "${PRODUCTNAME}"
 BrandingText "${COPYRIGHT}"
@@ -524,6 +526,13 @@ Function .onInit
 
   !insertmacro SetContext
 
+  ; Zapret Manager: NSIS applies /D=<path> before .onInit, but MULTIUSER_INIT
+  ; resets $INSTDIR to the default location. Keep an explicit command-line path.
+  StrCpy $ZMCustomInstallDir ""
+  ${If} $INSTDIR != "${PLACEHOLDER_INSTALL_DIR}"
+    StrCpy $ZMCustomInstallDir $INSTDIR
+  ${EndIf}
+
   ${If} $INSTDIR == "${PLACEHOLDER_INSTALL_DIR}"
     ; Set default install location
     !if "${INSTALLMODE}" == "perMachine"
@@ -549,6 +558,10 @@ Function .onInit
   !if "${INSTALLMODE}" == "both"
     !insertmacro MULTIUSER_INIT
   !endif
+
+  ${If} $ZMCustomInstallDir != ""
+    StrCpy $INSTDIR $ZMCustomInstallDir
+  ${EndIf}
 FunctionEnd
 
 

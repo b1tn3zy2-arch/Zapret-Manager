@@ -51,7 +51,7 @@ test.describe("Навигация и загрузка", () => {
 
     // версия внизу панели слева, из живого get_system_info
     await expect(
-      page.getByRole("complementary").getByText("0.1.0", { exact: true })
+      page.getByRole("complementary").getByText("1.0.0", { exact: true })
     ).toBeVisible();
 
     // блок метрик («Всего стратегий», «Время работы») удалён с главной
@@ -136,9 +136,9 @@ test.describe("Режимы дашборда", () => {
     await expect(
       modeSwitcher(page).getByRole("radio", { name: "Переключить на VPN" })
     ).toHaveAttribute("aria-checked", "true");
-    await expect(page.getByText("Нажмите для подключения")).toBeVisible();
+    await expect(page.getByText("Умное подключение")).toBeVisible();
     await expect(
-      page.getByRole("button", { name: "Добавить ссылку" }).first()
+      page.getByRole("button", { name: "Подключить VPN" })
     ).toBeVisible();
 
     expect(errors).toEqual([]);
@@ -151,7 +151,7 @@ test.describe("Режимы дашборда", () => {
     await modeSwitcher(page)
       .getByRole("radio", { name: "Переключить на VPN" })
       .click();
-    await expect(page.getByText("Нажмите для подключения")).toBeVisible();
+    await expect(page.getByText("Умное подключение")).toBeVisible();
 
     await modeSwitcher(page)
       .getByRole("radio", { name: "Переключить на обход" })
@@ -162,9 +162,7 @@ test.describe("Режимы дашборда", () => {
     expect(errors).toEqual([]);
   });
 
-  test("показывает пустое состояние подписки в режиме VPN", async ({
-    page,
-  }) => {
+  test("показывает карточку подписки в режиме VPN", async ({ page }) => {
     const errors = await bootstrap(page);
     await page.goto("/");
 
@@ -172,12 +170,10 @@ test.describe("Режимы дашборда", () => {
       .getByRole("radio", { name: "Переключить на VPN" })
       .click();
 
-    await expect(page.getByText("Нет VPN-конфигов")).toBeVisible();
-    await expect(
-      page.getByText(
-        "Добавьте ссылку на подписку, чтобы получить список серверов"
-      )
-    ).toBeVisible();
+    // Списка серверов больше нет: подписка одна и заданная, её
+    // приложение скачивает само при подключении.
+    await expect(page.getByText("Моя подписка")).toBeVisible();
+    await expect(page.getByText("Нет VPN-конфигов")).toHaveCount(0);
 
     expect(errors).toEqual([]);
   });

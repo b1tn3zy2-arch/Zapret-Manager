@@ -10,6 +10,9 @@ jobs:
   audit:
     name: Security audit
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: zapret-manager
     steps:
       - uses: actions/checkout@v4
 
@@ -23,10 +26,7 @@ jobs:
         run: cargo install cargo-audit --locked
 
       - name: RustSec audit
-        run: cargo audit --deny warnings
-
-      - name: Rust lints
-        run: cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings
+        run: cargo audit --file src-tauri/Cargo.lock --deny warnings
 
       - uses: pnpm/action-setup@v4
         with:
@@ -36,6 +36,7 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
+          cache-dependency-path: zapret-manager/pnpm-lock.yaml
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -46,11 +47,49 @@ jobs:
       - name: Security audit script
         run: node scripts/security-audit.mjs
 
+  # Проект — только под Windows: winapi, netsh, реестр и DirectX.
+  # Сборка и тесты на Linux не собираются, поэтому их проверка
+  # живёт в отдельном job на windows-latest.
+  lint:
+    name: Security lints
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: zapret-manager
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri -> target
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: zapret-manager/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
       - name: TypeScript
         run: pnpm exec tsc --noEmit
 
       - name: ESLint
         run: pnpm exec eslint .
+
+      - name: Rust lints
+        run: cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings
 
       - name: Rust tests
         run: cargo test --manifest-path src-tauri/Cargo.toml

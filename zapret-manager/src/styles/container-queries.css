@@ -1,75 +1,138 @@
+/* Объявляем at-правило @layer. */
 @layer components {
+  /* Объявляем селектор .dashboard-container. */
   .dashboard-container {
+    /* Задаём свойство container-type. */
     container-type: inline-size;
+    /* Задаём свойство container-name. */
     container-name: dashboard;
+    /* Закрываем правило или вложенный блок. */
   }
+  /* — разделитель логических блоков — */
 
+  /* Объявляем селектор .dashboard-layout. */
   .dashboard-layout {
+    /* Задаём свойство display. */
     display: grid;
+    /* Задаём свойство gap. */
     gap: var(--space-lg);
+    /* Задаём свойство grid-template-columns. */
     grid-template-columns: 1fr;
+    /* Закрываем правило или вложенный блок. */
   }
+  /* — разделитель логических блоков — */
 
+  /* Объявляем at-правило @container. */
   @container dashboard (min-width: 900px) {
+    /* Объявляем селектор .dashboard-layout. */
     .dashboard-layout {
+      /* Задаём свойство grid-template-columns. */
       grid-template-columns: repeat(2, minmax(0, 1fr));
+      /* Задаём свойство align-items. */
       align-items: start;
+      /* Закрываем правило или вложенный блок. */
     }
+    /* — разделитель логических блоков — */
 
+    /* Описываем часть стилевого правила: .dashboard-layout > .dashboard-lead,. */
     .dashboard-layout > .dashboard-lead,
+    /* Объявляем селектор .dashboard-layout > .dashboard-wide. */
     .dashboard-layout > .dashboard-wide {
+      /* Задаём свойство grid-column. */
       grid-column: span 2;
+      /* Закрываем правило или вложенный блок. */
     }
+    /* Закрываем правило или вложенный блок. */
   }
+  /* — разделитель логических блоков — */
 
+  /* Объявляем селектор .logs-container. */
   .logs-container {
+    /* Задаём свойство container-type. */
     container-type: inline-size;
+    /* Задаём свойство container-name. */
     container-name: logs;
+    /* Закрываем правило или вложенный блок. */
   }
+  /* — разделитель логических блоков — */
 
+  /* Объявляем селектор .log-row. */
   .log-row {
+    /* Задаём свойство container-type. */
     container-type: inline-size;
+    /* Закрываем правило или вложенный блок. */
   }
+  /* — разделитель логических блоков — */
 
+  /* Объявляем at-правило @container. */
   @container logs (max-width: 640px) {
+    /* Объявляем селектор .log-row__time. */
     .log-row__time {
+      /* Задаём свойство display. */
       display: none;
+      /* Закрываем правило или вложенный блок. */
     }
+    /* Закрываем правило или вложенный блок. */
   }
+  /* — разделитель логических блоков — */
 
+  /* Объявляем at-правило @container. */
   @container logs (max-width: 460px) {
+    /* Объявляем селектор .log-row__source. */
     .log-row__source {
+      /* Задаём свойство display. */
       display: none;
+      /* Закрываем правило или вложенный блок. */
     }
+    /* Закрываем правило или вложенный блок. */
   }
+  /* — разделитель логических блоков — */
 
+  /* Объявляем селектор .cards-container. */
   .cards-container {
+    /* Задаём свойство container-type. */
     container-type: inline-size;
+    /* Задаём свойство container-name. */
     container-name: cards;
+    /* Закрываем правило или вложенный блок. */
   }
+  /* — разделитель логических блоков — */
 
+  /* Объявляем селектор .card-grid. */
   .card-grid {
+    /* Задаём свойство display. */
     display: grid;
+    /* Задаём свойство gap. */
     gap: var(--space-md);
+    /* Задаём свойство grid-template-columns. */
     grid-template-columns: repeat(
-      auto-fill,
-      minmax(min(clamp(200px, 18vw, 260px), 100%), 1fr)
+      /* Описываем часть стилевого правила: auto-fill,. */ auto-fill,
+      /* Описываем часть стилевого правила: minmax(min(clamp(200px, 18vw, 260px), 100%), 1fr). */
+        minmax(min(clamp(200px, 18vw, 260px), 100%), 1fr)
+        /* Описываем часть стилевого правила: );. */
     );
+    /* Закрываем правило или вложенный блок. */
   }
+  /* — разделитель логических блоков — */
 
-  .strategy-list-grid {
-    display: grid;
-    gap: var(--space-md);
-    grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
-  }
-
+  /* Объявляем at-правило @container. */
   @container cards (max-width: 560px) {
+    /* Объявляем селектор .card-grid. */
     .card-grid {
+      /* Задаём свойство grid-template-columns. */
       grid-template-columns: minmax(0, 1fr);
+      /* Закрываем правило или вложенный блок. */
     }
+    /* — разделитель логических блоков — */
 
+    /* Объявляем селектор .strategy-card. */
     .strategy-card {
+      /* Задаём свойство font-size. */
       font-size: 0.9em;
+      /* Закрываем правило или вложенный блок. */
     }
+    /* Закрываем правило или вложенный блок. */
   }
+  /* Закрываем правило или вложенный блок. */
 }
+/* — разделитель логических блоков — */

@@ -1,6 +1,6 @@
 [package]
 name = "zapret-manager"
-version = "0.1.0"
+version = "1.0.2"
 description = "Zapret Manager — управление стратегиями обхода блокировок"
 authors = ["Zapret Manager Project"]
 edition = "2021"
@@ -14,16 +14,13 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
-tauri = { version = "2", features = ["image-png", "tray-icon"] }
+tauri = { version = "2", features = ["protocol-asset", "image-png", "tray-icon"] }
 tauri-plugin-opener = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-tauri-plugin-shell = "2.4.0"
 tauri-plugin-fs = "2.6.0"
 tauri-plugin-dialog = "2.8.1"
 tauri-plugin-notification = "2.5.1"
-tauri-plugin-updater = "2.13.1"
-tauri-plugin-process = "2.4.0"
 tauri-plugin-autostart = "2"
 tokio = { version = "1.53.2", features = ["full"] }
 thiserror = "2.0.21"
@@ -58,7 +55,6 @@ winapi = { version = "0.3.9", features = [
   "winuser",
   "wingdi",
   "commctrl",
-  "commctrl",
   "libloaderapi",
   "fileapi",
   "iphlpapi",
@@ -66,10 +62,12 @@ winapi = { version = "0.3.9", features = [
   "winreg",
   "wininet",
   "winerror",
+  "dpapi",
 ] }
 reqwest = { version = "0.13.5", default-features = false, features = [
   "json",
   "rustls",
+  "native-tls",
   "http2",
   "charset",
   "stream",
